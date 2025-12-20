@@ -1,16 +1,28 @@
-# my_playlist
+# MyPlaylist
 
-A new Flutter project.
+Video Playlist Creator and Local Database Manager built with Flutter.
 
-## Getting Started
+## Overview
+MyPlaylist is a desktop application designed to manage your local video collection, extract metadata from NFO files, and generate playlists (Random, Recent, or Filtered) for your favorite media player.
 
-This project is a starting point for a Flutter application.
+## Documentation
+- [Italiano (README_IT.md)](README_IT.md)
+- [English (README_EN.md)](README_EN.md)
+- [Changelog (CHANGELOG.md)](CHANGELOG.md)
+- [Refactoring & Architecture (REFACTORING.md)](REFACTORING.md)
 
-A few resources to get you started if this is your first Flutter project:
+## Key Features
+- **Folder Scanning**: Import videos with automatic metadata extraction.
+- **Database Management**: Full control over your collection (Search, Edit, Bulk Rename).
+- **Smart Playlists**: Generate random or filtered playlists with session-based exclusion (no repeats!).
+- **VLC Integration**: Advanced support for VLC with automatic process management.
+- **Modern UI**: Tooltips, real-time progress, and a clean interface.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Quick Start
+1.  Ensure [Flutter](https://flutter.dev/get-started/) is installed.
+2.  Run `flutter pub get`.
+3.  Run `flutter run -d linux` (or windows).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+**Version**: 2.5.1  
+**Last Update**: 2025-12-20
