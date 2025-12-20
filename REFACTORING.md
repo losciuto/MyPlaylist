@@ -1,42 +1,42 @@
-# Documento di Refactoring e Architettura
+# Refactoring and Architecture Document
 
-Questo documento descrive le principali scelte tecniche e i miglioramenti architetturali apportati alla versione 2.5.0 di MyPlaylist.
+This document describes the main technical choices and architectural improvements introduced in MyPlaylist version 2.5.0.
 
-## 1. Ottimizzazione delle Prestazioni (Bulk Operations)
+## 1. Performance Optimization (Bulk Operations)
 
-Uno dei problemi principali riscontrati nelle versioni precedenti era l'estrema lentezza durante la rinomina in massa dei titoli.
+One of the main issues encountered in previous versions was extreme slowness during bulk title renaming.
 
-### Problema:
-Ogni chiamata a `updateVideo` tramite il `DatabaseProvider` scatenava un `notifyListeners()`, che a sua volta forzava la `DataTable` a ricaricare l'intera lista dal database e il framework Flutter a ricostruire l'intero albero dei widget 160+ volte in pochi secondi.
+### Problem:
+Every call to `updateVideo` via `DatabaseProvider` triggered a `notifyListeners()`, which forced the `DataTable` to reload the entire list from the database and the Flutter framework to rebuild the entire widget tree 160+ times in a few seconds.
 
-### Soluzione:
-Abbiamo separato la logica di aggiornamento dei dati dalla logica di notifica della UI:
-- Durante il loop di rinomina, il codice interagisce direttamente con `DatabaseHelper.instance` (persistence layer).
-- La UI viene aggiornata tramite un `ValueNotifier<int>` leggero che gestisce solo la barra di progresso.
-- Un singolo `refreshVideos()` viene chiamato al termine dell'intero loop, riducendo i cicli di rebuild da N a 1.
+### Solution:
+We separated data update logic from UI notification logic:
+- During the renaming loop, the code interacts directly with `DatabaseHelper.instance` (persistence layer).
+- The UI is updated via a lightweight `ValueNotifier<Map<String, dynamic>>` that handles only the progress bar and current title display.
+- A single `refreshVideos()` is called after the entire loop finishes, reducing rebuild cycles from N to 1.
 
-## 2. Robustezza della Rinomina (Skip Logic)
+## 2. Rename Robustness (Skip Logic)
 
-Per rendere la funzione "Rinomina Titoli" utilizzabile quotidianamente senza sprechi di tempo, abbiamo implementato un sistema di verifica preventiva.
+To make the "Rename Titles" function usable daily without wasting time, we implemented a preventive verification system.
 
-- **Normalizzazione**: I titoli vengono confrontati dopo aver applicato `.trim()` e `.toLowerCase()`.
-- **Integrità NFO**: Se il file NFO non contiene un titolo valido, il file viene saltato invece di tentare ridenominazioni fallaci.
-- **Atomicità**: FFmpeg scrive i nuovi metadati in un file temporaneo; l'originale viene sostituito solo se l'operazione ha successo. In caso di errore, l'originale viene ripristinato.
+- **Normalization**: Titles are compared after applying `.trim()` and `.toLowerCase()`.
+- **NFO Integrity**: If the NFO file doesn't contain a valid title, the file is skipped instead of attempting erroneous renames.
+- **Atomicity**: FFmpeg writes new metadata to a temporary file; the original is replaced only if the operation succeeds. In case of error, the original is restored.
 
-## 3. Gestione del Player Esterno (VLC)
+## 3. External Player Management (VLC)
 
-L'integrazione con VLC è stata potenziata per offrire un'esperienza simile a quella di un telecomando fisico.
-- **Process Management**: Prima di avviare una nuova riproduzione, l'app identifica e termina eventuali istanze di VLC precedentemente aperte per evitare sovrapposizioni audio/video.
-- **Remote Control**: VLC viene avviato con i parametri `--rc-host` per permettere l'interazione via TCP (supportata da moduli futuri).
+Integration with VLC has been enhanced to provide an experience similar to a physical remote control.
+- **Process Management**: Before starting a new playback, the app identifies and terminates any previously opened VLC instances to avoid audio/video overlap.
+- **Remote Control**: VLC is launched with `--rc-host` parameters to allow TCP interaction (supported by future modules).
 
-## 4. UI/UX Dinamica
+## 4. Dynamic UI/UX
 
-- **Auto-Navigation**: Invece di richiedere all'utente di selezionare manualmente il tab, la `HomeScreen` interroga il database all'avvio e posiziona il cursore sul tab più utile (Genera Playlist se i dati esistono, Scansione se il database è vuoto).
-- **Feedback Operativo**: Introduzione di dialog di riepilogo post-operazione che indicano chiaramente quanti file sono stati aggiornati, quanti saltati e quanti sono andati in errore.
+- **Auto-Navigation**: Instead of requiring the user to manually select the tab, `HomeScreen` queries the database on startup and places the cursor on the most useful tab (Generate Playlist if data exists, Scan if the database is empty).
+- **Operational Feedback**: Introduction of post-operation summary dialogs that clearly indicate how many files were updated, skipped, or failed.
 
-## 5. Esclusione Video in Sessione
+## 5. Session-based Video Exclusion
 
-Per migliorare l'esperienza di scoperta, abbiamo introdotto la `Set<int> _proposedVideoIds` nel `PlaylistProvider`.
-- **Persistenza in memoria**: Gli ID dei video aggiunti a una playlist vengono memorizzati per l'intera durata dell'esecuzione del programma.
-- **Iniezione SQL**: Le query di `DatabaseHelper` (getRandom e getFiltered) accettano ora un parametro `excludeIds` che viene iniettato come clausola `NOT IN (...)` nella query SQL, garantendo che i video già visti non vengano riproposti fino al riavvio o all'esaurimento del pool.
-- **Auto-Reset**: Se il numero di video proposti eguaglia o supera il numero totale di video nel database, la memoria viene azzerata per permettere un nuovo ciclo di visione completo.
+To improve the discovery experience, we introduced `Set<int> _proposedVideoIds` in `PlaylistProvider`.
+- **In-Memory Persistence**: IDs of videos added to a playlist are stored for the entire duration of the program execution.
+- **SQL Injection**: `DatabaseHelper` queries (getRandom and getFiltered) now accept an `excludeIds` parameter injected as a `NOT IN (...)` clause in the SQL query, ensuring that already seen videos are not re-proposed until restart or pool exhaustion.
+- **Auto-Reset**: If the number of proposed videos equals or exceeds the total number of videos in the database, the memory is cleared to allow a new full viewing cycle.

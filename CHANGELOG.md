@@ -1,35 +1,35 @@
 # Changelog
 
-Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+All notable changes to this project will be documented in this file.
 
 ## [2.5.1] - 2025-12-20
 
-### Aggiunto
-- **Esclusione Sessione**: La generazione di playlist casuali (anche con filtri) ora esclude i video già proposti durante la sessione corrente.
-- **Visualizzazione Titolo in Elaborazione**: Il dialog di rinomina in massa ora mostra il titolo del video che sta venendo processato in tempo reale.
-- **Tooltip**: Aggiunti tooltip nella tabella del database per visualizzare il titolo completo dei video troncati.
+### Added
+- **Session Exclusion**: Random playlist generation (including filters) now excludes videos already proposed during the current session.
+- **Real-time Processing Title**: The bulk rename dialog now displays the title of the video currently being processed.
+- **Tooltips**: Added tooltips to the database table to view the full title of truncated entries.
 
-### Corretto
-- Perfezionata la logica di skip nella rinomina per essere totalmente case-insensitive.
+### Fixed
+- Refined rename skip logic to be fully case-insensitive and more robust.
 
 ## [2.5.0] - 2025-12-20
 
-### Aggiunto
-- Funzionalità "Rinomina Titoli in Massa" nel tab Gestione DB.
-- Dialog di progresso dettagliato per le operazioni bulk.
-- Possibilità di annullare la rinomina in massa con pulizia automatica dei file temporanei.
-- Supporto per la chiusura automatica dei processi VLC precedenti alla riproduzione.
-- Info Dialog con versione e data di redazione.
+### Added
+- "Bulk Title Rename" functionality in the DB Management tab.
+- Detailed progress dialog for bulk operations.
+- Ability to cancel bulk renaming with automatic temporary file cleanup.
+- Support for auto-killing previous VLC instances before playback.
+- Info Dialog with version and build date.
 
-### Migliorato
-- Ottimizzazione drastica delle prestazioni per l'aggiornamento del database (refresh della UI solo a fine processo).
-- Logica di salto (skip) intelligente per la rinomina: i video già aggiornati correttamente vengono saltati automaticamente.
-- Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
-- Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
+### Improved
+- Drastic performance optimization for database updates (UI refreshes only at the end of the process).
+- Intelligent skip logic for renaming: correctly updated videos are automatically skipped.
+- NFO Metadata Handling: More robust extraction of title, year, genres, actors, directors, and plot.
+- Initial Navigation: The app now opens on the 'Generate Playlist' tab if videos are already present in the database.
 
-### Corretto
-- Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.
-- Gestione dei codec nel player interno: migliorata la stabilità e aggiunto suggerimento per player esterni in caso di incompatibilità.
+### Fixed
+- Fixed bug in title comparison logic that caused unnecessary updates on already correct files.
+- Internal player codec handling: improved stability and added suggestions for external players in case of incompatibility.
 
 ## [1.1.0] - 2025-12-14
-- Versione iniziale stabile con supporto Database e Generazione Playlist.
+- Initial stable release with Database support and Playlist Generation.

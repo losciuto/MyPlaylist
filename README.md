@@ -6,10 +6,9 @@ Video Playlist Creator and Local Database Manager built with Flutter.
 MyPlaylist is a desktop application designed to manage your local video collection, extract metadata from NFO files, and generate playlists (Random, Recent, or Filtered) for your favorite media player.
 
 ## Documentation
-- [Italiano (README_IT.md)](README_IT.md)
-- [English (README_EN.md)](README_EN.md)
-- [Changelog (CHANGELOG.md)](CHANGELOG.md)
-- [Refactoring & Architecture (REFACTORING.md)](REFACTORING.md)
+- [English (CHANGELOG.md)](CHANGELOG.md) | [Italiano (CHANGELOG_IT.md)](CHANGELOG_IT.md)
+- [English (REFACTORING.md)](REFACTORING.md) | [Italiano (REFACTORING_IT.md)](REFACTORING_IT.md)
+- [English (README_EN.md)](README_EN.md) | [Italiano (README_IT.md)](README_IT.md)
 
 ## Key Features
 - **Folder Scanning**: Import videos with automatic metadata extraction.
