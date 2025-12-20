@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'providers/database_provider.dart';
 import 'providers/playlist_provider.dart';
+import 'services/remote_control_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +43,14 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: settingsService),
         ChangeNotifierProvider(create: (_) => DatabaseProvider()..refreshVideos()),
-        ChangeNotifierProvider(create: (_) => PlaylistProvider()),
+        ChangeNotifierProvider(create: (context) => PlaylistProvider()),
+        ChangeNotifierProxyProvider2<SettingsService, PlaylistProvider, RemoteControlService>(
+          create: (context) => RemoteControlService(
+            settingsService: context.read<SettingsService>(),
+            playlistProvider: context.read<PlaylistProvider>(),
+          ),
+          update: (context, settings, playlist, previous) => previous!,
+        ),
       ],
       child: const MyApp(),
     ),

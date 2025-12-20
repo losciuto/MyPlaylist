@@ -13,6 +13,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _playerPathController;
   late TextEditingController _defaultSizeController;
+  late TextEditingController _remotePortController;
+  late TextEditingController _remoteSecretController;
 
   @override
   void initState() {
@@ -20,12 +22,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settings = context.read<SettingsService>();
     _playerPathController = TextEditingController(text: settings.playerPath);
     _defaultSizeController = TextEditingController(text: settings.defaultPlaylistSize.toString());
+    _remotePortController = TextEditingController(text: settings.remoteServerPort.toString());
+    _remoteSecretController = TextEditingController(text: settings.remoteServerSecret);
   }
 
   @override
   void dispose() {
     _playerPathController.dispose();
     _defaultSizeController.dispose();
+    _remotePortController.dispose();
+    _remoteSecretController.dispose();
     super.dispose();
   }
 
@@ -49,6 +55,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (size != null && size > 0) {
         context.read<SettingsService>().setDefaultPlaylistSize(size);
       }
+    }
+  }
+
+  void _updateRemotePort(String value) {
+    if (value.isNotEmpty) {
+      final int? port = int.tryParse(value);
+      if (port != null && port > 0) {
+        context.read<SettingsService>().setRemoteServerPort(port);
+      }
+    }
+  }
+
+  void _updateRemoteSecret(String value) {
+    if (value.length >= 1) { // Basic check
+      context.read<SettingsService>().setRemoteServerSecret(value);
     }
   }
 
@@ -99,6 +120,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fillColor: Color(0xFF3C3C3C),
               ),
               onChanged: _updateDefaultSize,
+            ),
+            const SizedBox(height: 30),
+            const Text(
+              'Remote Control (TCP/IP)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50)),
+            ),
+            const SizedBox(height: 10),
+            Consumer<SettingsService>(
+              builder: (context, settings, child) {
+                return SwitchListTile(
+                  title: const Text('Abilita Server Remoto'),
+                  subtitle: const Text('Ricevi comandi criptati per gestire le playlist'),
+                  value: settings.remoteServerEnabled,
+                  onChanged: (val) => settings.setRemoteServerEnabled(val),
+                  activeColor: const Color(0xFF4CAF50),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _remotePortController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Porta Server',
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Color(0xFF3C3C3C),
+              ),
+              onChanged: _updateRemotePort,
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _remoteSecretController,
+              decoration: const InputDecoration(
+                labelText: 'Chiave Segreta (PSK)',
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Color(0xFF3C3C3C),
+                helperText: 'Usa la stessa chiave sul client per criptare i comandi',
+              ),
+              onChanged: _updateRemoteSecret,
+              obscureText: true,
             ),
           ],
         ),
