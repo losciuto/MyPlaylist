@@ -1,4 +1,4 @@
-# MyPlaylist (Clone)
+# MyPlaylist 
 
 Creatore di Playlist Video e Gestore Database Locale.
 
@@ -35,3 +35,6 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 Sviluppato con Flutter.
 Autore: Massimo
 Ultimo Aggiornamento: 20/12/2025 (v2.5.1)
+
+## Licenza
+Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

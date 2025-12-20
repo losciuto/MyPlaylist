@@ -1,4 +1,4 @@
-# MyPlaylist (Clone)
+# MyPlaylist
 
 Video Playlist Creator and Local Database Manager.
 
@@ -35,3 +35,6 @@ If you experience black screens or "Codec not found" errors, run the command abo
 Built with Flutter.
 Author: Massimo
 Last Update: 2025-12-20 (v2.5.1)
+
+## License
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
