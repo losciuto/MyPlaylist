@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.5.1] - 2025-12-20
+## [2.6.1] - 2025-12-21
+
+- Documentation update and version synchronization.
+
+## [2.6.0] - 2025-12-21
+
+### Added
+
+- **"Echo-Safe" Remote Control Protocol**: Implemented mutual exclusion and echo filtering in the control server for interference-free client-server communication.
+- **Playlist Preview**: New remote command (`preview`) allowing clients to receive the list of generated titles without immediately starting the player.
+- **Advanced VLC Management**: Optimized VLC process management for more reliable startup and shutdown.
 
 ### Added
 - **Session Exclusion**: Random playlist generation (including filters) now excludes videos already proposed during the current session.

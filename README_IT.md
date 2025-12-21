@@ -8,6 +8,7 @@ Creatore di Playlist Video e Gestore Database Locale.
 *   **Playlist**: Generazione casuale, recente o filtrata. Export .m3u.
 *   **Player**: Player interno (mpv) e supporto player esterno (VLC, ecc.).
 *   **VLC Control**: Supporto avanzato per VLC (kill automatico processi precedenti, avvio con controllo remoto).
+*   **Remote Protocol**: Server TCP AES-GCM per il controllo remoto dal client VLC Remote, con supporto anteprima playlist.
 *   **Persistenza**: Salva l'ultima playlist generata tra le sessioni.
 *   **Esclusione Sessione**: Le playlist casuali non ripetono video già proposti nella stessa sessione.
 *   **UI Advanced**: Tooltip sui titoli lunghi e visualizzazione del video in elaborazione durante la rinomina.
@@ -34,7 +35,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 20/12/2025 (v2.5.1)
+Ultimo Aggiornamento: 21/12/2025 (v2.6.1)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

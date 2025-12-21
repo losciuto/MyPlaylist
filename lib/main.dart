@@ -45,6 +45,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DatabaseProvider()..refreshVideos()),
         ChangeNotifierProvider(create: (context) => PlaylistProvider()),
         ChangeNotifierProxyProvider2<SettingsService, PlaylistProvider, RemoteControlService>(
+          lazy: false,
           create: (context) => RemoteControlService(
             settingsService: context.read<SettingsService>(),
             playlistProvider: context.read<PlaylistProvider>(),

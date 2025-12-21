@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [2.6.1] - 2025-12-21
+
+- Aggiornamento documentazione e sincronizzazione versioni.
+
+### Aggiunto
+- **Protocollo Remote Control "Echo-Safe"**: Implementato mutuo-esclusione e filtraggio echi nel server di controllo per una comunicazione client-server senza interferenze.
+- **Anteprima Playlist**: Nuovo comando remoto (`preview`) che permette ai client di ricevere la lista dei titoli generati senza avviare immediatamente il player.
+- **Gestione Avanzata VLC**: Ottimizzata la gestione dei processi VLC per un avvio e una chiusura più affidabili.
+
 ## [2.5.1] - 2025-12-20
 
 ### Aggiunto

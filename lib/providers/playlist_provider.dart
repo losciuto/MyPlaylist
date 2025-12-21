@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database_helper.dart';
 import '../models/video.dart';
+import '../services/settings_service.dart';
 
 class PlaylistProvider extends ChangeNotifier {
   List<Video> _currentPlaylist = [];
@@ -46,14 +47,15 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> generateRandom(int count) async {
+  Future<List<String>> generateRandom({int? count, bool launchPlayer = true}) async {
+    final limit = count ?? 20;
     // Check if we exhausted the available videos in this session
     if (_proposedVideoIds.length >= _totalVideoCount) {
       _proposedVideoIds.clear();
     }
     
     final videos = await DatabaseHelper.instance.getRandomPlaylist(
-      count, 
+      limit, 
       excludeIds: _proposedVideoIds.toList()
     );
 
@@ -61,25 +63,39 @@ class PlaylistProvider extends ChangeNotifier {
     // and we have proposed IDs, clear and try once more.
     if (videos.isEmpty && _proposedVideoIds.isNotEmpty) {
        _proposedVideoIds.clear();
-       final retryVideos = await DatabaseHelper.instance.getRandomPlaylist(count);
+       final retryVideos = await DatabaseHelper.instance.getRandomPlaylist(limit);
        await setPlaylist(retryVideos);
     } else {
        await setPlaylist(videos);
     }
+
+    if (launchPlayer) {
+      await playCurrentPlaylist();
+    }
+    
+    return _currentPlaylist.map((v) => v.title).toList();
   }
 
-  Future<void> generateRecent(int count) async {
-    final videos = await DatabaseHelper.instance.getRecentPlaylist(count);
+  Future<List<String>> generateRecentPlaylist({int? count, bool launchPlayer = true}) async {
+    final limit = count ?? 20; // Default to 20 if count is not provided
+    final videos = await DatabaseHelper.instance.getRecentPlaylist(limit);
     await setPlaylist(videos);
+    
+    if (launchPlayer) {
+      await playCurrentPlaylist();
+    }
+    
+    return _currentPlaylist.map((v) => v.title).toList();
   }
 
-  Future<void> generateFiltered({
+  Future<List<String>> generateFilteredPlaylist({
     List<String>? genres,
     List<String>? years,
     double? minRating,
     List<String>? actors,
     List<String>? directors,
-    int limit = 20
+    int? limit,
+    bool launchPlayer = true,
   }) async {
     // For filtered, if the pool is too small, we might want to reset proposed IDs too?
     // Let's implement it similar to random but specifically for filtered results.
@@ -90,7 +106,7 @@ class PlaylistProvider extends ChangeNotifier {
       minRating: minRating,
       actors: actors,
       directors: directors,
-      limit: limit,
+      limit: limit ?? 20, // Default to 20 if limit is not provided
       excludeIds: _proposedVideoIds.toList()
     );
 
@@ -105,12 +121,18 @@ class PlaylistProvider extends ChangeNotifier {
         minRating: minRating,
         actors: actors,
         directors: directors,
-        limit: limit
+        limit: limit ?? 20
       );
       await setPlaylist(retryVideos);
     } else {
       await setPlaylist(videos);
     }
+
+    if (launchPlayer) {
+      await playCurrentPlaylist();
+    }
+    
+    return _currentPlaylist.map((v) => v.title).toList();
   }
 
   Future<void> loadPlaylistState() => _loadPlaylistState();
@@ -177,16 +199,38 @@ class PlaylistProvider extends ChangeNotifier {
     return playlistFile.path;
   }
   
+  Future<void> playCurrentPlaylist() async {
+    final settings = SettingsService();
+    final path = await createTempPlaylistFile();
+    await launchPlayer(settings.playerPath, path);
+  }
+
   Process? _playerProcess;
+
+  Future<void> stopPlayer() async {
+    if (_playerProcess != null) {
+      debugPrint('Stopping player process...');
+      _playerProcess!.kill(ProcessSignal.sigterm);
+      _playerProcess = null;
+    } else {
+      // Fallback: prova a chiudere VLC direttamente se il riferimento è perso
+      try {
+        if (Platform.isLinux) {
+          await Process.run('pkill', ['-x', 'vlc']);
+        } else if (Platform.isWindows) {
+          await Process.run('taskkill', ['/IM', 'vlc.exe', '/F']);
+        }
+      } catch (e) {
+        debugPrint('Error in stopPlayer fallback: $e');
+      }
+    }
+    // Small delay to allow OS to release port if needed (VLC RC port)
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
 
   Future<void> launchPlayer(String playerPath, String playlistPath) async {
     // Kill existing process if alive
-    if (_playerProcess != null) {
-      _playerProcess!.kill(ProcessSignal.sigterm); // Try gentle kill first
-      _playerProcess = null;
-      // Allow a split second for cleanup? 
-      // await Future.delayed(const Duration(milliseconds: 200));
-    }
+    await stopPlayer();
 
     try {
       List<String> args = [playlistPath];
@@ -210,6 +254,7 @@ class PlaylistProvider extends ChangeNotifier {
         args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:4212', playlistPath];
       }
 
+      debugPrint('Starting player: $playerPath with args: $args');
       _playerProcess = await Process.start(playerPath, args);
       
       // Optional: Listen to exit to clear variable, though not strictly needed if we just overwrite

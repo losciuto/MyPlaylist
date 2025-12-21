@@ -10,6 +10,7 @@ import 'filter_dialog.dart';
 import 'video_details_dialog.dart';
 
 import 'manual_selection_dialog.dart';
+import '../services/remote_control_service.dart';
 
 class PlaylistTab extends StatefulWidget {
   const PlaylistTab({super.key});
@@ -32,14 +33,14 @@ class _PlaylistTabState extends State<PlaylistTab> {
   Future<void> _generateRandom(PlaylistProvider provider) async {
     final count = await _inputCount();
     if (count == null) return;
-    await provider.generateRandom(count);
+    await provider.generateRandom(count: count);
     _checkResult(provider.playlist);
   }
   
   Future<void> _generateRecent(PlaylistProvider provider) async {
     final count = await _inputCount();
     if (count == null) return;
-    await provider.generateRecent(count);
+    await provider.generateRecentPlaylist(count: count);
     _checkResult(provider.playlist);
   }
 
@@ -51,7 +52,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
     if (settings != null) {
       try {
-        await provider.generateFiltered(
+        await provider.generateFilteredPlaylist(
           genres: settings.genres,
           years: settings.years,
           minRating: settings.ratingMin,
@@ -262,6 +263,66 @@ class _PlaylistTabState extends State<PlaylistTab> {
                  ),
               
               const Spacer(),
+              
+              // Remote Command Logs Section
+              Consumer<RemoteControlService>(
+                builder: (context, remoteService, _) {
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600), // Limita la larghezza a 600px
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          leading: const Icon(Icons.history, color: Colors.blue, size: 20),
+                          title: const Text('Log Comandi Remoti', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          subtitle: Text(
+                            remoteService.commandLogs.isEmpty 
+                              ? 'In attesa...' 
+                              : 'Ultimo: ${remoteService.commandLogs.first.command}', 
+                            style: const TextStyle(fontSize: 11, color: Colors.grey)
+                          ),
+                          children: [
+                            if (remoteService.commandLogs.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: Text('Nessun comando ricevuto.', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                              )
+                            else
+                              SizedBox(
+                                height: 180,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: remoteService.commandLogs.length,
+                                  itemBuilder: (context, index) {
+                                    final log = remoteService.commandLogs[index];
+                                    final timeStr = '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}:${log.timestamp.second.toString().padLeft(2, '0')}';
+                                    
+                                    return ListTile(
+                                      dense: true,
+                                      visualDensity: VisualDensity.compact,
+                                      title: Text(log.command, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12)),
+                                      subtitle: Text(log.args.isEmpty ? 'Nessun parametro' : 'Parametri: ${log.args}', style: const TextStyle(fontSize: 10)),
+                                      trailing: Text(timeStr, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                    );
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              
+              const SizedBox(height: 20),
+              
               Container(
                  padding: const EdgeInsets.all(10),
                  decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(5)),
