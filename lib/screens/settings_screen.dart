@@ -15,6 +15,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _defaultSizeController;
   late TextEditingController _remotePortController;
   late TextEditingController _remoteSecretController;
+  late TextEditingController _vlcPortController;
+  late TextEditingController _serverInterfaceController;
+  bool _obscureSecret = true;
 
   @override
   void initState() {
@@ -24,6 +27,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _defaultSizeController = TextEditingController(text: settings.defaultPlaylistSize.toString());
     _remotePortController = TextEditingController(text: settings.remoteServerPort.toString());
     _remoteSecretController = TextEditingController(text: settings.remoteServerSecret);
+    _vlcPortController = TextEditingController(text: settings.vlcPort.toString());
+    _serverInterfaceController = TextEditingController(text: settings.serverInterface);
   }
 
   @override
@@ -32,6 +37,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _defaultSizeController.dispose();
     _remotePortController.dispose();
     _remoteSecretController.dispose();
+    _vlcPortController.dispose();
+    _serverInterfaceController.dispose();
     super.dispose();
   }
 
@@ -68,8 +75,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _updateRemoteSecret(String value) {
-    if (value.length >= 1) { // Basic check
+    if (value.isNotEmpty) {
       context.read<SettingsService>().setRemoteServerSecret(value);
+    }
+  }
+
+  void _updateVlcPort(String value) {
+    if (value.isNotEmpty) {
+      final int? port = int.tryParse(value);
+      if (port != null && port > 0) {
+        context.read<SettingsService>().setVlcPort(port);
+      }
+    }
+  }
+
+  void _updateServerInterface(String value) {
+    if (value.isNotEmpty) {
+      context.read<SettingsService>().setServerInterface(value);
     }
   }
 
@@ -103,6 +125,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fillColor: const Color(0xFF3C3C3C),
               ),
               onChanged: (val) => context.read<SettingsService>().setPlayerPath(val),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _vlcPortController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Porta RC VLC (Default: 4212)',
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Color(0xFF3C3C3C),
+                helperText: 'Porta per il controllo remoto di VLC',
+              ),
+              onChanged: _updateVlcPort,
             ),
             const SizedBox(height: 30),
             const Text(
@@ -153,15 +188,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 20),
             TextField(
               controller: _remoteSecretController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Chiave Segreta (PSK)',
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: const Color(0xFF3C3C3C),
+                helperText: 'Usa la stessa chiave sul client per criptare i comandi',
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureSecret ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () => setState(() => _obscureSecret = !_obscureSecret),
+                ),
+              ),
+              onChanged: _updateRemoteSecret,
+              obscureText: _obscureSecret,
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _serverInterfaceController,
+              decoration: const InputDecoration(
+                labelText: 'Interfaccia di Ascolto (Default: 0.0.0.0)',
                 border: OutlineInputBorder(),
                 filled: true,
                 fillColor: Color(0xFF3C3C3C),
-                helperText: 'Usa la stessa chiave sul client per criptare i comandi',
+                helperText: 'Indirizzo IP su cui il server accetta connessioni',
               ),
-              onChanged: _updateRemoteSecret,
-              obscureText: true,
+              onChanged: _updateServerInterface,
             ),
           ],
         ),

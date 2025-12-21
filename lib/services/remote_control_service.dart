@@ -26,6 +26,7 @@ class RemoteControlService with ChangeNotifier {
   bool _isRunning = false;
   int? _currentPort;
   String? _currentSecret;
+  String? _currentInterface;
   
   final List<RemoteCommandLog> _commandLogs = [];
   List<RemoteCommandLog> get commandLogs => List.unmodifiable(_commandLogs);
@@ -38,6 +39,7 @@ class RemoteControlService with ChangeNotifier {
   }) {
     _currentPort = settingsService.remoteServerPort;
     _currentSecret = settingsService.remoteServerSecret;
+    _currentInterface = settingsService.serverInterface;
     settingsService.addListener(_handleSettingsChange);
     if (settingsService.remoteServerEnabled) {
       start();
@@ -48,12 +50,13 @@ class RemoteControlService with ChangeNotifier {
     final bool shouldBeRunning = settingsService.remoteServerEnabled;
     final int newPort = settingsService.remoteServerPort;
     final String newSecret = settingsService.remoteServerSecret;
+    final String newInterface = settingsService.serverInterface;
 
     bool needsRestart = false;
 
     if (_isRunning && shouldBeRunning) {
-      if (newPort != _currentPort || newSecret != _currentSecret) {
-        debugPrint('Remote Server settings changed (Port: $_currentPort -> $newPort, Secret: [REDACTED]). Restarting...');
+      if (newPort != _currentPort || newSecret != _currentSecret || newInterface != _currentInterface) {
+        debugPrint('Remote Server settings changed (Port: $_currentPort -> $newPort, Interface: $_currentInterface -> $newInterface, Secret: [REDACTED]). Restarting...');
         needsRestart = true;
       }
     }
@@ -68,6 +71,7 @@ class RemoteControlService with ChangeNotifier {
 
     _currentPort = newPort;
     _currentSecret = newSecret;
+    _currentInterface = newInterface;
   }
 
   Future<void> restart() async {
@@ -79,7 +83,10 @@ class RemoteControlService with ChangeNotifier {
     if (_isRunning) return;
 
     try {
-      _server = await ServerSocket.bind(InternetAddress.anyIPv4, settingsService.remoteServerPort);
+      final address = settingsService.serverInterface == '0.0.0.0' 
+          ? InternetAddress.anyIPv4 
+          : InternetAddress(settingsService.serverInterface);
+      _server = await ServerSocket.bind(address, settingsService.remoteServerPort);
       _isRunning = true;
       notifyListeners();
 

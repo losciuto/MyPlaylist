@@ -19,6 +19,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyRemoteServerEnabled = 'remote_server_enabled';
   static const String _keyRemoteServerPort = 'remote_server_port';
   static const String _keyRemoteServerSecret = 'remote_server_secret';
+  static const String _keyVlcPort = 'vlc_port';
+  static const String _keyServerInterface = 'server_interface';
 
   // State
   String _playerPath = '';
@@ -26,6 +28,8 @@ class SettingsService with ChangeNotifier {
   bool _remoteServerEnabled = false;
   int _remoteServerPort = 8080;
   String _remoteServerSecret = 'my_default_secret_key_32chars_long'; // Should be 32 chars for AES-256
+  int _vlcPort = 4212;
+  String _serverInterface = '0.0.0.0';
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -33,6 +37,8 @@ class SettingsService with ChangeNotifier {
   bool get remoteServerEnabled => _remoteServerEnabled;
   int get remoteServerPort => _remoteServerPort;
   String get remoteServerSecret => _remoteServerSecret;
+  int get vlcPort => _vlcPort;
+  String get serverInterface => _serverInterface;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -43,6 +49,8 @@ class SettingsService with ChangeNotifier {
     _remoteServerEnabled = _prefs.getBool(_keyRemoteServerEnabled) ?? false;
     _remoteServerPort = _prefs.getInt(_keyRemoteServerPort) ?? 8080;
     _remoteServerSecret = _prefs.getString(_keyRemoteServerSecret) ?? 'my_default_secret_key_32chars_long';
+    _vlcPort = _prefs.getInt(_keyVlcPort) ?? 4212;
+    _serverInterface = _prefs.getString(_keyServerInterface) ?? '0.0.0.0';
     
     _initialized = true;
     notifyListeners();
@@ -75,6 +83,18 @@ class SettingsService with ChangeNotifier {
   Future<void> setRemoteServerSecret(String secret) async {
     _remoteServerSecret = secret;
     await _prefs.setString(_keyRemoteServerSecret, secret);
+    notifyListeners();
+  }
+
+  Future<void> setVlcPort(int port) async {
+    _vlcPort = port;
+    await _prefs.setInt(_keyVlcPort, port);
+    notifyListeners();
+  }
+
+  Future<void> setServerInterface(String interface) async {
+    _serverInterface = interface;
+    await _prefs.setString(_keyServerInterface, interface);
     notifyListeners();
   }
 }

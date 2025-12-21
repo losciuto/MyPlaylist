@@ -250,8 +250,8 @@ class PlaylistProvider extends ChangeNotifier {
           debugPrint('Error killing existing VLC instances: $e');
         }
 
-        // Enable RC interface on 0.0.0.0:4212
-        args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:4212', playlistPath];
+        // Enable RC interface on 0.0.0.0:vlcPort
+        args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:${settings.vlcPort}', playlistPath];
       }
 
       debugPrint('Starting player: $playerPath with args: $args');
