@@ -229,6 +229,7 @@ class PlaylistProvider extends ChangeNotifier {
   }
 
   Future<void> launchPlayer(String playerPath, String playlistPath) async {
+    final settings = SettingsService();
     // Kill existing process if alive
     await stopPlayer();
 
