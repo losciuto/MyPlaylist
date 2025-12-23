@@ -65,8 +65,23 @@ class ScanService {
     final stat = await videoFile.stat();
     final mtime = stat.modified.millisecondsSinceEpoch / 1000.0; // Seconds as double
 
-    // Check for NFO
-    final nfoPath = p.setExtension(path, '.nfo');
+    // Check for NFO (Priority: video_filename.nfo > movie.nfo)
+    String nfoPath = p.setExtension(path, '.nfo');
+    File nfoFile = File(nfoPath);
+    bool nfoExists = await nfoFile.exists();
+
+    if (!nfoExists) {
+      final movieNfoPath = p.join(p.dirname(path), 'movie.nfo');
+      final movieNfoFile = File(movieNfoPath);
+      if (await movieNfoFile.exists()) {
+        nfoPath = movieNfoPath;
+        nfoFile = movieNfoFile;
+        nfoExists = true;
+      }
+    }
+
+    print('DEBUG [ScanService]: Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath');
+    
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
     
     // Create Video object
@@ -87,7 +102,7 @@ class ScanService {
       posterPath: metadata?['poster'] ?? '',
     );
 
-    // Insert into DB (skip if exists)
-    await DatabaseHelper.instance.insertVideoUnique(video);
+    // Insert into DB (update if exists)
+    await DatabaseHelper.instance.insertVideo(video);
   }
 }

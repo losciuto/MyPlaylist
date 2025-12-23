@@ -192,9 +192,17 @@ class _PlaylistTabState extends State<PlaylistTab> {
                              : Image.file(File(v.posterPath), fit: BoxFit.cover, errorBuilder: (_,__,___) => const Icon(Icons.movie, size: 50)))
                           : const Icon(Icons.movie, size: 50),
                      ),
-                     Text(v.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10)),
-                   ],
-                 ),
+                     Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10)),
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         const Icon(Icons.star, color: Colors.orange, size: 10),
+                         const SizedBox(width: 2),
+                         Text(v.rating.toStringAsFixed(1), style: const TextStyle(fontSize: 10, color: Colors.white70)),
+                       ],
+                     ),
+                    ],
+                  ),
                );
              },
            ),

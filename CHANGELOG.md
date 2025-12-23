@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.7.0] - 2025-12-23
+
+### Added
+- **Power Parser for Ratings**: Implemented dual-strategy (XML DOM + Regex) rating extraction from NFO files.
+- **NFO Naming Fallback**: Added support for `movie.nfo` when video-specific NFO files are not found.
+- **Rating Visibility**: Added rating display to Database Management table, Poster Grid, and Manual Selection dialog.
+
+### Fixed
+- **Zero Rating Bug**: Resolved issue where all videos displayed 0.0 ratings despite having valid data in NFO files.
+- **Nested Tag Support**: Improved parser to handle complex Kodi-style `<ratings>` structures with `default="true"` attributes.
+
 ## [2.6.1] - 2025-12-21
 
 - Documentation update and version synchronization.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/video.dart';
 import '../database/database_helper.dart';
+import 'video_preview_dialog.dart';
 
 class ManualSelectionDialog extends StatefulWidget {
   const ManualSelectionDialog({super.key});
@@ -43,6 +44,13 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
             v.directors.toLowerCase().contains(lowerQuery);
       }).toList();
     });
+  }
+
+  void _showPreview(Video video) {
+    showDialog(
+      context: context,
+      builder: (ctx) => VideoPreviewDialog(video: video),
+    );
   }
 
   void _toggleSelection(Video video) {
@@ -171,7 +179,8 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                           final video = _filteredVideos[index];
                           final isSelected = _selectedIds.contains(video.id);
                           return ListTile(
-                            onTap: () => _toggleSelection(video),
+                            onTap: () => _showPreview(video),
+                            onLongPress: () => _toggleSelection(video),
                             leading: Checkbox(
                               value: isSelected,
                               activeColor: const Color(0xFF4CAF50),
@@ -184,12 +193,15 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
-                              '${video.year} • ${video.directors}',
+                              '${video.year} • ★ ${video.rating.toStringAsFixed(1)} • ${video.directors}',
                               style: const TextStyle(color: Colors.grey, fontSize: 12),
                               maxLines: 1,
                             ),
                             trailing: video.posterPath.isNotEmpty
-                                ? const Icon(Icons.image, color: Colors.white24, size: 20)
+                                ? IconButton(
+                                    icon: const Icon(Icons.image, color: Colors.white24, size: 20),
+                                    onPressed: () => _showPreview(video),
+                                  )
                                 : null,
                           );
                         },

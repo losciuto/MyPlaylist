@@ -205,6 +205,20 @@ class PlaylistProvider extends ChangeNotifier {
     await launchPlayer(settings.playerPath, path);
   }
 
+  Future<void> playSingleVideo(Video video) async {
+    final settings = SettingsService();
+    final tempDir = await getTemporaryDirectory();
+    final playlistFile = File(p.join(tempDir.path, 'single_video.m3u'));
+    
+    final buffer = StringBuffer();
+    buffer.writeln('#EXTM3U');
+    buffer.writeln('#EXTINF:-1,${video.title}');
+    buffer.writeln(video.path);
+    await playlistFile.writeAsString(buffer.toString());
+    
+    await launchPlayer(settings.playerPath, playlistFile.path);
+  }
+
   Process? _playerProcess;
 
   Future<void> stopPlayer() async {

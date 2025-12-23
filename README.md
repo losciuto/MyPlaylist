@@ -23,8 +23,8 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 3.  Run `flutter run -d linux` (or windows).
 
 ---
-**Version**: 2.6.1  
-**Last Update**: 2025-12-20
+**Version**: 2.7.0  
+**Last Update**: 2025-12-23
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

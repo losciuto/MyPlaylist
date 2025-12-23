@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../database/database_helper.dart';
 import '../models/filter_settings.dart';
 import '../services/settings_service.dart';
+import 'filter_videos_dialog.dart';
 
 class FilterDialog extends StatefulWidget {
   const FilterDialog({super.key});
@@ -140,6 +141,25 @@ class _FilterDialogState extends State<FilterDialog> {
     );
   }
 
+  String _getColumnName(String title) {
+    if (title.contains('Generi')) return 'genres';
+    if (title.contains('Anni')) return 'year';
+    if (title.contains('Registi')) return 'directors';
+    if (title.contains('Attori')) return 'actors';
+    return '';
+  }
+
+  void _showVideosList(String title, String category, String filterValue) {
+    showDialog(
+      context: context,
+      builder: (ctx) => FilterVideosDialog(
+        title: title,
+        category: category,
+        filterValue: filterValue,
+      ),
+    );
+  }
+
   Widget _buildMultiSelect(String title, Map<String, int> options, List<String> selected) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,20 +180,29 @@ class _FilterDialogState extends State<FilterDialog> {
               final key = options.keys.elementAt(i);
               final count = options[key];
               final isSel = selected.contains(key);
-              return CheckboxListTile(
-                title: Text('$key ($count)', style: const TextStyle(color: Colors.white, fontSize: 12)),
-                value: isSel,
-                activeColor: const Color(0xFF4CAF50),
+              return ListTile(
                 dense: true,
-                onChanged: (val) {
-                  setState(() {
-                    if (val == true) {
-                      selected.add(key);
-                    } else {
-                      selected.remove(key);
-                    }
-                  });
-                },
+                onTap: () => _showVideosList(title, _getColumnName(title), key),
+                leading: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Checkbox(
+                    value: isSel,
+                    activeColor: const Color(0xFF4CAF50),
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == true) {
+                          selected.add(key);
+                        } else {
+                          selected.remove(key);
+                        }
+                      });
+                    },
+                  ),
+                ),
+                title: Text('$key ($count)',
+                    style: const TextStyle(color: Colors.white, fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right, color: Colors.white24, size: 16),
               );
             },
           ),

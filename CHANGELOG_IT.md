@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [2.7.0] - 2025-12-23
+
+### Aggiunto
+- **Power Parser per Rating**: Implementata strategia duale (XML DOM + Regex) per l'estrazione dei voti dai file NFO.
+- **Fallback Nome NFO**: Aggiunto supporto per `movie.nfo` quando i file NFO specifici del video non vengono trovati.
+- **Visibilità Rating**: Aggiunta visualizzazione del rating nella tabella Gestione Database, Griglia Poster e Dialog Selezione Manuale.
+
+### Corretto
+- **Bug Rating Zero**: Risolto problema per cui tutti i video mostravano rating 0.0 nonostante avessero dati validi nei file NFO.
+- **Supporto Tag Annidati**: Migliorato il parser per gestire strutture complesse Kodi-style `<ratings>` con attributi `default="true"`.
+
 ## [2.6.1] - 2025-12-21
 
 - Aggiornamento documentazione e sincronizzazione versioni.

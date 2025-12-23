@@ -49,6 +49,8 @@ class DatabaseHelper {
 
   Future<void> insertVideo(Video video) async {
     final db = await instance.database;
+    // ignore: avoid_print
+    print('DEBUG [DatabaseHelper]: Inserting/Replacing video: ${video.title}, Rating: ${video.rating}');
     await db.insert(
       'videos',
       video.toMap(),
@@ -238,5 +240,22 @@ class DatabaseHelper {
       }
     }
     return ordered;
+  }
+
+  Future<List<Video>> getVideosByFilter(String column, String value) async {
+    final db = await instance.database;
+    String query;
+    List<dynamic> args;
+    
+    if (column == 'year') {
+      query = "SELECT * FROM videos WHERE year = ? ORDER BY title ASC";
+      args = [value];
+    } else {
+      query = "SELECT * FROM videos WHERE $column LIKE ? ORDER BY title ASC";
+      args = ['%$value%'];
+    }
+    
+    final result = await db.rawQuery(query, args);
+    return result.map((json) => Video.fromMap(json)).toList();
   }
 }

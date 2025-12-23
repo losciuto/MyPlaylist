@@ -328,6 +328,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                 DataColumn(label: Text('#')),
                                 DataColumn(label: Text('Titolo')),
                                 DataColumn(label: Text('Anno')),
+                                DataColumn(label: Text('Rating')),
                                 DataColumn(label: Text('Durata')),
                                 DataColumn(label: Text('Registi')),
                                 DataColumn(label: Text('Azioni')),
@@ -349,8 +350,18 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                       ),
                                     )
                                   ),
-                                  DataCell(Text(video.year)),
-                                  DataCell(Text(video.duration)),
+                                   DataCell(Text(video.year)),
+                                   DataCell(
+                                     Row(
+                                       mainAxisSize: MainAxisSize.min,
+                                       children: [
+                                         const Icon(Icons.star, color: Colors.orange, size: 14),
+                                         const SizedBox(width: 4),
+                                         Text(video.rating.toStringAsFixed(1)),
+                                       ],
+                                     ),
+                                   ),
+                                   DataCell(Text(video.duration)),
                                   DataCell(SizedBox(width: 150, child: Text(video.directors, overflow: TextOverflow.ellipsis))),
                                   DataCell(
                                     IconButton(

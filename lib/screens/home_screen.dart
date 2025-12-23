@@ -79,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text('MyPlaylist App', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
                         Text('Autore: Massimo'),
-                        Text('Data redazione: 21/12/2025'),
+                        Text('Data redazione: 23/12/2025'),
                         SizedBox(height: 10),
-                        Text('Versione: 2.6.1'),
+                        Text('Versione: 2.7.0'),
                       ],
                     ),
                     actions: [
