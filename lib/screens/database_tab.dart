@@ -161,6 +161,8 @@ class _DatabaseTabState extends State<DatabaseTab> {
     int skippedCount = 0;
     int errorCount = 0;
     int current = 0;
+    final List<String> skippedReasons = [];
+    final Set<String> processedDirs = {};
 
     for (final video in allVideos) {
       if (isCancelled) break;
@@ -171,18 +173,59 @@ class _DatabaseTabState extends State<DatabaseTab> {
         'title': video.title.isNotEmpty ? video.title : p.basename(video.path),
       };
       
+      // Track directory for cleanup
+      processedDirs.add(p.dirname(video.path));
+      
       try {
-        final nfoPath = p.setExtension(video.path, '.nfo');
-        final nfoFile = File(nfoPath);
+        // Robust NFO lookup
+        String nfoPath = p.setExtension(video.path, '.nfo');
+        File nfoFile = File(nfoPath);
+        
+        bool nfoFound = await nfoFile.exists();
+        
+        // If not found directly, try case-insensitive search in the same directory
+        if (!nfoFound) {
+           try {
+             final parentDir = Directory(p.dirname(video.path));
+             if (await parentDir.exists()) {
+               final videoBasenameNoExt = p.basenameWithoutExtension(video.path).toLowerCase();
+               
+               // List files in directory to find a match
+               final siblings = parentDir.listSync(); // Sync is okay for local simple dirs, or use await parentDir.list().toList()
+               for (final entity in siblings) {
+                 if (entity is File) {
+                   final entityPath = entity.path;
+                   final entityExt = p.extension(entityPath).toLowerCase();
+                   if (entityExt == '.nfo') {
+                     final entityBasenameNoExt = p.basenameWithoutExtension(entityPath).toLowerCase();
+                     if (entityBasenameNoExt == videoBasenameNoExt) {
+                       nfoPath = entityPath;
+                       nfoFile = File(nfoPath);
+                       nfoFound = true;
+                       debugPrint('MATCH [${p.basename(video.path)}]: Found case-insensitive NFO: ${p.basename(nfoPath)}');
+                       break;
+                     }
+                   }
+                 }
+               }
+             }
+           } catch (e) {
+             debugPrint('Error searching for NFO: $e');
+           }
+        }
 
-        if (!await nfoFile.exists()) {
+        if (!nfoFound) {
           skippedCount++;
+          skippedReasons.add('${p.basename(video.path)}: NFO non trovato');
+          debugPrint('SKIP [${p.basename(video.path)}]: NFO file not found (tried $nfoPath and case-insensitive)');
           continue;
         }
 
         final metadata = await NfoParser.parseNfo(nfoPath);
         if (metadata == null) {
           skippedCount++;
+          skippedReasons.add('${p.basename(video.path)}: NFO non valido');
+          debugPrint('SKIP [${p.basename(video.path)}]: NFO parsing failed');
           continue;
         }
 
@@ -191,49 +234,86 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
         if (nfoTitle == null || nfoTitle.isEmpty) {
           skippedCount++;
+          skippedReasons.add('${p.basename(video.path)}: Titolo mancante in NFO');
+          debugPrint('SKIP [${p.basename(video.path)}]: No title in NFO');
           continue;
         }
 
-        String newTitle = nfoTitle;
+        // 3-Way Comparison Logic: Database vs NFO vs File Metadata
+        
+        // 1. Get File Metadata using ffprobe
+        final fileMetadata = await MetadataService().getFileMetadata(video.path);
+        final fileTitle = fileMetadata['title'] ?? '';
+        
+        // Robust normalization
+        String norm(String? s) {
+          if (s == null) return '';
+          return s.trim()
+                  .toLowerCase()
+                  .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '') // Zero-width characters
+                  .replaceAll(RegExp(r'\s+'), ' '); // Collapse spaces
+        }
+
+        // Construct STRICT Target Title: "Title (Year)"
+        String targetTitle = nfoTitle;
         if (nfoYear != null && nfoYear.isNotEmpty) {
-          newTitle = '$nfoTitle ($nfoYear)';
+           targetTitle = '$nfoTitle ($nfoYear)';
         }
 
-        // Robust comparison: check if the title (which should already include the year if present) matches.
-        // We use case-insensitive comparison and trim to be as flexible as possible.
-        final String currentTitle = video.title.trim().toLowerCase();
-        final String targetTitle = newTitle.trim().toLowerCase();
+        final nfoGenres = metadata['genres'] ?? '';
+        final nfoDirectors = metadata['directors'] ?? '';
+        final nfoActors = metadata['actors'] ?? '';
+        final nfoPlot = metadata['plot'] ?? '';
+        final nfoRating = metadata['rating'] ?? 0.0;
+        final nfoPoster = metadata['poster'] ?? '';
 
-        if (currentTitle == targetTitle) {
+        // Strict & Independent Update Logic
+        bool dbMismatch = norm(video.title) != norm(targetTitle);
+        bool fileMismatch = norm(fileTitle) != norm(targetTitle);
+
+        if (!dbMismatch && !fileMismatch) {
           skippedCount++;
+          skippedReasons.add('${p.basename(video.path)}: Già allineato');
+          debugPrint('SKIP [${p.basename(video.path)}]: Aligned. DB="${video.title}", File="${fileTitle}"');
           continue;
         }
 
+        // Create the "Perfect" video object from NFO data
         final updatedVideo = Video(
           id: video.id,
           path: video.path,
           mtime: video.mtime,
           duration: video.duration,
-          title: newTitle,
+          title: targetTitle,
           year: (nfoYear != null && nfoYear.isNotEmpty) ? nfoYear : video.year, 
-          genres: metadata['genres'] ?? video.genres,
-          directors: metadata['directors'] ?? video.directors,
-          actors: metadata['actors'] ?? video.actors,
-          plot: metadata['plot'] ?? video.plot,
-          rating: metadata['rating'] ?? video.rating,
-          posterPath: metadata['poster'] ?? video.posterPath,
+          genres: nfoGenres.isNotEmpty ? nfoGenres : video.genres,
+          directors: nfoDirectors.isNotEmpty ? nfoDirectors : video.directors,
+          actors: nfoActors.isNotEmpty ? nfoActors : video.actors,
+          plot: nfoPlot.isNotEmpty ? nfoPlot : video.plot,
+          rating: nfoRating > 0 ? nfoRating : video.rating,
+          posterPath: nfoPoster.isNotEmpty ? nfoPoster : video.posterPath,
         );
 
-        // Optimization: Use DatabaseHelper directly here to avoid full refresh on every item.
-        // The provider refresh is called once at the end of the loop.
-        await DatabaseHelper.instance.updateVideo(updatedVideo);
+        debugPrint('UPDATE [${p.basename(video.path)}]: Action required');
+        
+        // Action 1: Update Database if needed
+        if (dbMismatch) {
+           debugPrint('  -> Updating Database (Title Mismatch: "${video.title}" vs "$targetTitle")');
+           await DatabaseHelper.instance.updateVideo(updatedVideo);
+        }
 
-        await MetadataService().updateFileMetadata(updatedVideo);
+        // Action 2: Update File Metadata if needed
+        if (fileMismatch) {
+           debugPrint('  -> Updating File Metadata (Title Mismatch: "${fileTitle}" vs "$targetTitle")');
+           await MetadataService().updateFileMetadata(updatedVideo);
+        }
+
         updatedCount++;
         
       } catch (e) {
         errorCount++;
-        debugPrint('Error renaming video ${video.path}: $e');
+        skippedReasons.add('${p.basename(video.path)}: Errore - $e');
+        debugPrint('ERROR renaming video ${video.path}: $e');
       }
       
       await Future.delayed(Duration.zero);
@@ -241,10 +321,16 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (mounted && !isCancelled) Navigator.pop(context);
 
-    if (isCancelled && allVideos.isNotEmpty && mounted) {
+    if (isCancelled && processedDirs.isNotEmpty && mounted) {
        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Annullamento... Pulizia file temporanei in corso...')));
-       final dir = p.dirname(allVideos.first.path);
-       await MetadataService().cleanupTempFiles(dir);
+       // Clean temp files in all processed directories
+       for (final dir in processedDirs) {
+         try {
+           await MetadataService().cleanupTempFiles(dir);
+         } catch (e) {
+           debugPrint('Error cleaning temp files in $dir: $e');
+         }
+       }
     }
 
     if (mounted) {

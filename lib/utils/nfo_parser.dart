@@ -20,13 +20,21 @@ class NfoParser {
 
       final document = XmlDocument.parse(content);
       
+      String clean(String s) {
+        return s.replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '') // Zero-width characters and BOM
+                .trim();
+      }
+
       String? getString(String tag) {
         final nodes = document.findAllElements(tag);
-        return nodes.isEmpty ? null : nodes.first.innerText.trim();
+        return nodes.isEmpty ? null : clean(nodes.first.innerText);
       }
 
       List<String> getList(String tag) {
-        return document.findAllElements(tag).map((e) => e.innerText.trim()).where((s) => s.isNotEmpty).toList();
+        return document.findAllElements(tag)
+            .map((e) => clean(e.innerText))
+            .where((s) => s.isNotEmpty)
+            .toList();
       }
 
       final title = getString('title') ?? getString('originaltitle');

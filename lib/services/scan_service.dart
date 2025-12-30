@@ -86,14 +86,23 @@ class ScanService {
     
     // Create Video object
     // If metadata is null, use minimal info (filename as title)
-    final title = metadata?['title'] ?? p.basenameWithoutExtension(path);
+    final rawTitle = metadata?['title'] ?? p.basenameWithoutExtension(path);
+    final year = metadata?['year'] ?? '';
+    
+    String formattedTitle = rawTitle;
+    if (year.isNotEmpty) {
+      final yearSuffix = '($year)';
+      if (!rawTitle.contains(yearSuffix)) {
+        formattedTitle = '$rawTitle $yearSuffix';
+      }
+    }
     
     final video = Video(
       path: path,
       mtime: mtime,
-      title: title,
+      title: formattedTitle,
       genres: metadata?['genres'] ?? '',
-      year: metadata?['year'] ?? '',
+      year: year,
       directors: metadata?['directors'] ?? '',
       plot: metadata?['plot'] ?? '',
       actors: metadata?['actors'] ?? '',

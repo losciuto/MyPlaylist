@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -19,6 +20,42 @@ class MetadataService {
     } catch (e) {
       debugPrint('FFmpeg check failed: $e');
       return false;
+    }
+  }
+
+  Future<Map<String, String>> getFileMetadata(String filePath) async {
+    try {
+      final result = await Process.run('ffprobe', [
+        '-v', 'quiet',
+        '-print_format', 'json',
+        '-show_format',
+        filePath
+      ]);
+
+      if (result.exitCode != 0) {
+        debugPrint('ffprobe failed for $filePath');
+        return {};
+      }
+
+      final String output = result.stdout.toString();
+      
+      try {
+        final Map<String, dynamic> json = jsonDecode(output);
+        if (json.containsKey('format') && json['format'] is Map) {
+          final format = json['format'] as Map<String, dynamic>;
+          if (format.containsKey('tags') && format['tags'] is Map) {
+             final tags = Map<String, String>.from(format['tags']);
+             return tags;
+          }
+        }
+      } catch (e) {
+        debugPrint('JSON parse error: $e');
+      }
+      
+      return {};
+    } catch (e) {
+      debugPrint('Error reading metadata: $e');
+      return {};
     }
   }
 
