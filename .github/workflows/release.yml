@@ -1,0 +1,89 @@
+name: Release MyPlaylist
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libmpv-dev mpv
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Compress Release
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czf myplaylist-linux-x64.tar.gz *
+          mv myplaylist-linux-x64.tar.gz ../../../../../
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myplaylist-linux-x64
+          path: myplaylist-linux-x64.tar.gz
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Compress Release
+        run: |
+          cd build/windows/x64/runner/release
+          Compress-Archive -Path * -DestinationPath ..\..\..\..\..\myplaylist-windows-x64.zip
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myplaylist-windows-x64
+          path: myplaylist-windows-x64.zip
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
+            artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
+          fail_on_unmatched_files: false
+          generate_release_notes: true
