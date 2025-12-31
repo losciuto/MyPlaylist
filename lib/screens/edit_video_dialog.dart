@@ -1,8 +1,14 @@
-import 'dart:io'; // Added for File
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import '../models/video.dart';
 import '../database/database_helper.dart';
 import '../services/metadata_service.dart';
+import '../services/settings_service.dart';
+import '../services/tmdb_service.dart';
+import '../utils/nfo_generator.dart';
+import 'package:path/path.dart' as p;
 
 class EditVideoDialog extends StatefulWidget {
   final Video video;
@@ -26,6 +32,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   late double _rating;
 
   bool _isSaving = false;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -45,7 +52,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
   Future<void> _loadFileSize() async {
     try {
-      final file = File(widget.video.path); // Requires import 'dart:io'
+      final file = File(widget.video.path);
       if (await file.exists()) {
         final len = await file.length();
         if (len < 1024 * 1024) {
@@ -59,6 +66,110 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       }
     } catch (e) {
       debugPrint('Error getting file size: $e');
+    }
+  }
+
+  Future<void> _downloadTmdbInfo() async {
+    final apiKey = context.read<SettingsService>().tmdbApiKey;
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante!')));
+      return;
+    }
+
+    setState(() => _isDownloading = true);
+
+    try {
+      final service = TmdbService(apiKey);
+      
+      // Use current controller text for search if available, else basename
+      String query = _titleController.text.trim();
+      if (query.isEmpty) {
+         query = p.basenameWithoutExtension(widget.video.path).replaceAll('.', ' ').replaceAll(RegExp(r'\(\d{4}\)'), '');
+      }
+      
+      int? year = int.tryParse(_yearController.text);
+      if (year == null) {
+         final yearMatch = RegExp(r'\((\d{4})\)').firstMatch(query);
+         if (yearMatch != null) year = int.tryParse(yearMatch.group(1)!);
+      }
+
+      final results = await service.searchMovie(query, year: year);
+
+      if (results.isEmpty) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun risultato trovato su TMDB.')));
+        setState(() => _isDownloading = false);
+        return;
+      }
+
+      // Always Interactive in single edit mode
+      if (!mounted) return;
+      final selectedMovie = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (ctx) => SimpleDialog(
+          title: const Text('Seleziona Film'),
+          children: results.map((m) => SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, m),
+            child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
+          )).toList(),
+        ),
+      );
+
+      if (selectedMovie == null) {
+         setState(() => _isDownloading = false);
+         return;
+      }
+
+      final details = await service.getMovieDetails(selectedMovie['id']);
+      final nfoContent = NfoGenerator.generateMovieNfo(details);
+
+      // 1. Write NFO
+      final videoFile = File(widget.video.path);
+      final nfoPath = p.setExtension(videoFile.path, '.nfo');
+      await File(nfoPath).writeAsString(nfoContent);
+
+      // 2. Download Poster
+      String localPosterPath = _posterPathController.text;
+      if (details['poster_path'] != null) {
+        final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
+        final newPosterPath = '${p.dirname(videoFile.path)}/${p.basenameWithoutExtension(videoFile.path)}-poster.jpg';
+        final response = await http.get(Uri.parse(posterUrl));
+        if (response.statusCode == 200) {
+          await File(newPosterPath).writeAsBytes(response.bodyBytes);
+          localPosterPath = newPosterPath;
+        }
+      }
+
+      // 3. Update UI
+      setState(() {
+         _titleController.text = details['title'] ?? _titleController.text;
+         _yearController.text = details['release_date']?.toString().split('-').first ?? _yearController.text;
+         
+         if (details['genres'] != null) {
+            final gList = (details['genres'] as List).map((g) => g['name']).join(', ');
+            _genresController.text = gList;
+         }
+         
+         if (details['overview'] != null) _plotController.text = details['overview'];
+         if (details['vote_average'] != null) _rating = (details['vote_average'] as num).toDouble();
+         
+         _posterPathController.text = localPosterPath;
+         
+         if (details['credits'] != null) {
+            final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
+            if (cast != null) _actorsController.text = cast;
+            
+            final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
+            if (crew != null) _directorsController.text = crew;
+         }
+         
+         _isDownloading = false;
+      });
+      
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati aggiornati da TMDB (NFO creato)')));
+
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
+      setState(() => _isDownloading = false);
     }
   }
 
@@ -130,8 +241,22 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
            key: _formKey,
            child: Column(
              children: [
-               const Text('Modifica Video', 
-                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+               Row(
+                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                 children: [
+                   const Text('Modifica Video', 
+                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+                   if (_isDownloading)
+                      const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                   else
+                      ElevatedButton.icon(
+                        onPressed: _downloadTmdbInfo,
+                        icon: const Icon(Icons.download, size: 16),
+                        label: const Text('Scarica TMDB'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
+                      ),
+                 ],
+               ),
                 if (_fileSizeString.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),

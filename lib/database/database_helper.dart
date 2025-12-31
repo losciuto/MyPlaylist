@@ -164,6 +164,10 @@ class DatabaseHelper {
       double? minRating,
       List<String>? actors,
       List<String>? directors,
+      List<String>? excludedGenres,
+      List<String>? excludedYears,
+      List<String>? excludedActors,
+      List<String>? excludedDirectors,
       int limit = 20,
       List<int>? excludeIds}) async {
         
@@ -198,6 +202,34 @@ class DatabaseHelper {
       final conditions = directors.map((_) => "directors LIKE ?").join(' OR ');
       query += " AND ($conditions)";
       args.addAll(directors.map((d) => '%$d%'));
+    }
+
+    if (excludedGenres != null && excludedGenres.isNotEmpty) {
+      for (var g in excludedGenres) {
+        query += " AND genres NOT LIKE ?";
+        args.add('%$g%');
+      }
+    }
+
+    if (excludedYears != null && excludedYears.isNotEmpty) {
+      for (var y in excludedYears) {
+        query += " AND year != ?";
+        args.add(y);
+      }
+    }
+
+    if (excludedActors != null && excludedActors.isNotEmpty) {
+      for (var a in excludedActors) {
+        query += " AND actors NOT LIKE ?";
+        args.add('%$a%');
+      }
+    }
+
+    if (excludedDirectors != null && excludedDirectors.isNotEmpty) {
+      for (var d in excludedDirectors) {
+        query += " AND directors NOT LIKE ?";
+        args.add('%$d%');
+      }
     }
 
     if (excludeIds != null && excludeIds.isNotEmpty) {

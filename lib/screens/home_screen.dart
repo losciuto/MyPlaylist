@@ -4,6 +4,7 @@ import 'scan_tab.dart';
 import 'database_tab.dart';
 import 'playlist_tab.dart';
 import 'settings_screen.dart';
+import '../config/app_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,8 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Tab(icon: Icon(Icons.storage), text: 'Gestione DB'),
               Tab(icon: Icon(Icons.playlist_play), text: 'Genera Playlist'),
             ],
-            indicatorColor: Color(0xFF4CAF50),
-            labelColor: Color(0xFF4CAF50),
+            indicatorColor: AppConfig.seedColor,
+            labelColor: AppConfig.seedColor,
             unselectedLabelColor: Colors.grey,
             indicatorSize: TabBarIndicatorSize.tab,
           ),
@@ -76,12 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('MyPlaylist App', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${AppConfig.appName} App', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
-                        Text('Autore: Massimo'),
-                        Text('Data redazione: 30/12/2025'),
+                        Text('Autore: ${AppConfig.appAuthor}'),
+                        Text('Data redazione: ${AppConfig.appBuildDate}'),
                         SizedBox(height: 10),
-                        Text('Versione: 2.7.1'),
+                        Text('Versione: ${AppConfig.appVersion}'),
                       ],
                     ),
                     actions: [

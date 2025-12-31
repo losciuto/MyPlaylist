@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.8.0] - 2025-12-31
+
+### Added
+- **Exclusion Filters**: Implemented tri-state selection (Include/Exclude/None) in the filter dialog for genres, years, actors, and directors.
+- **SQL Exclusion Logic**: Updated database queries to support negative matching for playlist generation.
+- **Improved UI for Filters**: Custom tri-state toggle widget for a better user experience in advanced filtering.
+
+
 ## [2.7.0] - 2025-12-23
 
 ### Added

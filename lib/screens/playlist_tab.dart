@@ -336,7 +336,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                  decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(5)),
                  child: Text(
                    !provider.hasPlaylist ? 'Nessuna playlist generata' : 'Playlist corrente: ${provider.playlist.length} video',
-                   style: const TextStyle(color: Colors.white),
+                   style: TextStyle(color: Theme.of(context).listTileTheme.textColor ?? Theme.of(context).textTheme.bodyMedium?.color),
                  ),
               ),
             ],

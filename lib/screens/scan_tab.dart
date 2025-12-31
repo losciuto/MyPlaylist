@@ -76,11 +76,12 @@ class _ScanTabState extends State<ScanTab> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+            const SizedBox(height: 20),
+            Text(
             'Scansiona le cartelle per aggiornare il database con i metadati dei video.\n'
             'Verranno cercati automaticamente i file .nfo associati.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFFCCCCCC), fontSize: 14),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 14),
           ),
           const SizedBox(height: 30),
           Center(
@@ -113,7 +114,7 @@ class _ScanTabState extends State<ScanTab> {
                 const SizedBox(height: 15),
                 Text(
                   _statusMessage,
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 5),

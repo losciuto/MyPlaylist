@@ -21,6 +21,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyRemoteServerSecret = 'remote_server_secret';
   static const String _keyVlcPort = 'vlc_port';
   static const String _keyServerInterface = 'server_interface';
+  static const String _keyThemeMode = 'theme_mode';
+  static const String _keyTmdbApiKey = 'tmdb_api_key';
 
   // State
   String _playerPath = '';
@@ -30,6 +32,8 @@ class SettingsService with ChangeNotifier {
   String _remoteServerSecret = 'my_default_secret_key_32chars_long'; // Should be 32 chars for AES-256
   int _vlcPort = 4212;
   String _serverInterface = '0.0.0.0';
+  ThemeMode _themeMode = ThemeMode.system;
+  String _tmdbApiKey = '';
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -39,6 +43,8 @@ class SettingsService with ChangeNotifier {
   String get remoteServerSecret => _remoteServerSecret;
   int get vlcPort => _vlcPort;
   String get serverInterface => _serverInterface;
+  ThemeMode get themeMode => _themeMode;
+  String get tmdbApiKey => _tmdbApiKey;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -51,6 +57,12 @@ class SettingsService with ChangeNotifier {
     _remoteServerSecret = _prefs.getString(_keyRemoteServerSecret) ?? 'my_default_secret_key_32chars_long';
     _vlcPort = _prefs.getInt(_keyVlcPort) ?? 4212;
     _serverInterface = _prefs.getString(_keyServerInterface) ?? '0.0.0.0';
+    _tmdbApiKey = _prefs.getString(_keyTmdbApiKey) ?? '';
+    
+    final themeIndex = _prefs.getInt(_keyThemeMode);
+    if (themeIndex != null && themeIndex >= 0 && themeIndex < ThemeMode.values.length) {
+      _themeMode = ThemeMode.values[themeIndex];
+    }
     
     _initialized = true;
     notifyListeners();
@@ -95,6 +107,18 @@ class SettingsService with ChangeNotifier {
   Future<void> setServerInterface(String interface) async {
     _serverInterface = interface;
     await _prefs.setString(_keyServerInterface, interface);
+    notifyListeners();
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    await _prefs.setInt(_keyThemeMode, mode.index);
+    notifyListeners();
+  }
+
+  Future<void> setTmdbApiKey(String key) async {
+    _tmdbApiKey = key;
+    await _prefs.setString(_keyTmdbApiKey, key);
     notifyListeners();
   }
 }

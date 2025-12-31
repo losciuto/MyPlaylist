@@ -21,9 +21,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
   // Selected state
   final List<String> _selectedGenres = [];
+  final List<String> _excludedGenres = [];
   final List<String> _selectedYears = [];
+  final List<String> _excludedYears = [];
   final List<String> _selectedActors = [];
+  final List<String> _excludedActors = [];
   final List<String> _selectedDirectors = [];
+  final List<String> _excludedDirectors = [];
   double _minRating = 0.0;
   final TextEditingController _limitController = TextEditingController(text: '20');
 
@@ -110,10 +114,10 @@ class _FilterDialogState extends State<FilterDialog> {
               Text('Valore: $_minRating', style: const TextStyle(color: Colors.white30)),
               const Divider(color: Colors.grey),
 
-              _buildMultiSelect('Generi', _availableGenres, _selectedGenres),
-              _buildMultiSelect('Anni', _availableYears, _selectedYears),
-              _buildMultiSelect('Registi', _availableDirectors, _selectedDirectors),
-              _buildMultiSelect('Attori', _availableActors, _selectedActors),
+              _buildMultiSelect('Generi', _availableGenres, _selectedGenres, _excludedGenres),
+              _buildMultiSelect('Anni', _availableYears, _selectedYears, _excludedYears),
+              _buildMultiSelect('Registi', _availableDirectors, _selectedDirectors, _excludedDirectors),
+              _buildMultiSelect('Attori', _availableActors, _selectedActors, _excludedActors),
             ],
           ),
         ),
@@ -131,6 +135,10 @@ class _FilterDialogState extends State<FilterDialog> {
               ratingMin: _minRating,
               actors: _selectedActors,
               directors: _selectedDirectors,
+              excludedGenres: _excludedGenres,
+              excludedYears: _excludedYears,
+              excludedActors: _excludedActors,
+              excludedDirectors: _excludedDirectors,
               limit: int.tryParse(_limitController.text) ?? 20,
             );
             Navigator.pop(context, settings);
@@ -160,7 +168,7 @@ class _FilterDialogState extends State<FilterDialog> {
     );
   }
 
-  Widget _buildMultiSelect(String title, Map<String, int> options, List<String> selected) {
+  Widget _buildMultiSelect(String title, Map<String, int> options, List<String> included, List<String> excluded) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -169,7 +177,7 @@ class _FilterDialogState extends State<FilterDialog> {
         const SizedBox(height: 5),
         Container(
           height: 150,
-          margin: const EdgeInsets.only(right: 12.0), // Avoid scrollbar overlap
+          margin: const EdgeInsets.only(right: 12.0),
           decoration: BoxDecoration(
             color: const Color(0xFF3C3C3C),
             borderRadius: BorderRadius.circular(5),
@@ -179,25 +187,46 @@ class _FilterDialogState extends State<FilterDialog> {
             itemBuilder: (ctx, i) {
               final key = options.keys.elementAt(i);
               final count = options[key];
-              final isSel = selected.contains(key);
+              
+              final isIncluded = included.contains(key);
+              final isExcluded = excluded.contains(key);
+
               return ListTile(
                 dense: true,
                 onTap: () => _showVideosList(title, _getColumnName(title), key),
                 leading: SizedBox(
                   width: 24,
                   height: 24,
-                  child: Checkbox(
-                    value: isSel,
-                    activeColor: const Color(0xFF4CAF50),
-                    onChanged: (val) {
+                  child: InkWell(
+                    onTap: () {
                       setState(() {
-                        if (val == true) {
-                          selected.add(key);
+                        if (isIncluded) {
+                          // Allow cycling to Excluded
+                          included.remove(key);
+                          excluded.add(key);
+                        } else if (isExcluded) {
+                          // Allow cycling to None
+                          excluded.remove(key);
                         } else {
-                          selected.remove(key);
+                          // Cycle to Included
+                          included.add(key);
                         }
                       });
                     },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(4),
+                        color: isIncluded 
+                              ? const Color(0xFF4CAF50) 
+                              : (isExcluded ? Colors.red : Colors.transparent),
+                      ),
+                      child: isIncluded
+                          ? const Icon(Icons.check, size: 16, color: Colors.white)
+                          : (isExcluded 
+                              ? const Icon(Icons.close, size: 16, color: Colors.white) 
+                              : null),
+                    ),
                   ),
                 ),
                 title: Text('$key ($count)',

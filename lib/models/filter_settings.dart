@@ -5,6 +5,10 @@ class FilterSettings {
   final List<String> actors;
   final List<String> directors;
   final int limit;
+  final List<String> excludedGenres;
+  final List<String> excludedYears;
+  final List<String> excludedActors;
+  final List<String> excludedDirectors;
 
   FilterSettings({
     this.genres = const [],
@@ -12,6 +16,10 @@ class FilterSettings {
     this.ratingMin = 0.0,
     this.actors = const [],
     this.directors = const [],
+    this.excludedGenres = const [],
+    this.excludedYears = const [],
+    this.excludedActors = const [],
+    this.excludedDirectors = const [],
     this.limit = 20,
   });
 }

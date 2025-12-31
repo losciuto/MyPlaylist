@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
@@ -9,6 +10,10 @@ import '../services/metadata_service.dart';
 import '../utils/nfo_parser.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:http/http.dart' as http;
+import '../services/settings_service.dart';
+import '../services/tmdb_service.dart';
+import '../utils/nfo_generator.dart';
 
 class DatabaseTab extends StatefulWidget {
   const DatabaseTab({super.key});
@@ -19,6 +24,201 @@ class DatabaseTab extends StatefulWidget {
 
 class _DatabaseTabState extends State<DatabaseTab> {
   final TextEditingController _searchController = TextEditingController();
+
+  Future<void> _bulkGenerateNfo() async {
+     final apiKey = context.read<SettingsService>().tmdbApiKey;
+     if (apiKey.isEmpty) {
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante! Impostala nei settings.')));
+       return;
+     }
+
+     final mode = await showDialog<String>(
+       context: context,
+       builder: (ctx) => AlertDialog(
+         title: const Text('Generazione NFO da TMDB'),
+         content: const Text('Scegli la modalità di generazione:\n\n'
+           '⚡ AUTOMATICO: Scarica il primo risultato trovato (più veloce).\n'
+           '🖐️ INTERATTIVO: Ti chiede di confermare il film per ogni video trovato.'),
+         actions: [
+           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
+           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'auto'), child: const Text('⚡ Automatico')),
+           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'interactive'), child: const Text('🖐️ Interattivo')),
+         ],
+       ),
+     );
+     
+     if (mode == null) return;
+     if (!mounted) return;
+
+     final provider = context.read<DatabaseProvider>();
+     final allVideos = List<Video>.from(provider.videos);
+     final total = allVideos.length;
+
+     if (total == 0) {
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun video nel database.')));
+       return;
+     }
+
+     final progressNotifier = ValueNotifier<Map<String, dynamic>>({'value': 0, 'title': '-'});
+     bool isCancelled = false;
+     
+     // Progress Dialog (Non-blocking for interactive, but blocking interaction with main UI)
+     // Issue: If interactive, we need to show ANOTHER dialog on top. 
+     // Solution: Don't use a modal progress dialog for interactive mode? 
+     // OR: Use a custom overlay?
+     // OR: Just update a variable and show the selection dialog.
+     
+     // Let's use the same Progress Dialog pattern but careful with context.
+     // Actually, for Interactive mode, better NOT to show a blocking progress dialog that covers the screen, 
+     // because we need to show the Selection Dialog.
+     // Simplified approach: Show Progress Dialog ONLY for Automatic. 
+     // For Interactive, show a persistent bottom sheet or just iterate with dialogs.
+     // Let's stick to simple "Status" updates via SnackBar or minimal UI for Interactive?
+     // No, let's try to keep it consistent.
+     // Actually, we can pop the progress dialog to show the selection dialog and then show it again? No, flickery.
+     
+     // Better Design for Interactive: 
+     // Iterate. If match found, show Dialog "Select Movie for [Filename]". 
+     // Inside that dialog, show "Progress: X/Y".
+     
+     // Let's proceed with valid implementation:
+     
+     int updated = 0;
+     int skipped = 0;
+     int errors = 0;
+     
+     final tmdb = TmdbService(apiKey);
+     
+     // Quick overlay/snackbar for start
+     if (mode == 'auto') {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFF3C3C3C),
+            content: ValueListenableBuilder<Map<String, dynamic>>(
+              valueListenable: progressNotifier,
+              builder: (ctx, state, _) {
+                 return Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     const Text('Scaricamento Info...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                     const SizedBox(height: 10),
+                     Text(state['title'], style: const TextStyle(color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
+                     const SizedBox(height: 10),
+                     LinearProgressIndicator(value: state['value'] / total, color: Colors.blue),
+                     Text('${state['value']} / $total', style: const TextStyle(color: Colors.white54)),
+                   ],
+                 );
+              }
+            ),
+            actions: [
+              TextButton(onPressed: () { isCancelled = true; Navigator.pop(ctx); }, child: const Text('Stop'))
+            ],
+          )
+        );
+     }
+
+     for (int i = 0; i < total; i++) {
+        if (isCancelled) break;
+        
+        final video = allVideos[i];
+        progressNotifier.value = {'value': i + 1, 'title': video.title};
+        
+        try {
+           // Basic cleanup for query
+           String query = p.basenameWithoutExtension(video.path).replaceAll('.', ' ').replaceAll(RegExp(r'\(\d{4}\)'), '');
+           
+           // Try to extract year from filename
+           final yearMatch = RegExp(r'\((\d{4})\)').firstMatch(video.title) ?? RegExp(r'\((\d{4})\)').firstMatch(p.basename(video.path));
+           final int? year = yearMatch != null ? int.tryParse(yearMatch.group(1)!) : null;
+
+           final results = await tmdb.searchMovie(query, year: year);
+           
+           Map<String, dynamic>? selectedMovie;
+           
+           if (results.isEmpty) {
+              skipped++;
+              continue;
+           }
+           
+           if (mode == 'auto') {
+              selectedMovie = results.first;
+           } else {
+              // Interactive Mode: Show Dialog
+              // Must await user choice
+             if (!mounted) break;
+             selectedMovie = await showDialog<Map<String, dynamic>>(
+               context: context,
+               barrierDismissible: false,
+               builder: (ctx) => SimpleDialog(
+                 title: Text('Seleziona ("${video.title}")', style: const TextStyle(fontSize: 16)),
+                 children: [
+                   ...results.map((m) => SimpleDialogOption(
+                     onPressed: () => Navigator.pop(ctx, m),
+                     child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
+                   )),
+                   SimpleDialogOption(
+                     onPressed: () => Navigator.pop(ctx, null),
+                     child: const Text('Saltare questo video', style: TextStyle(color: Colors.red)),
+                   ),
+                   SimpleDialogOption(
+                     onPressed: () { isCancelled = true; Navigator.pop(ctx, null); },
+                     child: const Text('INTERROMPI TUTTO', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                   ),
+                 ],
+               ),
+             );
+           }
+           
+           if (selectedMovie == null) {
+              if (isCancelled) break;
+              skipped++;
+              continue;
+           }
+           
+           // Process
+           final details = await tmdb.getMovieDetails(selectedMovie['id']);
+           final nfoContent = NfoGenerator.generateMovieNfo(details);
+           
+           // Paths
+           final videoFile = File(video.path);
+           final nfoPath = p.setExtension(video.path, '.nfo');
+           await File(nfoPath).writeAsString(nfoContent);
+           
+           if (details['poster_path'] != null) {
+              final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
+              final posterPath = '${p.dirname(video.path)}/${p.basenameWithoutExtension(video.path)}-poster.jpg';
+              final resp = await http.get(Uri.parse(posterUrl));
+              if (resp.statusCode == 200) {
+                 await File(posterPath).writeAsBytes(resp.bodyBytes);
+              }
+           }
+           updated++;
+
+        } catch (e) {
+           errors++;
+           debugPrint('Error TMDB processing ${video.path}: $e');
+        }
+        
+        // Small delay to behave
+        await Future.delayed(const Duration(milliseconds: 50));
+     }
+
+     if (mode == 'auto' && mounted && !isCancelled) Navigator.pop(context); // Close progress
+     
+     if (mounted) {
+       await provider.refreshVideos();
+       showDialog(
+         context: context, 
+         builder: (ctx) => AlertDialog(
+           title: const Text('Generazione Completata'),
+           content: Text('File creati: $updated\nSaltati/Non trovati: $skipped\nErrori: $errors'),
+           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))]
+         )
+       );
+     }
+  }
 
   @override
   void dispose() {
@@ -385,12 +585,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   // Search Bar
                   TextField(
                     controller: _searchController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Cerca video...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
                       filled: true,
-                      fillColor: Color(0xFF3C3C3C),
+                      fillColor: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF3C3C3C) 
+                          : Colors.grey[200],
                     ),
                     onChanged: _filterVideos, // Calls wrapper
                   ),
@@ -409,7 +611,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                             child: DataTable(
                               headingRowColor: WidgetStateProperty.all(const Color(0xFF4CAF50)),
                               headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              dataRowColor: WidgetStateProperty.resolveWith((states) => const Color(0xFF3C3C3C)),
+                              // Remove dataRowColor to let it follow theme
                               columns: const [
                                 DataColumn(label: Text('#')),
                                 DataColumn(label: Text('Titolo')),
@@ -484,6 +686,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     icon: const Icon(Icons.drive_file_rename_outline),
                     label: const Text('Rinomina Titoli'),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton.icon(
+                    onPressed: _bulkGenerateNfo,
+                    icon: const Icon(Icons.movie_creation),
+                    label: const Text('Genera NFO (TMDB)'),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                   ),
                 ],
               ),

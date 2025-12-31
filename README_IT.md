@@ -5,7 +5,8 @@ Creatore di Playlist Video e Gestore Database Locale.
 ## Funzionalità
 *   **Scansione Cartelle**: Importa video con estrazione automatica metadati (NFO/Nome file).
 *   **Database**: Gestione completa (Ricerca, Modifica, Rinomina Massa).
-*   **Playlist**: Generazione casuale, recente o filtrata. Export .m3u.
+*   **Playlist**: Generazione casuale, recente o filtrata (inclusione/esclusione). Export .m3u.
+*   **Filtri Avanzati**: Possibilità di includere o escludere generi, anni, attori e registi mediante selezione tri-state (Includi/Escludi/Nessuno).
 *   **Player**: Player interno (mpv) e supporto player esterno (VLC, ecc.).
 *   **VLC Control**: Supporto avanzato per VLC (kill automatico processi precedenti, avvio con controllo remoto).
 *   **Remote Protocol**: Server TCP AES-GCM per il controllo remoto dal client VLC Remote, con supporto anteprima playlist.
@@ -35,7 +36,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 23/12/2025 (v2.7.0)
+Ultimo Aggiornamento: 31/12/2025 (v2.8.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

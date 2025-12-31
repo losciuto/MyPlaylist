@@ -5,7 +5,8 @@ Video Playlist Creator and Local Database Manager.
 ## Features
 *   **Folder Scanning**: Import videos with automatic metadata extraction (NFO/Filename).
 *   **Database**: Full management (Search, Edit, Bulk Rename).
-*   **Playlist**: Generate random, recent, or filtered playlists. Export .m3u.
+*   **Playlist**: Generate random, recent, or filtered playlists (inclusion/exclusion). Export .m3u.
+*   **Advanced Filters**: Ability to include or exclude genres, years, actors and directors via tri-state selection (Include/Exclude/None).
 *   **Player**: Internal player (mpv) and external player support (VLC, etc.).
 *   **VLC Control**: Advanced VLC support (auto-kill previous instances, remote control launch).
 *   **Persistence**: Saves the last generated playlist between sessions.
@@ -34,7 +35,7 @@ If you experience black screens or "Codec not found" errors, run the command abo
 ## Credits
 Built with Flutter.
 Author: Massimo
-Last Update: 23/12/2025 (v2.7.0)
+Last Update: 31/12/2025 (v2.8.0)
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
