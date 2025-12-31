@@ -40,7 +40,7 @@ class TmdbService {
     final uri = Uri.parse('$_baseUrl/movie/$id').replace(queryParameters: {
       'api_key': apiKey,
       'language': language,
-      'append_to_response': 'credits', // Include actors and crew in one call
+      'append_to_response': 'credits,images', // Include actors, crew, and images (logos, etc.)
     });
 
     try {

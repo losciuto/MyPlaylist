@@ -176,25 +176,90 @@ class _DatabaseTabState extends State<DatabaseTab> {
               skipped++;
               continue;
            }
-           
-           // Process
-           final details = await tmdb.getMovieDetails(selectedMovie['id']);
-           final nfoContent = NfoGenerator.generateMovieNfo(details);
-           
-           // Paths
-           final videoFile = File(video.path);
-           final nfoPath = p.setExtension(video.path, '.nfo');
-           await File(nfoPath).writeAsString(nfoContent);
-           
-           if (details['poster_path'] != null) {
-              final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
-              final posterPath = '${p.dirname(video.path)}/${p.basenameWithoutExtension(video.path)}-poster.jpg';
-              final resp = await http.get(Uri.parse(posterUrl));
+                      // Process
+            final details = await tmdb.getMovieDetails(selectedMovie['id']);
+            final nfoContent = NfoGenerator.generateMovieNfo(details);
+            
+            // 1. Write NFO
+            final nfoPath = p.setExtension(video.path, '.nfo');
+            await File(nfoPath).writeAsString(nfoContent);
+            
+            String localPosterPath = video.posterPath;
+            final baseDir = p.dirname(video.path);
+            final baseFileName = p.basenameWithoutExtension(video.path);
+
+            // 2. Download Poster
+            if (details['poster_path'] != null) {
+               final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
+               final posterPath = '$baseDir/$baseFileName-poster.jpg';
+               final resp = await http.get(Uri.parse(posterUrl));
+               if (resp.statusCode == 200) {
+                  await File(posterPath).writeAsBytes(resp.bodyBytes);
+                  localPosterPath = posterPath;
+               }
+            }
+
+            // 3. Download Fanart (Backdrop)
+            if (details['backdrop_path'] != null) {
+              final fanartUrl = 'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
+              final fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+              final resp = await http.get(Uri.parse(fanartUrl));
               if (resp.statusCode == 200) {
-                 await File(posterPath).writeAsBytes(resp.bodyBytes);
+                await File(fanartPath).writeAsBytes(resp.bodyBytes);
               }
-           }
-           updated++;
+            }
+
+            // 4. Download Logo (Clearlogo)
+            if (details['images'] != null && details['images']['logos'] != null) {
+              final logos = details['images']['logos'] as List;
+              if (logos.isNotEmpty) {
+                // Try to find a logo in preferred language or just the first one
+                final logoPathTail = logos.first['file_path'];
+                final logoUrl = 'https://image.tmdb.org/t/p/original$logoPathTail';
+                final logoPath = '$baseDir/$baseFileName-clearlogo.png';
+                final resp = await http.get(Uri.parse(logoUrl));
+                if (resp.statusCode == 200) {
+                  await File(logoPath).writeAsBytes(resp.bodyBytes);
+                }
+              }
+            }
+
+            // 5. Update Database Record
+            final nfoTitle = details['title'] ?? video.title;
+            final nfoYear = details['release_date']?.toString().split('-').first ?? video.year;
+            final gList = details['genres'] != null 
+                ? (details['genres'] as List).map((g) => g['name']).join(', ')
+                : video.genres;
+            final nfoPlot = details['overview'] ?? video.plot;
+            final nfoRating = (details['vote_average'] as num?)?.toDouble() ?? video.rating;
+            
+            String nfoActors = video.actors;
+            String nfoDirectors = video.directors;
+            if (details['credits'] != null) {
+              final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
+              if (cast != null) nfoActors = cast;
+              
+              final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
+              if (crew != null) nfoDirectors = crew;
+            }
+
+            final updatedVideo = Video(
+              id: video.id,
+              path: video.path,
+              mtime: video.mtime,
+              duration: video.duration,
+              title: nfoYear.isNotEmpty ? '$nfoTitle ($nfoYear)' : nfoTitle,
+              year: nfoYear,
+              genres: gList,
+              directors: nfoDirectors,
+              actors: nfoActors,
+              plot: nfoPlot,
+              rating: nfoRating,
+              posterPath: localPosterPath,
+            );
+
+            await DatabaseHelper.instance.updateVideo(updatedVideo);
+            updated++;
 
         } catch (e) {
            errors++;

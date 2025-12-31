@@ -139,10 +139,43 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         }
       }
 
-      // 3. Update UI
+      // 3. Download Fanart (Backdrop)
+      final baseDir = p.dirname(videoFile.path);
+      final baseFileName = p.basenameWithoutExtension(videoFile.path);
+      
+      if (details['backdrop_path'] != null) {
+        final fanartUrl = 'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
+        final fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+        final resp = await http.get(Uri.parse(fanartUrl));
+        if (resp.statusCode == 200) {
+          await File(fanartPath).writeAsBytes(resp.bodyBytes);
+        }
+      }
+
+      // 4. Download Logo (Clearlogo)
+      if (details['images'] != null && details['images']['logos'] != null) {
+        final logos = details['images']['logos'] as List;
+        if (logos.isNotEmpty) {
+          final logoPathTail = logos.first['file_path'];
+          final logoUrl = 'https://image.tmdb.org/t/p/original$logoPathTail';
+          final logoPath = '$baseDir/$baseFileName-clearlogo.png';
+          final resp = await http.get(Uri.parse(logoUrl));
+          if (resp.statusCode == 200) {
+            await File(logoPath).writeAsBytes(resp.bodyBytes);
+          }
+        }
+      }
+
+      // 5. Update UI
       setState(() {
          _titleController.text = details['title'] ?? _titleController.text;
-         _yearController.text = details['release_date']?.toString().split('-').first ?? _yearController.text;
+         final releaseDate = details['release_date']?.toString().split('-').first;
+         if (releaseDate != null) {
+            _yearController.text = releaseDate;
+            // Also update Title to follow "Title (Year)" if needed? No, user might prefer manual.
+            // But for consistency with bulk, we can suggest it.
+            // Let's just update the year field.
+         }
          
          if (details['genres'] != null) {
             final gList = (details['genres'] as List).map((g) => g['name']).join(', ');
@@ -165,7 +198,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          _isDownloading = false;
       });
       
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati aggiornati da TMDB (NFO creato)')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati aggiornati da TMDB (NFO e asset creati)')));
 
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
