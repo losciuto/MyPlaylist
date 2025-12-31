@@ -119,21 +119,50 @@ class _DatabaseTabState extends State<DatabaseTab> {
         );
      }
 
-     for (int i = 0; i < total; i++) {
+      for (int i = 0; i < total; i++) {
         if (isCancelled) break;
         
         final video = allVideos[i];
-        progressNotifier.value = {'value': i + 1, 'title': video.title};
+        
+        // Skip found videos in interactive mode
+        if (mode == 'interactive' && video.title.isNotEmpty && video.year.isNotEmpty) {
+           skipped++;
+           continue;
+        }
+
+        progressNotifier.value = {'value': i + 1, 'title': video.title.isNotEmpty ? video.title : p.basename(video.path)};
         
         try {
-           // Basic cleanup for query
-           String query = p.basenameWithoutExtension(video.path).replaceAll('.', ' ').replaceAll(RegExp(r'\(\d{4}\)'), '');
+           // Tiered Search Logic
+           String baseQuery = p.basenameWithoutExtension(video.path)
+               .replaceAll('.', ' ')
+               .replaceAll('_', ' ')
+               .replaceAll(RegExp(r'\(\d{4}\)'), '')
+               .trim();
            
-           // Try to extract year from filename
+           // List of queries to try: 1. Full, 2. First 2 words, 3. First 1 word
+           List<String> queriesToTry = [baseQuery];
+           final words = baseQuery.split(RegExp(r'\s+')).where((w) => w.length > 1).toList();
+           
+           if (words.length >= 3) {
+             queriesToTry.add(words.take(2).join(' '));
+           }
+           if (words.isNotEmpty) {
+             queriesToTry.add(words.first);
+           }
+           
+           // Remove duplicates and maintain order
+           queriesToTry = queriesToTry.toSet().toList();
+
+           // Try to extract year from filename or existing title
            final yearMatch = RegExp(r'\((\d{4})\)').firstMatch(video.title) ?? RegExp(r'\((\d{4})\)').firstMatch(p.basename(video.path));
            final int? year = yearMatch != null ? int.tryParse(yearMatch.group(1)!) : null;
 
-           final results = await tmdb.searchMovie(query, year: year);
+           List<Map<String, dynamic>> results = [];
+           for (var q in queriesToTry) {
+             results = await tmdb.searchMovie(q, year: year);
+             if (results.isNotEmpty) break;
+           }
            
            Map<String, dynamic>? selectedMovie;
            
@@ -146,29 +175,29 @@ class _DatabaseTabState extends State<DatabaseTab> {
               selectedMovie = results.first;
            } else {
               // Interactive Mode: Show Dialog
-              // Must await user choice
-             if (!mounted) break;
-             selectedMovie = await showDialog<Map<String, dynamic>>(
-               context: context,
-               barrierDismissible: false,
-               builder: (ctx) => SimpleDialog(
-                 title: Text('Seleziona ("${video.title}")', style: const TextStyle(fontSize: 16)),
-                 children: [
-                   ...results.map((m) => SimpleDialogOption(
-                     onPressed: () => Navigator.pop(ctx, m),
-                     child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
-                   )),
-                   SimpleDialogOption(
-                     onPressed: () => Navigator.pop(ctx, null),
-                     child: const Text('Saltare questo video', style: TextStyle(color: Colors.red)),
-                   ),
-                   SimpleDialogOption(
-                     onPressed: () { isCancelled = true; Navigator.pop(ctx, null); },
-                     child: const Text('INTERROMPI TUTTO', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                   ),
-                 ],
-               ),
-             );
+              if (!mounted) break;
+              selectedMovie = await showDialog<Map<String, dynamic>>(
+                context: context,
+                barrierDismissible: false,
+                builder: (ctx) => SimpleDialog(
+                  title: Text('Seleziona per: ${p.basename(video.path)}', style: const TextStyle(fontSize: 14)),
+                  children: [
+                    ...results.map((m) => SimpleDialogOption(
+                      onPressed: () => Navigator.pop(ctx, m),
+                      child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
+                    )),
+                    const Divider(),
+                    SimpleDialogOption(
+                      onPressed: () => Navigator.pop(ctx, null),
+                      child: const Text('Salta questo video', style: TextStyle(color: Colors.orange)),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () { isCancelled = true; Navigator.pop(ctx, null); },
+                      child: const Text('INTERROMPI TUTTO', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
            }
            
            if (selectedMovie == null) {
