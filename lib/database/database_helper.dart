@@ -175,6 +175,7 @@ class DatabaseHelper {
     String query = "SELECT * FROM videos WHERE 1=1";
     List<dynamic> args = [];
 
+
     if (genres != null && genres.isNotEmpty) {
       final conditions = genres.map((_) => "genres LIKE ?").join(' OR ');
       query += " AND ($conditions)";
@@ -206,28 +207,29 @@ class DatabaseHelper {
 
     if (excludedGenres != null && excludedGenres.isNotEmpty) {
       for (var g in excludedGenres) {
-        query += " AND genres NOT LIKE ?";
+        // Handle NULL column values by treating them as empty strings for NOT LIKE comparison
+        query += " AND IFNULL(genres, '') NOT LIKE ?";
         args.add('%$g%');
       }
     }
 
     if (excludedYears != null && excludedYears.isNotEmpty) {
       for (var y in excludedYears) {
-        query += " AND year != ?";
+        query += " AND IFNULL(year, '') != ?";
         args.add(y);
       }
     }
 
     if (excludedActors != null && excludedActors.isNotEmpty) {
       for (var a in excludedActors) {
-        query += " AND actors NOT LIKE ?";
+        query += " AND IFNULL(actors, '') NOT LIKE ?";
         args.add('%$a%');
       }
     }
 
     if (excludedDirectors != null && excludedDirectors.isNotEmpty) {
       for (var d in excludedDirectors) {
-        query += " AND directors NOT LIKE ?";
+        query += " AND IFNULL(directors, '') NOT LIKE ?";
         args.add('%$d%');
       }
     }
@@ -241,12 +243,8 @@ class DatabaseHelper {
     query += " ORDER BY RANDOM() LIMIT ?";
     args.add(limit);
 
-    // ignore: avoid_print
-    print('DEBUG FILTER QUERY: $query');
-    // ignore: avoid_print
-    print('DEBUG FILTER ARGS: $args');
-
     final result = await db.rawQuery(query, args);
+
     return result.map((json) => Video.fromMap(json)).toList();
   }
 

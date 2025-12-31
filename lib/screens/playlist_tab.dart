@@ -58,6 +58,10 @@ class _PlaylistTabState extends State<PlaylistTab> {
           minRating: settings.ratingMin,
           actors: settings.actors,
           directors: settings.directors,
+          excludedGenres: settings.excludedGenres,
+          excludedYears: settings.excludedYears,
+          excludedActors: settings.excludedActors,
+          excludedDirectors: settings.excludedDirectors,
           limit: settings.limit
         );
         _checkResult(provider.playlist);
@@ -246,6 +250,16 @@ class _PlaylistTabState extends State<PlaylistTab> {
                    _buildBtn('✏️ Selezione\nManuale', Colors.blueGrey, () => _generateManual(provider)),
                 ],
               ),
+              if (provider.proposedVideoCount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextButton.icon(
+                    onPressed: () => provider.resetProposedVideos(),
+                    icon: const Icon(Icons.refresh, size: 16, color: Colors.orange),
+                    label: Text('Resetta cronologia sessione (${provider.proposedVideoCount} visti)', 
+                      style: const TextStyle(fontSize: 11, color: Colors.orange)),
+                  ),
+                ),
               
               const Divider(height: 40, color: Colors.grey),
               

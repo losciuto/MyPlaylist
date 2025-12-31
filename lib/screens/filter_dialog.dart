@@ -124,6 +124,22 @@ class _FilterDialogState extends State<FilterDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () {
+            setState(() {
+              _selectedGenres.clear();
+              _excludedGenres.clear();
+              _selectedYears.clear();
+              _excludedYears.clear();
+              _selectedActors.clear();
+              _excludedActors.clear();
+              _selectedDirectors.clear();
+              _excludedDirectors.clear();
+              _minRating = 0.0;
+            });
+          },
+          child: const Text('Resetta Filtri', style: TextStyle(color: Colors.redAccent)),
+        ),
+        TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Annulla'),
         ),
