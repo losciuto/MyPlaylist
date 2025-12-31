@@ -339,12 +339,29 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                        ),
                  ],
                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'File: ${p.basename(widget.video.path)}',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Percorso: ${widget.video.path}',
+                        style: const TextStyle(color: Colors.grey, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
                 if (_fileSizeString.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),
-                    child: Text('Dimensione file: $_fileSizeString', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    child: Text('Dimensione: $_fileSizeString', style: const TextStyle(color: Colors.grey, fontSize: 11)),
                   ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                Expanded(
                  child: Row(
                    crossAxisAlignment: CrossAxisAlignment.start,
