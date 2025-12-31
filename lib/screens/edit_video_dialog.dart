@@ -7,6 +7,7 @@ import '../database/database_helper.dart';
 import '../services/metadata_service.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
+import '../utils/nfo_parser.dart';
 import '../utils/nfo_generator.dart';
 import 'package:path/path.dart' as p;
 
@@ -206,6 +207,36 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     }
   }
 
+  Future<void> _loadFromNfo() async {
+    final nfoPath = p.setExtension(widget.video.path, '.nfo');
+    final file = File(nfoPath);
+    if (!await file.exists()) {
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File .nfo non trovato.')));
+       return;
+    }
+    
+    final metadata = await NfoParser.parseNfo(nfoPath);
+    if (metadata == null) {
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore nel parsing del file .nfo.')));
+       return;
+    }
+    
+    setState(() {
+       _titleController.text = metadata['title'] ?? _titleController.text;
+       _yearController.text = metadata['year'] ?? _yearController.text;
+       _genresController.text = metadata['genres'] ?? _genresController.text;
+       _directorsController.text = metadata['directors'] ?? _directorsController.text;
+       _actorsController.text = metadata['actors'] ?? _actorsController.text;
+       _plotController.text = metadata['plot'] ?? _plotController.text;
+       _rating = metadata['rating'] ?? _rating;
+       if (metadata['poster'] != null && metadata['poster'].toString().isNotEmpty) {
+          _posterPathController.text = metadata['poster'];
+       }
+    });
+    
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati caricati dal file .nfo!')));
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -218,7 +249,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _save({bool onlyDb = false}) async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSaving = true);
       
@@ -239,10 +270,18 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       );
 
       // ignore: avoid_print
-      print('DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}');
+      print('DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb');
 
       // Update Database
       await DatabaseHelper.instance.updateVideo(updatedVideo);
+
+      if (onlyDb) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Database aggiornato (senza toccare il file video)')));
+          Navigator.pop(context, true);
+        }
+        return;
+      }
 
       // Update File Metadata
       if (mounted) {
@@ -253,9 +292,9 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       
       if (mounted) {
         if (success) {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File aggiornato con successo!')));
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File e Database aggiornati con successo!')));
         } else {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(backgroundColor: Colors.red, content: Text('Errore aggiornamento file (vedi log)')));
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(backgroundColor: Colors.red, content: Text('Errore aggiornamento file (Database comunque aggiornato)')));
         }
         Navigator.pop(context, true);
       }
@@ -279,15 +318,26 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                  children: [
                    const Text('Modifica Video', 
                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
-                   if (_isDownloading)
-                      const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                   else
-                      ElevatedButton.icon(
-                        onPressed: _downloadTmdbInfo,
-                        icon: const Icon(Icons.download, size: 16),
-                        label: const Text('Scarica TMDB'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-                      ),
+                    if (_isDownloading)
+                       const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    else
+                       Row(
+                         children: [
+                           TextButton.icon(
+                             onPressed: _loadFromNfo,
+                             icon: const Icon(Icons.sync, size: 16),
+                             label: const Text('Carica da NFO'),
+                             style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
+                           ),
+                           const SizedBox(width: 10),
+                           ElevatedButton.icon(
+                             onPressed: _downloadTmdbInfo,
+                             icon: const Icon(Icons.download, size: 16),
+                             label: const Text('Scarica TMDB'),
+                             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
+                           ),
+                         ],
+                       ),
                  ],
                ),
                 if (_fileSizeString.isNotEmpty)
@@ -350,15 +400,22 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                Row(
                  mainAxisAlignment: MainAxisAlignment.end,
                  children: [
-                   TextButton(
-                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                     child: const Text('Annulla'),
-                   ),
-                   const SizedBox(width: 10),
-                   ElevatedButton(
-                     onPressed: _isSaving ? null : _save,
-                     child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : const Text('Salva Modifiche'),
-                   ),
+                    TextButton(
+                      onPressed: _isSaving ? null : () => Navigator.pop(context),
+                      child: const Text('Annulla'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: _isSaving ? null : () => _save(onlyDb: true),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange.withOpacity(0.8)),
+                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Aggiorna solo DB'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: _isSaving ? null : () => _save(onlyDb: false),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4CAF50)),
+                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Salva tutto (File + DB)'),
+                    ),
                  ],
                ),
              ],
