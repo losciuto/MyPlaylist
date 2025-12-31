@@ -31,6 +31,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   late TextEditingController _actorsController;
   late TextEditingController _plotController;
   late TextEditingController _posterPathController;
+  late TextEditingController _durationController;
   late double _rating;
 
   bool _isSaving = false;
@@ -46,6 +47,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _actorsController = TextEditingController(text: widget.video.actors);
     _plotController = TextEditingController(text: widget.video.plot);
     _posterPathController = TextEditingController(text: widget.video.posterPath);
+    _durationController = TextEditingController(text: widget.video.duration);
     _rating = widget.video.rating;
     _loadFileSize();
   }
@@ -183,6 +185,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          }
          
          if (details['overview'] != null) _plotController.text = details['overview'];
+         if (details['runtime'] != null) _durationController.text = details['runtime'].toString();
          if (details['vote_average'] != null) _rating = (details['vote_average'] as num).toDouble();
          
          _posterPathController.text = localPosterPath;
@@ -227,6 +230,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
        _directorsController.text = metadata['directors'] ?? _directorsController.text;
        _actorsController.text = metadata['actors'] ?? _actorsController.text;
        _plotController.text = metadata['plot'] ?? _plotController.text;
+       _durationController.text = metadata['duration'] ?? _durationController.text;
        _rating = metadata['rating'] ?? _rating;
        if (metadata['poster'] != null && metadata['poster'].toString().isNotEmpty) {
           _posterPathController.text = metadata['poster'];
@@ -245,6 +249,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _actorsController.dispose();
     _plotController.dispose();
     _posterPathController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -256,7 +261,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         id: widget.video.id,
         path: widget.video.path,
         mtime: widget.video.mtime,
-        duration: widget.video.duration,
+        duration: _durationController.text,
         
         title: _titleController.text,
         year: _yearController.text,
@@ -373,7 +378,13 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                            children: [
                              _buildTextField(_titleController, 'Titolo', true),
                              const SizedBox(height: 10),
-                             _buildTextField(_yearController, 'Anno'),
+                             Row(
+                               children: [
+                                 Expanded(child: _buildTextField(_yearController, 'Anno')),
+                                 const SizedBox(width: 10),
+                                 Expanded(child: _buildTextField(_durationController, 'Durata (min)')),
+                               ],
+                             ),
                              const SizedBox(height: 10),
                              _buildTextField(_genresController, 'Generi (separati da virgola)'),
                              const SizedBox(height: 10),
