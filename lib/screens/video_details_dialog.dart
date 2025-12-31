@@ -187,7 +187,6 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                     Row(
                       children: [
                         SizedBox(
-                          width: 150,
                           height: 36,
                           child: ElevatedButton.icon(
                             onPressed: () {
@@ -197,6 +196,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             icon: const Icon(Icons.play_arrow),
                             label: const Text('RIPRODUCI', style: TextStyle(fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
                               backgroundColor: const Color(0xFF4CAF50),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
