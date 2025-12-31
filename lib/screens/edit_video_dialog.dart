@@ -9,6 +9,7 @@ import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_parser.dart';
 import '../utils/nfo_generator.dart';
+import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
 
 class EditVideoDialog extends StatefulWidget {
@@ -106,12 +107,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       if (!mounted) return;
       final selectedMovie = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (ctx) => SimpleDialog(
-          title: const Text('Seleziona Film'),
-          children: results.map((m) => SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, m),
-            child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
-          )).toList(),
+        builder: (ctx) => MovieSelectionDialog(
+          title: 'Seleziona Film',
+          results: results,
+          isBulkMode: false,
         ),
       );
 

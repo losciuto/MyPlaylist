@@ -8,6 +8,7 @@ import '../database/database_helper.dart';
 
 import '../services/metadata_service.dart';
 import '../utils/nfo_parser.dart';
+import '../widgets/movie_selection_dialog.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
@@ -174,30 +175,24 @@ class _DatabaseTabState extends State<DatabaseTab> {
            if (mode == 'auto') {
               selectedMovie = results.first;
            } else {
-              // Interactive Mode: Show Dialog
+              // Interactive Mode: Show Pageable Dialog with posters
               if (!mounted) break;
-              selectedMovie = await showDialog<Map<String, dynamic>>(
+              final choice = await showDialog<dynamic>(
                 context: context,
                 barrierDismissible: false,
-                builder: (ctx) => SimpleDialog(
-                  title: Text('Seleziona per: ${p.basename(video.path)}', style: const TextStyle(fontSize: 14)),
-                  children: [
-                    ...results.map((m) => SimpleDialogOption(
-                      onPressed: () => Navigator.pop(ctx, m),
-                      child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
-                    )),
-                    const Divider(),
-                    SimpleDialogOption(
-                      onPressed: () => Navigator.pop(ctx, null),
-                      child: const Text('Salta questo video', style: TextStyle(color: Colors.orange)),
-                    ),
-                    SimpleDialogOption(
-                      onPressed: () { isCancelled = true; Navigator.pop(ctx, null); },
-                      child: const Text('INTERROMPI TUTTO', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                    ),
-                  ],
+                builder: (ctx) => MovieSelectionDialog(
+                  title: 'Seleziona per: ${p.basename(video.path)}',
+                  results: results,
+                  isBulkMode: true,
                 ),
               );
+
+              if (choice is Map<String, dynamic> && choice['action'] == 'cancel') {
+                isCancelled = true;
+                selectedMovie = null;
+              } else {
+                selectedMovie = choice as Map<String, dynamic>?;
+              }
            }
            
            if (selectedMovie == null) {
