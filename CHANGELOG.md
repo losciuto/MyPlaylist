@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.9.0] - 2026-01-02
+
+### Added
+- **Delete Video Record**: Added a delete icon button to the Database Management tab to remove individual video records from the database.
+- **NFO Generation Filter**: New option "Generate only if missing .nfo" in the bulk NFO generation dialog to avoid overwriting existing metadata.
+
 ## [2.8.0] - 2025-12-31
 
 ### Added

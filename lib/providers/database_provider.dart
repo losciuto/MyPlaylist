@@ -49,6 +49,13 @@ class DatabaseProvider extends ChangeNotifier {
     await refreshVideos();
   }
 
+  Future<void> deleteVideo(Video video) async {
+    if (video.id != null) {
+      await DatabaseHelper.instance.deleteVideo(video.id!);
+      await refreshVideos();
+    }
+  }
+
   // Moved bulk logic here, but exposed differently.
   // Since bulk logic needs UI feedback (progress), we might need a Stream or Callback 
   // For now, I'll keep the heavily interactive bulk loop in the UI or a separate service, 

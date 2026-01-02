@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [2.9.0] - 2026-01-02
+
+### Aggiunto
+- **Elimina Riga Video**: Aggiunto pulsante di eliminazione nella scheda Gestione Database per rimuovere singoli record video dal database.
+- **Filtro Generazione NFO**: Nuova opzione "Genera solo se manca il file .nfo" nel dialog di generazione bulk NFO per evitare di sovrascrivere metadati esistenti.
+
 ## [2.8.0] - 2025-12-31
 
 ### Aggiunto

@@ -25,6 +25,8 @@ class DatabaseTab extends StatefulWidget {
 
 class _DatabaseTabState extends State<DatabaseTab> {
   final TextEditingController _searchController = TextEditingController();
+  bool _onlyMissingNfo = false;
+
 
   Future<void> _bulkGenerateNfo() async {
      final apiKey = context.read<SettingsService>().tmdbApiKey;
@@ -37,9 +39,31 @@ class _DatabaseTabState extends State<DatabaseTab> {
        context: context,
        builder: (ctx) => AlertDialog(
          title: const Text('Generazione NFO da TMDB'),
-         content: const Text('Scegli la modalità di generazione:\n\n'
-           '⚡ AUTOMATICO: Scarica il primo risultato trovato (più veloce).\n'
-           '🖐️ INTERATTIVO: Ti chiede di confermare il film per ogni video trovato.'),
+         content: StatefulBuilder(
+           builder: (context, setState) {
+             return Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 const Text('Scegli la modalità di generazione:\n\n'
+                   '⚡ AUTOMATICO: Scarica il primo risultato trovato (più veloce).\n'
+                   '🖐️ INTERATTIVO: Ti chiede di confermare il film per ogni video trovato.'),
+                 const SizedBox(height: 20),
+                 CheckboxListTile(
+                   title: const Text('Genera solo se manca il file .nfo'),
+                   value: _onlyMissingNfo,
+                   onChanged: (val) {
+                     setState(() {
+                        _onlyMissingNfo = val ?? false;
+                     });
+                   },
+                   contentPadding: EdgeInsets.zero,
+                   controlAffinity: ListTileControlAffinity.leading,
+                 ),
+               ],
+             );
+           }
+         ),
          actions: [
            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
            ElevatedButton(onPressed: () => Navigator.pop(ctx, 'auto'), child: const Text('⚡ Automatico')),
@@ -129,6 +153,15 @@ class _DatabaseTabState extends State<DatabaseTab> {
         if (mode == 'interactive' && video.title.isNotEmpty && video.year.isNotEmpty) {
            skipped++;
            continue;
+        }
+
+        // Check for missing NFO if filter is active
+        if (_onlyMissingNfo) {
+           final nfoPath = p.setExtension(video.path, '.nfo');
+           if (await File(nfoPath).exists()) {
+             skipped++;
+             continue;
+           }
         }
 
         progressNotifier.value = {'value': i + 1, 'title': video.title.isNotEmpty ? video.title : p.basename(video.path)};
@@ -329,6 +362,29 @@ class _DatabaseTabState extends State<DatabaseTab> {
     if (result == true && mounted) {
       await context.read<DatabaseProvider>().refreshVideos();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Video aggiornato correttamente')));
+    }
+  }
+
+  Future<void> _deleteVideo(Video video) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Conferma Eliminazione'),
+        content: Text('Vuoi eliminare il video "${video.title}" dal database?\nIl file fisico non verrà rimosso.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annulla')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Elimina'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      await context.read<DatabaseProvider>().deleteVideo(video);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Video eliminato dal database')));
     }
   }
 
@@ -741,9 +797,20 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                    DataCell(Text(video.duration)),
                                   DataCell(SizedBox(width: 150, child: Text(video.directors, overflow: TextOverflow.ellipsis))),
                                   DataCell(
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Colors.blue),
-                                      onPressed: () => _editVideo(video),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit, color: Colors.blue),
+                                          onPressed: () => _editVideo(video),
+                                          tooltip: 'Modifica',
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                          onPressed: () => _deleteVideo(video),
+                                          tooltip: 'Elimina riga',
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ]);

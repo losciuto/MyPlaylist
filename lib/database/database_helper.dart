@@ -85,6 +85,15 @@ class DatabaseHelper {
     await db.delete('videos');
   }
 
+  Future<int> deleteVideo(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'videos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<int> getVideoCount() async {
     final db = await instance.database;
     final result = await db.rawQuery('SELECT COUNT(*) FROM videos');
