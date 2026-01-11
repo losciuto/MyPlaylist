@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
@@ -10,8 +11,15 @@ import '../utils/nfo_generator.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
   final Video video;
+  final Set<String>? selectedEpisodePaths;
+  final VoidCallback? onSelectionChanged;
 
-  const VideoPreviewDialog({super.key, required this.video});
+  const VideoPreviewDialog({
+    super.key, 
+    required this.video,
+    this.selectedEpisodePaths,
+    this.onSelectionChanged,
+  });
 
   @override
   State<VideoPreviewDialog> createState() => _VideoPreviewDialogState();
@@ -19,6 +27,56 @@ class VideoPreviewDialog extends StatefulWidget {
 
 class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
   bool _isDownloading = false;
+  List<File>? _episodes;
+  bool _isLoadingEpisodes = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.video.isSeries) {
+      _loadEpisodes();
+    }
+  }
+
+  Future<void> _loadEpisodes() async {
+    setState(() => _isLoadingEpisodes = true);
+    final dir = Directory(widget.video.path);
+    if (!await dir.exists()) {
+      setState(() {
+        _episodes = [];
+        _isLoadingEpisodes = false;
+      });
+      return;
+    }
+
+    const videoExtensions = [
+      '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
+      '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
+      '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
+    ];
+
+    List<File> files = [];
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          final ext = p.extension(entity.path).toLowerCase();
+          if (videoExtensions.contains(ext)) {
+            files.add(entity);
+          }
+        }
+      }
+      files.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
+    } catch (e) {
+      debugPrint('Error loading episodes: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        _episodes = files;
+        _isLoadingEpisodes = false;
+      });
+    }
+  }
 
   Future<void> _downloadInfo() async {
     final apiKey = context.read<SettingsService>().tmdbApiKey;
@@ -259,6 +317,68 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                   ),
                 ),
                 const SizedBox(height: 12),
+              ],
+
+              // Episodes Section
+              if (widget.video.isSeries) ...[
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'EPISODI:',
+                    style: TextStyle(
+                      color: Color(0xFF4CAF50),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 250,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.black26 : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: _isLoadingEpisodes
+                      ? const Center(child: CircularProgressIndicator())
+                      : (_episodes == null || _episodes!.isEmpty)
+                          ? const Center(child: Text('Nessun episodio trovato.', style: TextStyle(color: Colors.grey)))
+                          : ListView.separated(
+                              itemCount: _episodes!.length,
+                              separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),
+                              itemBuilder: (ctx, i) {
+                                final episodeFile = _episodes![i];
+                                final epPath = episodeFile.path;
+                                final isSelected = widget.selectedEpisodePaths?.contains(epPath) ?? false;
+                                
+                                return CheckboxListTile(
+                                  value: isSelected,
+                                  onChanged: widget.selectedEpisodePaths == null ? null : (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        widget.selectedEpisodePaths!.add(epPath);
+                                      } else {
+                                        widget.selectedEpisodePaths!.remove(epPath);
+                                      }
+                                    });
+                                    if (widget.onSelectionChanged != null) {
+                                      widget.onSelectionChanged!();
+                                    }
+                                  },
+                                  title: Text(
+                                    p.basename(epPath),
+                                    style: TextStyle(color: textColor, fontSize: 13),
+                                  ),
+                                  dense: true,
+                                  activeColor: const Color(0xFF4CAF50),
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                );
+                              },
+                            ),
+                ),
+                const SizedBox(height: 24),
               ],
             ],
           ),

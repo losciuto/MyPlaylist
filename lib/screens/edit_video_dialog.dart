@@ -85,10 +85,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     try {
       final service = TmdbService(apiKey);
       
-      // Use current controller text for search if available, else basename
+      // Use current controller text for search if available, else use CLEANED path basename
       String query = _titleController.text.trim();
       if (query.isEmpty) {
-         query = p.basenameWithoutExtension(widget.video.path).replaceAll('.', ' ').replaceAll(RegExp(r'\(\d{4}\)'), '');
+         query = _cleanQuery(widget.video.path);
       }
       
       int? year = int.tryParse(_yearController.text);
@@ -97,7 +97,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          if (yearMatch != null) year = int.tryParse(yearMatch.group(1)!);
       }
 
-      final results = await service.searchMovie(query, year: year);
+      final isSeries = widget.video.isSeries;
+      List<Map<String, dynamic>> results;
+      
+      if (isSeries) {
+        results = await service.searchTvShow(query, year: year);
+      } else {
+        results = await service.searchMovie(query, year: year);
+      }
 
       if (results.isEmpty) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun risultato trovato su TMDB.')));
@@ -105,13 +112,24 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         return;
       }
 
-      // Always Interactive in single edit mode
+      // Pre-process results for uniformity in dialog
+      final formattedResults = results.map((r) {
+        return {
+          'id': r['id'],
+          'title': isSeries ? r['name'] : r['title'],
+          'release_date': isSeries ? r['first_air_date'] : r['release_date'],
+          'poster_path': r['poster_path'],
+          'overview': r['overview'],
+          'original_title': isSeries ? r['original_name'] : r['original_title'],
+        };
+      }).toList();
+
       if (!mounted) return;
       final selectedMovie = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (ctx) => MovieSelectionDialog(
-          title: 'Seleziona Film',
-          results: results,
+          title: isSeries ? 'Seleziona Serie TV' : 'Seleziona Film',
+          results: formattedResults,
           isBulkMode: false,
         ),
       );
@@ -121,19 +139,44 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          return;
       }
 
-      final details = await service.getMovieDetails(selectedMovie['id']);
-      final nfoContent = NfoGenerator.generateMovieNfo(details);
+      Map<String, dynamic> details;
+      String nfoContent;
+      String nfoFileName = isSeries ? 'tvshow.nfo' : p.setExtension(p.basename(widget.video.path), '.nfo');
+
+      if (isSeries) {
+        details = await service.getTvShowDetails(selectedMovie['id']);
+        nfoContent = NfoGenerator.generateTvShowNfo(details);
+      } else {
+        details = await service.getMovieDetails(selectedMovie['id']);
+        nfoContent = NfoGenerator.generateMovieNfo(details);
+      }
 
       // 1. Write NFO
       final videoFile = File(widget.video.path);
-      final nfoPath = p.setExtension(videoFile.path, '.nfo');
+      // For series, nfo goes in the series folder as tvshow.nfo
+      // For movies, it goes next to the file with same name
+      String nfoPath;
+      if (isSeries) {
+        nfoPath = p.join(widget.video.path, 'tvshow.nfo');
+        // Actually widget.video.path IS the series directory for series items (as per new logic)
+        // Check if we need to make sure path is a directory
+      } else {
+        nfoPath = p.setExtension(videoFile.path, '.nfo');
+      }
+
       await File(nfoPath).writeAsString(nfoContent);
 
       // 2. Download Poster
       String localPosterPath = _posterPathController.text;
       if (details['poster_path'] != null) {
         final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
-        final newPosterPath = '${p.dirname(videoFile.path)}/${p.basenameWithoutExtension(videoFile.path)}-poster.jpg';
+        String newPosterPath;
+        if (isSeries) {
+           newPosterPath = p.join(widget.video.path, 'poster.jpg');
+        } else {
+           newPosterPath = '${p.dirname(videoFile.path)}/${p.basenameWithoutExtension(videoFile.path)}-poster.jpg';
+        }
+        
         final response = await http.get(Uri.parse(posterUrl));
         if (response.statusCode == 200) {
           await File(newPosterPath).writeAsBytes(response.bodyBytes);
@@ -142,12 +185,17 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       }
 
       // 3. Download Fanart (Backdrop)
-      final baseDir = p.dirname(videoFile.path);
-      final baseFileName = p.basenameWithoutExtension(videoFile.path);
-      
       if (details['backdrop_path'] != null) {
         final fanartUrl = 'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
-        final fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+        String fanartPath;
+        if (isSeries) {
+           fanartPath = p.join(widget.video.path, 'fanart.jpg');
+        } else {
+           final baseDir = p.dirname(videoFile.path);
+           final baseFileName = p.basenameWithoutExtension(videoFile.path);
+           fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+        }
+        
         final resp = await http.get(Uri.parse(fanartUrl));
         if (resp.statusCode == 200) {
           await File(fanartPath).writeAsBytes(resp.bodyBytes);
@@ -160,7 +208,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         if (logos.isNotEmpty) {
           final logoPathTail = logos.first['file_path'];
           final logoUrl = 'https://image.tmdb.org/t/p/original$logoPathTail';
-          final logoPath = '$baseDir/$baseFileName-clearlogo.png';
+          String logoPath;
+          if (isSeries) {
+             logoPath = p.join(widget.video.path, 'clearlogo.png');
+          } else {
+             final baseDir = p.dirname(videoFile.path);
+             final baseFileName = p.basenameWithoutExtension(videoFile.path);
+             logoPath = '$baseDir/$baseFileName-clearlogo.png';
+          }
           final resp = await http.get(Uri.parse(logoUrl));
           if (resp.statusCode == 200) {
             await File(logoPath).writeAsBytes(resp.bodyBytes);
@@ -170,13 +225,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
       // 5. Update UI
       setState(() {
-         _titleController.text = details['title'] ?? _titleController.text;
-         final releaseDate = details['release_date']?.toString().split('-').first;
-         if (releaseDate != null) {
-            _yearController.text = releaseDate;
-            // Also update Title to follow "Title (Year)" if needed? No, user might prefer manual.
-            // But for consistency with bulk, we can suggest it.
-            // Let's just update the year field.
+         if (isSeries) {
+            _titleController.text = details['name'] ?? _titleController.text;
+            final firstAir = details['first_air_date']?.toString().split('-').first;
+             if (firstAir != null) _yearController.text = firstAir;
+         } else {
+            _titleController.text = details['title'] ?? _titleController.text;
+            final releaseDate = details['release_date']?.toString().split('-').first;
+            if (releaseDate != null) _yearController.text = releaseDate;
          }
          
          if (details['genres'] != null) {
@@ -185,7 +241,15 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          }
          
          if (details['overview'] != null) _plotController.text = details['overview'];
-         if (details['runtime'] != null) _durationController.text = details['runtime'].toString();
+         
+         if (isSeries) {
+            if (details['episode_run_time'] != null && (details['episode_run_time'] as List).isNotEmpty) {
+               _durationController.text = details['episode_run_time'][0].toString();
+            }
+         } else {
+            if (details['runtime'] != null) _durationController.text = details['runtime'].toString();
+         }
+         
          if (details['vote_average'] != null) _rating = (details['vote_average'] as num).toDouble();
          
          _posterPathController.text = localPosterPath;
@@ -194,8 +258,15 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
             final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
             if (cast != null) _actorsController.text = cast;
             
-            final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
-            if (crew != null) _directorsController.text = crew;
+            if (isSeries) {
+               // For series, created_by is distinct, but we can check crew too
+               if (details['created_by'] != null) {
+                 _directorsController.text = (details['created_by'] as List).map((c) => c['name']).join(', ');
+               }
+            } else {
+               final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
+               if (crew != null) _directorsController.text = crew;
+            }
          }
          
          _isDownloading = false;
@@ -207,6 +278,37 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
       setState(() => _isDownloading = false);
     }
+  }
+
+  String _cleanQuery(String input) {
+    // 1. Remove file extensions and replace dots/underscores/hyphens with space
+    String cleaned = p.basenameWithoutExtension(input)
+        .replaceAll('.', ' ')
+        .replaceAll('_', ' ')
+        .replaceAll('-', ' ');
+
+    // 2. Remove common release tags (case insensitive)
+    final tagsToRemove = [
+      'ita', 'eng', 'sub', 'x264', 'x265', 'h264', 'h265', '1080p', '720p',
+      '480p', '4k', 'uhd', 'hdr', 'web', 'dl', 'webdl', 'bluray', 'dvdrip',
+      'ac3', 'aac', 'dts', 'truehd', 'divx', 'xvid',
+      'stagione', 'season', 'ep', 'episodio'
+    ];
+    
+    for (final tag in tagsToRemove) {
+      cleaned = cleaned.replaceAll(RegExp(r'\b' + tag + r'\b', caseSensitive: false), '');
+    }
+
+    // 3. Remove SxxExx patterns (S01E01, S01, E01)
+    cleaned = cleaned.replaceAll(RegExp(r's\d{1,2}e\d{1,2}', caseSensitive: false), '')
+                     .replaceAll(RegExp(r's\d{1,2}', caseSensitive: false), '')
+                     .replaceAll(RegExp(r'e\d{1,2}', caseSensitive: false), '');
+
+    // 4. Remove Years inside parens or standalone (if not part of title context, tricky but let's try removing parens)
+    cleaned = cleaned.replaceAll(RegExp(r'\(\d{4}\)'), '');
+    
+    // 5. Trim extra spaces
+    return cleaned.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
 
   Future<void> _loadFromNfo() async {
@@ -271,6 +373,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         plot: _plotController.text,
         posterPath: _posterPathController.text,
         rating: _rating,
+        isSeries: widget.video.isSeries,
       );
 
       // ignore: avoid_print
@@ -366,6 +469,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                     padding: const EdgeInsets.only(top: 5),
                     child: Text('Dimensione: $_fileSizeString', style: const TextStyle(color: Colors.grey, fontSize: 11)),
                   ),
+                _buildEpisodesSection(), // Add this line
                 const SizedBox(height: 15),
                Expanded(
                  child: Row(
@@ -467,6 +571,88 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         filled: true,
         fillColor: const Color(0xFF3C3C3C),
       ),
+    );
+  }
+
+  // Series Episode List Methods
+  List<File>? _episodes;
+  bool _isLoadingEpisodes = false;
+
+  Future<void> _loadEpisodes() async {
+    if (_episodes != null) return; // Already loaded
+
+    setState(() => _isLoadingEpisodes = true);
+    final dir = Directory(widget.video.path);
+    if (!await dir.exists()) {
+       setState(() {
+         _episodes = [];
+         _isLoadingEpisodes = false;
+       });
+       return;
+    }
+
+    // Reuse extension logic (duplicated for simplicity to avoid import cycle if service is not standard)
+    // Actually we can import ScanService if it's not a circular dep. 
+    // ScanService is in services/scan_service.dart. 
+    // We can assume ScanService.videoExtensions is available.
+    // If not, use hardcoded list.
+    const videoExtensions = [
+    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
+    '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
+    '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
+  ];
+
+    List<File> files = [];
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          final ext = p.extension(entity.path).toLowerCase();
+          if (videoExtensions.contains(ext)) {
+            files.add(entity);
+          }
+        }
+      }
+      files.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
+    } catch (e) {
+      debugPrint('Error loading episodes: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        _episodes = files;
+        _isLoadingEpisodes = false;
+      });
+    }
+  }
+
+  Widget _buildEpisodesSection() {
+    if (!widget.video.isSeries) return const SizedBox.shrink();
+
+    return ExpansionTile(
+      title: const Text('Episodi', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      onExpansionChanged: (expanded) {
+        if (expanded) _loadEpisodes();
+      },
+      children: [
+        if (_isLoadingEpisodes)
+          const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
+        else if (_episodes == null || _episodes!.isEmpty)
+           const Padding(padding: EdgeInsets.all(8.0), child: Text('Nessun episodio trovato.', style: TextStyle(color: Colors.white70)))
+        else
+           SizedBox(
+             height: 200,
+             child: ListView.builder(
+               itemCount: _episodes!.length,
+               itemBuilder: (ctx, i) {
+                 return ListTile(
+                   dense: true,
+                   title: Text(p.basename(_episodes![i].path), style: const TextStyle(color: Colors.white70)),
+                   leading: const Icon(Icons.movie, size: 16, color: Colors.blueGrey),
+                 );
+               },
+             ),
+           )
+      ],
     );
   }
 }

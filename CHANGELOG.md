@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-01-11
+
+### Added
+- **TV Series Management**: Implemented series folder handling. Folders containing "Series", "Serie", "Seriale", "TV Show", or a `tvshow.nfo` file are now treated as a single entity in the database.
+    - **NFO Generation**: Added support for creating `tvshow.nfo` and standard assets (`poster.jpg`, `fanart.jpg`, `clearlogo.png`) for series.
+    - **Recursive Metadata Sync**: Bulk renaming and metadata updates now propagate to all episodes in a series folder.
+    - **Smart Episode Titles**: Automated title formatting for episodes (e.g., "Series - S01E01 Episode Title") with noise cleaning.
+    - **Plot Propagation**: Series plot is automatically written to the metadata of all individual episode files.
+- **Enhanced UI**:
+    - **Uniform Manual Selection**: Refactored the list to be consistent; detailed series info and episode selection are now in the standard Preview Dialog.
+    - **Series Badges**: Visual indicators (TV icon and badges) in Database management, Grid, and Selection dialogs.
+- **Bulk Series Operations**: Extended bulk rename and NFO generation to support television content type.
+- **Database Schema v2**: Updated database to support the new "Series" content type with automatic migration.
+
 ## [2.9.0] - 2026-01-02
 
 ### Added
@@ -41,7 +55,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Session Exclusion**: Random playlist generation (including filters) now excludes videos already proposed during the current session.
-- **Real-time Processing Title**: The bulk rename dialog now displays the title of the video currently being processed.
+*   **Advanced UI**: Tooltips for long titles and real-time processing title display during renaming.
+*   **Series Management**: Automatic detection of TV series folders (based on names like "Series", "Serie", "Seriale" or `tvshow.nfo` files) for sequential playback.
 - **Tooltips**: Added tooltips to the database table to view the full title of truncated entries.
 
 ### Fixed

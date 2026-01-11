@@ -190,11 +190,29 @@ class _PlaylistTabState extends State<PlaylistTab> {
                  child: Column(
                    children: [
                      Expanded(
-                       child: v.posterPath.isNotEmpty 
-                          ? (v.posterPath.startsWith('http') 
-                             ? Image.network(v.posterPath, fit: BoxFit.cover) 
-                             : Image.file(File(v.posterPath), fit: BoxFit.cover, errorBuilder: (_,__,___) => const Icon(Icons.movie, size: 50)))
-                          : const Icon(Icons.movie, size: 50),
+                       child: Stack(
+                         fit: StackFit.expand,
+                         children: [
+                           v.posterPath.isNotEmpty 
+                             ? (v.posterPath.startsWith('http') 
+                                ? Image.network(v.posterPath, fit: BoxFit.cover) 
+                                : Image.file(File(v.posterPath), fit: BoxFit.cover, errorBuilder: (_,__,___) => const Icon(Icons.movie, size: 50)))
+                             : const Icon(Icons.movie, size: 50),
+                           if (v.isSeries)
+                             Positioned(
+                               top: 5,
+                               right: 5,
+                               child: Container(
+                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                 decoration: BoxDecoration(
+                                   color: Colors.blueAccent,
+                                   borderRadius: BorderRadius.circular(4),
+                                 ),
+                                 child: const Text('SERIE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                               ),
+                             ),
+                         ],
+                       ),
                      ),
                      Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10)),
                      Row(

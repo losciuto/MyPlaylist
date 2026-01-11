@@ -55,4 +55,52 @@ class TmdbService {
       rethrow;
     }
   }
+
+  /// Search for a TV Show by query.
+  Future<List<Map<String, dynamic>>> searchTvShow(String query, {int? year, String language = 'it-IT'}) async {
+    if (apiKey.isEmpty) throw Exception('API Key mancante');
+
+    final uri = Uri.parse('$_baseUrl/search/tv').replace(queryParameters: {
+      'api_key': apiKey,
+      'query': query,
+      'language': language,
+      if (year != null) 'first_air_date_year': year.toString(),
+    });
+
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data['results']);
+      } else {
+        throw Exception('Errore TMDB Search TV: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('TMDB Search TV Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Get detailed TV Show info including credits.
+  Future<Map<String, dynamic>> getTvShowDetails(int id, {String language = 'it-IT'}) async {
+    if (apiKey.isEmpty) throw Exception('API Key mancante');
+
+    final uri = Uri.parse('$_baseUrl/tv/$id').replace(queryParameters: {
+      'api_key': apiKey,
+      'language': language,
+      'append_to_response': 'credits,images',
+    });
+
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Errore TMDB Dettagli TV: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('TMDB Details TV Error: $e');
+      rethrow;
+    }
+  }
 }

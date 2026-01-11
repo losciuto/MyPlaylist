@@ -10,6 +10,7 @@ class Video {
   final String actors;
   final String duration;
   final double rating;
+  final bool isSeries;
   final String posterPath;
 
   Video({
@@ -24,6 +25,7 @@ class Video {
     this.actors = '',
     this.duration = '',
     this.rating = 0.0,
+    this.isSeries = false,
     this.posterPath = '',
   });
 
@@ -40,6 +42,7 @@ class Video {
       'actors': actors,
       'duration': duration,
       'rating': rating,
+      'isSeries': isSeries ? 1 : 0,
       'posterPath': posterPath,
     };
   }
@@ -57,6 +60,7 @@ class Video {
       actors: map['actors'] ?? '',
       duration: map['duration'] ?? '',
       rating: (map['rating'] is int) ? (map['rating'] as int).toDouble() : (map['rating'] as double? ?? 0.0),
+      isSeries: map['isSeries'] == 1,
       posterPath: map['posterPath'] ?? '',
     );
   }

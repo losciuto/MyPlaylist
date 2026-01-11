@@ -6,6 +6,7 @@ Creatore di Playlist Video e Gestore Database Locale.
 *   **Scansione Cartelle**: Importa video con estrazione automatica metadati (NFO/Nome file).
 *   **Database**: Gestione completa (Ricerca, Modifica, Rinomina Massa).
 *   **Playlist**: Generazione casuale, recente o filtrata (inclusione/esclusione). Export .m3u.
+*   **Gestione Serie TV**: Supporto completo per cartelle di serie TV, aggiornamento ricorsivo dei metadati degli episodi e generazione automatica di `tvshow.nfo`.
 *   **Filtri Avanzati**: Possibilità di includere o escludere generi, anni, attori e registi mediante selezione tri-state (Includi/Escludi/Nessuno).
 *   **Player**: Player interno (mpv) e supporto player esterno (VLC, ecc.).
 *   **VLC Control**: Supporto avanzato per VLC (kill automatico processi precedenti, avvio con controllo remoto).
@@ -36,7 +37,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 31/12/2025 (v2.8.0)
+Ultimo Aggiornamento: 11/01/2026 (v3.0.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

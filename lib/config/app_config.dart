@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class AppConfig {
   // App Info
   static const String appName = 'MyPlaylist';
-  static const String appVersion = '2.9.0';
+  static const String appVersion = '3.0.0';
   static const String appAuthor = 'Massimo';
-  static const String appBuildDate = '02/01/2026';
+  static const String appBuildDate = '11/01/2026';
 
   // Window Layout
   static const Size windowSize = Size(1200, 800);

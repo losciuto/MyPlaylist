@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.0.0] - 2026-01-11
+
+### Aggiunto
+- **Gestione Serie TV**: Implementata la gestione delle cartelle serie. Le cartelle contenenti "Serie", "Series", "Seriale", "TV Show" o un file `tvshow.nfo` vengono ora trattate come un'unica entità nel database.
+    - **Generazione NFO**: Supporto per la creazione di `tvshow.nfo` e download di asset standard (`poster.jpg`, `fanart.jpg`, `clearlogo.png`) per le serie.
+    - **Sincronizzazione Metadati Ricorsiva**: La rinomina e l'aggiornamento metadati ora si propagano a tutti gli episodi nella cartella della serie.
+    - **Titoli Episodi Intelligenti**: Formattazione automatica (es. "Serie - S01E01 Titolo Episodio") con pulizia dei tag di release.
+    - **Propagazione Trama**: La trama della serie viene scritta automaticamente nei metadati di ogni singolo episodio.
+- **UI Potenziata**:
+    - **Selezione Manuale Uniforme**: Lista resa coerente; i dettagli della serie e la selezione degli episodi sono ora integrati nel Dialog di Anteprima standard.
+    - **Badge Serie**: Indicatori visivi (icona TV e badge) nella gestione DB, griglia poster e dialog di selezione.
+- **Operazioni Bulk per Serie**: Estesa la rinomina dei titoli e la generazione NFO per supportare i contenuti televisivi.
+- **Schema Database v2**: Aggiornato il database per supportare il nuovo tipo "Serie" con migrazione automatica.
+
 ## [2.9.0] - 2026-01-02
 
 ### Aggiunto
@@ -40,6 +54,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 
 ### Aggiunto
 - **Esclusione Sessione**: La generazione di playlist casuali (anche con filtri) ora esclude i video già proposti durante la sessione corrente.
+- **UI Advanced**: Tooltip sui titoli lunghi e visualizzazione del video in elaborazione durante la rinomina.
+- **Gestione Serie**: Riconoscimento automatico delle cartelle serie TV (basato su nomi come "Serie", "Series", "Seriale" o file `tvshow.nfo`) per la riproduzione in sequenza.
 - **Visualizzazione Titolo in Elaborazione**: Il dialog di rinomina in massa ora mostra il titolo del video che sta venendo processato in tempo reale.
 - **Tooltip**: Aggiunti tooltip nella tabella del database per visualizzare il titolo completo dei video troncati.
 
@@ -60,6 +76,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Logica di salto (skip) intelligente per la rinomina: i video già aggiornati correttamente vengono saltati automaticamente.
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
+Autore: Massimo
+Ultimo Aggiornamento: 11/01/2026 (v3.0.0)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.

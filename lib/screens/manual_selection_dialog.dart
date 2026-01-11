@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import '../database/database_helper.dart';
 import 'video_preview_dialog.dart';
@@ -14,6 +16,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   List<Video> _allVideos = [];
   List<Video> _filteredVideos = [];
   final Set<int> _selectedIds = {};
+  final Set<String> _selectedEpisodePaths = {};
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
 
@@ -49,7 +52,13 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   void _showPreview(Video video) {
     showDialog(
       context: context,
-      builder: (ctx) => VideoPreviewDialog(video: video),
+      builder: (ctx) => VideoPreviewDialog(
+        video: video,
+        selectedEpisodePaths: video.isSeries ? _selectedEpisodePaths : null,
+        onSelectionChanged: () {
+          if (mounted) setState(() {});
+        },
+      ),
     );
   }
 
@@ -73,6 +82,33 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
     setState(() {
       _selectedIds.clear();
     });
+  }
+
+  Future<List<File>> _getEpisodes(String path) async {
+    final dir = Directory(path);
+    if (!await dir.exists()) return [];
+    
+    const videoExtensions = [
+    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
+    '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
+    '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
+  ];
+
+    List<File> episodes = [];
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+           final ext = p.extension(entity.path).toLowerCase();
+           if (videoExtensions.contains(ext)) {
+             episodes.add(entity);
+           }
+        }
+      }
+      episodes.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
+    } catch (e) {
+      debugPrint('Error scanning episodes: $e');
+    }
+    return episodes;
   }
 
   @override
@@ -176,34 +212,49 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                         itemCount: _filteredVideos.length,
                         separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),
                         itemBuilder: (ctx, index) {
-                          final video = _filteredVideos[index];
-                          final isSelected = _selectedIds.contains(video.id);
-                          return ListTile(
-                            onTap: () => _showPreview(video),
-                            onLongPress: () => _toggleSelection(video),
-                            leading: Checkbox(
-                              value: isSelected,
-                              activeColor: const Color(0xFF4CAF50),
-                              onChanged: (v) => _toggleSelection(video),
-                            ),
-                            title: Text(
-                              video.title,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              '${video.year} • ★ ${video.rating.toStringAsFixed(1)} • ${video.directors}',
-                              style: const TextStyle(color: Colors.grey, fontSize: 12),
-                              maxLines: 1,
-                            ),
-                            trailing: video.posterPath.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.image, color: Colors.white24, size: 20),
-                                    onPressed: () => _showPreview(video),
-                                  )
-                                : null,
-                          );
+                            final video = _filteredVideos[index];
+                            final isSelected = _selectedIds.contains(video.id);
+
+                            return ListTile(
+                              onTap: () => _showPreview(video),
+                              onLongPress: () => _toggleSelection(video),
+                              leading: Checkbox(
+                                value: isSelected,
+                                activeColor: const Color(0xFF4CAF50),
+                                onChanged: (v) => _toggleSelection(video),
+                              ),
+                              title: Row(
+                                children: [
+                                  if (video.isSeries) ...[
+                                    const Icon(Icons.tv, color: Colors.blueAccent, size: 16),
+                                    const SizedBox(width: 5),
+                                    const Text('SERIE', style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    const SizedBox(width: 5),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      video.title,
+                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                video.isSeries
+                                    ? '${video.year} • ${video.genres} • ★ ${video.rating.toStringAsFixed(1)}'
+                                    : '${video.year} • ★ ${video.rating.toStringAsFixed(1)} • ${video.directors}',
+                                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                maxLines: 1,
+                              ),
+                              trailing: video.posterPath.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.image, color: Colors.white24, size: 20),
+                                      onPressed: () => _showPreview(video),
+                                    )
+                                  : null,
+                            );
                         },
                       ),
                     ),
@@ -221,7 +272,40 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
                   onPressed: () {
+                    // 1. Get standard selected videos
                     final selectedVideos = _allVideos.where((v) => _selectedIds.contains(v.id)).toList();
+                    
+                    // 2. Create virtual Video objects for selected episodes
+                    for (final epPath in _selectedEpisodePaths) {
+                      // Find parent series for metadata
+                      try {
+                        // Simple heuristic: find series that contains this path
+                        // Or just iterate all series videos and check path starts with
+                        final parentSeries = _allVideos.firstWhere(
+                          (v) => v.isSeries && epPath.startsWith(v.path),
+                          orElse: () => Video(path: '', mtime: 0), // Dummy
+                        );
+                        
+                        if (parentSeries.path.isNotEmpty) {
+                          selectedVideos.add(Video(
+                            id: null, // Virtual
+                            path: epPath,
+                            mtime: File(epPath).lastModifiedSync().millisecondsSinceEpoch.toDouble(),
+                            title: p.basename(epPath),
+                            isSeries: false, // Treated as individual file
+                            year: parentSeries.year,
+                            genres: parentSeries.genres,
+                            directors: parentSeries.directors,
+                            rating: parentSeries.rating,
+                            posterPath: parentSeries.posterPath,
+                            plot: parentSeries.plot,
+                          ));
+                        }
+                      } catch (e) {
+                         debugPrint('Error creating virtual video for $epPath: $e');
+                      }
+                    }
+                    
                     Navigator.pop(context, selectedVideos);
                   },
                   icon: const Icon(Icons.playlist_add),

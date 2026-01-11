@@ -193,8 +193,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
            final int? year = yearMatch != null ? int.tryParse(yearMatch.group(1)!) : null;
 
            List<Map<String, dynamic>> results = [];
+           final isSeries = video.isSeries;
+
            for (var q in queriesToTry) {
-             results = await tmdb.searchMovie(q, year: year);
+             if (isSeries) {
+               results = await tmdb.searchTvShow(q, year: year);
+             } else {
+               results = await tmdb.searchMovie(q, year: year);
+             }
              if (results.isNotEmpty) break;
            }
            
@@ -215,7 +221,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 barrierDismissible: false,
                 builder: (ctx) => MovieSelectionDialog(
                   title: 'Seleziona per: ${p.basename(video.path)}',
-                  results: results,
+                  results: results.map((r) => {
+                    'id': r['id'],
+                    'title': isSeries ? r['name'] : r['title'],
+                    'release_date': isSeries ? r['first_air_date'] : r['release_date'],
+                    'poster_path': r['poster_path'],
+                    'overview': r['overview'],
+                  }).toList(),
                   isBulkMode: true,
                 ),
               );
@@ -233,22 +245,35 @@ class _DatabaseTabState extends State<DatabaseTab> {
               skipped++;
               continue;
            }
-                      // Process
-            final details = await tmdb.getMovieDetails(selectedMovie['id']);
-            final nfoContent = NfoGenerator.generateMovieNfo(details);
-            
+           
+            // Process Details
+            Map<String, dynamic> details;
+            String nfoContent;
+            String nfoPath;
+            if (isSeries) {
+              details = await tmdb.getTvShowDetails(selectedMovie['id']);
+              nfoContent = NfoGenerator.generateTvShowNfo(details);
+              nfoPath = p.join(video.path, 'tvshow.nfo');
+            } else {
+              details = await tmdb.getMovieDetails(selectedMovie['id']);
+              nfoContent = NfoGenerator.generateMovieNfo(details);
+              nfoPath = p.setExtension(video.path, '.nfo');
+            }
+
             // 1. Write NFO
-            final nfoPath = p.setExtension(video.path, '.nfo');
             await File(nfoPath).writeAsString(nfoContent);
             
             String localPosterPath = video.posterPath;
-            final baseDir = p.dirname(video.path);
+            final baseDir = isSeries ? video.path : p.dirname(video.path);
             final baseFileName = p.basenameWithoutExtension(video.path);
 
             // 2. Download Poster
             if (details['poster_path'] != null) {
                final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
-               final posterPath = '$baseDir/$baseFileName-poster.jpg';
+               final posterPath = isSeries 
+                  ? p.join(baseDir, 'poster.jpg')
+                  : '$baseDir/$baseFileName-poster.jpg';
+                  
                final resp = await http.get(Uri.parse(posterUrl));
                if (resp.statusCode == 200) {
                   await File(posterPath).writeAsBytes(resp.bodyBytes);
@@ -259,7 +284,10 @@ class _DatabaseTabState extends State<DatabaseTab> {
             // 3. Download Fanart (Backdrop)
             if (details['backdrop_path'] != null) {
               final fanartUrl = 'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
-              final fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+              final fanartPath = isSeries
+                  ? p.join(baseDir, 'fanart.jpg')
+                  : '$baseDir/$baseFileName-fanart.jpg';
+                  
               final resp = await http.get(Uri.parse(fanartUrl));
               if (resp.statusCode == 200) {
                 await File(fanartPath).writeAsBytes(resp.bodyBytes);
@@ -270,10 +298,12 @@ class _DatabaseTabState extends State<DatabaseTab> {
             if (details['images'] != null && details['images']['logos'] != null) {
               final logos = details['images']['logos'] as List;
               if (logos.isNotEmpty) {
-                // Try to find a logo in preferred language or just the first one
                 final logoPathTail = logos.first['file_path'];
                 final logoUrl = 'https://image.tmdb.org/t/p/original$logoPathTail';
-                final logoPath = '$baseDir/$baseFileName-clearlogo.png';
+                final logoPath = isSeries
+                    ? p.join(baseDir, 'clearlogo.png')
+                    : '$baseDir/$baseFileName-clearlogo.png';
+                    
                 final resp = await http.get(Uri.parse(logoUrl));
                 if (resp.statusCode == 200) {
                   await File(logoPath).writeAsBytes(resp.bodyBytes);
@@ -282,8 +312,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
             }
 
             // 5. Update Database Record
-            final nfoTitle = details['title'] ?? video.title;
-            final nfoYear = details['release_date']?.toString().split('-').first ?? video.year;
+            final nfoTitle = isSeries ? details['name'] : (details['title'] ?? video.title);
+            final nfoYear = (isSeries ? details['first_air_date'] : details['release_date'])?.toString().split('-').first ?? video.year;
+            
             final gList = details['genres'] != null 
                 ? (details['genres'] as List).map((g) => g['name']).join(', ')
                 : video.genres;
@@ -296,8 +327,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
               final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
               if (cast != null) nfoActors = cast;
               
-              final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
-              if (crew != null) nfoDirectors = crew;
+              if (isSeries) {
+                if (details['created_by'] != null) {
+                  nfoDirectors = (details['created_by'] as List).map((c) => c['name']).join(', ');
+                }
+              } else {
+                final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
+                if (crew != null) nfoDirectors = crew;
+              }
             }
 
             final updatedVideo = Video(
@@ -313,6 +350,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               plot: nfoPlot,
               rating: nfoRating,
               posterPath: localPosterPath,
+              isSeries: video.isSeries,
             );
 
             await DatabaseHelper.instance.updateVideo(updatedVideo);
@@ -523,13 +561,16 @@ class _DatabaseTabState extends State<DatabaseTab> {
       
       try {
         // Robust NFO lookup
-        String nfoPath = p.setExtension(video.path, '.nfo');
+        String nfoPath = video.isSeries 
+            ? p.join(video.path, 'tvshow.nfo')
+            : p.setExtension(video.path, '.nfo');
+            
         File nfoFile = File(nfoPath);
         
         bool nfoFound = await nfoFile.exists();
         
-        // If not found directly, try case-insensitive search in the same directory
-        if (!nfoFound) {
+        // If not found directly, try case-insensitive search in the same directory (only for movies)
+        if (!nfoFound && !video.isSeries) {
            try {
              final parentDir = Directory(p.dirname(video.path));
              if (await parentDir.exists()) {
@@ -637,6 +678,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
           plot: nfoPlot.isNotEmpty ? nfoPlot : video.plot,
           rating: nfoRating > 0 ? nfoRating : video.rating,
           posterPath: nfoPoster.isNotEmpty ? nfoPoster : video.posterPath,
+          isSeries: video.isSeries,
         );
 
         debugPrint('UPDATE [${p.basename(video.path)}]: Action required');
@@ -771,18 +813,29 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                 final video = entry.value;
                                 return DataRow(cells: [
                                   DataCell(Text('$i')),
-                                  DataCell(
-                                    Tooltip(
-                                      message: video.title,
-                                      child: SizedBox(
-                                        width: 200, 
-                                        child: Text(
-                                          video.title.isNotEmpty ? video.title : 'N/A', 
-                                          overflow: TextOverflow.ellipsis
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                    DataCell(
+                                      Tooltip(
+                                        message: video.title,
+                                        child: SizedBox(
+                                          width: 200, 
+                                          child: Row(
+                                            children: [
+                                              if (video.isSeries) 
+                                                const Padding(
+                                                  padding: EdgeInsets.only(right: 5),
+                                                  child: Icon(Icons.tv, color: Colors.blueAccent, size: 16),
+                                                ),
+                                              Expanded(
+                                                child: Text(
+                                                  video.title.isNotEmpty ? video.title : 'N/A', 
+                                                  overflow: TextOverflow.ellipsis
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ),
+                                      )
+                                    ),
                                    DataCell(Text(video.year)),
                                    DataCell(
                                      Row(

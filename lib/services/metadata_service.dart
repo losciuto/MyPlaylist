@@ -60,64 +60,183 @@ class MetadataService {
   }
 
   Future<bool> updateFileMetadata(Video video) async {
-    final File originalFile = File(video.path);
-    if (!await originalFile.exists()) {
-      debugPrint('File not found: ${video.path}');
+    final FileSystemEntityType type = await FileSystemEntity.type(video.path);
+    
+    if (type == FileSystemEntityType.directory) {
+      return _updateSeriesFiles(video);
+    } else if (type == FileSystemEntityType.file) {
+      return _updateSingleFile(video.path, video);
+    } else {
+      debugPrint('Path not found or invalid: ${video.path}');
       return false;
     }
+  }
 
-    final String dir = p.dirname(video.path);
-    final String filename = p.basename(video.path);
+  Future<bool> _updateSingleFile(String path, Video video, {bool preserveTitle = false, String? forcedTitle}) async {
+    final File originalFile = File(path);
+    if (!await originalFile.exists()) return false;
+
+    final String dir = p.dirname(path);
+    final String filename = p.basename(path);
     final String tempPath = p.join(dir, 'temp_$filename');
 
     try {
       // 1. Rename original to temp
       await originalFile.rename(tempPath);
-      debugPrint('Renamed to temp: $tempPath');
-
-      // 2. Run ffmpeg to write metadata to original path (new file)
-      // -map_metadata 0: Keep existing global metadata
-      // -c copy: Copy streams without re-encoding
+      
+      // 2. Run ffmpeg
       final List<String> args = [
         '-i', tempPath,
         '-map_metadata', '0',
         '-c', 'copy',
-        '-metadata', 'title=${video.title}',
+        '-metadata', 'genre=${video.genres}',
         '-metadata', 'date=${video.year}',
-        '-metadata', 'genre=${video.genres}', // May need handling for multiple genres
-        '-metadata', 'artist=${video.directors}', // Director often mapped to artist
-        '-metadata', 'description=${video.plot}', // Description or comment
-        '-metadata', 'comment=${video.plot}',
-        video.path 
+        '-metadata', 'artist=${video.directors}',
+        
+        if (preserveTitle) ...[
+           '-metadata', 'album=${video.title}',
+           '-metadata', 'show=${video.title}',
+           // Propagate plot to episodes as requested
+           '-metadata', 'description=${video.plot}',
+           '-metadata', 'comment=${video.plot}',
+           
+           // Use forcedTitle if provided (for formatted Episode Title)
+           if (forcedTitle != null) '-metadata', 'title=$forcedTitle',
+        ] else ...[
+           '-metadata', 'title=${video.title}',
+           '-metadata', 'description=${video.plot}',
+           '-metadata', 'comment=${video.plot}',
+        ],
+        path 
       ];
 
-      debugPrint('Running ffmpeg: $args');
       final result = await Process.run('ffmpeg', args);
 
       if (result.exitCode == 0) {
-        debugPrint('FFmpeg success. Deleting temp.');
         await File(tempPath).delete();
         return true;
       } else {
         debugPrint('FFmpeg failed: ${result.stderr}');
-        // Restore original
-        if (await File(video.path).exists()) {
-          await File(video.path).delete();
-        }
-        await File(tempPath).rename(video.path);
+        // Restore
+        if (await File(path).exists()) await File(path).delete();
+        await File(tempPath).rename(path);
         return false;
       }
     } catch (e) {
-      debugPrint('Error updating metadata: $e');
-      // Attempt restore
+      debugPrint('Error updating metadata for $path: $e');
       if (await File(tempPath).exists()) {
-         if (await File(video.path).exists()) {
-            await File(video.path).delete();
-         }
-         await File(tempPath).rename(video.path);
+         if (await File(path).exists()) await File(path).delete();
+         await File(tempPath).rename(path);
       }
       return false;
     }
+  }
+
+  String _cleanRemainder(String input) {
+    String cleaned = input;
+    // Tags to remove
+    final stopTags = ['ita', 'eng', 'sub', '1080p', '720p', '480p', 'h264', 'x264', 'hevc', 'web-dl', 'bluray', 'dvdrip', 'ac3', 'aac'];
+    
+    // Find earliest tag
+    int earliestIndex = -1;
+    for (final tag in stopTags) {
+      final index = cleaned.toLowerCase().indexOf(tag.toLowerCase());
+      if (index != -1) {
+         if (index > 0) {
+            final charBefore = cleaned[index - 1];
+            if (['.', ' ', '_', '-'].contains(charBefore)) {
+                if (earliestIndex == -1 || index < earliestIndex) {
+                    earliestIndex = index;
+                }
+            }
+         }
+      }
+    }
+    
+    if (earliestIndex != -1) {
+       cleaned = cleaned.substring(0, earliestIndex - 1);
+    }
+    
+    return cleaned.replaceAll('.', ' ').replaceAll('_', ' ').replaceAll('-', ' ').trim();
+  }
+
+  String _generateEpisodeTitle(String seriesName, String filename) {
+    // 1. Try SxxExx pattern
+    final sxeMatch = RegExp(r'[sS](\d{1,2})[eE](\d{1,2})').firstMatch(filename);
+    if (sxeMatch != null) {
+      final s = sxeMatch.group(1)!.padLeft(2, '0');
+      final e = sxeMatch.group(2)!.padLeft(2, '0');
+      
+      // Extract remainder logic
+      String remainder = filename.substring(sxeMatch.end);
+      String extraTitle = _cleanRemainder(remainder);
+      
+      if (extraTitle.isNotEmpty) {
+         return '$seriesName - S${s}E$e $extraTitle';
+      } else {
+         return '$seriesName - S${s}E$e';
+      }
+    }
+
+    // 2. Try xXX pattern (e.g. 1x05)
+    final xMatch = RegExp(r'(\d{1,2})x(\d{1,2})').firstMatch(filename);
+    if (xMatch != null) {
+      final s = xMatch.group(1)!.padLeft(2, '0');
+      final e = xMatch.group(2)!.padLeft(2, '0');
+      
+       String remainder = filename.substring(xMatch.end);
+       String extraTitle = _cleanRemainder(remainder);
+       
+       if (extraTitle.isNotEmpty) {
+          return '$seriesName - S${s}E$e $extraTitle';
+       } else {
+          return '$seriesName - S${s}E$e';
+       }
+    }
+
+    // 3. Fallback: Clean filename completely
+    String cleaned = _cleanRemainder(filename);
+    return '$seriesName - $cleaned'; 
+  }
+
+  Future<bool> _updateSeriesFiles(Video video) async {
+    final dir = Directory(video.path);
+    if (!await dir.exists()) return false;
+
+    // Reuse extension connection or hardcode
+    const videoExtensions = [
+      '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
+      '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
+      '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
+    ];
+
+    bool allSuccess = true;
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+           final ext = p.extension(entity.path).toLowerCase();
+           final basename = p.basenameWithoutExtension(entity.path);
+           
+           if (videoExtensions.contains(ext)) {
+             debugPrint('Updating metadata for episode: ${entity.path}');
+             
+             final formattedTitle = _generateEpisodeTitle(video.title, basename);
+             
+             final success = await _updateSingleFile(
+                entity.path, 
+                video, 
+                preserveTitle: true,
+                forcedTitle: formattedTitle
+             );
+             if (!success) allSuccess = false;
+           }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error scanning series directory: $e');
+      return false;
+    }
+    return allSuccess;
   }
 
   Future<void> cleanupTempFiles(String directoryPath) async {

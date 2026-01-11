@@ -25,7 +25,12 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path, 
+      version: 2, 
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
@@ -42,9 +47,22 @@ class DatabaseHelper {
         actors TEXT,
         duration TEXT,
         rating REAL,
+        isSeries INTEGER DEFAULT 0,
         posterPath TEXT
       )
     ''');
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add isSeries column if it doesn't exist
+      try {
+        await db.execute('ALTER TABLE videos ADD COLUMN isSeries INTEGER DEFAULT 0');
+      } catch (e) {
+        // Handle case where column might already exist (e.g. partial manual update)
+        print('DEBUG [DatabaseHelper]: Failed to add isSeries column: $e');
+      }
+    }
   }
 
   Future<void> insertVideo(Video video) async {
