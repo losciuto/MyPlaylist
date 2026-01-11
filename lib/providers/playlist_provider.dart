@@ -47,7 +47,7 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<String>> generateRandom({int? count, bool launchPlayer = true}) async {
+  Future<List<Map<String, dynamic>>> generateRandom({int? count, bool launchPlayer = true}) async {
     final limit = count ?? 20;
     // Check if we exhausted the available videos in this session
     if (_proposedVideoIds.length >= _totalVideoCount) {
@@ -73,10 +73,10 @@ class PlaylistProvider extends ChangeNotifier {
       await playCurrentPlaylist();
     }
     
-    return _currentPlaylist.map((v) => v.title).toList();
+    return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
-  Future<List<String>> generateRecentPlaylist({int? count, bool launchPlayer = true}) async {
+  Future<List<Map<String, dynamic>>> generateRecentPlaylist({int? count, bool launchPlayer = true}) async {
     final limit = count ?? 20; // Default to 20 if count is not provided
     final videos = await DatabaseHelper.instance.getRecentPlaylist(limit);
     await setPlaylist(videos);
@@ -85,10 +85,10 @@ class PlaylistProvider extends ChangeNotifier {
       await playCurrentPlaylist();
     }
     
-    return _currentPlaylist.map((v) => v.title).toList();
+    return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
-  Future<List<String>> generateFilteredPlaylist({
+  Future<List<Map<String, dynamic>>> generateFilteredPlaylist({
     List<String>? genres,
     List<String>? years,
     double? minRating,
@@ -144,7 +144,7 @@ class PlaylistProvider extends ChangeNotifier {
       await playCurrentPlaylist();
     }
     
-    return _currentPlaylist.map((v) => v.title).toList();
+    return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
   Future<void> loadPlaylistState() => _loadPlaylistState();

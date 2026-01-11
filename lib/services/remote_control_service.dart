@@ -232,6 +232,10 @@ class RemoteControlService with ChangeNotifier {
           minRating: (args['min_rating'] as num?)?.toDouble(),
           actors: (args['actors'] as List?)?.cast<String>(),
           directors: (args['directors'] as List?)?.cast<String>(),
+          excludedGenres: (args['excluded_genres'] as List?)?.cast<String>(),
+          excludedYears: (args['excluded_years'] as List?)?.cast<String>(),
+          excludedActors: (args['excluded_actors'] as List?)?.cast<String>(),
+          excludedDirectors: (args['excluded_directors'] as List?)?.cast<String>(),
           limit: args['limit'] as int? ?? settingsService.defaultPlaylistSize,
           launchPlayer: !preview,
         );
