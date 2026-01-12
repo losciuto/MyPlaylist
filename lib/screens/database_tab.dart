@@ -351,6 +351,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               rating: nfoRating,
               posterPath: localPosterPath,
               isSeries: video.isSeries,
+              saga: (details['belongs_to_collection'] != null) ? details['belongs_to_collection']['name'] : video.saga,
             );
 
             await DatabaseHelper.instance.updateVideo(updatedVideo);
@@ -679,6 +680,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
           rating: nfoRating > 0 ? nfoRating : video.rating,
           posterPath: nfoPoster.isNotEmpty ? nfoPoster : video.posterPath,
           isSeries: video.isSeries,
+          saga: (metadata['saga'] != null && metadata['saga'].toString().isNotEmpty) ? metadata['saga'] : video.saga,
         );
 
         debugPrint('UPDATE [${p.basename(video.path)}]: Action required');
@@ -804,9 +806,10 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                 DataColumn(label: Text('Titolo')),
                                 DataColumn(label: Text('Anno')),
                                 DataColumn(label: Text('Rating')),
-                                DataColumn(label: Text('Durata')),
-                                DataColumn(label: Text('Registi')),
-                                DataColumn(label: Text('Azioni')),
+                                 DataColumn(label: Text('Durata')),
+                                 DataColumn(label: Text('Saga')),
+                                 DataColumn(label: Text('Registi')),
+                                 DataColumn(label: Text('Azioni')),
                               ],
                               rows: provider.filteredVideos.asMap().entries.map((entry) {
                                 final i = entry.key + 1;
@@ -847,8 +850,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
                                        ],
                                      ),
                                    ),
-                                   DataCell(Text(video.duration)),
-                                  DataCell(SizedBox(width: 150, child: Text(video.directors, overflow: TextOverflow.ellipsis))),
+                                    DataCell(Text(video.duration)),
+                                    DataCell(SizedBox(width: 120, child: Text(video.saga, overflow: TextOverflow.ellipsis))),
+                                   DataCell(SizedBox(width: 150, child: Text(video.directors, overflow: TextOverflow.ellipsis))),
                                   DataCell(
                                     Row(
                                       mainAxisSize: MainAxisSize.min,

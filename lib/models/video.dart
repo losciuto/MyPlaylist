@@ -12,6 +12,8 @@ class Video {
   final double rating;
   final bool isSeries;
   final String posterPath;
+  final String saga;
+  final int sagaIndex;
 
   Video({
     this.id,
@@ -27,6 +29,8 @@ class Video {
     this.rating = 0.0,
     this.isSeries = false,
     this.posterPath = '',
+    this.saga = '',
+    this.sagaIndex = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -44,6 +48,8 @@ class Video {
       'rating': rating,
       'isSeries': isSeries ? 1 : 0,
       'posterPath': posterPath,
+      'saga': saga,
+      'sagaIndex': sagaIndex,
     };
   }
 
@@ -62,6 +68,8 @@ class Video {
       rating: (map['rating'] is int) ? (map['rating'] as int).toDouble() : (map['rating'] as double? ?? 0.0),
       isSeries: map['isSeries'] == 1,
       posterPath: map['posterPath'] ?? '',
+      saga: map['saga'] ?? '',
+      sagaIndex: map['sagaIndex'] ?? 0,
     );
   }
 }

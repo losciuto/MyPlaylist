@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.antigravity.myplaylist.my_playlist"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "29.0.14206865"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -128,6 +128,19 @@ class NfoParser {
 
       final duration = getString('runtime');
       final thumb = getString('thumb');
+      
+      // Extract Saga (Set)
+      String? saga;
+      final setNode = document.findAllElements('set').firstOrNull;
+      if (setNode != null) {
+        final nameNode = setNode.findElements('name').firstOrNull;
+        if (nameNode != null) {
+          saga = clean(nameNode.innerText);
+        } else {
+          // Fallback if <set> contains the name directly
+          saga = clean(setNode.innerText);
+        }
+      }
 
       final finalRating = double.tryParse((rating ?? '').replaceAll(',', '.')) ?? 0.0;
       print('DEBUG [NfoParser]: FINAL RATING for "$title" is: $finalRating (from raw: $rating)');
@@ -142,6 +155,7 @@ class NfoParser {
         'rating': finalRating,
         'duration': duration,
         'poster': thumb,
+        'saga': saga,
       };
     } catch (e) {
       debugPrint('Error parsing NFO ($path): $e');

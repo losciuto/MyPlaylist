@@ -158,6 +158,7 @@ class ScanService {
       rating: metadata?['rating'] ?? 0.0,
       isSeries: true,
       posterPath: metadata?['poster'] ?? '',
+      saga: metadata?['saga'] ?? '',
     );
 
     await DatabaseHelper.instance.insertVideo(video);
@@ -212,6 +213,7 @@ class ScanService {
       duration: metadata?['duration'] ?? '',
       rating: metadata?['rating'] ?? 0.0,
       posterPath: metadata?['poster'] ?? '',
+      saga: metadata?['saga'] ?? '',
     );
 
     // Insert into DB (update if exists)

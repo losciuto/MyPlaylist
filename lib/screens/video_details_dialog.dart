@@ -179,6 +179,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                         if (widget.video.duration.isNotEmpty) _buildTag(widget.video.duration, Colors.purple),
                         _buildTag('★ ${widget.video.rating.toStringAsFixed(1)}', Colors.amber),
                         if (widget.video.directors.isNotEmpty) _buildTag('Regia: ${widget.video.directors}', Colors.teal),
+                        if (widget.video.saga.isNotEmpty) _buildTag('Saga: ${widget.video.saga}', Colors.orangeAccent),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -242,6 +243,11 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                         if (widget.video.plot.isNotEmpty) ...[
                           _buildSectionTitle('Trama'),
                           Text(widget.video.plot, style: TextStyle(color: secondaryTextColor, fontSize: 16, height: 1.4)),
+                          const SizedBox(height: 15),
+                        ],
+                        if (widget.video.saga.isNotEmpty) ...[
+                          _buildSectionTitle('Saga'),
+                          Text(widget.video.saga, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
                           const SizedBox(height: 15),
                         ],
                         _buildSectionTitle('File'),

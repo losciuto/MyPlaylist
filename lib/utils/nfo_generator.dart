@@ -73,6 +73,14 @@ class NfoGenerator {
              builder.element('thumb', nest: 'https://image.tmdb.org/t/p/original${tmdbData['backdrop_path']}');
         });
       }
+
+      // Saga (Collection)
+      if (tmdbData['belongs_to_collection'] != null) {
+        final col = tmdbData['belongs_to_collection'];
+        builder.element('set', nest: () {
+          builder.element('name', nest: col['name'] ?? '');
+        });
+      }
     });
 
     return builder.buildDocument().toXmlString(pretty: true, indent: '    ');

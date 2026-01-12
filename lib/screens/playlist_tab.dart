@@ -62,6 +62,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
           excludedYears: settings.excludedYears,
           excludedActors: settings.excludedActors,
           excludedDirectors: settings.excludedDirectors,
+          sagas: settings.sagas,
+          excludedSagas: settings.excludedSagas,
           limit: settings.limit
         );
         _checkResult(provider.playlist);

@@ -32,6 +32,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   late TextEditingController _plotController;
   late TextEditingController _posterPathController;
   late TextEditingController _durationController;
+  late TextEditingController _sagaController;
+  late TextEditingController _sagaIndexController;
   late double _rating;
 
   bool _isSaving = false;
@@ -48,6 +50,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _plotController = TextEditingController(text: widget.video.plot);
     _posterPathController = TextEditingController(text: widget.video.posterPath);
     _durationController = TextEditingController(text: widget.video.duration);
+    _sagaController = TextEditingController(text: widget.video.saga);
+    _sagaIndexController = TextEditingController(text: widget.video.sagaIndex.toString());
     _rating = widget.video.rating;
     _loadFileSize();
   }
@@ -253,6 +257,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          if (details['vote_average'] != null) _rating = (details['vote_average'] as num).toDouble();
          
          _posterPathController.text = localPosterPath;
+         _sagaController.text = (details['belongs_to_collection'] != null) ? (details['belongs_to_collection']['name'] ?? '') : '';
          
          if (details['credits'] != null) {
             final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
@@ -337,6 +342,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
        if (metadata['poster'] != null && metadata['poster'].toString().isNotEmpty) {
           _posterPathController.text = metadata['poster'];
        }
+       _sagaController.text = metadata['saga'] ?? '';
     });
     
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati caricati dal file .nfo!')));
@@ -352,6 +358,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _plotController.dispose();
     _posterPathController.dispose();
     _durationController.dispose();
+    _sagaController.dispose();
+    _sagaIndexController.dispose();
     super.dispose();
   }
 
@@ -374,6 +382,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         posterPath: _posterPathController.text,
         rating: _rating,
         isSeries: widget.video.isSeries,
+        saga: _sagaController.text,
+        sagaIndex: int.tryParse(_sagaIndexController.text) ?? 0,
       );
 
       // ignore: avoid_print
@@ -497,6 +507,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                              _buildTextField(_actorsController, 'Attori (separati da virgola)'),
                              const SizedBox(height: 10),
                              _buildTextField(_posterPathController, 'Path Poster'),
+                             const SizedBox(height: 10),
+                             Row(
+                               children: [
+                                 Expanded(child: _buildTextField(_sagaController, 'Saga', false, 1, 'Il nome della collezione di film (es. Star Wars Collection)')),
+                                 const SizedBox(width: 10),
+                                 Expanded(child: _buildTextField(_sagaIndexController, 'Indice Saga', false, 1, 'L\'ordine del film nella collezione (1, 2, 3...)')),
+                               ],
+                             ),
                            ],
                          ),
                        ),
@@ -556,7 +574,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, [bool required = false, int maxLines = 1]) {
+  Widget _buildTextField(TextEditingController controller, String label, [bool required = false, int maxLines = 1, String? tooltip]) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -570,6 +588,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4CAF50))),
         filled: true,
         fillColor: const Color(0xFF3C3C3C),
+        suffixIcon: tooltip != null ? Tooltip(
+          message: tooltip,
+          child: const Icon(Icons.info_outline, color: Colors.blueAccent, size: 18),
+        ) : null,
       ),
     );
   }

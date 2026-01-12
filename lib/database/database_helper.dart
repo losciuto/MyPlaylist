@@ -27,7 +27,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path, 
-      version: 2, 
+      version: 3, 
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -48,7 +48,9 @@ class DatabaseHelper {
         duration TEXT,
         rating REAL,
         isSeries INTEGER DEFAULT 0,
-        posterPath TEXT
+        posterPath TEXT,
+        saga TEXT DEFAULT '',
+        sagaIndex INTEGER DEFAULT 0
       )
     ''');
   }
@@ -59,8 +61,15 @@ class DatabaseHelper {
       try {
         await db.execute('ALTER TABLE videos ADD COLUMN isSeries INTEGER DEFAULT 0');
       } catch (e) {
-        // Handle case where column might already exist (e.g. partial manual update)
         print('DEBUG [DatabaseHelper]: Failed to add isSeries column: $e');
+      }
+    }
+    if (oldVersion < 3) {
+      try {
+        await db.execute("ALTER TABLE videos ADD COLUMN saga TEXT DEFAULT ''");
+        await db.execute('ALTER TABLE videos ADD COLUMN sagaIndex INTEGER DEFAULT 0');
+      } catch (e) {
+        print('DEBUG [DatabaseHelper]: Failed to add saga/sagaIndex columns: $e');
       }
     }
   }
@@ -195,6 +204,8 @@ class DatabaseHelper {
       List<String>? excludedYears,
       List<String>? excludedActors,
       List<String>? excludedDirectors,
+      List<String>? sagas,
+      List<String>? excludedSagas,
       int limit = 20,
       List<int>? excludeIds}) async {
         
@@ -232,6 +243,12 @@ class DatabaseHelper {
       args.addAll(directors.map((d) => '%$d%'));
     }
 
+    if (sagas != null && sagas.isNotEmpty) {
+      final conditions = sagas.map((_) => "saga LIKE ?").join(' OR ');
+      query += " AND ($conditions)";
+      args.addAll(sagas.map((s) => '%$s%'));
+    }
+
     if (excludedGenres != null && excludedGenres.isNotEmpty) {
       for (var g in excludedGenres) {
         // Handle NULL column values by treating them as empty strings for NOT LIKE comparison
@@ -258,6 +275,13 @@ class DatabaseHelper {
       for (var d in excludedDirectors) {
         query += " AND IFNULL(directors, '') NOT LIKE ?";
         args.add('%$d%');
+      }
+    }
+
+    if (excludedSagas != null && excludedSagas.isNotEmpty) {
+      for (var s in excludedSagas) {
+        query += " AND IFNULL(saga, '') NOT LIKE ?";
+        args.add('%$s%');
       }
     }
 

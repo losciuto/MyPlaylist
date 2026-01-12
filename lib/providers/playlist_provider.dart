@@ -98,6 +98,8 @@ class PlaylistProvider extends ChangeNotifier {
     List<String>? excludedYears,
     List<String>? excludedActors,
     List<String>? excludedDirectors,
+    List<String>? sagas,
+    List<String>? excludedSagas,
     int? limit,
     bool launchPlayer = true,
   }) async {
@@ -114,6 +116,8 @@ class PlaylistProvider extends ChangeNotifier {
       excludedYears: excludedYears,
       excludedActors: excludedActors,
       excludedDirectors: excludedDirectors,
+      sagas: sagas,
+      excludedSagas: excludedSagas,
       limit: limit ?? 20,
       excludeIds: _proposedVideoIds.toList()
     );
@@ -133,6 +137,8 @@ class PlaylistProvider extends ChangeNotifier {
         excludedYears: excludedYears,
         excludedActors: excludedActors,
         excludedDirectors: excludedDirectors,
+        sagas: sagas,
+        excludedSagas: excludedSagas,
         limit: limit ?? 20
       );
       await setPlaylist(retryVideos);

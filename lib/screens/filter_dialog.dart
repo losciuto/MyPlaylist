@@ -18,6 +18,7 @@ class _FilterDialogState extends State<FilterDialog> {
   Map<String, int> _availableYears = {};
   Map<String, int> _availableActors = {};
   Map<String, int> _availableDirectors = {};
+  Map<String, int> _availableSagas = {};
 
   // Selected state
   final List<String> _selectedGenres = [];
@@ -28,8 +29,11 @@ class _FilterDialogState extends State<FilterDialog> {
   final List<String> _excludedActors = [];
   final List<String> _selectedDirectors = [];
   final List<String> _excludedDirectors = [];
+  final List<String> _selectedSagas = [];
+  final List<String> _excludedSagas = [];
   double _minRating = 0.0;
   final TextEditingController _limitController = TextEditingController(text: '20');
+  int _currentTab = 0; // 0: Generale, 1: Generi, 2: Anni, 3: Registi, 4: Attori, 5: Saghe
 
   bool _isLoading = true;
 
@@ -47,12 +51,16 @@ class _FilterDialogState extends State<FilterDialog> {
       final years = await DatabaseHelper.instance.getValuesWithCounts('year');
       final actors = await DatabaseHelper.instance.getValuesWithCounts('actors');
       final directors = await DatabaseHelper.instance.getValuesWithCounts('directors');
+      final sagas = await DatabaseHelper.instance.getValuesWithCounts('saga');
 
       // Sort alphabetically
       final sortedGenres = Map.fromEntries(genres.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
       final sortedYears = Map.fromEntries(years.entries.toList()..sort((a, b) => b.key.compareTo(a.key))); // Years desc
       final sortedActors = Map.fromEntries(actors.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
       final sortedDirectors = Map.fromEntries(directors.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+      
+      // Filter sagas to show only those with more than 1 movie
+      final filteredSagas = Map.fromEntries(sagas.entries.where((e) => e.value > 1).toList()..sort((a, b) => a.key.compareTo(b.key)));
 
       if (mounted) {
         setState(() {
@@ -60,6 +68,7 @@ class _FilterDialogState extends State<FilterDialog> {
           _availableYears = sortedYears;
           _availableActors = sortedActors;
           _availableDirectors = sortedDirectors;
+          _availableSagas = filteredSagas;
           _isLoading = false;
         });
       }
@@ -86,40 +95,36 @@ class _FilterDialogState extends State<FilterDialog> {
       backgroundColor: const Color(0xFF2B2B2B),
       title: const Text('Filtri Avanzati Playlist', style: TextStyle(color: Color(0xFF4CAF50))),
       content: SizedBox(
-        width: 600,
+        width: 800,
         height: 600,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Numero di video:', style: TextStyle(color: Colors.white70)),
-              TextField(
-                controller: _limitController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(filled: true, fillColor: Color(0xFF3C3C3C)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Sidebar
+            Container(
+              width: 180,
+              decoration: const BoxDecoration(
+                border: Border(right: BorderSide(color: Colors.white12)),
               ),
-              const SizedBox(height: 20),
-              
-              const Text('Rating Minimo:', style: TextStyle(color: Colors.white70)),
-              Slider(
-                value: _minRating,
-                min: 0,
-                max: 10,
-                divisions: 20,
-                label: _minRating.toString(),
-                activeColor: const Color(0xFF4CAF50),
-                onChanged: (val) => setState(() => _minRating = val),
+              child: ListView(
+                children: [
+                   _buildSidebarItem(0, 'Generale', Icons.settings),
+                   _buildSidebarItem(1, 'Generi', Icons.category),
+                   _buildSidebarItem(2, 'Anni', Icons.calendar_today),
+                   _buildSidebarItem(3, 'Registi', Icons.person),
+                   _buildSidebarItem(4, 'Attori', Icons.group),
+                   _buildSidebarItem(5, 'Saghe', Icons.library_books),
+                   const Divider(color: Colors.white12),
+                   _buildSummary(),
+                ],
               ),
-              Text('Valore: $_minRating', style: const TextStyle(color: Colors.white30)),
-              const Divider(color: Colors.grey),
-
-              _buildMultiSelect('Generi', _availableGenres, _selectedGenres, _excludedGenres),
-              _buildMultiSelect('Anni', _availableYears, _selectedYears, _excludedYears),
-              _buildMultiSelect('Registi', _availableDirectors, _selectedDirectors, _excludedDirectors),
-              _buildMultiSelect('Attori', _availableActors, _selectedActors, _excludedActors),
-            ],
-          ),
+            ),
+            const SizedBox(width: 20),
+            // Content Area
+            Expanded(
+              child: _buildTabContent(),
+            ),
+          ],
         ),
       ),
       actions: [
@@ -134,6 +139,8 @@ class _FilterDialogState extends State<FilterDialog> {
               _excludedActors.clear();
               _selectedDirectors.clear();
               _excludedDirectors.clear();
+              _selectedSagas.clear();
+              _excludedSagas.clear();
               _minRating = 0.0;
             });
           },
@@ -155,6 +162,8 @@ class _FilterDialogState extends State<FilterDialog> {
               excludedYears: _excludedYears,
               excludedActors: _excludedActors,
               excludedDirectors: _excludedDirectors,
+              sagas: _selectedSagas,
+              excludedSagas: _excludedSagas,
               limit: int.tryParse(_limitController.text) ?? 20,
             );
             Navigator.pop(context, settings);
@@ -168,8 +177,9 @@ class _FilterDialogState extends State<FilterDialog> {
   String _getColumnName(String title) {
     if (title.contains('Generi')) return 'genres';
     if (title.contains('Anni')) return 'year';
-    if (title.contains('Registi')) return 'directors';
+     if (title.contains('Registi')) return 'directors';
     if (title.contains('Attori')) return 'actors';
+    if (title.contains('Saghe')) return 'saga';
     return '';
   }
 
@@ -188,71 +198,157 @@ class _FilterDialogState extends State<FilterDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 15),
-        Text('$title (${options.length})', style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
-        const SizedBox(height: 5),
-        Container(
-          height: 150,
-          margin: const EdgeInsets.only(right: 12.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFF3C3C3C),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ListView.builder(
-            itemCount: options.length,
-            itemBuilder: (ctx, i) {
-              final key = options.keys.elementAt(i);
-              final count = options[key];
-              
-              final isIncluded = included.contains(key);
-              final isExcluded = excluded.contains(key);
+        Text('$title (${options.length})', style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 18)),
+        const SizedBox(height: 10),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF3C3C3C),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ListView.builder(
+              itemCount: options.length,
+              itemBuilder: (ctx, i) {
+                final key = options.keys.elementAt(i);
+                final count = options[key];
+                
+                final isIncluded = included.contains(key);
+                final isExcluded = excluded.contains(key);
 
-              return ListTile(
-                dense: true,
-                onTap: () => _showVideosList(title, _getColumnName(title), key),
-                leading: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        if (isIncluded) {
-                          // Allow cycling to Excluded
-                          included.remove(key);
-                          excluded.add(key);
-                        } else if (isExcluded) {
-                          // Allow cycling to None
-                          excluded.remove(key);
-                        } else {
-                          // Cycle to Included
-                          included.add(key);
-                        }
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(4),
-                        color: isIncluded 
-                              ? const Color(0xFF4CAF50) 
-                              : (isExcluded ? Colors.red : Colors.transparent),
+                return ListTile(
+                  dense: true,
+                  onLongPress: () => _showVideosList(title, _getColumnName(title), key),
+                  leading: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (isIncluded) {
+                            included.remove(key);
+                            excluded.add(key);
+                          } else if (isExcluded) {
+                            excluded.remove(key);
+                          } else {
+                            included.add(key);
+                          }
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                          color: isIncluded 
+                                ? const Color(0xFF4CAF50) 
+                                : (isExcluded ? Colors.red : Colors.transparent),
+                        ),
+                        child: isIncluded
+                            ? const Icon(Icons.check, size: 16, color: Colors.white)
+                            : (isExcluded 
+                                ? const Icon(Icons.close, size: 16, color: Colors.white) 
+                                : null),
                       ),
-                      child: isIncluded
-                          ? const Icon(Icons.check, size: 16, color: Colors.white)
-                          : (isExcluded 
-                              ? const Icon(Icons.close, size: 16, color: Colors.white) 
-                              : null),
                     ),
                   ),
-                ),
-                title: Text('$key ($count)',
-                    style: const TextStyle(color: Colors.white, fontSize: 12)),
-                trailing: const Icon(Icons.chevron_right, color: Colors.white24, size: 16),
-              );
-            },
+                  title: Text('$key ($count)',
+                      style: const TextStyle(color: Colors.white, fontSize: 13)),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.list, color: Colors.white24, size: 16),
+                    onPressed: () => _showVideosList(title, _getColumnName(title), key),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSidebarItem(int index, String label, IconData icon) {
+    final isSelected = _currentTab == index;
+    return ListTile(
+      selected: isSelected,
+      leading: Icon(icon, color: isSelected ? const Color(0xFF4CAF50) : Colors.white70, size: 20),
+      title: Text(label, style: TextStyle(color: isSelected ? const Color(0xFF4CAF50) : Colors.white70, fontSize: 14)),
+      onTap: () => setState(() => _currentTab = index),
+      dense: true,
+    );
+  }
+
+  Widget _buildTabContent() {
+    switch (_currentTab) {
+      case 0:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('IMPOSTAZIONI GENERALI', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 18)),
+            const SizedBox(height: 20),
+            const Text('Numero massimo di video:', style: TextStyle(color: Colors.white70)),
+            const SizedBox(height: 5),
+            TextField(
+              controller: _limitController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                filled: true, 
+                fillColor: Color(0xFF3C3C3C),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+              ),
+            ),
+            const SizedBox(height: 30),
+            const Text('Rating Minimo:', style: TextStyle(color: Colors.white70)),
+            Slider(
+              value: _minRating,
+              min: 0,
+              max: 10,
+              divisions: 20,
+              label: _minRating.toString(),
+              activeColor: const Color(0xFF4CAF50),
+              onChanged: (val) => setState(() => _minRating = val),
+            ),
+            Center(child: Text('Filtra per rating ≥ $_minRating', style: const TextStyle(color: Colors.white70))),
+          ],
+        );
+      case 1:
+        return _buildMultiSelect('Generi', _availableGenres, _selectedGenres, _excludedGenres);
+      case 2:
+        return _buildMultiSelect('Anni', _availableYears, _selectedYears, _excludedYears);
+      case 3:
+        return _buildMultiSelect('Registi', _availableDirectors, _selectedDirectors, _excludedDirectors);
+      case 4:
+        return _buildMultiSelect('Attori', _availableActors, _selectedActors, _excludedActors);
+      case 5:
+        return _buildMultiSelect('Saghe', _availableSagas, _selectedSagas, _excludedSagas);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildSummary() {
+    int inclusions = _selectedGenres.length + _selectedYears.length + _selectedActors.length + _selectedDirectors.length + _selectedSagas.length;
+    int exclusions = _excludedGenres.length + _excludedYears.length + _excludedActors.length + _excludedDirectors.length + _excludedSagas.length;
+    
+    if (inclusions == 0 && exclusions == 0) {
+       return const Padding(
+         padding: EdgeInsets.all(10.0),
+         child: Text('Nessun filtro attivo', style: TextStyle(color: Colors.white24, fontSize: 11)),
+       );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('RIEPILOGO', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+          if (inclusions > 0) 
+            Text('• $inclusions inclusi', style: const TextStyle(color: Color(0xFF4CAF50), fontSize: 11)),
+          if (exclusions > 0)
+            Text('• $exclusions esclusi', style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+        ],
+      ),
     );
   }
 }
