@@ -25,7 +25,26 @@ class DatabaseTab extends StatefulWidget {
 
 class _DatabaseTabState extends State<DatabaseTab> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _horizontalScrollController = ScrollController();
+  
   bool _onlyMissingNfo = false;
+  
+  // Sorting state
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
+  // Column widths
+  static const double _colIdxWidth = 50;
+  static const double _colTitleWidth = 350;
+  static const double _colYearWidth = 80;
+  static const double _colRatingWidth = 80;
+  static const double _colDurationWidth = 100;
+  static const double _colSagaWidth = 180;
+  static const double _colDirectorsWidth = 200;
+  static const double _colActionsWidth = 120;
+  static const double _totalTableWidth = _colIdxWidth + _colTitleWidth + _colYearWidth + 
+                                       _colRatingWidth + _colDurationWidth + _colSagaWidth + 
+                                       _colDirectorsWidth + _colActionsWidth;
 
 
   Future<void> _bulkGenerateNfo() async {
@@ -384,7 +403,70 @@ class _DatabaseTabState extends State<DatabaseTab> {
   @override
   void dispose() {
     _searchController.dispose();
+    _horizontalScrollController.dispose();
     super.dispose();
+  }
+
+  void _sortVideos(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+    
+    final provider = context.read<DatabaseProvider>();
+    final videos = List<Video>.from(provider.filteredVideos);
+    
+    videos.sort((a, b) {
+      int comparison = 0;
+      
+      switch (columnIndex) {
+        case 0: // # (index)
+          comparison = provider.filteredVideos.indexOf(a).compareTo(provider.filteredVideos.indexOf(b));
+          break;
+        case 1: // Titolo
+          comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+          break;
+        case 2: // Anno
+          comparison = a.year.compareTo(b.year);
+          break;
+        case 3: // Rating
+          comparison = a.rating.compareTo(b.rating);
+          break;
+        case 4: // Durata
+          // Parse duration strings like "1h 30m" for comparison
+          final aDuration = _parseDuration(a.duration);
+          final bDuration = _parseDuration(b.duration);
+          comparison = aDuration.compareTo(bDuration);
+          break;
+        case 5: // Saga
+          comparison = a.saga.toLowerCase().compareTo(b.saga.toLowerCase());
+          break;
+        case 6: // Registi
+          comparison = a.directors.toLowerCase().compareTo(b.directors.toLowerCase());
+          break;
+      }
+      
+      return ascending ? comparison : -comparison;
+    });
+    
+    // Update the provider with sorted videos
+    provider.setSortedVideos(videos);
+  }
+  
+  int _parseDuration(String duration) {
+    // Parse duration like "1h 30m" or "45m" to minutes
+    int totalMinutes = 0;
+    final hourMatch = RegExp(r'(\d+)h').firstMatch(duration);
+    final minMatch = RegExp(r'(\d+)m').firstMatch(duration);
+    
+    if (hourMatch != null) {
+      totalMinutes += int.parse(hourMatch.group(1)!) * 60;
+    }
+    if (minMatch != null) {
+      totalMinutes += int.parse(minMatch.group(1)!);
+    }
+    
+    return totalMinutes;
   }
 
   // Wrappers to keep UI clean
@@ -793,87 +875,31 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   ? const Center(child: CircularProgressIndicator())
                   : provider.filteredVideos.isEmpty
                       ? const Center(child: Text('Nessun video trovato.'))
-                      : SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              headingRowColor: WidgetStateProperty.all(const Color(0xFF4CAF50)),
-                              headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              // Remove dataRowColor to let it follow theme
-                              columns: const [
-                                DataColumn(label: Text('#')),
-                                DataColumn(label: Text('Titolo')),
-                                DataColumn(label: Text('Anno')),
-                                DataColumn(label: Text('Rating')),
-                                 DataColumn(label: Text('Durata')),
-                                 DataColumn(label: Text('Saga')),
-                                 DataColumn(label: Text('Registi')),
-                                 DataColumn(label: Text('Azioni')),
-                              ],
-                              rows: provider.filteredVideos.asMap().entries.map((entry) {
-                                final i = entry.key + 1;
-                                final video = entry.value;
-                                return DataRow(cells: [
-                                  DataCell(Text('$i')),
-                                    DataCell(
-                                      Tooltip(
-                                        message: video.title,
-                                        child: SizedBox(
-                                          width: 200, 
-                                          child: Row(
-                                            children: [
-                                              if (video.isSeries) 
-                                                const Padding(
-                                                  padding: EdgeInsets.only(right: 5),
-                                                  child: Icon(Icons.tv, color: Colors.blueAccent, size: 16),
-                                                ),
-                                              Expanded(
-                                                child: Text(
-                                                  video.title.isNotEmpty ? video.title : 'N/A', 
-                                                  overflow: TextOverflow.ellipsis
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        ),
-                                      )
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: _horizontalScrollController,
+                              child: SizedBox(
+                                width: _totalTableWidth,
+                                child: Column(
+                                  children: [
+                                    // Unified Header
+                                    _buildTableHeader(),
+                                    // Scrollable Body
+                                    Expanded(
+                                      child: ListView.builder(
+                                        itemCount: provider.filteredVideos.length,
+                                        itemBuilder: (context, index) {
+                                          return _buildTableRow(provider.filteredVideos[index], index);
+                                        },
+                                      ),
                                     ),
-                                   DataCell(Text(video.year)),
-                                   DataCell(
-                                     Row(
-                                       mainAxisSize: MainAxisSize.min,
-                                       children: [
-                                         const Icon(Icons.star, color: Colors.orange, size: 14),
-                                         const SizedBox(width: 4),
-                                         Text(video.rating.toStringAsFixed(1)),
-                                       ],
-                                     ),
-                                   ),
-                                    DataCell(Text(video.duration)),
-                                    DataCell(SizedBox(width: 120, child: Text(video.saga, overflow: TextOverflow.ellipsis))),
-                                   DataCell(SizedBox(width: 150, child: Text(video.directors, overflow: TextOverflow.ellipsis))),
-                                  DataCell(
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit, color: Colors.blue),
-                                          onPressed: () => _editVideo(video),
-                                          tooltip: 'Modifica',
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete, color: Colors.red),
-                                          onPressed: () => _deleteVideo(video),
-                                          tooltip: 'Elimina riga',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ]);
-                              }).toList(),
-                            ),
-                          ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
                         ),
             ),
             Padding(
@@ -913,6 +939,137 @@ class _DatabaseTabState extends State<DatabaseTab> {
           ],
         );
       },
+    );
+  }
+  Widget _buildTableHeader() {
+    return Container(
+      color: const Color(0xFF4CAF50),
+      height: 48,
+      child: Row(
+        children: [
+          _buildHeaderColumn('#', _colIdxWidth, 0),
+          _buildHeaderColumn('Titolo', _colTitleWidth, 1),
+          _buildHeaderColumn('Anno', _colYearWidth, 2),
+          _buildHeaderColumn('Rating', _colRatingWidth, 3),
+          _buildHeaderColumn('Durata', _colDurationWidth, 4),
+          _buildHeaderColumn('Saga', _colSagaWidth, 5),
+          _buildHeaderColumn('Registi', _colDirectorsWidth, 6),
+          const SizedBox(width: _colActionsWidth, child: Center(child: Text('Azioni', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderColumn(String label, double width, int index) {
+    return InkWell(
+      onTap: () => _sortVideos(index, _sortColumnIndex == index ? !_sortAscending : true),
+      child: SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+              if (_sortColumnIndex == index)
+                Icon(_sortAscending ? Icons.arrow_upward : Icons.arrow_downward, color: Colors.white70, size: 14),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableRow(Video video, int index) {
+    final bgColor = index % 2 == 0 
+        ? (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white)
+        : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF333333) : Colors.grey[50]);
+
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+      ),
+      child: Row(
+        children: [
+          _buildTableCell(Text('${index + 1}'), _colIdxWidth),
+          _buildTableCell(
+            Tooltip(
+              message: video.title,
+              child: Row(
+                children: [
+                  if (video.isSeries) 
+                    const Padding(
+                      padding: EdgeInsets.only(right: 5),
+                      child: Icon(Icons.tv, color: Colors.blueAccent, size: 16),
+                    ),
+                  Expanded(
+                    child: Text(
+                      video.title.isNotEmpty ? video.title : 'N/A', 
+                      overflow: TextOverflow.ellipsis
+                    ),
+                  ),
+                ],
+              ),
+            ), 
+            _colTitleWidth
+          ),
+          _buildTableCell(Text(video.year), _colYearWidth),
+          _buildTableCell(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.star, color: Colors.orange, size: 14),
+                const SizedBox(width: 4),
+                Text(video.rating.toStringAsFixed(1)),
+              ],
+            ), 
+            _colRatingWidth
+          ),
+          _buildTableCell(Text(video.duration), _colDurationWidth),
+          _buildTableCell(Text(video.saga, overflow: TextOverflow.ellipsis), _colSagaWidth),
+          _buildTableCell(Text(video.directors, overflow: TextOverflow.ellipsis), _colDirectorsWidth),
+          _buildTableCell(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                  onPressed: () => _editVideo(video),
+                  tooltip: 'Modifica',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  onPressed: () => _deleteVideo(video),
+                  tooltip: 'Elimina',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
+                ),
+              ],
+            ), 
+            _colActionsWidth
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTableCell(Widget child, double width) {
+    return SizedBox(
+      width: width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: child,
+        ),
+      ),
     );
   }
 }

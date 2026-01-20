@@ -39,6 +39,11 @@ class DatabaseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSortedVideos(List<Video> sortedVideos) {
+    _filteredVideos = sortedVideos;
+    notifyListeners();
+  }
+
   Future<void> updateVideo(Video video) async {
     await DatabaseHelper.instance.updateVideo(video);
     await refreshVideos(); // Refresh to update list and sort
