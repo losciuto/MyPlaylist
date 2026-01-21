@@ -833,4 +833,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String bulkOpStats(Object errors, Object skipped, Object updated) {
     return 'Aggiornati: $updated\nSaltati: $skipped\nErrori: $errors';
   }
+
+  @override
+  String get openGitHubLabel => 'Apri GitHub';
 }

@@ -30,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _serverInterfaceController;
   late TextEditingController _tmdbApiKeyController;
   bool _obscureSecret = true;
+  bool _isCheckingUpdates = false;
   int _currentTab = 0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control, 4: Manutenzione, 5: Debug
 
   @override
@@ -164,9 +165,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkForUpdates() async {
-    // Show loading indicator or just rely on the dialog if found
-    // For a manual check, it's nice to show "No updates" if none found
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    setState(() => _isCheckingUpdates = true);
     
     try {
       final updateInfo = await GitHubService().checkForUpdates();
@@ -183,9 +183,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-         SnackBar(content: Text(AppLocalizations.of(context)!.updateError(e.toString()))),
-      );
+      if (mounted) {
+        scaffoldMessenger.showSnackBar(
+           SnackBar(content: Text(AppLocalizations.of(context)!.updateError(e.toString()))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCheckingUpdates = false);
     }
   }
 
@@ -327,10 +331,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ListTile(
           title: Text(l10n.checkForUpdates),
           subtitle: Text(l10n.currentVersion(AppConfig.appVersion)),
-          trailing: ElevatedButton(
-            onPressed: _checkForUpdates,
-            child: Text(l10n.checkButton),
-          ),
+          trailing: _isCheckingUpdates 
+            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+            : ElevatedButton(
+                onPressed: _checkForUpdates,
+                child: Text(l10n.checkButton),
+              ),
           contentPadding: EdgeInsets.zero,
         ),
       ],

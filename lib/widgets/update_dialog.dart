@@ -18,6 +18,10 @@ class UpdateDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isDirectDownload = updateInfo.downloadUrl.toLowerCase().contains('.appimage') || 
+                             updateInfo.downloadUrl.toLowerCase().contains('.deb') ||
+                             updateInfo.downloadUrl.toLowerCase().contains('.tar.gz');
+
     return AlertDialog(
       title: Text(l10n.updateAvailableTitle(updateInfo.version)),
       content: SizedBox(
@@ -54,8 +58,8 @@ class UpdateDialog extends StatelessWidget {
              _launchUrl();
              Navigator.of(context).pop();
           },
-          icon: const Icon(Icons.download),
-          label: Text(l10n.downloadButtonLabel),
+          icon: Icon(isDirectDownload ? Icons.download : Icons.open_in_new),
+          label: Text(isDirectDownload ? l10n.downloadButtonLabel : l10n.openGitHubLabel),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,

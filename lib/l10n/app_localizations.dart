@@ -1567,6 +1567,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aggiornati: {updated}\nSaltati: {skipped}\nErrori: {errors}'**
   String bulkOpStats(Object errors, Object skipped, Object updated);
+
+  /// No description provided for @openGitHubLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri GitHub'**
+  String get openGitHubLabel;
 }
 
 class _AppLocalizationsDelegate

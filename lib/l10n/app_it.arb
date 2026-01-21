@@ -248,5 +248,6 @@
   "deleteTooltip": "Elimina",
   "opCancelled": "Operazione Annullata",
   "opCompleted": "Operazione Completata",
-  "bulkOpStats": "Aggiornati: {updated}\nSaltati: {skipped}\nErrori: {errors}"
+  "bulkOpStats": "Aggiornati: {updated}\nSaltati: {skipped}\nErrori: {errors}",
+  "openGitHubLabel": "Apri GitHub"
 }

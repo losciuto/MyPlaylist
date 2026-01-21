@@ -27,18 +27,29 @@ class GitHubService {
         final String tagName = data['tag_name'] ?? '';
         final String body = data['body'] ?? '';
         
-        // Find the asset for Linux/AppImage or just take the first one or the html_url
-        // For simplicity and to let user choose, we can use the html_url of the release
-        // OR we can look for specific assets. Let's use the release page URL for now 
-        // as it's safer than guessing the asset structure.
-        final String downloadUrl = data['html_url'] ?? '';
+        // Default download URL is the release page
+        String downloadUrl = data['html_url'] ?? '';
+        
+        // Try to find a direct download link for Linux (.AppImage or .deb)
+        final List<dynamic>? assets = data['assets'];
+        if (assets != null && assets.isNotEmpty) {
+          for (final asset in assets) {
+            final String name = asset['name']?.toString().toLowerCase() ?? '';
+            final String browserDownloadUrl = asset['browser_download_url'] ?? '';
+            
+            if (browserDownloadUrl.isNotEmpty && 
+                (name.endsWith('.appimage') || name.endsWith('.deb') || name.endsWith('.tar.gz'))) {
+              downloadUrl = browserDownloadUrl;
+              break; // Take the first matching Linux asset
+            }
+          }
+        }
 
-        // Clean version string (remove 'v' prefix if present)
-        final String remoteVersion = tagName.startsWith('v') 
-            ? tagName.substring(1) 
-            : tagName;
+        // Clean version string: take only digits and dots
+        final String remoteVersion = _extractVersion(tagName);
+        final String currentVersion = _extractVersion(AppConfig.appVersion);
 
-        if (_isNewerVersion(remoteVersion, AppConfig.appVersion)) {
+        if (_isNewerVersion(remoteVersion, currentVersion)) {
           return UpdateInfo(
             version: tagName,
             body: body,
@@ -47,10 +58,16 @@ class GitHubService {
         }
       }
     } catch (e) {
-      // Fail silently or log error
       print('Error checking for updates: $e');
     }
     return null;
+  }
+
+  String _extractVersion(String input) {
+    // Keep only numbers and dots
+    final RegExp regExp = RegExp(r'[0-9]+\.[0-9]+(\.[0-9]+)?');
+    final match = regExp.firstMatch(input);
+    return match?.group(0) ?? input;
   }
 
   bool _isNewerVersion(String remote, String current) {
@@ -63,8 +80,6 @@ class GitHubService {
         if (remoteParts[i] < currentParts[i]) return false;
       }
       
-      // If we are here, common parts are equal. 
-      // If remote has more parts (e.g. 1.0.1 vs 1.0), it's newer
       return remoteParts.length > currentParts.length;
     } catch (e) {
       return false; 
