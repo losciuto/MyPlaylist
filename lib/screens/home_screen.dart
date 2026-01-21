@@ -3,8 +3,11 @@ import '../database/database_helper.dart'; // Import DB Helper
 import 'scan_tab.dart';
 import 'database_tab.dart';
 import 'playlist_tab.dart';
-import 'settings_screen.dart';
+import '../services/github_service.dart';
+import '../widgets/update_dialog.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 import '../config/app_config.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,10 +23,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _checkDatabase();
+    _loadVideos();
+    // Check for updates after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates();
+    });
   }
 
-  Future<void> _checkDatabase() async {
+  Future<void> _checkForUpdates() async {
+    final updateInfo = await GitHubService().checkForUpdates();
+    if (updateInfo != null && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => UpdateDialog(updateInfo: updateInfo),
+      );
+    }
+  }
+
+  Future<void> _loadVideos() async {
     final count = await DatabaseHelper.instance.getVideoCount();
     if (mounted) {
       setState(() {
@@ -51,14 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
       initialIndex: _initialIndex,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Creatore Playlist'),
+          title: Text(AppLocalizations.of(context)!.playlistCreator),
           backgroundColor: Theme.of(context).cardColor,
           elevation: 0,
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.folder_open), text: 'Scansione'),
-              Tab(icon: Icon(Icons.storage), text: 'Gestione DB'),
-              Tab(icon: Icon(Icons.playlist_play), text: 'Genera Playlist'),
+              Tab(icon: const Icon(Icons.folder_open), text: AppLocalizations.of(context)!.navScan),
+              Tab(icon: const Icon(Icons.storage), text: AppLocalizations.of(context)!.navDatabase),
+              Tab(icon: const Icon(Icons.playlist_play), text: AppLocalizations.of(context)!.navPlaylist),
             ],
             indicatorColor: AppConfig.seedColor,
             labelColor: AppConfig.seedColor,
@@ -72,21 +89,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Informazioni'),
-                    content: const Column(
+                    title: Text(AppLocalizations.of(context)!.infoTitle),
+                    content: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppConfig.appName} App', style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 10),
-                        Text('Autore: ${AppConfig.appAuthor}'),
-                        Text('Data redazione: ${AppConfig.appBuildDate}'),
-                        SizedBox(height: 10),
-                        Text('Versione: ${AppConfig.appVersion}'),
+                        Text('${AppConfig.appName} App', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        Text('${AppLocalizations.of(context)!.author}: ${AppConfig.appAuthor}'),
+                        Text('${AppLocalizations.of(context)!.buildDate}: ${AppConfig.appBuildDate}'),
+                        const SizedBox(height: 10),
+                        Text(AppLocalizations.of(context)!.currentVersion(AppConfig.appVersion)),
                       ],
                     ),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok)),
                     ],
                   ),
                 );
@@ -97,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
                 );
               },
             ),

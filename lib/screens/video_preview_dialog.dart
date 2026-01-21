@@ -8,6 +8,7 @@ import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
   final Video video;
@@ -81,7 +82,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
   Future<void> _downloadInfo() async {
     final apiKey = context.read<SettingsService>().tmdbApiKey;
     if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing)));
       return;
     }
 
@@ -96,7 +97,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       final results = await service.searchMovie(query, year: year);
 
       if (results.isEmpty) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun risultato trovato su TMDB.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbNoResults)));
         setState(() => _isDownloading = false);
         return;
       }
@@ -109,7 +110,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
         final selection = await showDialog<Map<String, dynamic>>(
           context: context,
           builder: (ctx) => SimpleDialog(
-            title: const Text('Seleziona Film'),
+            title: Text(AppLocalizations.of(context)!.selectMovieTitle),
             children: results.map((m) => SimpleDialogOption(
               onPressed: () => Navigator.pop(ctx, m),
               child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
@@ -142,12 +143,12 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Info scaricate con successo! Riavvia la scansione per aggiornare.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbSuccessMsg)));
         Navigator.pop(context); // Close dialog
       }
 
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.genericError(e.toString()))));
     } finally {
       if (mounted) setState(() => _isDownloading = false);
     }
@@ -160,6 +161,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
     final textColor = isDark ? Colors.white : Colors.black87;
     final secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = Theme.of(context).cardColor;
+    final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
       backgroundColor: cardColor,
@@ -253,7 +255,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('RIPRODUCI', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(l10n.playButtonLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
@@ -284,10 +286,10 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
   
               // Plot
               if (widget.video.plot.isNotEmpty) ...[
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'TRAMA:',
+                    l10n.sectionPlot.toUpperCase(),
                     style: TextStyle(
                       color: Color(0xFF4CAF50),
                       fontSize: 12,
@@ -321,10 +323,10 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
 
               // Episodes Section
               if (widget.video.isSeries) ...[
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'EPISODI:',
+                    l10n.sectionEpisodes.toUpperCase(),
                     style: TextStyle(
                       color: Color(0xFF4CAF50),
                       fontSize: 12,
@@ -344,7 +346,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                   child: _isLoadingEpisodes
                       ? const Center(child: CircularProgressIndicator())
                       : (_episodes == null || _episodes!.isEmpty)
-                          ? const Center(child: Text('Nessun episodio trovato.', style: TextStyle(color: Colors.grey)))
+                          ? Center(child: Text(l10n.noEpisodesFound, style: const TextStyle(color: Colors.grey)))
                           : ListView.separated(
                               itemCount: _episodes!.length,
                               separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),

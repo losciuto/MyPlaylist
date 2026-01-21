@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class MovieSelectionDialog extends StatefulWidget {
   final String title;
@@ -22,6 +23,7 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final totalPages = (widget.results.length / itemsPerPage).ceil();
     final startIndex = _currentPage * itemsPerPage;
     final endIndex = (startIndex + itemsPerPage < widget.results.length)
@@ -78,13 +80,13 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                           : const Icon(Icons.movie, color: Colors.grey),
                     ),
                     title: Text(
-                      movie['title'] ?? 'Senza Titolo',
+                      movie['title'] ?? l10n.untitled,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Anno: $releaseDate', style: const TextStyle(color: Colors.white70)),
+                        Text(l10n.yearLabel(releaseDate), style: const TextStyle(color: Colors.white70)),
                         if (movie['overview'] != null && movie['overview'].toString().isNotEmpty)
                           Text(
                             movie['overview'],
@@ -112,7 +114,7 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                           : null,
                     ),
                     Text(
-                      'Pagina ${_currentPage + 1} di $totalPages',
+                      l10n.pageOf((_currentPage + 1).toString(), totalPages.toString()),
                       style: const TextStyle(color: Colors.white70),
                     ),
                     IconButton(
@@ -131,14 +133,14 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                 if (widget.isBulkMode) ...[
                   TextButton(
                     onPressed: () => Navigator.pop(context, {'action': 'cancel'}),
-                    child: const Text('INTERROMPI TUTTO', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    child: Text(l10n.stopAllButtonLabel, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                   ),
                   const Spacer(),
                 ],
                 TextButton(
                   onPressed: () => Navigator.pop(context, null),
                   child: Text(
-                    widget.isBulkMode ? 'Salta questo video' : 'Annulla',
+                    widget.isBulkMode ? l10n.skipVideo : l10n.cancel,
                     style: TextStyle(color: widget.isBulkMode ? Colors.orange : Colors.grey),
                   ),
                 ),

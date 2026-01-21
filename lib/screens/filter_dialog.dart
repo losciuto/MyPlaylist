@@ -4,6 +4,7 @@ import '../database/database_helper.dart';
 import '../models/filter_settings.dart';
 import '../services/settings_service.dart';
 import 'filter_videos_dialog.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class FilterDialog extends StatefulWidget {
   const FilterDialog({super.key});
@@ -79,7 +80,7 @@ class _FilterDialogState extends State<FilterDialog> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore caricamento filtri: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.genericError('')} $e')),
         );
       }
     }
@@ -93,7 +94,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
     return AlertDialog(
       backgroundColor: const Color(0xFF2B2B2B),
-      title: const Text('Filtri Avanzati Playlist', style: TextStyle(color: Color(0xFF4CAF50))),
+      title: Text(AppLocalizations.of(context)!.filterTitle, style: const TextStyle(color: Color(0xFF4CAF50))),
       content: SizedBox(
         width: 800,
         height: 600,
@@ -108,12 +109,12 @@ class _FilterDialogState extends State<FilterDialog> {
               ),
               child: ListView(
                 children: [
-                   _buildSidebarItem(0, 'Generale', Icons.settings),
-                   _buildSidebarItem(1, 'Generi', Icons.category),
-                   _buildSidebarItem(2, 'Anni', Icons.calendar_today),
-                   _buildSidebarItem(3, 'Registi', Icons.person),
-                   _buildSidebarItem(4, 'Attori', Icons.group),
-                   _buildSidebarItem(5, 'Saghe', Icons.library_books),
+                   _buildSidebarItem(0, AppLocalizations.of(context)!.tabGeneral, Icons.settings),
+                   _buildSidebarItem(1, AppLocalizations.of(context)!.tabGenres, Icons.category),
+                   _buildSidebarItem(2, AppLocalizations.of(context)!.tabYears, Icons.calendar_today),
+                   _buildSidebarItem(3, AppLocalizations.of(context)!.tabDirectors, Icons.person),
+                   _buildSidebarItem(4, AppLocalizations.of(context)!.tabActors, Icons.group),
+                   _buildSidebarItem(5, AppLocalizations.of(context)!.tabSagas, Icons.library_books),
                    const Divider(color: Colors.white12),
                    _buildSummary(),
                 ],
@@ -144,11 +145,11 @@ class _FilterDialogState extends State<FilterDialog> {
               _minRating = 0.0;
             });
           },
-          child: const Text('Resetta Filtri', style: TextStyle(color: Colors.redAccent)),
+          child: Text(AppLocalizations.of(context)!.resetFilters, style: const TextStyle(color: Colors.redAccent)),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Annulla'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -168,19 +169,10 @@ class _FilterDialogState extends State<FilterDialog> {
             );
             Navigator.pop(context, settings);
           },
-          child: const Text('Genera Playlist'),
+          child: Text(AppLocalizations.of(context)!.createPlaylist),
         ),
       ],
     );
-  }
-
-  String _getColumnName(String title) {
-    if (title.contains('Generi')) return 'genres';
-    if (title.contains('Anni')) return 'year';
-     if (title.contains('Registi')) return 'directors';
-    if (title.contains('Attori')) return 'actors';
-    if (title.contains('Saghe')) return 'saga';
-    return '';
   }
 
   void _showVideosList(String title, String category, String filterValue) {
@@ -194,7 +186,7 @@ class _FilterDialogState extends State<FilterDialog> {
     );
   }
 
-  Widget _buildMultiSelect(String title, Map<String, int> options, List<String> included, List<String> excluded) {
+  Widget _buildMultiSelect(String title, String category, Map<String, int> options, List<String> included, List<String> excluded) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -217,7 +209,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
                 return ListTile(
                   dense: true,
-                  onLongPress: () => _showVideosList(title, _getColumnName(title), key),
+                  onLongPress: () => _showVideosList(title, category, key),
                   leading: SizedBox(
                     width: 24,
                     height: 24,
@@ -254,7 +246,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       style: const TextStyle(color: Colors.white, fontSize: 13)),
                   trailing: IconButton(
                     icon: const Icon(Icons.list, color: Colors.white24, size: 16),
-                    onPressed: () => _showVideosList(title, _getColumnName(title), key),
+                    onPressed: () => _showVideosList(title, category, key),
                   ),
                 );
               },
@@ -282,9 +274,9 @@ class _FilterDialogState extends State<FilterDialog> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('IMPOSTAZIONI GENERALI', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(AppLocalizations.of(context)!.generalSettings, style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 20),
-            const Text('Numero massimo di video:', style: TextStyle(color: Colors.white70)),
+            Text(AppLocalizations.of(context)!.maxVideos, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 5),
             TextField(
               controller: _limitController,
@@ -298,7 +290,7 @@ class _FilterDialogState extends State<FilterDialog> {
               ),
             ),
             const SizedBox(height: 30),
-            const Text('Rating Minimo:', style: TextStyle(color: Colors.white70)),
+            Text(AppLocalizations.of(context)!.minRating, style: const TextStyle(color: Colors.white70)),
             Slider(
               value: _minRating,
               min: 0,
@@ -308,19 +300,19 @@ class _FilterDialogState extends State<FilterDialog> {
               activeColor: const Color(0xFF4CAF50),
               onChanged: (val) => setState(() => _minRating = val),
             ),
-            Center(child: Text('Filtra per rating ≥ $_minRating', style: const TextStyle(color: Colors.white70))),
+            Center(child: Text(AppLocalizations.of(context)!.filterByRating(_minRating), style: const TextStyle(color: Colors.white70))),
           ],
         );
       case 1:
-        return _buildMultiSelect('Generi', _availableGenres, _selectedGenres, _excludedGenres);
+        return _buildMultiSelect(AppLocalizations.of(context)!.tabGenres, 'genres', _availableGenres, _selectedGenres, _excludedGenres);
       case 2:
-        return _buildMultiSelect('Anni', _availableYears, _selectedYears, _excludedYears);
+        return _buildMultiSelect(AppLocalizations.of(context)!.tabYears, 'year', _availableYears, _selectedYears, _excludedYears);
       case 3:
-        return _buildMultiSelect('Registi', _availableDirectors, _selectedDirectors, _excludedDirectors);
+        return _buildMultiSelect(AppLocalizations.of(context)!.tabDirectors, 'directors', _availableDirectors, _selectedDirectors, _excludedDirectors);
       case 4:
-        return _buildMultiSelect('Attori', _availableActors, _selectedActors, _excludedActors);
+        return _buildMultiSelect(AppLocalizations.of(context)!.tabActors, 'actors', _availableActors, _selectedActors, _excludedActors);
       case 5:
-        return _buildMultiSelect('Saghe', _availableSagas, _selectedSagas, _excludedSagas);
+        return _buildMultiSelect(AppLocalizations.of(context)!.tabSagas, 'saga', _availableSagas, _selectedSagas, _excludedSagas);
       default:
         return const SizedBox.shrink();
     }
@@ -331,9 +323,9 @@ class _FilterDialogState extends State<FilterDialog> {
     int exclusions = _excludedGenres.length + _excludedYears.length + _excludedActors.length + _excludedDirectors.length + _excludedSagas.length;
     
     if (inclusions == 0 && exclusions == 0) {
-       return const Padding(
-         padding: EdgeInsets.all(10.0),
-         child: Text('Nessun filtro attivo', style: TextStyle(color: Colors.white24, fontSize: 11)),
+       return Padding(
+         padding: const EdgeInsets.all(10.0),
+         child: Text(AppLocalizations.of(context)!.noActiveFilters, style: const TextStyle(color: Colors.white24, fontSize: 11)),
        );
     }
 
@@ -342,11 +334,11 @@ class _FilterDialogState extends State<FilterDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('RIEPILOGO', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.summary, style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
           if (inclusions > 0) 
-            Text('• $inclusions inclusi', style: const TextStyle(color: Color(0xFF4CAF50), fontSize: 11)),
+            Text(AppLocalizations.of(context)!.included(inclusions), style: const TextStyle(color: Color(0xFF4CAF50), fontSize: 11)),
           if (exclusions > 0)
-            Text('• $exclusions esclusi', style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+            Text(AppLocalizations.of(context)!.excluded(exclusions), style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
         ],
       ),
     );

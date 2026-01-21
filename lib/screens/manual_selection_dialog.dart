@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import '../database/database_helper.dart';
 import 'video_preview_dialog.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class ManualSelectionDialog extends StatefulWidget {
   const ManualSelectionDialog({super.key});
@@ -127,9 +128,9 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
               children: [
                 const Icon(Icons.edit_note, color: Color(0xFF4CAF50), size: 28),
                 const SizedBox(width: 10),
-                const Text(
-                  'Selezione Manuale Video',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  AppLocalizations.of(context)!.manualSelectionTitle,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const Spacer(),
                 IconButton(
@@ -148,7 +149,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                     controller: _searchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Cerca per titolo, anno, regista...',
+                      hintText: AppLocalizations.of(context)!.searchHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                       prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
                       filled: true,
@@ -166,11 +167,11 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Selezionati: ${_selectedIds.length}',
+                      AppLocalizations.of(context)!.selectedCount(_selectedIds.length),
                       style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      'Totale visibili: ${_filteredVideos.length}',
+                      AppLocalizations.of(context)!.visibleCount(_filteredVideos.length),
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
@@ -185,13 +186,13 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                 TextButton.icon(
                   onPressed: _selectAll,
                   icon: const Icon(Icons.check_box, size: 18),
-                  label: const Text('Seleziona Tutti Visibili'),
+                  label: Text(AppLocalizations.of(context)!.selectAllVisible),
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
                 ),
                 TextButton.icon(
                   onPressed: _deselectAll,
                   icon: const Icon(Icons.check_box_outline_blank, size: 18),
-                  label: const Text('Deseleziona Tutti'),
+                  label: Text(AppLocalizations.of(context)!.deselectAll),
                   style: TextButton.styleFrom(foregroundColor: Colors.orange),
                 ),
               ],
@@ -228,7 +229,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                                   if (video.isSeries) ...[
                                     const Icon(Icons.tv, color: Colors.blueAccent, size: 16),
                                     const SizedBox(width: 5),
-                                    const Text('SERIE', style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    Text(AppLocalizations.of(context)!.seriesLabel, style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
                                     const SizedBox(width: 5),
                                   ],
                                   Expanded(
@@ -267,7 +268,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Annulla', style: TextStyle(color: Colors.grey)),
+                  child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.grey)),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
@@ -309,7 +310,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                     Navigator.pop(context, selectedVideos);
                   },
                   icon: const Icon(Icons.playlist_add),
-                  label: const Text('Crea Playlist'),
+                  label: Text(AppLocalizations.of(context)!.createPlaylist),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     foregroundColor: Colors.white,

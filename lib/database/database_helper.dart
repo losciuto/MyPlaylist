@@ -33,6 +33,19 @@ class DatabaseHelper {
     );
   }
 
+  Future<String> getDatabasePath() async {
+    final dbPath = await getDatabasesPath();
+    return join(dbPath, 'videos.db');
+  }
+
+  Future<void> close() async {
+    final db = _database;
+    if (db != null) {
+      await db.close();
+      _database = null;
+    }
+  }
+
   Future _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE videos (

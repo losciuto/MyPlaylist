@@ -15,6 +15,7 @@ import 'package:http/http.dart' as http;
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class DatabaseTab extends StatefulWidget {
   const DatabaseTab({super.key});
@@ -50,26 +51,24 @@ class _DatabaseTabState extends State<DatabaseTab> {
   Future<void> _bulkGenerateNfo() async {
      final apiKey = context.read<SettingsService>().tmdbApiKey;
      if (apiKey.isEmpty) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante! Impostala nei settings.')));
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing)));
        return;
      }
 
      final mode = await showDialog<String>(
        context: context,
        builder: (ctx) => AlertDialog(
-         title: const Text('Generazione NFO da TMDB'),
+         title: Text(AppLocalizations.of(context)!.tmdbGenTitle),
          content: StatefulBuilder(
            builder: (context, setState) {
              return Column(
                mainAxisSize: MainAxisSize.min,
                crossAxisAlignment: CrossAxisAlignment.start,
                children: [
-                 const Text('Scegli la modalità di generazione:\n\n'
-                   '⚡ AUTOMATICO: Scarica il primo risultato trovato (più veloce).\n'
-                   '🖐️ INTERATTIVO: Ti chiede di confermare il film per ogni video trovato.'),
+                 Text(AppLocalizations.of(context)!.tmdbGenModeMsg),
                  const SizedBox(height: 20),
                  CheckboxListTile(
-                   title: const Text('Genera solo se manca il file .nfo'),
+                   title: Text(AppLocalizations.of(context)!.onlyMissingNfo),
                    value: _onlyMissingNfo,
                    onChanged: (val) {
                      setState(() {
@@ -84,9 +83,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
            }
          ),
          actions: [
-           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
-           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'auto'), child: const Text('⚡ Automatico')),
-           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'interactive'), child: const Text('🖐️ Interattivo')),
+           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
+           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'auto'), child: Text(AppLocalizations.of(context)!.tmdbClickAuto)),
+           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'interactive'), child: Text(AppLocalizations.of(context)!.tmdbClickInteractive)),
          ],
        ),
      );
@@ -99,7 +98,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
      final total = allVideos.length;
 
      if (total == 0) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun video nel database.')));
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.noVideoInDb)));
        return;
      }
 
@@ -146,7 +145,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                  return Column(
                    mainAxisSize: MainAxisSize.min,
                    children: [
-                     const Text('Scaricamento Info...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                     Text(AppLocalizations.of(context)!.downloadingInfo, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                      const SizedBox(height: 10),
                      Text(state['title'], style: const TextStyle(color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
                      const SizedBox(height: 10),
@@ -157,7 +156,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               }
             ),
             actions: [
-              TextButton(onPressed: () { isCancelled = true; Navigator.pop(ctx); }, child: const Text('Stop'))
+              TextButton(onPressed: () { isCancelled = true; Navigator.pop(ctx); }, child: Text(AppLocalizations.of(context)!.stopAllButtonLabel))
             ],
           )
         );
@@ -239,7 +238,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 context: context,
                 barrierDismissible: false,
                 builder: (ctx) => MovieSelectionDialog(
-                  title: 'Seleziona per: ${p.basename(video.path)}',
+                  title: AppLocalizations.of(context)!.selectMovieTitle,
                   results: results.map((r) => {
                     'id': r['id'],
                     'title': isSeries ? r['name'] : r['title'],
@@ -392,9 +391,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
        showDialog(
          context: context, 
          builder: (ctx) => AlertDialog(
-           title: const Text('Generazione Completata'),
-           content: Text('File creati: $updated\nSaltati/Non trovati: $skipped\nErrori: $errors'),
-           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))]
+           title: Text(AppLocalizations.of(context)!.genComplete),
+           content: Text(AppLocalizations.of(context)!.genStats(updated.toString(), skipped.toString(), errors.toString())),
+           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok))]
          )
        );
      }
@@ -482,7 +481,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (result == true && mounted) {
       await context.read<DatabaseProvider>().refreshVideos();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Video aggiornato correttamente')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.videoUpdated)));
     }
   }
 
@@ -490,14 +489,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Conferma Eliminazione'),
-        content: Text('Vuoi eliminare il video "${video.title}" dal database?\nIl file fisico non verrà rimosso.'),
+        title: Text(AppLocalizations.of(context)!.confirmDeleteTitle),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteMsg(video.title)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Elimina'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -505,7 +504,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().deleteVideo(video);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Video eliminato dal database')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.videoDeleted)));
     }
   }
 
@@ -513,20 +512,20 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Conferma'),
-        content: const Text('Vuoi cancellare TUTTI i dati dal database?'),
+        title: Text(AppLocalizations.of(context)!.confirm),
+        content: Text(AppLocalizations.of(context)!.confirmClearDb),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.no)),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Si, Cancella', style: TextStyle(color: Colors.red))),
+              child: Text(AppLocalizations.of(context)!.yesDelete, style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().clearDatabase();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Database pulito!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.dbCleared)));
     }
   }
 
@@ -534,17 +533,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rinomina Titoli in Massa'),
-        content: const Text(
-          'Questa operazione cercherà i file .nfo per ogni video e rinominerà i video nel formato "Titolo (Anno)".\n\n'
-          'Verranno aggiornati sia il database che i metadati dei file video.\n\n'
-          'L\'operazione potrebbe richiedere del tempo. Continuare?'
-        ),
+        title: Text(AppLocalizations.of(context)!.bulkRenameTitle),
+        content: Text(AppLocalizations.of(context)!.bulkRenameMsg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true), 
-            child: const Text('Avvia')
+            child: Text(AppLocalizations.of(context)!.start)
           ),
         ],
       ),
@@ -560,7 +555,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (total == 0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun video da elaborare.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.noVideoFound)));
       }
       return;
     }
@@ -577,7 +572,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF3C3C3C),
-        title: const Text('Rinomina in corso...', style: TextStyle(color: Colors.white)),
+        title: Text(AppLocalizations.of(context)!.renaming, style: const TextStyle(color: Colors.white)),
         content: ValueListenableBuilder<Map<String, dynamic>>(
           valueListenable: progressNotifier,
           builder: (context, state, child) {
@@ -588,7 +583,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Elaborazione:',
+                  AppLocalizations.of(context)!.processing,
                   style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
                 ),
                 const SizedBox(height: 5),
@@ -617,7 +612,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               isCancelled = true;
               Navigator.pop(ctx);
             }, 
-            child: const Text('Annulla', style: TextStyle(color: Colors.redAccent))
+            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.redAccent))
           ),
         ],
       ),
@@ -793,7 +788,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     if (mounted && !isCancelled) Navigator.pop(context);
 
     if (isCancelled && processedDirs.isNotEmpty && mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Annullamento... Pulizia file temporanei in corso...')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.cancelling)));
        // Clean temp files in all processed directories
        for (final dir in processedDirs) {
          try {
@@ -810,14 +805,12 @@ class _DatabaseTabState extends State<DatabaseTab> {
        showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(isCancelled ? 'Operazione Annullata' : 'Operazione Completata'),
+          title: Text(isCancelled ? AppLocalizations.of(context)!.opCancelled : AppLocalizations.of(context)!.opCompleted),
           content: Text(
-            'Aggiornati: $updatedCount\n'
-            'Saltati: $skippedCount\n'
-            'Errori: $errorCount'
+            AppLocalizations.of(context)!.bulkOpStats(updatedCount.toString(), skippedCount.toString(), errorCount.toString())
           ),
           actions: [
-             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+             TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok)),
           ],
         ),
       );
@@ -843,13 +836,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('GESTIONE DATABASE',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+                        Text(AppLocalizations.of(context)!.databaseManagementTitle,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text('🎬 Video nel database: ${provider.filteredVideos.length}',
+                  Text(AppLocalizations.of(context)!.videosInDatabase(provider.filteredVideos.length),
                       style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
                   
                   const SizedBox(height: 10),
@@ -857,7 +850,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      labelText: 'Cerca video...',
+                      labelText: AppLocalizations.of(context)!.searchVideosPlaceholder,
                       prefixIcon: const Icon(Icons.search),
                       border: const OutlineInputBorder(),
                       filled: true,
@@ -874,7 +867,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.filteredVideos.isEmpty
-                      ? const Center(child: Text('Nessun video trovato.'))
+                      ? Center(child: Text(AppLocalizations.of(context)!.noVideosFound))
                       : LayoutBuilder(
                           builder: (context, constraints) {
                             return SingleChildScrollView(
@@ -909,28 +902,28 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   ElevatedButton.icon(
                     onPressed: _clearDatabase,
                     icon: const Icon(Icons.delete),
-                    label: const Text('Pulisci Database'),
+                    label: Text(AppLocalizations.of(context)!.clearDatabaseButton),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton.icon(
                     onPressed: () => provider.refreshVideos(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Aggiorna'),
+                    label: Text(AppLocalizations.of(context)!.refreshButton),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton.icon(
                     onPressed: _bulkRenameTitles,
                     icon: const Icon(Icons.drive_file_rename_outline),
-                    label: const Text('Rinomina Titoli'),
+                    label: Text(AppLocalizations.of(context)!.renameTitlesButton),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton.icon(
                     onPressed: _bulkGenerateNfo,
                     icon: const Icon(Icons.movie_creation),
-                    label: const Text('Genera NFO (TMDB)'),
+                    label: Text(AppLocalizations.of(context)!.generateNfoTmdbLabel),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                   ),
                 ],
@@ -942,19 +935,20 @@ class _DatabaseTabState extends State<DatabaseTab> {
     );
   }
   Widget _buildTableHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: const Color(0xFF4CAF50),
       height: 48,
       child: Row(
         children: [
           _buildHeaderColumn('#', _colIdxWidth, 0),
-          _buildHeaderColumn('Titolo', _colTitleWidth, 1),
-          _buildHeaderColumn('Anno', _colYearWidth, 2),
-          _buildHeaderColumn('Rating', _colRatingWidth, 3),
-          _buildHeaderColumn('Durata', _colDurationWidth, 4),
-          _buildHeaderColumn('Saga', _colSagaWidth, 5),
-          _buildHeaderColumn('Registi', _colDirectorsWidth, 6),
-          const SizedBox(width: _colActionsWidth, child: Center(child: Text('Azioni', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+          _buildHeaderColumn(l10n.colTitle, _colTitleWidth, 1),
+          _buildHeaderColumn(l10n.colYear, _colYearWidth, 2),
+          _buildHeaderColumn(l10n.colRating, _colRatingWidth, 3),
+          _buildHeaderColumn(l10n.colDuration, _colDurationWidth, 4),
+          _buildHeaderColumn(l10n.colSaga, _colSagaWidth, 5),
+          _buildHeaderColumn(l10n.colDirectors, _colDirectorsWidth, 6),
+          SizedBox(width: _colActionsWidth, child: Center(child: Text(l10n.colActions, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
         ],
       ),
     );
@@ -1037,7 +1031,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
                   onPressed: () => _editVideo(video),
-                  tooltip: 'Modifica',
+                  tooltip: AppLocalizations.of(context)!.editTooltip,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   splashRadius: 20,
@@ -1046,7 +1040,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red, size: 20),
                   onPressed: () => _deleteVideo(video),
-                  tooltip: 'Elimina',
+                  tooltip: AppLocalizations.of(context)!.deleteTooltip,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   splashRadius: 20,

@@ -11,6 +11,7 @@ import '../utils/nfo_parser.dart';
 import '../utils/nfo_generator.dart';
 import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class EditVideoDialog extends StatefulWidget {
   final Video video;
@@ -80,7 +81,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   Future<void> _downloadTmdbInfo() async {
     final apiKey = context.read<SettingsService>().tmdbApiKey;
     if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing)));
       return;
     }
 
@@ -111,7 +112,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       }
 
       if (results.isEmpty) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun risultato trovato su TMDB.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbNoResults)));
         setState(() => _isDownloading = false);
         return;
       }
@@ -132,7 +133,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       final selectedMovie = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (ctx) => MovieSelectionDialog(
-          title: isSeries ? 'Seleziona Serie TV' : 'Seleziona Film',
+          title: isSeries ? AppLocalizations.of(context)!.generalTab : AppLocalizations.of(context)!.selectMovieTitle,
           results: formattedResults,
           isBulkMode: false,
         ),
@@ -277,10 +278,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          _isDownloading = false;
       });
       
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati aggiornati da TMDB (NFO e asset creati)')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbUpdatedMsg)));
 
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.genericError(e.toString()))));
       setState(() => _isDownloading = false);
     }
   }
@@ -320,13 +321,13 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     final nfoPath = p.setExtension(widget.video.path, '.nfo');
     final file = File(nfoPath);
     if (!await file.exists()) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File .nfo non trovato.')));
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nfoNotFoundMsg)));
        return;
     }
     
     final metadata = await NfoParser.parseNfo(nfoPath);
     if (metadata == null) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore nel parsing del file .nfo.')));
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nfoErrorMsg)));
        return;
     }
     
@@ -345,7 +346,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
        _sagaController.text = metadata['saga'] ?? '';
     });
     
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dati caricati dal file .nfo!')));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nfoLoadedMsg)));
   }
 
   @override
@@ -394,7 +395,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
       if (onlyDb) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Database aggiornato (senza toccare il file video)')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.dbUpdatedMsg)));
           Navigator.pop(context, true);
         }
         return;
@@ -402,16 +403,16 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
       // Update File Metadata
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Aggiornamento file in corso...')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.fileUpdateMsg)));
       }
 
       final success = await MetadataService().updateFileMetadata(updatedVideo);
       
       if (mounted) {
         if (success) {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File e Database aggiornati con successo!')));
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.successUpdateMsg)));
         } else {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(backgroundColor: Colors.red, content: Text('Errore aggiornamento file (Database comunque aggiornato)')));
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(AppLocalizations.of(context)!.errorUpdateMsg)));
         }
         Navigator.pop(context, true);
       }
@@ -433,8 +434,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                Row(
                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                  children: [
-                   const Text('Modifica Video', 
-                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+                   Text(AppLocalizations.of(context)!.editVideoTitle, 
+                     style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
                     if (_isDownloading)
                        const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                     else
@@ -443,14 +444,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                            TextButton.icon(
                              onPressed: _loadFromNfo,
                              icon: const Icon(Icons.sync, size: 16),
-                             label: const Text('Carica da NFO'),
+                             label: Text(AppLocalizations.of(context)!.loadFromNfo),
                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
                            ),
                            const SizedBox(width: 10),
                            ElevatedButton.icon(
                              onPressed: _downloadTmdbInfo,
                              icon: const Icon(Icons.download, size: 16),
-                             label: const Text('Scarica TMDB'),
+                             label: Text(AppLocalizations.of(context)!.downloadTmdb),
                              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
                            ),
                          ],
@@ -463,12 +464,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'File: ${p.basename(widget.video.path)}',
+                        AppLocalizations.of(context)!.fileLabel(p.basename(widget.video.path)),
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Percorso: ${widget.video.path}',
+                        AppLocalizations.of(context)!.pathLabel(widget.video.path),
                         style: const TextStyle(color: Colors.grey, fontSize: 11),
                       ),
                     ],
@@ -477,7 +478,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                 if (_fileSizeString.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),
-                    child: Text('Dimensione: $_fileSizeString', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                    child: Text(AppLocalizations.of(context)!.sizeLabel(_fileSizeString), style: const TextStyle(color: Colors.grey, fontSize: 11)),
                   ),
                 _buildEpisodesSection(), // Add this line
                 const SizedBox(height: 15),
@@ -490,31 +491,27 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                        child: SingleChildScrollView(
                          child: Column(
                            children: [
-                             _buildTextField(_titleController, 'Titolo', true),
+                             _buildTextField(_titleController, AppLocalizations.of(context)!.labelTitle, true),
                              const SizedBox(height: 10),
                              Row(
                                children: [
-                                 Expanded(child: _buildTextField(_yearController, 'Anno')),
+                                 Expanded(child: _buildTextField(_yearController, AppLocalizations.of(context)!.labelYear)),
                                  const SizedBox(width: 10),
-                                 Expanded(child: _buildTextField(_durationController, 'Durata (min)')),
+                                 Expanded(child: _buildTextField(_durationController, AppLocalizations.of(context)!.labelDuration)),
                                ],
                              ),
                              const SizedBox(height: 10),
-                             _buildTextField(_genresController, 'Generi (separati da virgola)'),
+                             _buildTextField(_genresController, AppLocalizations.of(context)!.labelGenres),
                              const SizedBox(height: 10),
-                             _buildTextField(_directorsController, 'Registi'),
+                             _buildTextField(_directorsController, AppLocalizations.of(context)!.labelDirectors),
                              const SizedBox(height: 10),
-                             _buildTextField(_actorsController, 'Attori (separati da virgola)'),
+                             _buildTextField(_actorsController, AppLocalizations.of(context)!.labelActors),
                              const SizedBox(height: 10),
-                             _buildTextField(_posterPathController, 'Path Poster'),
+                             _buildTextField(_posterPathController, AppLocalizations.of(context)!.labelPoster),
                              const SizedBox(height: 10),
-                             Row(
-                               children: [
-                                 Expanded(child: _buildTextField(_sagaController, 'Saga', false, 1, 'Il nome della collezione di film (es. Star Wars Collection)')),
-                                 const SizedBox(width: 10),
-                                 Expanded(child: _buildTextField(_sagaIndexController, 'Indice Saga', false, 1, 'L\'ordine del film nella collezione (1, 2, 3...)')),
-                               ],
-                             ),
+                                  Expanded(child: _buildTextField(_sagaController, AppLocalizations.of(context)!.labelSaga, false, 1, AppLocalizations.of(context)!.sagaTooltip)),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: _buildTextField(_sagaIndexController, AppLocalizations.of(context)!.labelSagaIndex, false, 1, AppLocalizations.of(context)!.sagaIndexTooltip)),
                            ],
                          ),
                        ),
@@ -524,7 +521,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                      Expanded(
                        child: Column(
                          children: [
-                            const Text('Rating', style: TextStyle(color: Colors.white70)),
+                            Text(AppLocalizations.of(context)!.colRating, style: const TextStyle(color: Colors.white70)),
                             Slider(
                               value: _rating,
                               min: 0,
@@ -534,10 +531,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                               activeColor: const Color(0xFF4CAF50),
                               onChanged: (val) => setState(() => _rating = val),
                             ),
-                            Text('Voto: $_rating', style: const TextStyle(color: Colors.white)),
+                            Text(AppLocalizations.of(context)!.ratingLabel(_rating.toStringAsFixed(1)), style: const TextStyle(color: Colors.white)),
                             const SizedBox(height: 20),
                             Expanded(
-                              child: _buildTextField(_plotController, 'Trama', false, 10),
+                              child: _buildTextField(_plotController, AppLocalizations.of(context)!.labelPlot, false, 10),
                             ),
                          ],
                        ),
@@ -551,19 +548,19 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                  children: [
                     TextButton(
                       onPressed: _isSaving ? null : () => Navigator.pop(context),
-                      child: const Text('Annulla'),
+                      child: Text(AppLocalizations.of(context)!.cancel),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: _isSaving ? null : () => _save(onlyDb: true),
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange.withOpacity(0.8)),
-                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Aggiorna solo DB'),
+                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(AppLocalizations.of(context)!.updateDbOnly),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: _isSaving ? null : () => _save(onlyDb: false),
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4CAF50)),
-                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Salva tutto (File + DB)'),
+                      child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(AppLocalizations.of(context)!.saveAll),
                     ),
                  ],
                ),
@@ -579,7 +576,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       controller: controller,
       maxLines: maxLines,
       style: const TextStyle(color: Colors.white),
-      validator: required ? (val) => val == null || val.isEmpty ? 'Campo obbligatorio' : null : null,
+      validator: required ? (val) => val == null || val.isEmpty ? AppLocalizations.of(context)!.requiredField : null : null,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
@@ -651,7 +648,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     if (!widget.video.isSeries) return const SizedBox.shrink();
 
     return ExpansionTile(
-      title: const Text('Episodi', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      title: Text(AppLocalizations.of(context)!.sectionEpisodes, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       onExpansionChanged: (expanded) {
         if (expanded) _loadEpisodes();
       },
@@ -659,7 +656,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         if (_isLoadingEpisodes)
           const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
         else if (_episodes == null || _episodes!.isEmpty)
-           const Padding(padding: EdgeInsets.all(8.0), child: Text('Nessun episodio trovato.', style: TextStyle(color: Colors.white70)))
+           Padding(padding: const EdgeInsets.all(8.0), child: Text(AppLocalizations.of(context)!.noEpisodesFound, style: const TextStyle(color: Colors.white70)))
         else
            SizedBox(
              height: 200,

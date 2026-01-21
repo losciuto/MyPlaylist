@@ -7,6 +7,7 @@ import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
   final Video video;
@@ -23,7 +24,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
   Future<void> _downloadInfo() async {
     final apiKey = context.read<SettingsService>().tmdbApiKey;
     if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API Key TMDB mancante!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing)));
       return;
     }
 
@@ -38,7 +39,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
       final results = await service.searchMovie(query, year: year);
 
       if (results.isEmpty) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nessun risultato trovato su TMDB.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbNoResults)));
         setState(() => _isDownloading = false);
         return;
       }
@@ -51,7 +52,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
         final selection = await showDialog<Map<String, dynamic>>(
           context: context,
           builder: (ctx) => SimpleDialog(
-            title: const Text('Seleziona Film'),
+            title: Text(AppLocalizations.of(context)!.selectMovieTitle),
             children: results.map((m) => SimpleDialogOption(
               onPressed: () => Navigator.pop(ctx, m),
               child: Text('${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})'),
@@ -84,12 +85,12 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Info scaricate con successo! Riavvia la scansione per aggiornare.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbSuccessMsg)));
         Navigator.pop(context); // Close dialog
       }
 
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.genericError(e.toString()))));
     } finally {
       if (mounted) setState(() => _isDownloading = false);
     }
@@ -103,6 +104,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
     final secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = Theme.of(context).cardColor;
     final iconColor = isDark ? Colors.white54 : Colors.grey;
+    final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
       backgroundColor: cardColor,
@@ -195,7 +197,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                               Navigator.pop(context);
                             },
                             icon: const Icon(Icons.play_arrow),
-                            label: const Text('RIPRODUCI', style: TextStyle(fontWeight: FontWeight.bold)),
+                            label: Text(l10n.playButtonLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 20),
                               backgroundColor: const Color(0xFF4CAF50),
@@ -231,26 +233,26 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.video.genres.isNotEmpty) ...[
-                          _buildSectionTitle('Generi'),
+                          _buildSectionTitle(l10n.sectionGenres),
                           Text(widget.video.genres, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.actors.isNotEmpty) ...[
-                          _buildSectionTitle('Cast'),
+                          _buildSectionTitle(l10n.sectionCast),
                           Text(widget.video.actors, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.plot.isNotEmpty) ...[
-                          _buildSectionTitle('Trama'),
+                          _buildSectionTitle(l10n.sectionPlot),
                           Text(widget.video.plot, style: TextStyle(color: secondaryTextColor, fontSize: 16, height: 1.4)),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.saga.isNotEmpty) ...[
-                          _buildSectionTitle('Saga'),
+                          _buildSectionTitle(l10n.sectionSaga),
                           Text(widget.video.saga, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
                           const SizedBox(height: 15),
                         ],
-                        _buildSectionTitle('File'),
+                        _buildSectionTitle(l10n.sectionFile),
                         Text(widget.video.path, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                       ],
                     ),

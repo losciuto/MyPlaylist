@@ -33,6 +33,7 @@ class SettingsService with ChangeNotifier {
   int _vlcPort = 4212;
   String _serverInterface = '0.0.0.0';
   ThemeMode _themeMode = ThemeMode.system;
+  Locale _locale = const Locale('it');
   String _tmdbApiKey = '';
 
   bool get initialized => _initialized;
@@ -44,6 +45,7 @@ class SettingsService with ChangeNotifier {
   int get vlcPort => _vlcPort;
   String get serverInterface => _serverInterface;
   ThemeMode get themeMode => _themeMode;
+  Locale get locale => _locale;
   String get tmdbApiKey => _tmdbApiKey;
 
   Future<void> init() async {
@@ -63,6 +65,9 @@ class SettingsService with ChangeNotifier {
     if (themeIndex != null && themeIndex >= 0 && themeIndex < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[themeIndex];
     }
+
+    final languageCode = _prefs.getString('language_code') ?? 'it';
+    _locale = Locale(languageCode);
     
     _initialized = true;
     notifyListeners();
@@ -113,6 +118,13 @@ class SettingsService with ChangeNotifier {
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
     await _prefs.setInt(_keyThemeMode, mode.index);
+    notifyListeners();
+  }
+
+  Future<void> setLocale(Locale cx) async {
+    if (_locale == cx) return;
+    _locale = cx;
+    await _prefs.setString('language_code', cx.languageCode);
     notifyListeners();
   }
 

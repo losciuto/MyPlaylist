@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
+import '../services/github_service.dart';
+import '../widgets/update_dialog.dart';
 import 'package:provider/provider.dart';
 import '../services/settings_service.dart';
+import '../services/logger_service.dart';
+import 'package:flutter/services.dart';
+import '../database/database_helper.dart';
+import '../providers/database_provider.dart';
+import 'dart:io';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart' as p;
+import '../config/app_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _serverInterfaceController;
   late TextEditingController _tmdbApiKeyController;
   bool _obscureSecret = true;
-  int _currentTab = 0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control
+  int _currentTab = 0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control, 4: Manutenzione, 5: Debug
 
   @override
   void initState() {
@@ -106,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Impostazioni'),
+        title: Text(AppLocalizations.of(context)!.settingsTitle),
         backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
       ),
@@ -126,6 +137,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSidebarItem(1, 'Metadati', Icons.data_usage),
                 _buildSidebarItem(2, 'Player', Icons.play_circle_outline),
                 _buildSidebarItem(3, 'Remote Control', Icons.settings_remote),
+                const Divider(color: Colors.white10),
+                _buildSidebarItem(4, 'Manutenzione', Icons.build),
+                _buildSidebarItem(5, 'Debug Log', Icons.bug_report),
               ],
             ),
           ),
@@ -149,15 +163,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _checkForUpdates() async {
+    // Show loading indicator or just rely on the dialog if found
+    // For a manual check, it's nice to show "No updates" if none found
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
+    try {
+      final updateInfo = await GitHubService().checkForUpdates();
+      if (!mounted) return;
+
+      if (updateInfo != null) {
+        showDialog(
+          context: context,
+          builder: (context) => UpdateDialog(updateInfo: updateInfo),
+        );
+      } else {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.noUpdates)),
+        );
+      }
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+         SnackBar(content: Text(AppLocalizations.of(context)!.updateError(e.toString()))),
+      );
+    }
+  }
+
   Widget _buildSidebarItem(int index, String label, IconData icon) {
+    final l10n = AppLocalizations.of(context)!;
     final isSelected = _currentTab == index;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Map index to localized label
+    String localizedLabel;
+    switch (index) {
+      case 0: localizedLabel = l10n.generalTab; break;
+      case 1: localizedLabel = l10n.metadataTab; break;
+      case 2: localizedLabel = l10n.playerTab; break;
+      case 3: localizedLabel = l10n.remoteTab; break;
+      case 4: localizedLabel = l10n.maintenanceTab; break;
+      case 5: localizedLabel = l10n.debugTab; break;
+      default: localizedLabel = label;
+    }
     
     return ListTile(
       selected: isSelected,
       leading: Icon(icon, color: isSelected ? const Color(0xFF4CAF50) : (isDark ? Colors.white70 : Colors.black87), size: 22),
       title: Text(
-        label, 
+        localizedLabel, 
         style: TextStyle(
           color: isSelected ? const Color(0xFF4CAF50) : (isDark ? Colors.white70 : Colors.black87),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -176,6 +229,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       case 1: return _buildMetadatiTab();
       case 2: return _buildPlayerTab();
       case 3: return _buildRemoteTab();
+      case 4: return _buildManutenzioneTab();
+      case 5: return _buildDebugTab();
       default: return const SizedBox.shrink();
     }
   }
@@ -193,29 +248,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildGeneraleTab() {
+    final settings = Provider.of<SettingsService>(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Impostazioni Generali'),
-        const Text('ASPETTO', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        _buildSectionHeader(l10n.generalTab),
+        Text(l10n.appearanceHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
+        // Language Selector
+        ListTile(
+            title: Text(l10n.language),
+            trailing: DropdownButton<Locale>(
+              value: settings.locale,
+              onChanged: (Locale? newLocale) {
+                if (newLocale != null) {
+                  settings.setLocale(newLocale);
+                }
+              },
+              items: [
+                DropdownMenuItem(
+                  value: Locale('it'),
+                  child: Text(l10n.langIt),
+                ),
+                DropdownMenuItem(
+                  value: Locale('en'),
+                  child: Text(l10n.langEn),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
         Consumer<SettingsService>(
           builder: (context, settings, child) {
             return DropdownButtonFormField<ThemeMode>(
               decoration: InputDecoration(
-                labelText: 'Tema Applicazione',
+                labelText: l10n.themeMode,
                 border: const OutlineInputBorder(),
                 filled: true,
                 fillColor: fillColor,
               ),
               value: settings.themeMode,
-              items: const [
-                DropdownMenuItem(value: ThemeMode.system, child: Text('Sistema')),
-                DropdownMenuItem(value: ThemeMode.light, child: Text('Chiaro')),
-                DropdownMenuItem(value: ThemeMode.dark, child: Text('Scuro')),
+              items: [
+                DropdownMenuItem(value: ThemeMode.system, child: Text(l10n.systemTheme)),
+                DropdownMenuItem(value: ThemeMode.light, child: Text(l10n.lightTheme)),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text(l10n.darkTheme)),
               ],
               onChanged: (ThemeMode? newValue) {
                 if (newValue != null) settings.setThemeMode(newValue);
@@ -224,42 +304,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
         const SizedBox(height: 35),
-        const Text('PLAYLIST', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(l10n.playlistHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         TextField(
           controller: _defaultSizeController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: 'Numero Video Default',
+            labelText: l10n.videosPerPage,
             border: const OutlineInputBorder(),
             filled: true,
             fillColor: fillColor,
-            helperText: 'Numero di video proposti di default alla creazione di una playlist',
+            helperText: l10n.defaultPlaylistSizeHelp,
           ),
           onChanged: _updateDefaultSize,
+        ),
+        const SizedBox(height: 35),
+        Text(
+          l10n.updates,
+          style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        ListTile(
+          title: Text(l10n.checkForUpdates),
+          subtitle: Text(l10n.currentVersion(AppConfig.appVersion)),
+          trailing: ElevatedButton(
+            onPressed: _checkForUpdates,
+            child: Text(l10n.checkButton),
+          ),
+          contentPadding: EdgeInsets.zero,
         ),
       ],
     );
   }
 
   Widget _buildMetadatiTab() {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Metadati e API'),
-        const Text('TMDB (THE MOVIE DATABASE)', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        _buildSectionHeader(l10n.metadataTab),
+        Text(l10n.tmdbHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         TextField(
           controller: _tmdbApiKeyController,
           decoration: InputDecoration(
-            labelText: 'TMDB API Key',
+            labelText: l10n.tmdbApiKey,
             border: const OutlineInputBorder(),
             filled: true,
             fillColor: fillColor,
-            helperText: 'Richiesta per scaricare trame, locandine e dettagli da TMDB',
+            helperText: l10n.tmdbApiKeyHint,
           ),
           onChanged: (val) => context.read<SettingsService>().setTmdbApiKey(val),
         ),
@@ -275,10 +371,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               const Icon(Icons.info_outline, color: Colors.blueAccent),
               const SizedBox(width: 15),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Senza una API Key valida non sarà possibile utilizzare le funzioni di arricchimento metadati automatico.',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  l10n.tmdbInfo,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ),
             ],
@@ -289,19 +385,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildPlayerTab() {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Configurazione Player'),
-        const Text('ESEGUIBILE', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        _buildSectionHeader(l10n.playerTab),
+        Text(l10n.executableHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         TextField(
           controller: _playerPathController,
           decoration: InputDecoration(
-            labelText: 'Percorso Player Esterno',
+            labelText: l10n.playerPath,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: const Icon(Icons.folder_open),
@@ -309,22 +406,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             filled: true,
             fillColor: fillColor,
-            helperText: 'Percorso del programma utilizzato per riprodurre i video',
           ),
           onChanged: (val) => context.read<SettingsService>().setPlayerPath(val),
         ),
         const SizedBox(height: 35),
-        const Text('CONTROLLO REMOTO VLC', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(l10n.vlcRemoteHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         TextField(
           controller: _vlcPortController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: 'Porta HTTP VLC (Default: 4212)',
+            labelText: l10n.vlcPort,
             border: const OutlineInputBorder(),
             filled: true,
             fillColor: fillColor,
-            helperText: 'La porta impostata nell\'interfaccia RC di VLC',
           ),
           onChanged: _updateVlcPort,
         ),
@@ -333,20 +428,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildRemoteTab() {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Server Controllo Remoto'),
-        const Text('STATO SERVER', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        _buildSectionHeader(l10n.remoteTab),
+        Text(l10n.serverStatusHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 5),
         Consumer<SettingsService>(
           builder: (context, settings, child) {
             return SwitchListTile(
-              title: const Text('Abilita Server Remoto'),
-              subtitle: const Text('Permette di controllare l\'app tramite rete locale'),
+              title: Text(l10n.serverEnabled),
+              subtitle: Text(l10n.remoteControlSubtitle),
               value: settings.remoteServerEnabled,
               onChanged: (val) => settings.setRemoteServerEnabled(val),
               activeColor: const Color(0xFF4CAF50),
@@ -355,7 +451,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
         const SizedBox(height: 25),
-        const Text('NETWORK', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(l10n.networkHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         Row(
           children: [
@@ -364,7 +460,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: TextField(
                 controller: _serverInterfaceController,
                 decoration: InputDecoration(
-                  labelText: 'Interfaccia (IP)',
+                  labelText: l10n.listenInterface,
                   border: const OutlineInputBorder(),
                   filled: true,
                   fillColor: fillColor,
@@ -379,7 +475,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 controller: _remotePortController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Porta',
+                  labelText: l10n.serverPort,
                   border: const OutlineInputBorder(),
                   filled: true,
                   fillColor: fillColor,
@@ -390,16 +486,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         const SizedBox(height: 25),
-        const Text('SICUREZZA', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(l10n.securityHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         TextField(
           controller: _remoteSecretController,
           decoration: InputDecoration(
-            labelText: 'Pre-Shared Key (PSK)',
+            labelText: l10n.securityKey,
             border: const OutlineInputBorder(),
             filled: true,
             fillColor: fillColor,
-            helperText: 'Chiave di cifratura per i comandi in ingresso',
             suffixIcon: IconButton(
               icon: Icon(_obscureSecret ? Icons.visibility : Icons.visibility_off),
               onPressed: () => setState(() => _obscureSecret = !_obscureSecret),
@@ -410,5 +505,267 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildManutenzioneTab() {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(l10n.maintenanceTab),
+        Text(l10n.backupRestoreHeader, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+        
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: fillColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.save_alt, color: Color(0xFF4CAF50)),
+                  const SizedBox(width: 10),
+                  Text(l10n.backupDatabase, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.backupDescription,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton.icon(
+                onPressed: _exportDatabase,
+                icon: const Icon(Icons.download),
+                label: Text(l10n.exportButton),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 30),
+
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.red.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.restore, color: Colors.orangeAccent),
+                  const SizedBox(width: 10),
+                  Text(l10n.restoreDatabase, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orangeAccent)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.restoreDescription,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton.icon(
+                onPressed: _importDatabase,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800]),
+                icon: const Icon(Icons.upload),
+                label: Text(l10n.importButton),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _exportDatabase() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final dbPath = await DatabaseHelper.instance.getDatabasePath();
+      final dbFile = File(dbPath);
+
+      if (!await dbFile.exists()) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.dbNotFoundMsg)));
+        return;
+      }
+
+      String? outputDir = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: l10n.selectDestinationFolder,
+      );
+
+      if (outputDir != null) {
+        final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+        final newPath = p.join(outputDir, 'myplaylist_backup_$timestamp.db');
+        await dbFile.copy(newPath);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.backupSuccessMsg(newPath)), 
+              backgroundColor: const Color(0xFF4CAF50),
+              duration: const Duration(seconds: 4),
+            )
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.backupErrorMsg(e.toString())), backgroundColor: Colors.red));
+    }
+  }
+
+  Future<void> _importDatabase() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: l10n.selectBackupFile,
+        type: FileType.any,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final backupPath = result.files.single.path!;
+        
+        if (!backupPath.endsWith('.db')) {
+           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.invalidDbMsg), backgroundColor: Colors.orange));
+           return;
+        }
+
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.confirmRestoreTitle),
+            content: Text(l10n.confirmRestoreMsg),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true), 
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: Text(AppLocalizations.of(context)!.confirm)
+              ),
+            ],
+          ),
+        );
+
+        if (confirm == true) {
+          // Close connection
+          await DatabaseHelper.instance.close();
+          
+          final dbPath = await DatabaseHelper.instance.getDatabasePath();
+          final sourceFile = File(backupPath);
+          await sourceFile.copy(dbPath);
+          
+          // Refresh provider
+          if (mounted) {
+            await context.read<DatabaseProvider>().refreshVideos();
+            if (mounted) {
+              final l10n = AppLocalizations.of(context)!;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.dbRestoredMsg), backgroundColor: const Color(0xFF4CAF50)));
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.restoreErrorMsg(e.toString())), backgroundColor: Colors.red));
+    }
+  }
+  Widget _buildDebugTab() {
+     final l10n = AppLocalizations.of(context)!;
+     final isDark = Theme.of(context).brightness == Brightness.dark;
+     final fillColor = isDark ? const Color(0xFF1E1E1E) : Colors.grey[100];
+
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         _buildSectionHeader(l10n.debugTab),
+         
+         Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           children: [
+             Text(l10n.eventLog, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+             Row(
+               children: [
+                 IconButton(
+                   icon: const Icon(Icons.refresh),
+                   onPressed: () => setState(() {}),
+                   tooltip: l10n.refreshLog,
+                 ),
+                 IconButton(
+                   icon: const Icon(Icons.copy),
+                   onPressed: () async {
+                      final logs = await LoggerService().getLogs();
+                      await Clipboard.setData(ClipboardData(text: logs));
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.logCopied)));
+                   },
+                   tooltip: l10n.copyLog,
+                 ),
+                 IconButton(
+                   icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                   onPressed: () async {
+                     await LoggerService().clearLogs();
+                     setState(() {});
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.logCleared)));
+                   },
+                   tooltip: l10n.clearLog,
+                 ),
+               ],
+             ),
+           ],
+         ),
+         const SizedBox(height: 10),
+         
+         Container(
+           height: 400,
+           width: double.infinity,
+           padding: const EdgeInsets.all(10),
+           decoration: BoxDecoration(
+             color: fillColor,
+             borderRadius: BorderRadius.circular(5),
+             border: Border.all(color: Colors.white10),
+           ),
+           child: FutureBuilder<String>(
+             future: LoggerService().getLogs(),
+             builder: (context, snapshot) {
+               if (snapshot.connectionState == ConnectionState.waiting) {
+                 return const Center(child: CircularProgressIndicator());
+               }
+               
+               if (snapshot.hasError) {
+                 return Text(l10n.logError(snapshot.error.toString()), style: const TextStyle(color: Colors.red));
+               }
+               
+               return SingleChildScrollView(
+                 child: SelectableText(
+                   snapshot.data ?? l10n.noLogs,
+                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                 ),
+               );
+             },
+           ),
+         ),
+         const SizedBox(height: 10),
+         FutureBuilder<String?>(
+            future: LoggerService().getLogFilePath(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                  l10n.logFile(snapshot.data!), 
+                  style: const TextStyle(color: Colors.white24, fontSize: 10)
+                );
+              }
+              return const SizedBox.shrink();
+            },
+         ),
+       ],
+     );
   }
 }

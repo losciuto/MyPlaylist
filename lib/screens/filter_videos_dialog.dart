@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/video.dart';
 import '../database/database_helper.dart';
 import 'video_preview_dialog.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class FilterVideosDialog extends StatefulWidget {
   final String title;
@@ -64,7 +65,7 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Video per ${widget.title}: ${widget.filterValue}',
+                    AppLocalizations.of(context)!.videosFor(widget.title, widget.filterValue),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -81,7 +82,7 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Trovati: ${_videos.length} video',
+                AppLocalizations.of(context)!.foundVideos(_videos.length),
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ),
@@ -96,10 +97,10 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
               ),
               child: Row(
                 children: [
-                  Expanded(flex: 3, child: Text('Titolo', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 1, child: Text('Anno', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 1, child: Text('Rating', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 4, child: Text('Path', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(flex: 3, child: Text(AppLocalizations.of(context)!.labelTitle, style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(flex: 1, child: Text(AppLocalizations.of(context)!.labelYear, style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(flex: 1, child: Text(AppLocalizations.of(context)!.ratingLabel(''), style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(flex: 4, child: Text(AppLocalizations.of(context)!.pathLabel(''), style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
                 ],
               ),
             ),

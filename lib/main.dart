@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
@@ -9,6 +10,9 @@ import 'providers/database_provider.dart';
 import 'providers/playlist_provider.dart';
 import 'services/remote_control_service.dart';
 import 'config/app_config.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_playlist/l10n/app_localizations.dart'; // Add generated import
+import 'services/logger_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +23,22 @@ void main() async {
   // Initialize Settings
   final settingsService = SettingsService();
   await settingsService.init();
+
+  // Initialize Logger
+  final logger = LoggerService();
+  await logger.init();
+
+  // Handle Flutter Errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    logger.error('Flutter Error', details.exception, details.stack);
+  };
+
+  // Handle Platform Errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    logger.error('Platform Error', error, stack);
+    return true;
+  };
   
   // Initialize Window Manager for desktop
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
@@ -72,6 +92,17 @@ class MyApp extends StatelessWidget {
           theme: AppConfig.lightTheme,
           darkTheme: AppConfig.darkTheme,
           themeMode: settings.themeMode,
+          locale: settings.locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('it'), // Italian
+            Locale('en'), // English
+          ],
           home: const HomeScreen(),
         );
       },

@@ -11,6 +11,7 @@ import 'video_details_dialog.dart';
 
 import 'manual_selection_dialog.dart';
 import '../services/remote_control_service.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class PlaylistTab extends StatefulWidget {
   const PlaylistTab({super.key});
@@ -69,7 +70,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
         _checkResult(provider.playlist);
       } catch (e) {
         debugPrint('Error generating playlist: $e');
-        _showSnack('Errore generazione playlist: $e');
+        _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
       }
     }
   }
@@ -89,9 +90,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
   void _checkResult(List<Video> videos) {
     if (videos.isEmpty) {
-      _showSnack('Nessun video trovato!');
+      _showSnack(AppLocalizations.of(context)!.noVideoFound);
     } else {
-      _showSnack('Generata playlist di ${videos.length} video.');
+      _showSnack(AppLocalizations.of(context)!.videoCreated(videos.length));
     }
   }
 
@@ -101,17 +102,17 @@ class _PlaylistTabState extends State<PlaylistTab> {
     return showDialog<int?>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Numero di video'),
+        title: Text(AppLocalizations.of(context)!.inputCountTitle),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Quanti video vuoi includere?'),
+          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.inputCountLabel),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text)),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -134,10 +135,10 @@ class _PlaylistTabState extends State<PlaylistTab> {
         
         // Launch player process via provider
         await provider.launchPlayer(playerPath, playlistPath);
-        _showSnack('Avviato player esterno: ${p.basename(playerPath)}');
+        _showSnack(AppLocalizations.of(context)!.playerStarted(p.basename(playerPath)));
 
       } catch (e) {
-        _showSnack('Errore avvio player esterno: $e');
+        _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
         debugPrint('External player error: $e');
       }
     } else {
@@ -156,7 +157,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
            await Process.run('explorer', [dir]);
         }
       } catch (e) {
-         _showSnack('Impossibile aprire la cartella: $e');
+         _showSnack(AppLocalizations.of(context)!.folderOpenError(e.toString()));
       }
     }
   }
@@ -210,7 +211,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                                    color: Colors.blueAccent,
                                    borderRadius: BorderRadius.circular(4),
                                  ),
-                                 child: const Text('SERIE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                 child: Text(AppLocalizations.of(context)!.seriesLabel, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                ),
                              ),
                          ],
@@ -238,7 +239,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
   void _exportPlaylist(PlaylistProvider provider) async {
     final path = await provider.exportPlaylist();
     if (path != null) {
-      _showSnack('Playlist esportata in $path');
+      _showSnack(AppLocalizations.of(context)!.playlistExported(path));
     }
   }
 
@@ -250,7 +251,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Text('GENERA PLAYLIST (video presenti: ${provider.totalVideoCount})',
+              Text(AppLocalizations.of(context)!.genPlaylistTitle(provider.totalVideoCount),
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
               const SizedBox(height: 20),
               
@@ -258,16 +259,16 @@ class _PlaylistTabState extends State<PlaylistTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildBtn('🎲 Playlist Casuale', Colors.orange, () => _generateRandom(provider)),
-                  _buildBtn('🕒 Più Recenti', Colors.blue, () => _generateRecent(provider)),
+                  _buildBtn(AppLocalizations.of(context)!.btnRandom, Colors.orange, () => _generateRandom(provider)),
+                  _buildBtn(AppLocalizations.of(context)!.btnRecent, Colors.blue, () => _generateRecent(provider)),
                 ],
               ),
               const SizedBox(height: 20),
                Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                   _buildBtn('🎲 Playlist\ncon Filtri', Colors.purple, () => _generateFiltered(provider)),
-                   _buildBtn('✏️ Selezione\nManuale', Colors.blueGrey, () => _generateManual(provider)),
+                   _buildBtn(AppLocalizations.of(context)!.btnFiltered, Colors.purple, () => _generateFiltered(provider)),
+                   _buildBtn(AppLocalizations.of(context)!.btnManual, Colors.blueGrey, () => _generateManual(provider)),
                 ],
               ),
               if (provider.proposedVideoCount > 0)
@@ -276,7 +277,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   child: TextButton.icon(
                     onPressed: () => provider.resetProposedVideos(),
                     icon: const Icon(Icons.refresh, size: 16, color: Colors.orange),
-                    label: Text('Resetta cronologia sessione (${provider.proposedVideoCount} visti)', 
+                    label: Text(AppLocalizations.of(context)!.btnResetSession(provider.proposedVideoCount), 
                       style: const TextStyle(fontSize: 11, color: Colors.orange)),
                   ),
                 ),
@@ -284,14 +285,14 @@ class _PlaylistTabState extends State<PlaylistTab> {
               const Divider(height: 40, color: Colors.grey),
               
               // Action Buttons
-              const Text('Azioni Playlist', style: TextStyle(fontSize: 16, color: Color(0xFF4CAF50))),
+              Text(AppLocalizations.of(context)!.actionsTitle, style: const TextStyle(fontSize: 16, color: Color(0xFF4CAF50))),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildBtn('🎨 Mostra Poster', Colors.pink, provider.hasPlaylist ? () => _showPosters(provider) : null),
-                  _buildBtn('▶️ Riproduci', const Color(0xFF4CAF50), provider.hasPlaylist ? () => _playPlaylist(provider) : null),
-                  _buildBtn('💾 Esporta', Colors.orange, provider.hasPlaylist ? () => _exportPlaylist(provider) : null),
+                  _buildBtn(AppLocalizations.of(context)!.btnShowPosters, Colors.pink, provider.hasPlaylist ? () => _showPosters(provider) : null),
+                  _buildBtn(AppLocalizations.of(context)!.playButtonLabel, const Color(0xFF4CAF50), provider.hasPlaylist ? () => _playPlaylist(provider) : null),
+                  _buildBtn(AppLocalizations.of(context)!.btnExport, Colors.orange, provider.hasPlaylist ? () => _exportPlaylist(provider) : null),
                 ],
               ),
               const SizedBox(height: 10),
@@ -300,7 +301,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                    child: TextButton.icon(
                      onPressed: () => _openTempPlaylistFolder(provider),
                      icon: const Icon(Icons.folder_open, color: Colors.grey),
-                     label: const Text('Apri cartella file temporaneo', style: TextStyle(color: Colors.grey)),
+                     label: Text(AppLocalizations.of(context)!.openTempFolder, style: const TextStyle(color: Colors.grey)),
                    ),
                  ),
               
@@ -322,18 +323,18 @@ class _PlaylistTabState extends State<PlaylistTab> {
                         child: ExpansionTile(
                           initiallyExpanded: true,
                           leading: const Icon(Icons.history, color: Colors.blue, size: 20),
-                          title: const Text('Log Comandi Remoti', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          title: Text(AppLocalizations.of(context)!.logTitle, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                           subtitle: Text(
                             remoteService.commandLogs.isEmpty 
-                              ? 'In attesa...' 
-                              : 'Ultimo: ${remoteService.commandLogs.first.command}', 
+                              ? AppLocalizations.of(context)!.logWaiting 
+                              : AppLocalizations.of(context)!.logLast(remoteService.commandLogs.first.command), 
                             style: const TextStyle(fontSize: 11, color: Colors.grey)
                           ),
                           children: [
                             if (remoteService.commandLogs.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Text('Nessun comando ricevuto.', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(AppLocalizations.of(context)!.noCommandsMsg, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                               )
                             else
                               SizedBox(
@@ -349,7 +350,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                                       dense: true,
                                       visualDensity: VisualDensity.compact,
                                       title: Text(log.command, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12)),
-                                      subtitle: Text(log.args.isEmpty ? 'Nessun parametro' : 'Parametri: ${log.args}', style: const TextStyle(fontSize: 10)),
+                                      subtitle: Text(log.args.isEmpty ? AppLocalizations.of(context)!.paramsNone : AppLocalizations.of(context)!.paramsLabel(log.args), style: const TextStyle(fontSize: 10)),
                                       trailing: Text(timeStr, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                                     );
                                   },
@@ -369,7 +370,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                  padding: const EdgeInsets.all(10),
                  decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(5)),
                  child: Text(
-                   !provider.hasPlaylist ? 'Nessuna playlist generata' : 'Playlist corrente: ${provider.playlist.length} video',
+                   !provider.hasPlaylist ? AppLocalizations.of(context)!.noPlaylist : AppLocalizations.of(context)!.currentPlaylist(provider.playlist.length),
                    style: TextStyle(color: Theme.of(context).listTileTheme.textColor ?? Theme.of(context).textTheme.bodyMedium?.color),
                  ),
               ),
