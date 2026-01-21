@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import '../database/database_helper.dart';
-import '../models/video.dart';
+import '../database/app_database.dart' as db;
+import '../models/video.dart' as model;
 import '../utils/nfo_parser.dart';
 
 class ScanStatus {
@@ -145,7 +145,7 @@ class ScanService {
       }
     }
 
-    final video = Video(
+    final video = model.Video(
       path: path,
       mtime: mtime,
       title: formattedTitle,
@@ -161,7 +161,7 @@ class ScanService {
       saga: metadata?['saga'] ?? '',
     );
 
-    await DatabaseHelper.instance.insertVideo(video);
+    await db.AppDatabase.instance.insertVideo(video);
   }
 
   Future<void> _processVideo(File videoFile) async {
@@ -184,11 +184,11 @@ class ScanService {
       }
     }
 
-    print('DEBUG [ScanService]: Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath');
+    print('DEBUG [ScanService]: model.Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath');
     
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
     
-    // Create Video object
+    // Create model.Video object
     // If metadata is null, use minimal info (filename as title)
     final rawTitle = metadata?['title'] ?? p.basenameWithoutExtension(path);
     final year = metadata?['year'] ?? '';
@@ -201,7 +201,7 @@ class ScanService {
       }
     }
     
-    final video = Video(
+    final video = model.Video(
       path: path,
       mtime: mtime,
       title: formattedTitle,
@@ -217,6 +217,6 @@ class ScanService {
     );
 
     // Insert into DB (update if exists)
-    await DatabaseHelper.instance.insertVideo(video);
+    await db.AppDatabase.instance.insertVideo(video);
   }
 }

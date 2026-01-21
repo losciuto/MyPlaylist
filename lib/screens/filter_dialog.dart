@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import '../models/filter_settings.dart';
 import '../services/settings_service.dart';
 import 'filter_videos_dialog.dart';
@@ -48,11 +48,11 @@ class _FilterDialogState extends State<FilterDialog> {
 
   Future<void> _loadData() async {
     try {
-      final genres = await DatabaseHelper.instance.getValuesWithCounts('genres');
-      final years = await DatabaseHelper.instance.getValuesWithCounts('year');
-      final actors = await DatabaseHelper.instance.getValuesWithCounts('actors');
-      final directors = await DatabaseHelper.instance.getValuesWithCounts('directors');
-      final sagas = await DatabaseHelper.instance.getValuesWithCounts('saga');
+      final genres = await db.AppDatabase.instance.getValuesWithCounts('genres');
+      final years = await db.AppDatabase.instance.getValuesWithCounts('year');
+      final actors = await db.AppDatabase.instance.getValuesWithCounts('actors');
+      final directors = await db.AppDatabase.instance.getValuesWithCounts('directors');
+      final sagas = await db.AppDatabase.instance.getValuesWithCounts('saga');
 
       // Sort alphabetically
       final sortedGenres = Map.fromEntries(genres.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));

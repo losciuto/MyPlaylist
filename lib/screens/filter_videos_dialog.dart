@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/video.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
@@ -31,7 +31,7 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
   }
 
   Future<void> _loadVideos() async {
-    final videos = await DatabaseHelper.instance.getVideosByFilter(widget.category, widget.filterValue);
+    final videos = await db.AppDatabase.instance.getVideosByFilter(widget.category, widget.filterValue);
     if (mounted) {
       setState(() {
         _videos = videos;

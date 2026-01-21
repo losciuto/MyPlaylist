@@ -16,6 +16,20 @@
   "tmdbApiKeyHint": "Enter your TMDB API Key",
   "tmdbInfo": "API Key is required to fetch missing metadata.",
   "playerPath": "Player Path",
+  "playerSelection": "Player Selection",
+  "playerPreset": "Player Preset",
+  "autoDetectPlayer": "Auto-Detect",
+  "customPlayer": "Custom Player",
+  "testPlayer": "Test Player",
+  "playerDetected": "Player detected: {name}",
+  "@playerDetected": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "playerNotFound": "No player found. Please configure manually.",
+  "playerTested": "Player tested successfully!",
+  "playerTestFailed": "Failed to launch player. Check the path.",
   "vlcPort": "VLC RC Port",
   "serverEnabled": "Enable Server",
   "serverPort": "Server Port",
@@ -57,6 +71,7 @@
   "colRating": "Rating",
   "colSaga": "Saga",
   "colDirectors": "Directors",
+  "colGenres": "Genres",
   "colActions": "Actions",
   "searchPlaceholder": "Search...",
   "btnScan": "Scan Folder",
@@ -100,7 +115,12 @@
   "scanStats": "📊 Scan Statistics",
   "scanStatusReady": "Ready to scan",
   "scanStatusInit": "Initializing scan...",
-  "scanFound": "Videos found: {count}",
+  "videosFoundCount": "{count, plural, =0{No videos found} =1{1 video found} other{{count} videos found}}",
+  "@videosFoundCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "scanSupportedExt": "Supported extensions: .mp4, .avi, .mkv, .mov, ...",
   "genPlaylistTitle": "GENERATE PLAYLIST (videos: {count})",
   "btnRandom": "🎲 Random Playlist",
@@ -116,13 +136,29 @@
   "logWaiting": "Waiting...",
   "logLast": "Last: {command}",
   "noPlaylist": "No playlist generated",
-  "currentPlaylist": "Current playlist: {count} videos",
+  "videosCount": "{count, plural, =0{No videos} =1{1 video} other{{count} videos}}",
+  "@videosCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "currentPlaylist": "Current playlist: {count, plural, =0{no videos} =1{1 video} other{{count} videos}}",
+  "@currentPlaylist": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "playlistExported": "Playlist exported to {path}",
   "playerStarted": "External player started: {name}",
   "folderOpenError": "Cannot open folder: {error}",
   "inputCountTitle": "Number of videos",
   "inputCountLabel": "How many videos to include?",
-  "videoCreated": "Generated playlist of {count} videos.",
+  "videoCreated": "Generated playlist of {count, plural, =0{no videos} =1{1 video} other{{count} videos}}.",
+  "@videoCreated": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "noVideoFound": "No videos found!",
   "filterTitle": "Advanced Playlist Filters",
   "resetFilters": "Reset Filters",
@@ -137,15 +173,40 @@
   "minRating": "Minimum Rating:",
   "filterByRating": "Filter by rating ≥ {rating}",
   "summary": "SUMMARY",
-  "included": "• {count} included",
-  "excluded": "• {count} excluded",
+  "includedItemsCount": "{count, plural, =0{None included} =1{1 included} other{{count} included}}",
+  "@includedItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "excludedItemsCount": "{count, plural, =0{None excluded} =1{1 excluded} other{{count} excluded}}",
+  "@excludedItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "noActiveFilters": "No active filters",
   "videosFor": "Videos for {title}: {value}",
-  "foundVideos": "Found: {count} videos",
+  "foundVideos": "Found: {count, plural, =0{no videos} =1{1 video} other{{count} videos}}",
+  "@foundVideos": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "manualSelectionTitle": "Manual Video Selection",
   "searchHint": "Search by title, year, director...",
-  "selectedCount": "Selected: {count}",
-  "visibleCount": "Total visible: {count}",
+  "selectedItemsCount": "{count, plural, =0{None selected} =1{1 selected} other{{count} selected}}",
+  "@selectedItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "visibleCount": "Total visible: {count, plural, =0{none} =1{1} other{{count}}}",
+  "@visibleCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "selectAllVisible": "Select All Visible",
   "deselectAll": "Deselect All",
   "createPlaylist": "Create Playlist",
@@ -238,7 +299,12 @@
   "eventLogHeader": "EVENT LOG",
   "updateError": "Error checking for updates: {error}",
   "databaseManagementTitle": "DATABASE MANAGEMENT",
-  "videosInDatabase": "🎬 Videos in database: {count}",
+  "videosInDatabase": "🎬 {count, plural, =0{No videos} =1{1 video} other{{count} videos}} in database",
+  "@videosInDatabase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "searchVideosPlaceholder": "Search videos...",
   "noVideosFound": "No videos found.",
   "clearDatabaseButton": "Clear Database",
@@ -249,5 +315,19 @@
   "opCancelled": "Operation Cancelled",
   "opCompleted": "Operation Completed",
   "bulkOpStats": "Updated: {updated}\nSkipped: {skipped}\nErrors: {errors}",
-  "openGitHubLabel": "Open GitHub"
+  "openGitHubLabel": "Open GitHub",
+  "statsTotalVideos": "Total Videos",
+  "statsMovies": "Movies",
+  "statsSeries": "Series",
+  "statsAvgRating": "Avg Rating",
+  "statsTopGenres": "Top Genres",
+  "statsVideosByYear": "Videos by Year",
+  "statsTopSagas": "Top Sagas/Collections",
+  "exportPlaylistTitle": "Export Playlist",
+  "tabStatistics": "Statistics",
+  "settingsAutoSync": "Auto-Sync",
+  "settingsAutoSyncSubtitle": "Automatically watch scanned folders for changes",
+  "settingsWatchedFolders": "Watched Folders",
+  "settingsNoWatchedFolders": "No folders being watched",
+  "fanartApiKey": "Fanart.tv API Key"
 }

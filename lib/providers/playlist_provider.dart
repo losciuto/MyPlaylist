@@ -4,9 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import '../models/video.dart';
 import '../services/settings_service.dart';
+import '../models/player_config.dart';
 
 class PlaylistProvider extends ChangeNotifier {
   List<Video> _currentPlaylist = [];
@@ -26,7 +27,7 @@ class PlaylistProvider extends ChangeNotifier {
   }
 
   Future<void> updateVideoCount() async {
-    _totalVideoCount = await DatabaseHelper.instance.getVideoCount();
+    _totalVideoCount = await db.AppDatabase.instance.getVideoCount();
     notifyListeners();
   }
 
@@ -54,7 +55,7 @@ class PlaylistProvider extends ChangeNotifier {
       _proposedVideoIds.clear();
     }
     
-    final videos = await DatabaseHelper.instance.getRandomPlaylist(
+    final videos = await db.AppDatabase.instance.getRandomPlaylist(
       limit, 
       excludeIds: _proposedVideoIds.toList()
     );
@@ -63,7 +64,7 @@ class PlaylistProvider extends ChangeNotifier {
     // and we have proposed IDs, clear and try once more.
     if (videos.isEmpty && _proposedVideoIds.isNotEmpty) {
        _proposedVideoIds.clear();
-       final retryVideos = await DatabaseHelper.instance.getRandomPlaylist(limit);
+       final retryVideos = await db.AppDatabase.instance.getRandomPlaylist(limit);
        await setPlaylist(retryVideos);
     } else {
        await setPlaylist(videos);
@@ -78,7 +79,7 @@ class PlaylistProvider extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> generateRecentPlaylist({int? count, bool launchPlayer = true}) async {
     final limit = count ?? 20; // Default to 20 if count is not provided
-    final videos = await DatabaseHelper.instance.getRecentPlaylist(limit);
+    final videos = await db.AppDatabase.instance.getRecentPlaylist(limit);
     await setPlaylist(videos);
     
     if (launchPlayer) {
@@ -106,7 +107,7 @@ class PlaylistProvider extends ChangeNotifier {
     // For filtered, if the pool is too small, we might want to reset proposed IDs too?
     // Let's implement it similar to random but specifically for filtered results.
     
-    final videos = await DatabaseHelper.instance.getFilteredPlaylist(
+    final videos = await db.AppDatabase.instance.getFilteredPlaylist(
       genres: genres,
       years: years,
       minRating: minRating,
@@ -127,7 +128,7 @@ class PlaylistProvider extends ChangeNotifier {
       // We don't clear everything because other filters might still have unproposed videos,
       // but for this specific filter set, we might need a workaround.
       // For simplicity, if we get nothing, we try again without exclusion.
-      final retryVideos = await DatabaseHelper.instance.getFilteredPlaylist(
+      final retryVideos = await db.AppDatabase.instance.getFilteredPlaylist(
         genres: genres,
         years: years,
         minRating: minRating,
@@ -160,7 +161,7 @@ class PlaylistProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final paths = prefs.getStringList('last_playlist_paths');
       if (paths != null && paths.isNotEmpty) {
-        final videos = await DatabaseHelper.instance.getVideosByPaths(paths);
+        final videos = await db.AppDatabase.instance.getVideosByPaths(paths);
         _currentPlaylist = videos;
         notifyListeners();
       }
@@ -179,9 +180,9 @@ class PlaylistProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> exportPlaylist() async {
+  Future<String?> exportPlaylist(String dialogTitle) async {
     String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Esporta Playlist',
+      dialogTitle: dialogTitle,
       fileName: 'playlist.m3u',
       allowedExtensions: ['m3u'],
       type: FileType.custom,
@@ -262,35 +263,42 @@ class PlaylistProvider extends ChangeNotifier {
 
   Future<void> launchPlayer(String playerPath, String playlistPath) async {
     final settings = SettingsService();
-    // Kill existing process if alive
     await stopPlayer();
 
     try {
-      List<String> args = [playlistPath];
-      final isVlc = playerPath.toLowerCase().contains('vlc');
+      // Get player config (with backward compatibility)
+      final config = settings.playerConfig ?? PlayerConfig.custom(playerPath);
+      final execPath = config.getExecutablePath();
+      
+      // Special VLC handling (kill existing + RC interface)
+      final isVlc = config.preset == PlayerPreset.vlc || execPath.toLowerCase().contains('vlc');
       
       if (isVlc) {
-        // KILL ALL EXISTING VLC INSTANCES
         try {
           if (Platform.isLinux) {
             await Process.run('pkill', ['-x', 'vlc']);
           } else if (Platform.isWindows) {
             await Process.run('taskkill', ['/IM', 'vlc.exe', '/F']);
           }
-          // Give system a moment to clean up resources
           await Future.delayed(const Duration(milliseconds: 500));
         } catch (e) {
           debugPrint('Error killing existing VLC instances: $e');
         }
-
-        // Enable RC interface on 0.0.0.0:vlcPort
-        args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:${settings.vlcPort}', playlistPath];
       }
 
-      debugPrint('Starting player: $playerPath with args: $args');
-      _playerProcess = await Process.start(playerPath, args);
+      // Build args
+      List<String> args;
+      if (isVlc) {
+        args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:${settings.vlcPort}', playlistPath];
+      } else {
+        args = List<String>.from(config.playlistArgs);
+        if (args.isEmpty) args = [playlistPath];
+        else args.add(playlistPath);
+      }
+
+      debugPrint('Starting player: ${config.name} ($execPath) with args: $args');
+      _playerProcess = await Process.start(execPath, args);
       
-      // Optional: Listen to exit to clear variable, though not strictly needed if we just overwrite
       _playerProcess!.exitCode.then((_) {
         _playerProcess = null;
       });

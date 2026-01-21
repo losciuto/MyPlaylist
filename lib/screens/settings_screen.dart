@@ -7,9 +7,10 @@ import 'package:provider/provider.dart';
 import '../services/settings_service.dart';
 import '../services/logger_service.dart';
 import 'package:flutter/services.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import '../providers/database_provider.dart';
 import 'dart:io';
+import '../models/player_config.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
 import '../config/app_config.dart';
@@ -29,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _vlcPortController;
   late TextEditingController _serverInterfaceController;
   late TextEditingController _tmdbApiKeyController;
+  late TextEditingController _fanartApiKeyController;
   bool _obscureSecret = true;
   bool _isCheckingUpdates = false;
   int _currentTab = 0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control, 4: Manutenzione, 5: Debug
@@ -44,6 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _vlcPortController = TextEditingController(text: settings.vlcPort.toString());
     _serverInterfaceController = TextEditingController(text: settings.serverInterface);
     _tmdbApiKeyController = TextEditingController(text: settings.tmdbApiKey);
+    _fanartApiKeyController = TextEditingController(text: settings.fanartApiKey);
   }
 
   @override
@@ -55,6 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _vlcPortController.dispose();
     _serverInterfaceController.dispose();
     _tmdbApiKeyController.dispose();
+    _fanartApiKeyController.dispose();
     super.dispose();
   }
 
@@ -365,6 +369,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           onChanged: (val) => context.read<SettingsService>().setTmdbApiKey(val),
         ),
+        const SizedBox(height: 15),
+        TextField(
+          controller: _fanartApiKeyController,
+          decoration: InputDecoration(
+            labelText: l10n.fanartApiKey,
+            border: const OutlineInputBorder(),
+            filled: true,
+            fillColor: fillColor,
+            helperText: 'Optional: For better logos and backgrounds',
+          ),
+          onChanged: (val) => context.read<SettingsService>().setFanartApiKey(val),
+        ),
         const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.all(15),
@@ -385,6 +401,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: 35),
+        
+        // Auto-Sync Section
+        Text(l10n.settingsAutoSync, style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+        Consumer<SettingsService>(
+          builder: (context, settings, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SwitchListTile(
+                  title: Text(l10n.settingsAutoSync),
+                  subtitle: Text(l10n.settingsAutoSyncSubtitle),
+                  value: settings.autoSyncEnabled,
+                  onChanged: (val) => settings.setAutoSyncEnabled(val),
+                  activeColor: const Color(0xFF4CAF50),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 20),
+                Text(l10n.settingsWatchedFolders, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: fillColor,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: settings.watchedDirectories.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Center(
+                            child: Text(
+                              l10n.settingsNoWatchedFolders,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: settings.watchedDirectories.length,
+                          separatorBuilder: (ctx, i) => const Divider(height: 1),
+                          itemBuilder: (ctx, i) {
+                            final dir = settings.watchedDirectories[i];
+                            return ListTile(
+                              title: Text(p.basename(dir), style: const TextStyle(fontSize: 14)),
+                              subtitle: Text(dir, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                onPressed: () => settings.removeWatchedDirectory(dir),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -598,7 +673,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _exportDatabase() async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final dbPath = await DatabaseHelper.instance.getDatabasePath();
+      final dbPath = await db.AppDatabase.instance.getDatabasePath();
       final dbFile = File(dbPath);
 
       if (!await dbFile.exists()) {
@@ -664,9 +739,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         if (confirm == true) {
           // Close connection
-          await DatabaseHelper.instance.close();
+          await db.AppDatabase.instance.close();
           
-          final dbPath = await DatabaseHelper.instance.getDatabasePath();
+          final dbPath = await db.AppDatabase.instance.getDatabasePath();
           final sourceFile = File(backupPath);
           await sourceFile.copy(dbPath);
           

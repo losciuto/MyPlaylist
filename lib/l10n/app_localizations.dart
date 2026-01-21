@@ -200,6 +200,60 @@ abstract class AppLocalizations {
   /// **'Percorso Player'**
   String get playerPath;
 
+  /// No description provided for @playerSelection.
+  ///
+  /// In it, this message translates to:
+  /// **'Selezione Player'**
+  String get playerSelection;
+
+  /// No description provided for @playerPreset.
+  ///
+  /// In it, this message translates to:
+  /// **'Preset Player'**
+  String get playerPreset;
+
+  /// No description provided for @autoDetectPlayer.
+  ///
+  /// In it, this message translates to:
+  /// **'Rileva Automaticamente'**
+  String get autoDetectPlayer;
+
+  /// No description provided for @customPlayer.
+  ///
+  /// In it, this message translates to:
+  /// **'Player Personalizzato'**
+  String get customPlayer;
+
+  /// No description provided for @testPlayer.
+  ///
+  /// In it, this message translates to:
+  /// **'Testa Player'**
+  String get testPlayer;
+
+  /// No description provided for @playerDetected.
+  ///
+  /// In it, this message translates to:
+  /// **'Player rilevato: {name}'**
+  String playerDetected(String name);
+
+  /// No description provided for @playerNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun player trovato. Configura manualmente.'**
+  String get playerNotFound;
+
+  /// No description provided for @playerTested.
+  ///
+  /// In it, this message translates to:
+  /// **'Player testato con successo!'**
+  String get playerTested;
+
+  /// No description provided for @playerTestFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile avviare il player. Controlla il percorso.'**
+  String get playerTestFailed;
+
   /// No description provided for @vlcPort.
   ///
   /// In it, this message translates to:
@@ -445,6 +499,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Registi'**
   String get colDirectors;
+
+  /// No description provided for @colGenres.
+  ///
+  /// In it, this message translates to:
+  /// **'Generi'**
+  String get colGenres;
 
   /// No description provided for @colActions.
   ///
@@ -704,11 +764,11 @@ abstract class AppLocalizations {
   /// **'Inizializzazione scansione...'**
   String get scanStatusInit;
 
-  /// No description provided for @scanFound.
+  /// No description provided for @videosFoundCount.
   ///
   /// In it, this message translates to:
-  /// **'Video trovati: {count}'**
-  String scanFound(Object count);
+  /// **'{count, plural, =0{Nessun video trovato} =1{1 video trovato} other{{count} video trovati}}'**
+  String videosFoundCount(int count);
 
   /// No description provided for @scanSupportedExt.
   ///
@@ -800,11 +860,17 @@ abstract class AppLocalizations {
   /// **'Nessuna playlist generata'**
   String get noPlaylist;
 
+  /// No description provided for @videosCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Nessun video} =1{1 video} other{{count} video}}'**
+  String videosCount(int count);
+
   /// No description provided for @currentPlaylist.
   ///
   /// In it, this message translates to:
-  /// **'Playlist corrente: {count} video'**
-  String currentPlaylist(Object count);
+  /// **'Playlist corrente: {count, plural, =0{nessun video} =1{1 video} other{{count} video}}'**
+  String currentPlaylist(int count);
 
   /// No description provided for @playlistExported.
   ///
@@ -839,8 +905,8 @@ abstract class AppLocalizations {
   /// No description provided for @videoCreated.
   ///
   /// In it, this message translates to:
-  /// **'Generata playlist di {count} video.'**
-  String videoCreated(Object count);
+  /// **'Generata playlist di {count, plural, =0{nessun video} =1{1 video} other{{count} video}}.'**
+  String videoCreated(int count);
 
   /// No description provided for @noVideoFound.
   ///
@@ -926,17 +992,17 @@ abstract class AppLocalizations {
   /// **'Sommario'**
   String get summary;
 
-  /// No description provided for @included.
+  /// No description provided for @includedItemsCount.
   ///
   /// In it, this message translates to:
-  /// **'Inclusioni: {inclusions}'**
-  String included(Object inclusions);
+  /// **'{count, plural, =0{Nessuno incluso} =1{1 incluso} other{{count} inclusi}}'**
+  String includedItemsCount(int count);
 
-  /// No description provided for @excluded.
+  /// No description provided for @excludedItemsCount.
   ///
   /// In it, this message translates to:
-  /// **'Esclusioni: {exclusions}'**
-  String excluded(Object exclusions);
+  /// **'{count, plural, =0{Nessuno escluso} =1{1 escluso} other{{count} esclusi}}'**
+  String excludedItemsCount(int count);
 
   /// No description provided for @noActiveFilters.
   ///
@@ -953,8 +1019,8 @@ abstract class AppLocalizations {
   /// No description provided for @foundVideos.
   ///
   /// In it, this message translates to:
-  /// **'Trovati: {count} video'**
-  String foundVideos(Object count);
+  /// **'Trovati: {count, plural, =0{nessun video} =1{1 video} other{{count} video}}'**
+  String foundVideos(int count);
 
   /// No description provided for @manualSelectionTitle.
   ///
@@ -968,17 +1034,17 @@ abstract class AppLocalizations {
   /// **'Cerca per titolo, anno, regista...'**
   String get searchHint;
 
-  /// No description provided for @selectedCount.
+  /// No description provided for @selectedItemsCount.
   ///
   /// In it, this message translates to:
-  /// **'Selezionati: {count}'**
-  String selectedCount(Object count);
+  /// **'{count, plural, =0{Nessuno selezionato} =1{1 selezionato} other{{count} selezionati}}'**
+  String selectedItemsCount(int count);
 
   /// No description provided for @visibleCount.
   ///
   /// In it, this message translates to:
-  /// **'Totale visibili: {count}'**
-  String visibleCount(Object count);
+  /// **'Totale visibili: {count, plural, =0{nessuno} =1{1} other{{count}}}'**
+  String visibleCount(int count);
 
   /// No description provided for @selectAllVisible.
   ///
@@ -1406,6 +1472,18 @@ abstract class AppLocalizations {
   /// **'Seleziona cartella da scansionare'**
   String get selectFolderToScan;
 
+  /// No description provided for @included.
+  ///
+  /// In it, this message translates to:
+  /// **'Inclusioni: {inclusions}'**
+  String included(Object inclusions);
+
+  /// No description provided for @excluded.
+  ///
+  /// In it, this message translates to:
+  /// **'Esclusioni: {exclusions}'**
+  String excluded(Object exclusions);
+
   /// No description provided for @scanFinishedMsg.
   ///
   /// In it, this message translates to:
@@ -1505,8 +1583,8 @@ abstract class AppLocalizations {
   /// No description provided for @videosInDatabase.
   ///
   /// In it, this message translates to:
-  /// **'🎬 Video nel database: {count}'**
-  String videosInDatabase(Object count);
+  /// **'🎬 {count, plural, =0{Nessun video} =1{1 video} other{{count} video}} nel database'**
+  String videosInDatabase(int count);
 
   /// No description provided for @searchVideosPlaceholder.
   ///
@@ -1573,6 +1651,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Apri GitHub'**
   String get openGitHubLabel;
+
+  /// No description provided for @statsTotalVideos.
+  ///
+  /// In it, this message translates to:
+  /// **'Totale Video'**
+  String get statsTotalVideos;
+
+  /// No description provided for @statsMovies.
+  ///
+  /// In it, this message translates to:
+  /// **'Film'**
+  String get statsMovies;
+
+  /// No description provided for @statsSeries.
+  ///
+  /// In it, this message translates to:
+  /// **'Serie TV'**
+  String get statsSeries;
+
+  /// No description provided for @statsAvgRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto Medio'**
+  String get statsAvgRating;
+
+  /// No description provided for @statsTopGenres.
+  ///
+  /// In it, this message translates to:
+  /// **'Generi Top'**
+  String get statsTopGenres;
+
+  /// No description provided for @statsVideosByYear.
+  ///
+  /// In it, this message translates to:
+  /// **'Video per Anno'**
+  String get statsVideosByYear;
+
+  /// No description provided for @statsTopSagas.
+  ///
+  /// In it, this message translates to:
+  /// **'Saghe/Collezioni Top'**
+  String get statsTopSagas;
+
+  /// No description provided for @exportPlaylistTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta Playlist'**
+  String get exportPlaylistTitle;
+
+  /// No description provided for @tabStatistics.
+  ///
+  /// In it, this message translates to:
+  /// **'Statistiche'**
+  String get tabStatistics;
+
+  /// No description provided for @settingsAutoSync.
+  ///
+  /// In it, this message translates to:
+  /// **'Auto-Sync'**
+  String get settingsAutoSync;
+
+  /// No description provided for @settingsAutoSyncSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Monitora automaticamente le cartelle scansionate per modifiche'**
+  String get settingsAutoSyncSubtitle;
+
+  /// No description provided for @settingsWatchedFolders.
+  ///
+  /// In it, this message translates to:
+  /// **'Cartelle Monitorate'**
+  String get settingsWatchedFolders;
+
+  /// No description provided for @settingsNoWatchedFolders.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna cartella monitorata'**
+  String get settingsNoWatchedFolders;
+
+  /// No description provided for @fanartApiKey.
+  ///
+  /// In it, this message translates to:
+  /// **'Fanart.tv API Key'**
+  String get fanartApiKey;
 }
 
 class _AppLocalizationsDelegate

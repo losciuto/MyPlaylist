@@ -1,80 +1,118 @@
 import 'package:flutter/foundation.dart';
-import '../database/database_helper.dart';
-import '../models/video.dart';
-// import '../services/metadata_service.dart'; // Unused
-// import '../utils/nfo_parser.dart'; // Unused
-// import 'dart:io'; // Unused
-// import 'package:path/path.dart' as p; // Unused
+import '../database/app_database.dart';
+import '../models/video.dart' as model;
+import 'package:drift/drift.dart';
+import '../utils/filter_utils.dart';
 
 class DatabaseProvider extends ChangeNotifier {
-  List<Video> _videos = [];
-  List<Video> _filteredVideos = [];
+  final AppDatabase _db;
+  List<model.Video> _videos = [];
+  List<model.Video> _filteredVideos = [];
   bool _isLoading = false;
 
-  List<Video> get videos => _videos;
-  List<Video> get filteredVideos => _filteredVideos;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
+  DatabaseProvider(this._db);
+
+  List<model.Video> get videos => _videos;
+  List<model.Video> get filteredVideos => _filteredVideos;
   bool get isLoading => _isLoading;
+  int get sortColumnIndex => _sortColumnIndex;
+  bool get sortAscending => _sortAscending;
 
   Future<void> refreshVideos() async {
     _isLoading = true;
     notifyListeners();
     
-    _videos = await DatabaseHelper.instance.getAllVideos();
-    _filteredVideos = List.from(_videos);
+    final driftVideos = await _db.select(_db.videos).get();
+    _videos = driftVideos.map((v) => _mapDriftToModel(v)).toList();
+    _applyFilterAndSort();
     
     _isLoading = false;
     notifyListeners();
   }
 
+  model.Video _mapDriftToModel(DriftVideo v) {
+    return model.Video(
+      id: v.id,
+      path: v.path,
+      mtime: v.mtime,
+      title: v.title,
+      genres: v.genres,
+      year: v.year,
+      directors: v.directors,
+      plot: v.plot,
+      actors: v.actors,
+      duration: v.duration,
+      rating: v.rating,
+      isSeries: v.isSeries == 1,
+      posterPath: v.posterPath,
+      saga: v.saga,
+      sagaIndex: v.sagaIndex,
+    );
+  }
+
+  void _applyFilterAndSort() {
+    _filteredVideos = List.from(_videos);
+    _doSort();
+  }
+
   void filterVideos(String query) {
-    if (query.isEmpty) {
-      _filteredVideos = List.from(_videos);
-    } else {
-      final lower = query.toLowerCase();
-      _filteredVideos = _videos.where((v) => 
-        v.title.toLowerCase().contains(lower) || 
-        v.path.toLowerCase().contains(lower)
-      ).toList();
-    }
+    _filteredVideos = FilterUtils.filterVideos(_videos, query);
+    _doSort();
     notifyListeners();
   }
 
-  void setSortedVideos(List<Video> sortedVideos) {
-    _filteredVideos = sortedVideos;
+  void sort(int columnIndex, bool ascending) {
+    _sortColumnIndex = columnIndex;
+    _sortAscending = ascending;
+    _doSort();
     notifyListeners();
   }
 
-  Future<void> updateVideo(Video video) async {
-    await DatabaseHelper.instance.updateVideo(video);
-    await refreshVideos(); // Refresh to update list and sort
+  void _doSort() {
+    FilterUtils.sortVideos(_filteredVideos, _sortColumnIndex, _sortAscending);
   }
 
-  Future<void> clearDatabase() async {
-    await DatabaseHelper.instance.clearDatabase();
+
+  Future<void> updateVideo(model.Video video) async {
+    await _db.update(_db.videos).replace(
+      VideosCompanion(
+        id: Value(video.id!),
+        path: Value(video.path),
+        mtime: Value(video.mtime),
+        title: Value(video.title),
+        genres: Value(video.genres),
+        year: Value(video.year),
+        directors: Value(video.directors),
+        plot: Value(video.plot),
+        actors: Value(video.actors),
+        duration: Value(video.duration),
+        rating: Value(video.rating),
+        isSeries: Value(video.isSeries ? 1 : 0),
+        posterPath: Value(video.posterPath),
+        saga: Value(video.saga),
+        sagaIndex: Value(video.sagaIndex),
+      ),
+    );
     await refreshVideos();
   }
 
-  Future<void> deleteVideo(Video video) async {
+  Future<void> clearDatabase() async {
+    await _db.delete(_db.videos).go();
+    await refreshVideos();
+  }
+
+  Future<void> deleteVideo(model.Video video) async {
     if (video.id != null) {
-      await DatabaseHelper.instance.deleteVideo(video.id!);
+      await (_db.delete(_db.videos)..where((t) => t.id.equals(video.id!))).go();
       await refreshVideos();
     }
   }
 
-  // Moved bulk logic here, but exposed differently.
-  // Since bulk logic needs UI feedback (progress), we might need a Stream or Callback 
-  // For now, I'll keep the heavily interactive bulk loop in the UI or a separate service, 
-  // OR better: Return a Stream<double> of progress.
-  // Actually, for simplicity given the current structure, I will keep the bulk loop structure similar 
-  // but move the CORE renaming logic here.
-  
-  // Actually, 'bulkRename' is a very specific operation that updates the DB line by line.
-  // If we move it here, we need to handle the progress notification.
-  // Let's create a method that performs the rename for a single video, 
-  // and the UI loop can call it? No, that spams notifyListeners.
-  
-  // Let's just expose the list of videos to the UI so it can loop over them. 
-  // The UI already fetches 'allVideos' using DatabaseHelper.
-  // I will leave the bulk *orchestration* in the UI for now as it's heavily tied to the ProgressDialog,
-  // but I will expose a method to 'reload' after it's done.
+  void setSortedVideos(List<model.Video> sortedVideos) {
+    _filteredVideos = sortedVideos;
+    notifyListeners();
+  }
 }

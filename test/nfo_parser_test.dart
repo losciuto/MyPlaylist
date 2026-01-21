@@ -70,9 +70,52 @@ void main() {
       expect(result['rating'], 7.5);
     });
 
-    test('Handles missing file gracefully', () async {
-      final result = await NfoParser.parseNfo('${tempDir.path}/ghost.nfo');
+    test('Handles non-XML content gracefully', () async {
+      final nfoFile = File('${tempDir.path}/garbage.nfo');
+      await nfoFile.writeAsString('This is just plain text, not XML.');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      // Parser checks for '<', if not found prints debug and returns null
       expect(result, isNull);
+    });
+
+    test('Handles malformed XML gracefully', () async {
+      final nfoFile = File('${tempDir.path}/broken.nfo');
+      await nfoFile.writeAsString('<movie><title>Unclosed Tag');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      // Xml parser throws exception, catch block returns null
+      expect(result, isNull);
+    });
+
+    test('Handles empty fields/defaults', () async {
+      final nfoFile = File('${tempDir.path}/empty.nfo');
+      await nfoFile.writeAsString('<movie><year></year></movie>');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['title'], isNull);
+      expect(result['year'], isNull); // Empty string usually maps to null or empty in parser logic
+      expect(result['rating'], 0.0);
+    });
+
+    test('Handles weird/bad ratings', () async {
+      final nfoFile = File('${tempDir.path}/bad_rating.nfo');
+      await nfoFile.writeAsString('<movie><rating>NaN</rating></movie>');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['rating'], 0.0);
+    });
+    
+    test('Handles UTF-8 content', () async {
+       final nfoFile = File('${tempDir.path}/utf8.nfo');
+       await nfoFile.writeAsString('''
+<movie>
+    <title>Hércules</title>
+    <plot>Café &amp; Tea</plot>
+</movie>
+''');
+       final result = await NfoParser.parseNfo(nfoFile.path);
+       expect(result, isNotNull);
+       expect(result!['title'], 'Hércules');
+       expect(result['plot'], 'Café & Tea');
     });
   });
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database/database_helper.dart'; // Import DB Helper
+import '../database/app_database.dart' as db;
 import 'scan_tab.dart';
 import 'database_tab.dart';
 import 'playlist_tab.dart';
@@ -8,6 +8,7 @@ import '../widgets/update_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../config/app_config.dart';
 import 'settings_screen.dart';
+import 'statistics_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadVideos() async {
-    final count = await DatabaseHelper.instance.getVideoCount();
+    final count = await db.AppDatabase.instance.getVideoCount();
     if (mounted) {
       setState(() {
         if (count > 0) {
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       initialIndex: _initialIndex,
       child: Scaffold(
         appBar: AppBar(
@@ -76,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Tab(icon: const Icon(Icons.folder_open), text: AppLocalizations.of(context)!.navScan),
               Tab(icon: const Icon(Icons.storage), text: AppLocalizations.of(context)!.navDatabase),
               Tab(icon: const Icon(Icons.playlist_play), text: AppLocalizations.of(context)!.navPlaylist),
+              Tab(icon: const Icon(Icons.bar_chart), text: AppLocalizations.of(context)!.tabStatistics),
             ],
             indicatorColor: AppConfig.seedColor,
             labelColor: AppConfig.seedColor,
@@ -125,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ScanTab(),
             DatabaseTab(),
             PlaylistTab(),
+            StatisticsTab(),
           ],
         ),
       ),

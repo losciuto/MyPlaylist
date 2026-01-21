@@ -27,7 +27,9 @@ class NfoParser {
 
       String? getString(String tag) {
         final nodes = document.findAllElements(tag);
-        return nodes.isEmpty ? null : clean(nodes.first.innerText);
+        if (nodes.isEmpty) return null;
+        final res = clean(nodes.first.innerText);
+        return res.isEmpty ? null : res;
       }
 
       List<String> getList(String tag) {
@@ -143,7 +145,10 @@ class NfoParser {
       }
 
       final finalRating = double.tryParse((rating ?? '').replaceAll(',', '.')) ?? 0.0;
-      print('DEBUG [NfoParser]: FINAL RATING for "$title" is: $finalRating (from raw: $rating)');
+
+      // Handle NaN or Infinity
+      final safeRating = (finalRating.isNaN || finalRating.isInfinite) ? 0.0 : finalRating;
+      print('DEBUG [NfoParser]: FINAL RATING for "$title" is: $safeRating (from raw: $rating)');
 
       return {
         'title': title,
@@ -152,7 +157,7 @@ class NfoParser {
         'directors': directors.join(', '),
         'plot': plot,
         'actors': safeActors.join(', '),
-        'rating': finalRating,
+        'rating': safeRating,
         'duration': duration,
         'poster': thumb,
         'saga': saga,

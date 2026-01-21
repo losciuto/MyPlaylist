@@ -10,9 +10,11 @@ import 'providers/database_provider.dart';
 import 'providers/playlist_provider.dart';
 import 'services/remote_control_service.dart';
 import 'config/app_config.dart';
+import 'database/app_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:my_playlist/l10n/app_localizations.dart'; // Add generated import
 import 'services/logger_service.dart';
+import 'services/file_watcher_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,11 +61,58 @@ void main() async {
     });
   }
 
+  // Initialize File Watcher
+  final fileWatcher = FileWatcherService();
+  
+  // Initial sync state
+  if (settingsService.autoSyncEnabled) {
+    for (final dir in settingsService.watchedDirectories) {
+      fileWatcher.startWatching(dir);
+    }
+  }
+
+  // Listen for settings changes to update watcher
+  settingsService.addListener(() async {
+    if (settingsService.autoSyncEnabled) {
+      if (!fileWatcher.isWatching && settingsService.watchedDirectories.isNotEmpty) {
+          // Re-enable or start watching new dirs
+          for (final dir in settingsService.watchedDirectories) {
+             await fileWatcher.startWatching(dir);
+          }
+      } else {
+         // Check for diffs in watched directories
+         final currentWatched = fileWatcher.watchedDirectories.toSet();
+         final targetWatched = settingsService.watchedDirectories.toSet();
+         
+         // Remove no longer watched
+         for (final dir in currentWatched) {
+           if (!targetWatched.contains(dir)) {
+             await fileWatcher.stopWatching(dir);
+           }
+         }
+         
+         // Add newly watched
+         for (final dir in targetWatched) {
+           if (!currentWatched.contains(dir)) {
+             await fileWatcher.startWatching(dir);
+           }
+         }
+      }
+    } else {
+      if (fileWatcher.isWatching) {
+        await fileWatcher.stopAll();
+      }
+    }
+  });
+
+  final database = AppDatabase();
+
   runApp(
     MultiProvider(
       providers: [
+        Provider.value(value: database),
         ChangeNotifierProvider.value(value: settingsService),
-        ChangeNotifierProvider(create: (_) => DatabaseProvider()..refreshVideos()),
+        ChangeNotifierProvider(create: (_) => DatabaseProvider(database)..refreshVideos()),
         ChangeNotifierProvider(create: (context) => PlaylistProvider()),
         ChangeNotifierProxyProvider2<SettingsService, PlaylistProvider, RemoteControlService>(
           lazy: false,

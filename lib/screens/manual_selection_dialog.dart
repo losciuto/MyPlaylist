@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import '../models/video.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
@@ -28,7 +28,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   }
 
   Future<void> _loadVideos() async {
-    final videos = await DatabaseHelper.instance.getAllVideos();
+    final videos = await db.AppDatabase.instance.getAllVideos();
     if (mounted) {
       setState(() {
         _allVideos = videos;
@@ -167,7 +167,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.selectedCount(_selectedIds.length),
+                      AppLocalizations.of(context)!.selectedItemsCount(_selectedIds.length),
                       style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold),
                     ),
                     Text(

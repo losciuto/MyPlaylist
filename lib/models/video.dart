@@ -72,4 +72,40 @@ class Video {
       sagaIndex: map['sagaIndex'] ?? 0,
     );
   }
+
+  Video copyWith({
+    int? id,
+    String? path,
+    double? mtime,
+    String? title,
+    String? genres,
+    String? year,
+    String? directors,
+    String? plot,
+    String? actors,
+    String? duration,
+    double? rating,
+    bool? isSeries,
+    String? posterPath,
+    String? saga,
+    int? sagaIndex,
+  }) {
+    return Video(
+      id: id ?? this.id,
+      path: path ?? this.path,
+      mtime: mtime ?? this.mtime,
+      title: title ?? this.title,
+      genres: genres ?? this.genres,
+      year: year ?? this.year,
+      directors: directors ?? this.directors,
+      plot: plot ?? this.plot,
+      actors: actors ?? this.actors,
+      duration: duration ?? this.duration,
+      rating: rating ?? this.rating,
+      isSeries: isSeries ?? this.isSeries,
+      posterPath: posterPath ?? this.posterPath,
+      saga: saga ?? this.saga,
+      sagaIndex: sagaIndex ?? this.sagaIndex,
+    );
+  }
 }

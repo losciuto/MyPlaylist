@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppConfig {
   // App Info
   static const String appName = 'MyPlaylist';
-  static const String appVersion = '3.3.0';
+  static const String appVersion = '3.4.0';
   static const String appAuthor = 'Massimo';
   static const String appBuildDate = '21/01/2026';
 

@@ -1,8 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [3.4.0] - 2026-01-21
 
-## [3.0.0] - 2026-01-11
+### Added
+- **Auto-Sync**: Background file watcher to automatically detect new videos and sync them to the database. Includes customizable watched folders in Settings.
+- **Fanart.tv Integration**: Fetch high-quality logos, clearart, and disc art for movies.
+- **Table Virtualization**: Drastically improved database table performance for large collections using optimized virtualization (`ListView.builder`).
+- **Linux Code Signing**: Support for GPG signing in CI/CD pipeline.
+
+### Fixed
+- **Edit Dialog**: Resolved layout crashes ("render box no size") and improved responsive layout for the editing window.
+- **Critical Layout**: Fixed infinite height issue with `Expanded` widgets inside scroll views.
+
+
 
 ### Added
 - **TV Series Management**: Implemented series folder handling. Folders containing "Series", "Serie", "Seriale", "TV Show", or a `tvshow.nfo` file are now treated as a single entity in the database.

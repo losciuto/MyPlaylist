@@ -1,6 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../services/scan_service.dart';
+import 'package:provider/provider.dart';
+import '../services/settings_service.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class ScanTab extends StatefulWidget {
@@ -56,6 +58,12 @@ class _ScanTabState extends State<ScanTab> {
            ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(content: Text(AppLocalizations.of(context)!.scanFinishedMsg(_count))),
            );
+           
+           // Auto-add to watched directories if auto-sync is enabled
+           final settings = context.read<SettingsService>();
+           if (settings.autoSyncEnabled) {
+             settings.addWatchedDirectory(folder);
+           }
         }
       },
       onError: (e) {
@@ -129,7 +137,7 @@ class _ScanTabState extends State<ScanTab> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  AppLocalizations.of(context)!.scanFound(_count),
+                  AppLocalizations.of(context)!.videosFoundCount(_count),
                    style: const TextStyle(color: Colors.grey),
                 ),
               ],

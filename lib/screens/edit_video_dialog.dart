@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import '../models/video.dart';
-import '../database/database_helper.dart';
+import '../database/app_database.dart' as db;
 import '../services/metadata_service.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
@@ -391,7 +391,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       print('DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb');
 
       // Update Database
-      await DatabaseHelper.instance.updateVideo(updatedVideo);
+      await db.AppDatabase.instance.updateVideo(updatedVideo);
 
       if (onlyDb) {
         if (mounted) {
@@ -484,7 +484,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                 const SizedBox(height: 15),
                Expanded(
                  child: Row(
-                   crossAxisAlignment: CrossAxisAlignment.start,
+                   crossAxisAlignment: CrossAxisAlignment.stretch,
                    children: [
                      // Left Column
                      Expanded(
@@ -509,34 +509,38 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                              const SizedBox(height: 10),
                              _buildTextField(_posterPathController, AppLocalizations.of(context)!.labelPoster),
                              const SizedBox(height: 10),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
                                   Expanded(child: _buildTextField(_sagaController, AppLocalizations.of(context)!.labelSaga, false, 1, AppLocalizations.of(context)!.sagaTooltip)),
                                   const SizedBox(width: 10),
                                   Expanded(child: _buildTextField(_sagaIndexController, AppLocalizations.of(context)!.labelSagaIndex, false, 1, AppLocalizations.of(context)!.sagaIndexTooltip)),
+                                ],
+                              ),
                            ],
                          ),
                        ),
                      ),
                      const SizedBox(width: 20),
-                     // Right Column
                      Expanded(
-                       child: Column(
-                         children: [
-                            Text(AppLocalizations.of(context)!.colRating, style: const TextStyle(color: Colors.white70)),
-                            Slider(
-                              value: _rating,
-                              min: 0,
-                              max: 10,
-                              divisions: 20,
-                              label: _rating.toString(),
-                              activeColor: const Color(0xFF4CAF50),
-                              onChanged: (val) => setState(() => _rating = val),
-                            ),
-                            Text(AppLocalizations.of(context)!.ratingLabel(_rating.toStringAsFixed(1)), style: const TextStyle(color: Colors.white)),
-                            const SizedBox(height: 20),
-                            Expanded(
-                              child: _buildTextField(_plotController, AppLocalizations.of(context)!.labelPlot, false, 10),
-                            ),
-                         ],
+                       child: SingleChildScrollView(
+                         child: Column(
+                           children: [
+                              Text(AppLocalizations.of(context)!.colRating, style: const TextStyle(color: Colors.white70)),
+                              Slider(
+                                value: _rating,
+                                min: 0,
+                                max: 10,
+                                divisions: 20,
+                                label: _rating.toString(),
+                                activeColor: const Color(0xFF4CAF50),
+                                onChanged: (val) => setState(() => _rating = val),
+                              ),
+                              Text(AppLocalizations.of(context)!.ratingLabel(_rating.toStringAsFixed(1)), style: const TextStyle(color: Colors.white)),
+                              const SizedBox(height: 20),
+                              _buildTextField(_plotController, AppLocalizations.of(context)!.labelPlot, false, 15),
+                           ],
+                         ),
                        ),
                      ),
                    ],

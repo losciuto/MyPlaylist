@@ -237,7 +237,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
   }
 
   void _exportPlaylist(PlaylistProvider provider) async {
-    final path = await provider.exportPlaylist();
+    final path = await provider.exportPlaylist(AppLocalizations.of(context)!.exportPlaylistTitle);
     if (path != null) {
       _showSnack(AppLocalizations.of(context)!.playlistExported(path));
     }

@@ -34,11 +34,27 @@ jobs:
           tar -czf myplaylist-linux-x64.tar.gz *
           mv myplaylist-linux-x64.tar.gz ../../../../../
 
+      - name: Import GPG Key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        continue-on-error: true
+
+      - name: Sign Release
+        if: steps.import_gpg.outcome == 'success'
+        run: |
+          gpg --detach-sign --armor myplaylist-linux-x64.tar.gz
+        continue-on-error: true
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: myplaylist-linux-x64
-          path: myplaylist-linux-x64.tar.gz
+          path: |
+            myplaylist-linux-x64.tar.gz
+            myplaylist-linux-x64.tar.gz.asc
 
   build-windows:
     name: Build Windows
@@ -84,6 +100,7 @@ jobs:
         with:
           files: |
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
+            artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz.asc
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
           fail_on_unmatched_files: false
           generate_release_notes: true

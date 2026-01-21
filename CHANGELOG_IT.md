@@ -1,8 +1,19 @@
 # Changelog
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+## [3.4.0] - 2026-01-21
 
-## [3.0.0] - 2026-01-11
+### Novità
+- **Auto-Sync**: Watcher in background per rilevare automaticamente nuovi video e sincronizzarli nel database. Include la gestione delle cartelle monitorate nelle Impostazioni.
+- **Integrazione Fanart.tv**: Scaricamento automatico di Loghi, ClearArt e DiscArt ad alta qualità.
+- **Virtualizzazione Tabella**: Drastico miglioramento delle prestazioni per collezioni numerose grazie all'uso di `ListView.builder`.
+- **Firma Digitale Linux**: Supporto GPG nel workflow di rilascio CI/CD.
+
+### Correzioni
+- **Finestra Modifica**: Risolti crash di layout ("render box no size") e migliorata la risposta dell'interfaccia di editing.
+- **Layout Critico**: Risolto problema di altezza infinita con widget `Expanded` all'interno di viste a scorrimento.
+
+
 
 ### Aggiunto
 - **Gestione Serie TV**: Implementata la gestione delle cartelle serie. Le cartelle contenenti "Serie", "Series", "Seriale", "TV Show" o un file `tvshow.nfo` vengono ora trattate come un'unica entità nel database.

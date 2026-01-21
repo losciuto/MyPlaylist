@@ -61,6 +61,36 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playerPath => 'Percorso Player';
 
   @override
+  String get playerSelection => 'Selezione Player';
+
+  @override
+  String get playerPreset => 'Preset Player';
+
+  @override
+  String get autoDetectPlayer => 'Rileva Automaticamente';
+
+  @override
+  String get customPlayer => 'Player Personalizzato';
+
+  @override
+  String get testPlayer => 'Testa Player';
+
+  @override
+  String playerDetected(String name) {
+    return 'Player rilevato: $name';
+  }
+
+  @override
+  String get playerNotFound => 'Nessun player trovato. Configura manualmente.';
+
+  @override
+  String get playerTested => 'Player testato con successo!';
+
+  @override
+  String get playerTestFailed =>
+      'Impossibile avviare il player. Controlla il percorso.';
+
+  @override
   String get vlcPort => 'Porta RC VLC';
 
   @override
@@ -193,6 +223,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get colDirectors => 'Registi';
+
+  @override
+  String get colGenres => 'Generi';
 
   @override
   String get colActions => 'Azioni';
@@ -341,8 +374,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get scanStatusInit => 'Inizializzazione scansione...';
 
   @override
-  String scanFound(Object count) {
-    return 'Video trovati: $count';
+  String videosFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video trovati',
+      one: '1 video trovato',
+      zero: 'Nessun video trovato',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -398,8 +438,27 @@ class AppLocalizationsIt extends AppLocalizations {
   String get noPlaylist => 'Nessuna playlist generata';
 
   @override
-  String currentPlaylist(Object count) {
-    return 'Playlist corrente: $count video';
+  String videosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+      zero: 'Nessun video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currentPlaylist(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+      zero: 'nessun video',
+    );
+    return 'Playlist corrente: $_temp0';
   }
 
   @override
@@ -424,8 +483,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get inputCountLabel => 'Quanti video vuoi includere?';
 
   @override
-  String videoCreated(Object count) {
-    return 'Generata playlist di $count video.';
+  String videoCreated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+      zero: 'nessun video',
+    );
+    return 'Generata playlist di $_temp0.';
   }
 
   @override
@@ -473,13 +539,27 @@ class AppLocalizationsIt extends AppLocalizations {
   String get summary => 'Sommario';
 
   @override
-  String included(Object inclusions) {
-    return 'Inclusioni: $inclusions';
+  String includedItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count inclusi',
+      one: '1 incluso',
+      zero: 'Nessuno incluso',
+    );
+    return '$_temp0';
   }
 
   @override
-  String excluded(Object exclusions) {
-    return 'Esclusioni: $exclusions';
+  String excludedItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count esclusi',
+      one: '1 escluso',
+      zero: 'Nessuno escluso',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -491,8 +571,15 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String foundVideos(Object count) {
-    return 'Trovati: $count video';
+  String foundVideos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+      zero: 'nessun video',
+    );
+    return 'Trovati: $_temp0';
   }
 
   @override
@@ -502,13 +589,27 @@ class AppLocalizationsIt extends AppLocalizations {
   String get searchHint => 'Cerca per titolo, anno, regista...';
 
   @override
-  String selectedCount(Object count) {
-    return 'Selezionati: $count';
+  String selectedItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selezionati',
+      one: '1 selezionato',
+      zero: 'Nessuno selezionato',
+    );
+    return '$_temp0';
   }
 
   @override
-  String visibleCount(Object count) {
-    return 'Totale visibili: $count';
+  String visibleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count',
+      one: '1',
+      zero: 'nessuno',
+    );
+    return 'Totale visibili: $_temp0';
   }
 
   @override
@@ -745,6 +846,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get selectFolderToScan => 'Seleziona cartella da scansionare';
 
   @override
+  String included(Object inclusions) {
+    return 'Inclusioni: $inclusions';
+  }
+
+  @override
+  String excluded(Object exclusions) {
+    return 'Esclusioni: $exclusions';
+  }
+
+  @override
   String scanFinishedMsg(Object count) {
     return 'Scansione terminata. Trovati $count nuovi video.';
   }
@@ -798,8 +909,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get databaseManagementTitle => 'GESTIONE DATABASE';
 
   @override
-  String videosInDatabase(Object count) {
-    return '🎬 Video nel database: $count';
+  String videosInDatabase(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+      zero: 'Nessun video',
+    );
+    return '🎬 $_temp0 nel database';
   }
 
   @override
@@ -836,4 +954,47 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get openGitHubLabel => 'Apri GitHub';
+
+  @override
+  String get statsTotalVideos => 'Totale Video';
+
+  @override
+  String get statsMovies => 'Film';
+
+  @override
+  String get statsSeries => 'Serie TV';
+
+  @override
+  String get statsAvgRating => 'Voto Medio';
+
+  @override
+  String get statsTopGenres => 'Generi Top';
+
+  @override
+  String get statsVideosByYear => 'Video per Anno';
+
+  @override
+  String get statsTopSagas => 'Saghe/Collezioni Top';
+
+  @override
+  String get exportPlaylistTitle => 'Esporta Playlist';
+
+  @override
+  String get tabStatistics => 'Statistiche';
+
+  @override
+  String get settingsAutoSync => 'Auto-Sync';
+
+  @override
+  String get settingsAutoSyncSubtitle =>
+      'Monitora automaticamente le cartelle scansionate per modifiche';
+
+  @override
+  String get settingsWatchedFolders => 'Cartelle Monitorate';
+
+  @override
+  String get settingsNoWatchedFolders => 'Nessuna cartella monitorata';
+
+  @override
+  String get fanartApiKey => 'Fanart.tv API Key';
 }
