@@ -84,9 +84,38 @@ jobs:
           name: myplaylist-windows-x64
           path: myplaylist-windows-x64.zip
 
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (Release)
+        run: flutter build apk --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myplaylist-android
+          path: build/app/outputs/flutter-apk/app-release.apk
+
   create-release:
     name: Create GitHub Release
-    needs: [build-linux, build-windows]
+    needs: [build-linux, build-windows, build-android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -102,5 +131,6 @@ jobs:
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz.asc
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
+            artifacts/myplaylist-android/app-release.apk
           fail_on_unmatched_files: false
           generate_release_notes: true
