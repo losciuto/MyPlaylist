@@ -18,16 +18,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalTab => 'General';
 
   @override
-  String get metadataTab => 'Rating';
+  String get metadataTab => 'Metadata Info';
 
   @override
-  String get playerTab => 'Player';
+  String get playerTab => 'Server Player';
 
   @override
-  String get remoteTab => 'Remote Control';
+  String get remoteTab => 'Remote Playlist';
 
   @override
-  String get maintenanceTab => 'Maintenance';
+  String get maintenanceTab => 'Backup/Restore';
 
   @override
   String get debugTab => 'Debug Log';

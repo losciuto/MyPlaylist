@@ -119,25 +119,25 @@ abstract class AppLocalizations {
   /// No description provided for @metadataTab.
   ///
   /// In it, this message translates to:
-  /// **'Voto'**
+  /// **'Info Metadati'**
   String get metadataTab;
 
   /// No description provided for @playerTab.
   ///
   /// In it, this message translates to:
-  /// **'Player'**
+  /// **'Server Player'**
   String get playerTab;
 
   /// No description provided for @remoteTab.
   ///
   /// In it, this message translates to:
-  /// **'Remote Control'**
+  /// **'Remote Playlist'**
   String get remoteTab;
 
   /// No description provided for @maintenanceTab.
   ///
   /// In it, this message translates to:
-  /// **'Manutenzione'**
+  /// **'Backup/Ripristino'**
   String get maintenanceTab;
 
   /// No description provided for @debugTab.
