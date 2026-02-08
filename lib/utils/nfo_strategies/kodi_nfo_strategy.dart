@@ -93,42 +93,61 @@ class KodiNfoStrategy implements NfoStrategy {
       }
     }
 
-    // Rating logic
-    String? rating = getString('userrating');
-    if (rating == null || rating.isEmpty) {
-      final ratingNodes = document.rootElement.findElements('rating');
+    // Helper per un parsing robusto dei decimali (Power Parser)
+    double robustParse(String? val) {
+      if (val == null || val.isEmpty) return 0.0;
+      // Estrae la prima parte numerica (es. "8.5/10" -> "8.5")
+      // Gestisce sia il punto che la virgola
+      final match = RegExp(r'(\d+[.,]?\d*)').firstMatch(val.replaceAll(',', '.'));
+      if (match != null) {
+        return double.tryParse(match.group(1)!) ?? 0.0;
+      }
+      return 0.0;
+    }
+
+    // Logica di estrazione Rating
+    String? ratingStr = getString('userrating');
+    // Se userrating manca o è zero, cerchiamo un rating più significativo
+    if (ratingStr == null || ratingStr.isEmpty || ratingStr == '0' || ratingStr == '0.0') {
+      // Cerca prima nel blocco <ratings> (plurale)
+      final ratingsBlock = document.rootElement.findElements('ratings').firstOrNull;
+      final ratingNodes = ratingsBlock != null 
+          ? ratingsBlock.findElements('rating') 
+          : document.rootElement.findElements('rating');
+          
       XmlElement? bestNode;
       for (final node in ratingNodes) {
+        // Priorità: default="true"
         if (node.getAttribute('default') == 'true') {
           bestNode = node;
           break;
         }
+        // Fallback: il primo che capita (se è caricato da Kodi, solitamente è quello principale)
         bestNode ??= node;
       }
 
       if (bestNode != null) {
         final valueNode = bestNode.findElements('value').firstOrNull;
-        rating = valueNode != null ? valueNode.innerText.trim() : bestNode.innerText.trim();
+        ratingStr = valueNode != null ? valueNode.innerText.trim() : bestNode.innerText.trim();
       }
     }
 
-    // Regex fallback if needed
-    if (rating == null || rating.isEmpty || rating == '0' || rating == '0.0') {
+    // Fallback con Regex se ancora vuoto o zero
+    if (ratingStr == null || ratingStr.isEmpty || ratingStr == '0' || ratingStr == '0.0') {
       final simpleRegex = RegExp(r'<rating[^>]*>([^<]+)<\/rating>', caseSensitive: false);
       final simpleMatch = simpleRegex.firstMatch(content);
-      if (simpleMatch != null) rating = simpleMatch.group(1)?.trim();
+      if (simpleMatch != null) ratingStr = simpleMatch.group(1)?.trim();
     }
 
-    // Saga
+    final safeRating = robustParse(ratingStr);
+
+    // Saga (Set)
     String? saga;
     final setNode = document.rootElement.findElements('set').firstOrNull;
     if (setNode != null) {
       final nameNode = setNode.findElements('name').firstOrNull;
       saga = nameNode != null ? clean(nameNode.innerText) : clean(setNode.innerText);
     }
-
-    final finalRating = double.tryParse((rating ?? '').replaceAll(',', '.')) ?? 0.0;
-    final safeRating = (finalRating.isNaN || finalRating.isInfinite) ? 0.0 : finalRating;
 
     return {
       'title': title,

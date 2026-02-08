@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.6.2] - 08/02/2026
+
+### Correzioni
+- **Parsing Rating**: Risolto un bug critico nel parser NFO che ignorava il rating corretto se il campo `<userrating>` era presente ma impostato a zero (comune in file generati da TinyMediaManager/Kodi). Ora viene data priorità corretta ai valori nel blocco `<ratings>`.
+
 ## [3.6.1] - 08/02/2026
 
 ### Correzioni

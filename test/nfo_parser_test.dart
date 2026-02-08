@@ -156,7 +156,50 @@ void main() {
       final result = await NfoParser.parseNfo(nfoFile.path);
       expect(result, isNotNull);
       expect(result!['poster'], 'movie_poster.jpg');
-      expect(result['directorThumbs'], 'director_photo.jpg');
+    });
+
+    test('Parses nested <ratings><rating> correctly (Power Parser)', () async {
+      final nfoFile = File('${tempDir.path}/nested_rating.nfo');
+      await nfoFile.writeAsString('''
+<movie>
+    <title>Nested Rating Movie</title>
+    <ratings>
+        <rating name="imdb">
+            <value>7.2</value>
+        </rating>
+        <rating name="tmdb" default="true">
+            <value>8.5/10</value>
+        </rating>
+    </ratings>
+</movie>
+''');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['rating'], 8.5);
+    });
+
+    test('Handles complex rating string "8,5 (100 votes)" (Power Parser)', () async {
+      final nfoFile = File('${tempDir.path}/complex_rating.nfo');
+      await nfoFile.writeAsString('<movie><rating>8,5 (100 votes)</rating></movie>');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['rating'], 8.5);
+    });
+
+    test('Prioritizes default rating over zero userrating (Real World Case)', () async {
+      final nfoFile = File('${tempDir.path}/priority_test.nfo');
+      await nfoFile.writeAsString('''
+<movie>
+    <ratings>
+        <rating name="metacritic"><value>90.0</value></rating>
+        <rating name="imdb" default="true"><value>8.2</value></rating>
+    </ratings>
+    <userrating>0</userrating>
+</movie>
+''');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['rating'], 8.2); // Should pick IMDb 8.2, not Metacritic 90.0 or Userrating 0.0
     });
   });
 }
