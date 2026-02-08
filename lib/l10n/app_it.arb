@@ -253,6 +253,7 @@
   "ratingLabel": "Voto: {rating}",
   "updateDbOnly": "Aggiorna solo DB",
   "saveAll": "Salva tutto (File + DB)",
+  "saveToNfo": "Salva su NFO",
   "requiredField": "Campo obbligatorio",
   "dbUpdatedMsg": "Database aggiornato (senza toccare il file video)",
   "fileUpdateMsg": "Aggiornamento file in corso...",

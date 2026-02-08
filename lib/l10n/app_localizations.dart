@@ -1322,6 +1322,12 @@ abstract class AppLocalizations {
   /// **'Salva tutto (File + DB)'**
   String get saveAll;
 
+  /// No description provided for @saveToNfo.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva su NFO'**
+  String get saveToNfo;
+
   /// No description provided for @requiredField.
   ///
   /// In it, this message translates to:

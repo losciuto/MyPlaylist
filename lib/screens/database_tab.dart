@@ -384,6 +384,16 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     decoration: InputDecoration(
                       labelText: l10n.searchVideosPlaceholder,
                       prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 20),
+                              onPressed: () {
+                                _searchController.clear();
+                                _filterVideos('');
+                                setState(() {});
+                              },
+                            )
+                          : null,
                       border: const OutlineInputBorder(),
                       filled: true,
                       fillColor: Theme.of(context).brightness == Brightness.dark

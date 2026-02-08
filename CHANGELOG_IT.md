@@ -9,6 +9,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - **Auto-Sync Metadati**: Nuova impostazione per aggiornare automaticamente i file NFO su disco quando i metadati (voto, generi, ecc.) vengono modificati nell'app.
 - **Controllo NFO Manuale**: Aggiunti pulsanti "Salva su NFO" e "Ricarica da NFO" nei dialoghi Dettagli e Modifica.
 - **Slider Voto**: Integrato uno slider interattivo per una regolazione precisa del voto/rating nelle finestre info.
+- **Pulsante Pulisci Ricerca**: Aggiunta una "X" nel campo di ricerca per svuotare rapidamente il testo e resettare i filtri.
+- **Log Errori Avanzati**: Integrazione del logger per catturare i fallimenti di FFmpeg durante l'aggiornamento dei metadati, inclusi gli errori stderr.
 
 ### Ottimizzazioni
 - **Motore Turbo-Scan**: Incremento significativo delle prestazioni durante la scansione delle collezioni.
@@ -115,7 +117,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
 Autore: Massimo
-Ultimo Aggiornamento: 11/01/2026 (v3.0.0)
+Ultimo Aggiornamento: 08/02/2026 (v3.6.0)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.

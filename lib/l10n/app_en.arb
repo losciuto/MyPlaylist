@@ -253,6 +253,7 @@
   "ratingLabel": "Rating: {rating}",
   "updateDbOnly": "Update DB only",
   "saveAll": "Save all (File + DB)",
+  "saveToNfo": "Save to NFO",
   "requiredField": "Required field",
   "dbUpdatedMsg": "Database updated (video file untouched)",
   "fileUpdateMsg": "Updating file...",

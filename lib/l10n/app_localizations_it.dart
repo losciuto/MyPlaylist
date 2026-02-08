@@ -765,6 +765,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get saveAll => 'Salva tutto (File + DB)';
 
   @override
+  String get saveToNfo => 'Salva su NFO';
+
+  @override
   String get requiredField => 'Campo obbligatorio';
 
   @override

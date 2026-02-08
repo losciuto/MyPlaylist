@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - **Auto-Sync Metadata**: New setting to automatically update NFO files on disk when metadata (ranking, genres, etc.) is edited in the app.
 - **Manual NFO Control**: Added "Save to NFO" and "Refresh from NFO" buttons to both Details and Edit dialogs.
 - **Rating Slider**: Integrated a smooth slider for precise rating/voting adjustments in info windows.
+- **Search Clear Button**: Added an 'X' button to the search field to quickly clear text and reset filters.
+- **Enhanced Error Logging**: Integrated logger to capture FFmpeg failures during metadata updates, including stderr output.
 
 ### Optimized
 - **Turbo-Scan Engine**: Significant performance boost during collection scanning.

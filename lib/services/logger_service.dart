@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:intl/intl.dart';
+import '../config/app_config.dart';
 
 class LoggerService {
   static final LoggerService _instance = LoggerService._internal();
@@ -36,7 +37,7 @@ class LoggerService {
         }
       }
 
-      await info('LoggerService initialized. App version: 3.2.0');
+      await info('LoggerService initialized. App version: ${AppConfig.appVersion}');
       _initialized = true;
     } catch (e) {
       debugPrint('Failed to initialize LoggerService: $e');

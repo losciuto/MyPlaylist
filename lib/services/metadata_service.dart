@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import '../models/video.dart';
+import 'logger_service.dart';
 
 class MetadataService {
   static final MetadataService _instance = MetadataService._internal();
@@ -116,14 +117,14 @@ class MetadataService {
         await File(tempPath).delete();
         return true;
       } else {
-        debugPrint('FFmpeg failed: ${result.stderr}');
+        await LoggerService().error('FFmpeg failed for $path: ${result.stderr}');
         // Restore
         if (await File(path).exists()) await File(path).delete();
         await File(tempPath).rename(path);
         return false;
       }
     } catch (e) {
-      debugPrint('Error updating metadata for $path: $e');
+      await LoggerService().error('Error updating metadata for $path', e);
       if (await File(tempPath).exists()) {
          if (await File(path).exists()) await File(path).delete();
          await File(tempPath).rename(path);
