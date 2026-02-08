@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.6.1] - 08/02/2026
+
+### Correzioni
+- **Robustezza UI**: Aggiunti controlli di sicurezza per prevenire i crash "unmounted context" quando si chiudono dialoghi o si cambiano tab durante operazioni asincrone.
+- **Aggiornamento Metadati Resiliente**: Implementata una strategia di fallback per FFmpeg: se il salvataggio completo fallisce (es. per sottotitoli corrotti), l'app riprova automaticamente preservando solo video e audio, garantendo il successo del salvataggio dei metadati.
+- **Mappatura Migliorata**: Aggiunti `-map 0` e `-ignore_unknown` per preservare tutte le tracce nei file MKV complessi per impostazione predefinita.
+
 ## [3.6.0] - 2026-02-08
 
 ### Novità

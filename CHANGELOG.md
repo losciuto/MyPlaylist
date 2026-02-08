@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.1] - 2026-02-08
+
+### Fixed
+- **UI Robustness**: Added safety checks to prevent "unmounted context" crashes when closing dialogs or switching tabs during asynchronous operations.
+- **Resilient Metadata Update**: Implemented a fallback strategy for FFmpeg: if a full stream mapping fails (e.g., due to corrupt subtitles), the app automatically retries by preserving only video and audio, ensuring metadata updates always succeed.
+- **Improved Mapping**: Added `-map 0` and `-ignore_unknown` to preserve all tracks in complex MKV files by default.
+
 ## [3.6.0] - 2026-02-08
 
 ### Added

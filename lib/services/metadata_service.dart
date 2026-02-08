@@ -85,41 +85,59 @@ class MetadataService {
       // 1. Rename original to temp
       await originalFile.rename(tempPath);
       
-      // 2. Run ffmpeg
-      final List<String> args = [
-        '-i', tempPath,
-        '-map', '0',
-        '-map_metadata', '0',
-        '-c', 'copy',
+      // 2. Build common metadata args
+      final List<String> metadataArgs = [
         '-metadata', 'genre=${video.genres}',
         '-metadata', 'date=${video.year}',
         '-metadata', 'artist=${video.directors}',
-        
         if (preserveTitle) ...[
            '-metadata', 'album=${video.title}',
            '-metadata', 'show=${video.title}',
-           // Propagate plot to episodes as requested
            '-metadata', 'description=${video.plot}',
            '-metadata', 'comment=${video.plot}',
-           
-           // Use forcedTitle if provided (for formatted Episode Title)
            if (forcedTitle != null) '-metadata', 'title=$forcedTitle',
         ] else ...[
            '-metadata', 'title=${video.title}',
            '-metadata', 'description=${video.plot}',
            '-metadata', 'comment=${video.plot}',
         ],
+      ];
+
+      // 3. Attempt 1: Full Mapping (map 0)
+      final List<String> args1 = [
+        '-i', tempPath,
+        '-map', '0',
+        '-map_metadata', '0',
+        '-c', 'copy',
+        '-ignore_unknown',
+        ...metadataArgs,
         path 
       ];
 
-      final result = await Process.run('ffmpeg', args);
+      var result = await Process.run('ffmpeg', args1);
+
+      // 4. Attempt 2: Fallback Mapping (v + a only) if Attempt 1 fails
+      if (result.exitCode != 0) {
+        await LoggerService().warning('FFmpeg full mapping failed for $path. Retrying with video/audio only...');
+        final List<String> args2 = [
+          '-i', tempPath,
+          '-map', '0:v',
+          '-map', '0:a',
+          '-map_metadata', '0',
+          '-c', 'copy',
+          '-ignore_unknown',
+          ...metadataArgs,
+          path 
+        ];
+        result = await Process.run('ffmpeg', args2);
+      }
 
       if (result.exitCode == 0) {
         await File(tempPath).delete();
         return true;
       } else {
-        await LoggerService().error('FFmpeg failed for $path: ${result.stderr}');
-        // Restore
+        await LoggerService().error('FFmpeg failed for $path after retry: ${result.stderr}');
+        // Restore original
         if (await File(path).exists()) await File(path).delete();
         await File(tempPath).rename(path);
         return false;
