@@ -28,6 +28,7 @@ class SettingsService with ChangeNotifier {
   static const String _keyTmdbApiKey = 'tmdb_api_key';
   static const String _keyAutoSyncEnabled = 'auto_sync_enabled';
   static const String _keyWatchedDirectories = 'watched_directories';
+  static const String _keyAutoSyncNfoOnEdit = 'auto_sync_nfo_on_edit';
 
   // State
   String _playerPath = '';
@@ -43,6 +44,7 @@ class SettingsService with ChangeNotifier {
   String _tmdbApiKey = '';
   bool _autoSyncEnabled = false;
   List<String> _watchedDirectories = [];
+  bool _autoSyncNfoOnEdit = false;
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -58,6 +60,7 @@ class SettingsService with ChangeNotifier {
   String get tmdbApiKey => _tmdbApiKey;
   bool get autoSyncEnabled => _autoSyncEnabled;
   List<String> get watchedDirectories => List.unmodifiable(_watchedDirectories);
+  bool get autoSyncNfoOnEdit => _autoSyncNfoOnEdit;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -99,6 +102,7 @@ class SettingsService with ChangeNotifier {
     
     _autoSyncEnabled = _prefs.getBool(_keyAutoSyncEnabled) ?? false;
     _watchedDirectories = _prefs.getStringList(_keyWatchedDirectories) ?? [];
+    _autoSyncNfoOnEdit = _prefs.getBool(_keyAutoSyncNfoOnEdit) ?? false;
     
     _initialized = true;
     notifyListeners();
@@ -210,6 +214,12 @@ class SettingsService with ChangeNotifier {
   Future<void> setWatchedDirectories(List<String> paths) async {
     _watchedDirectories = List.from(paths);
     await _prefs.setStringList(_keyWatchedDirectories, _watchedDirectories);
+    notifyListeners();
+  }
+
+  Future<void> setAutoSyncNfoOnEdit(bool enabled) async {
+    _autoSyncNfoOnEdit = enabled;
+    await _prefs.setBool(_keyAutoSyncNfoOnEdit, enabled);
     notifyListeners();
   }
 }

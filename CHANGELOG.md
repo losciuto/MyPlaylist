@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.0] - 2026-02-08
+
+### Added
+- **Bidirectional NFO Sync**: Real-time synchronization between the app database and local `.nfo` files.
+- **Auto-Sync Metadata**: New setting to automatically update NFO files on disk when metadata (ranking, genres, etc.) is edited in the app.
+- **Manual NFO Control**: Added "Save to NFO" and "Refresh from NFO" buttons to both Details and Edit dialogs.
+- **Rating Slider**: Integrated a smooth slider for precise rating/voting adjustments in info windows.
+
+### Optimized
+- **Turbo-Scan Engine**: Significant performance boost during collection scanning.
+    - **Parallel Processing**: Actor and director photos are now verified and downloaded concurrently.
+    - **Directory Concurrency**: Multi-threaded directory listing and processing.
+    - **Database Batching**: Video records are committed in batches to minimize disk I/O.
+- **Bulk Metadata Extraction**: Refined TMDB service to extract actor/director thumbnails during bulk operations.
+
 ## [3.5.1] - 2026-02-08
 
 ### Added

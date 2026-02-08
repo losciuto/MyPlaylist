@@ -1,6 +1,73 @@
 import 'package:xml/xml.dart';
+import '../models/video.dart' as model;
 
 class NfoGenerator {
+  /// Generates a Kodi-compatible NFO XML string from the application's Video model.
+  static String generateFromVideo(model.Video video) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+
+    builder.element('movie', nest: () {
+      builder.element('title', nest: video.title);
+      builder.element('plot', nest: video.plot);
+      builder.element('year', nest: video.year);
+      builder.element('runtime', nest: video.duration);
+      
+      // Rating block
+      builder.element('rating', attributes: {'name': 'app', 'max': '10', 'default': 'true'}, nest: () {
+        builder.element('value', nest: video.rating.toString());
+      });
+
+      // Genres
+      if (video.genres.isNotEmpty) {
+        for (final genre in video.genres.split(',')) {
+          final cleanGenre = genre.trim();
+          if (cleanGenre.isNotEmpty) {
+            builder.element('genre', nest: cleanGenre);
+          }
+        }
+      }
+
+      // Directors
+      final directorNames = video.directors.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final directorThumbs = video.directorThumbs.split('|').map((e) => e.trim()).toList();
+      for (int i = 0; i < directorNames.length; i++) {
+        builder.element('director', nest: () {
+          builder.element('name', nest: directorNames[i]);
+          if (i < directorThumbs.length && directorThumbs[i].isNotEmpty) {
+            builder.element('thumb', nest: directorThumbs[i]);
+          }
+        });
+      }
+
+      // Actors
+      final actorNames = video.actors.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final actorThumbs = video.actorThumbs.split('|').map((e) => e.trim()).toList();
+      for (int i = 0; i < actorNames.length; i++) {
+        builder.element('actor', nest: () {
+          builder.element('name', nest: actorNames[i]);
+          if (i < actorThumbs.length && actorThumbs[i].isNotEmpty) {
+            builder.element('thumb', nest: actorThumbs[i]);
+          }
+        });
+      }
+
+      // Poster
+      if (video.posterPath.isNotEmpty) {
+        builder.element('thumb', attributes: {'aspect': 'poster'}, nest: video.posterPath);
+      }
+
+      // Saga
+      if (video.saga.isNotEmpty) {
+        builder.element('set', nest: () {
+          builder.element('name', nest: video.saga);
+        });
+      }
+    });
+
+    return builder.buildDocument().toXmlString(pretty: true, indent: '    ');
+  }
+
   /// Generates a Kodi-compatible NFO XML string from TMDB data map.
   static String generateMovieNfo(Map<String, dynamic> tmdbData) {
     final builder = XmlBuilder();
@@ -85,6 +152,66 @@ class NfoGenerator {
         builder.element('set', nest: () {
           builder.element('name', nest: col['name'] ?? '');
         });
+      }
+    });
+
+    return builder.buildDocument().toXmlString(pretty: true, indent: '    ');
+  }
+
+  /// Generates a Kodi-compatible TV SHOW NFO XML string from the application's Video model.
+  static String generateTvShowFromVideo(model.Video video) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+
+    builder.element('tvshow', nest: () {
+      builder.element('title', nest: video.title);
+      builder.element('showtitle', nest: video.title);
+      builder.element('plot', nest: video.plot);
+      builder.element('year', nest: video.year);
+      builder.element('runtime', nest: video.duration);
+      
+      // Rating block
+      builder.element('rating', attributes: {'name': 'app', 'max': '10', 'default': 'true'}, nest: () {
+        builder.element('value', nest: video.rating.toString());
+      });
+
+      // Genres
+      if (video.genres.isNotEmpty) {
+        for (final genre in video.genres.split(',')) {
+          final cleanGenre = genre.trim();
+          if (cleanGenre.isNotEmpty) {
+            builder.element('genre', nest: cleanGenre);
+          }
+        }
+      }
+
+      // Directors (Creators)
+      final directorNames = video.directors.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final directorThumbs = video.directorThumbs.split('|').map((e) => e.trim()).toList();
+      for (int i = 0; i < directorNames.length; i++) {
+        builder.element('director', nest: () {
+          builder.element('name', nest: directorNames[i]);
+          if (i < directorThumbs.length && directorThumbs[i].isNotEmpty) {
+            builder.element('thumb', nest: directorThumbs[i]);
+          }
+        });
+      }
+
+      // Actors
+      final actorNames = video.actors.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final actorThumbs = video.actorThumbs.split('|').map((e) => e.trim()).toList();
+      for (int i = 0; i < actorNames.length; i++) {
+        builder.element('actor', nest: () {
+          builder.element('name', nest: actorNames[i]);
+          if (i < actorThumbs.length && actorThumbs[i].isNotEmpty) {
+            builder.element('thumb', nest: actorThumbs[i]);
+          }
+        });
+      }
+
+      // Poster
+      if (video.posterPath.isNotEmpty) {
+        builder.element('thumb', attributes: {'aspect': 'poster'}, nest: video.posterPath);
       }
     });
 

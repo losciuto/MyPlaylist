@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../services/scan_service.dart';
@@ -24,6 +25,13 @@ class _ScanTabState extends State<ScanTab> {
   }
   int _count = 0;
   bool _isScanning = false;
+  StreamSubscription? _scanSubscription;
+
+  @override
+  void dispose() {
+    _scanSubscription?.cancel();
+    super.dispose();
+  }
 
   void _selectFolder() async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
@@ -42,37 +50,52 @@ class _ScanTabState extends State<ScanTab> {
       _count = 0;
     });
 
-    ScanService.instance.scanFolder(folder).listen(
+    _scanSubscription = ScanService.instance.scanFolder(folder).listen(
       (status) {
-        setState(() {
-          _statusMessage = status.message;
-          _count = status.count;
-        });
+        if (mounted) {
+          setState(() {
+            _statusMessage = status.message;
+            _count = status.count;
+          });
+        }
       },
       onDone: () {
-        setState(() {
-          _isScanning = false;
-        });
-        
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text(AppLocalizations.of(context)!.scanFinishedMsg(_count))),
-           );
-           
-           // Auto-add to watched directories if auto-sync is enabled
-           final settings = context.read<SettingsService>();
-           if (settings.autoSyncEnabled) {
-             settings.addWatchedDirectory(folder);
-           }
+          setState(() {
+            _isScanning = false;
+            _scanSubscription = null;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.scanFinishedMsg(_count))),
+          );
+          
+          final settings = context.read<SettingsService>();
+          if (settings.autoSyncEnabled) {
+            settings.addWatchedDirectory(folder);
+          }
         }
       },
       onError: (e) {
-        setState(() {
-          _isScanning = false;
-          _statusMessage = AppLocalizations.of(context)!.genericError(e.toString());
-        });
+        if (mounted) {
+          setState(() {
+            _isScanning = false;
+            _scanSubscription = null;
+            _statusMessage = AppLocalizations.of(context)!.genericError(e.toString());
+          });
+        }
       },
+      cancelOnError: true,
     );
+  }
+
+  void _stopScan() {
+    _scanSubscription?.cancel();
+    setState(() {
+      _isScanning = false;
+      _scanSubscription = null;
+      _statusMessage = 'Scansione interrotta dall\'utente.';
+    });
   }
 
   @override
@@ -103,14 +126,26 @@ class _ScanTabState extends State<ScanTab> {
           ),
           const SizedBox(height: 30),
           Center(
-            child: ElevatedButton.icon(
-              onPressed: _isScanning ? null : _selectFolder,
-              icon: const Icon(Icons.folder_open),
-              label: Text(_isScanning ? AppLocalizations.of(context)!.scanInProgress : AppLocalizations.of(context)!.selectFolderToScan),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
+            child: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isScanning ? null : _selectFolder,
+                  icon: const Icon(Icons.folder_open),
+                  label: Text(_isScanning ? AppLocalizations.of(context)!.scanInProgress : AppLocalizations.of(context)!.selectFolderToScan),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                ),
+                if (_isScanning) ...[
+                  const SizedBox(height: 15),
+                  TextButton.icon(
+                    onPressed: _stopScan,
+                    icon: const Icon(Icons.stop, color: Colors.red),
+                    label: const Text('Ferma Scansione', style: TextStyle(color: Colors.red)),
+                  ),
+                ],
+              ],
             ),
           ),
           const SizedBox(height: 30),

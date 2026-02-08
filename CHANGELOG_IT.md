@@ -2,6 +2,21 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.6.0] - 2026-02-08
+
+### Novità
+- **Sincronizzazione Bidirezionale NFO**: Sincronizzazione in tempo reale tra il database dell'app e i file `.nfo` locali.
+- **Auto-Sync Metadati**: Nuova impostazione per aggiornare automaticamente i file NFO su disco quando i metadati (voto, generi, ecc.) vengono modificati nell'app.
+- **Controllo NFO Manuale**: Aggiunti pulsanti "Salva su NFO" e "Ricarica da NFO" nei dialoghi Dettagli e Modifica.
+- **Slider Voto**: Integrato uno slider interattivo per una regolazione precisa del voto/rating nelle finestre info.
+
+### Ottimizzazioni
+- **Motore Turbo-Scan**: Incremento significativo delle prestazioni durante la scansione delle collezioni.
+    - **Elaborazione Parallela**: Le foto di attori e registi vengono verificate e scaricate simultaneamente.
+    - **Concorrenza Directory**: Elaborazione multi-thread dei contenuti delle cartelle.
+    - **Batch Database**: I record dei video vengono salvati in blocchi (batch) per minimizzare l'overhead di scrittura su disco.
+- **Estrazione Metadati Bulk**: Perfezionato il servizio TMDB per estrarre le miniature dei partecipanti anche durante le operazioni di massa.
+
 ## [3.5.1] - 2026-02-08
 
 ### Novità

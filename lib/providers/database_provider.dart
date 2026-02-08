@@ -3,15 +3,21 @@ import '../database/app_database.dart';
 import '../models/video.dart' as model;
 import 'package:drift/drift.dart';
 import '../utils/filter_utils.dart';
+import '../services/nfo_sync_service.dart';
+import '../services/settings_service.dart';
 
 class DatabaseProvider extends ChangeNotifier {
   final AppDatabase _db;
+  final NfoSyncService _syncService = NfoSyncService();
+  
   List<model.Video> _videos = [];
   List<model.Video> _filteredVideos = [];
   bool _isLoading = false;
 
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
+  String _searchQuery = '';
+  int _currentTabIndex = 2; // Default to PlaylistTab (previously _initialIndex logic)
 
   DatabaseProvider(this._db);
 
@@ -20,6 +26,13 @@ class DatabaseProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get sortColumnIndex => _sortColumnIndex;
   bool get sortAscending => _sortAscending;
+  String get searchQuery => _searchQuery;
+  int get currentTabIndex => _currentTabIndex;
+
+  void setTabIndex(int index) {
+    _currentTabIndex = index;
+    notifyListeners();
+  }
 
   Future<void> refreshVideos() async {
     _isLoading = true;
@@ -50,6 +63,8 @@ class DatabaseProvider extends ChangeNotifier {
       posterPath: v.posterPath,
       saga: v.saga,
       sagaIndex: v.sagaIndex,
+      actorThumbs: v.actorThumbs ?? '',
+      directorThumbs: v.directorThumbs ?? '',
     );
   }
 
@@ -59,8 +74,22 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   void filterVideos(String query) {
+    _searchQuery = query;
     _filteredVideos = FilterUtils.filterVideos(_videos, query);
     _doSort();
+    notifyListeners();
+  }
+
+  void filterByPerson(String personName) {
+    _searchQuery = personName;
+    _filteredVideos = _videos.where((v) {
+      final actors = v.actors.split(',').map((e) => e.trim().toLowerCase());
+      final directors = v.directors.split(',').map((e) => e.trim().toLowerCase());
+      final search = personName.trim().toLowerCase();
+      return actors.contains(search) || directors.contains(search);
+    }).toList();
+    _doSort();
+    _currentTabIndex = 1; // Switch to DatabaseTab
     notifyListeners();
   }
 
@@ -76,7 +105,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
 
-  Future<void> updateVideo(model.Video video) async {
+  Future<void> updateVideo(model.Video video, {bool syncNfo = false}) async {
     await _db.update(_db.videos).replace(
       VideosCompanion(
         id: Value(video.id!),
@@ -94,9 +123,29 @@ class DatabaseProvider extends ChangeNotifier {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
+        actorThumbs: Value(video.actorThumbs),
+        directorThumbs: Value(video.directorThumbs),
       ),
     );
+
+    if (syncNfo) {
+      await _syncService.saveNfo(video);
+    }
+
     await refreshVideos();
+  }
+
+  /// Manually saves video metadata to NFO on disk
+  Future<bool> saveToNfo(model.Video video) async {
+    return await _syncService.saveNfo(video);
+  }
+
+  /// Manually refreshes video metadata from NFO on disk
+  Future<void> refreshFromNfo(model.Video video) async {
+    final refreshedVideo = await _syncService.refreshFromNfo(video);
+    if (refreshedVideo != null) {
+      await updateVideo(refreshedVideo, syncNfo: false);
+    }
   }
 
   Future<void> clearDatabase() async {

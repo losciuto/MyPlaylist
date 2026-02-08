@@ -1741,6 +1741,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Fanart.tv API Key'**
   String get fanartApiKey;
+
+  /// No description provided for @settingsAutoSyncNfo.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza NFO su modifica'**
+  String get settingsAutoSyncNfo;
+
+  /// No description provided for @settingsAutoSyncNfoSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva automaticamente i metadati nel file .nfo quando modifichi un video'**
+  String get settingsAutoSyncNfoSubtitle;
 }
 
 class _AppLocalizationsDelegate

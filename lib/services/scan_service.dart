@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 import '../database/app_database.dart' as db;
 import '../models/video.dart' as model;
 import '../utils/nfo_parser.dart';
+import 'media_asset_service.dart';
 
 class ScanStatus {
   final String message;
@@ -14,6 +15,8 @@ class ScanStatus {
 class ScanService {
   static final ScanService instance = ScanService._();
   ScanService._();
+
+  final _mediaAssetService = MediaAssetService();
 
   static const List<String> videoExtensions = [
     '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
@@ -99,28 +102,49 @@ class ScanService {
     // 3. Normal Recursive Scan
     int localCount = 0;
     try {
-      await for (final entity in dir.list(recursive: false, followLinks: false)) {
-        if (entity is Directory) {
-          await for (final status in _scanRecursive(entity)) {
-            if (status.message == 'COUNT_UPDATE') {
-              localCount += status.count;
-              yield ScanStatus('COUNT_UPDATE', status.count);
-            } else {
-              yield status;
+      final entities = await dir.list(recursive: false, followLinks: false).toList();
+      
+      // Process in batches of 5 to avoid overwhelming file handles/network
+      const batchSize = 5;
+      for (var i = 0; i < entities.length; i += batchSize) {
+        final batch = entities.sublist(i, i + batchSize > entities.length ? entities.length : i + batchSize);
+        
+        final tasks = batch.map((entity) async {
+          final name = p.basename(entity.path);
+          if (name.startsWith('.')) return 0;
+
+          if (entity is Directory) {
+            int subCount = 0;
+            await for (final status in _scanRecursive(entity)) {
+              if (status.message == 'COUNT_UPDATE') {
+                subCount += status.count;
+              }
+            }
+            return subCount;
+          } else if (entity is File) {
+            final ext = p.extension(entity.path).toLowerCase();
+            if (videoExtensions.contains(ext)) {
+              try {
+                await _processVideo(entity);
+                return 1;
+              } catch (e) {
+                print('Error processing video ${entity.path}: $e');
+              }
             }
           }
-        } else if (entity is File) {
-          final ext = p.extension(entity.path).toLowerCase();
-          if (videoExtensions.contains(ext)) {
-            try {
-              await _processVideo(entity);
-              localCount++;
-              yield ScanStatus('COUNT_UPDATE', 1);
-            } catch (e) {}
-          }
+          return 0;
+        });
+
+        final results = await Future.wait(tasks);
+        final batchAddedCount = results.fold<int>(0, (sum, val) => sum + val);
+        if (batchAddedCount > 0) {
+          localCount += batchAddedCount;
+          yield ScanStatus('COUNT_UPDATE', batchAddedCount);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      print('Error listing directory ${dir.path}: $e');
+    }
   }
 
   Future<void> _processSeries(Directory seriesDir) async {
@@ -145,17 +169,28 @@ class ScanService {
       }
     }
 
+    final processedDirects = await _processThumbnails(
+      metadata?['directors'] ?? '',
+      metadata?['directorThumbs'] ?? '',
+      seriesDir.path,
+    );
+    final processedActors = await _processThumbnails(
+      metadata?['actors'] ?? '',
+      metadata?['actorThumbs'] ?? '',
+      seriesDir.path,
+    );
+
     final video = model.Video(
       path: path,
       mtime: mtime,
       title: formattedTitle,
       genres: metadata?['genres'] ?? '',
       year: year,
-      directors: metadata?['directors'] ?? '',
-      directorThumbs: metadata?['directorThumbs'] ?? '',
+      directors: processedDirects.names,
+      directorThumbs: processedDirects.thumbs,
       plot: metadata?['plot'] ?? '',
-      actors: metadata?['actors'] ?? '',
-      actorThumbs: metadata?['actorThumbs'] ?? '',
+      actors: processedActors.names,
+      actorThumbs: processedActors.thumbs,
       duration: metadata?['duration'] ?? '',
       rating: metadata?['rating'] ?? 0.0,
       isSeries: true,
@@ -203,17 +238,28 @@ class ScanService {
       }
     }
     
+    final processedDirects = await _processThumbnails(
+      metadata?['directors'] ?? '',
+      metadata?['directorThumbs'] ?? '',
+      p.dirname(path),
+    );
+    final processedActors = await _processThumbnails(
+      metadata?['actors'] ?? '',
+      metadata?['actorThumbs'] ?? '',
+      p.dirname(path),
+    );
+
     final video = model.Video(
       path: path,
       mtime: mtime,
       title: formattedTitle,
       genres: metadata?['genres'] ?? '',
       year: year,
-      directors: metadata?['directors'] ?? '',
-      directorThumbs: metadata?['directorThumbs'] ?? '',
+      directors: processedDirects.names,
+      directorThumbs: processedDirects.thumbs,
       plot: metadata?['plot'] ?? '',
-      actors: metadata?['actors'] ?? '',
-      actorThumbs: metadata?['actorThumbs'] ?? '',
+      actors: processedActors.names,
+      actorThumbs: processedActors.thumbs,
       duration: metadata?['duration'] ?? '',
       rating: metadata?['rating'] ?? 0.0,
       posterPath: metadata?['poster'] ?? '',
@@ -222,5 +268,29 @@ class ScanService {
 
     // Insert into DB (update if exists)
     await db.AppDatabase.instance.insertVideo(video);
+  }
+
+  Future<({String names, String thumbs})> _processThumbnails(
+      String namesStr, String thumbsStr, String baseDir) async {
+    if (namesStr.isEmpty) return (names: '', thumbs: '');
+
+    final names = namesStr.split(',').map((e) => e.trim()).toList();
+    final thumbs = thumbsStr.split('|').map((e) => e.trim()).toList();
+
+    // Parallelize thumbnail processing
+    final downloadTasks = <Future<String>>[];
+    for (int i = 0; i < names.length; i++) {
+      final name = names[i];
+      final thumb = i < thumbs.length ? thumbs[i] : '';
+
+      if (thumb.isNotEmpty && thumb.startsWith('http')) {
+        downloadTasks.add(_mediaAssetService.downloadThumbnail(thumb, baseDir, name));
+      } else {
+        downloadTasks.add(Future.value(thumb));
+      }
+    }
+
+    final newThumbs = await Future.wait(downloadTasks);
+    return (names: namesStr, thumbs: newThumbs.join('|'));
   }
 }

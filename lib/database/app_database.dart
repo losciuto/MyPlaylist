@@ -26,6 +26,12 @@ class Videos extends Table {
   TextColumn get actorThumbs => text().withDefault(const Constant(''))();
   TextColumn get directorThumbs => text().withDefault(const Constant(''))();
   IntColumn get sagaIndex => integer().withDefault(const Constant(0))();
+
+  @override
+  List<Index> get indexes => [
+    Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'),
+    Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'),
+  ];
 }
 
 @DriftDatabase(tables: [Videos])
@@ -34,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -48,6 +54,11 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(videos, videos.actorThumbs);
           await m.addColumn(videos, videos.directorThumbs);
         }
+        if (from < 3) {
+          // Add indices
+          await m.createIndex(Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'));
+          await m.createIndex(Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'));
+        }
       },
       beforeOpen: (details) async {
         // Migration logic removed - sqflite is no longer used
@@ -59,26 +70,38 @@ class AppDatabase extends _$AppDatabase {
   // --- CRUD Operations (UI/Service Bridge) ---
 
   Future<void> insertVideo(model.Video video) async {
-    await into(videos).insertOnConflictUpdate(
-      VideosCompanion.insert(
-        path: video.path,
-        mtime: video.mtime,
-        title: Value(video.title),
-        genres: Value(video.genres),
-        year: Value(video.year),
-        directors: Value(video.directors),
-        directorThumbs: Value(video.directorThumbs),
-        plot: Value(video.plot),
-        actors: Value(video.actors),
-        actorThumbs: Value(video.actorThumbs),
-        duration: Value(video.duration),
-        rating: Value(video.rating),
-        isSeries: Value(video.isSeries ? 1 : 0),
-        posterPath: Value(video.posterPath),
-        saga: Value(video.saga),
-        sagaIndex: Value(video.sagaIndex),
-      ),
-    );
+    await insertVideos([video]);
+  }
+
+  Future<void> insertVideos(List<model.Video> videoList) async {
+    await batch((b) {
+      for (final video in videoList) {
+        b.insertAll(
+          videos,
+          [
+            VideosCompanion.insert(
+              path: video.path,
+              mtime: video.mtime,
+              title: Value(video.title),
+              genres: Value(video.genres),
+              year: Value(video.year),
+              directors: Value(video.directors),
+              directorThumbs: Value(video.directorThumbs),
+              plot: Value(video.plot),
+              actors: Value(video.actors),
+              actorThumbs: Value(video.actorThumbs),
+              duration: Value(video.duration),
+              rating: Value(video.rating),
+              isSeries: Value(video.isSeries ? 1 : 0),
+              posterPath: Value(video.posterPath),
+              saga: Value(video.saga),
+              sagaIndex: Value(video.sagaIndex),
+            ),
+          ],
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
   }
 
   Future<void> insertVideoUnique(model.Video video) async {

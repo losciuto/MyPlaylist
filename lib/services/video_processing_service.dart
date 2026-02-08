@@ -261,16 +261,29 @@ class VideoProcessingService {
         
         String nfoActors = video.actors;
         String nfoDirectors = video.directors;
+        String nfoActorThumbs = video.actorThumbs;
+        String nfoDirectorThumbs = video.directorThumbs;
+
         if (details['credits'] != null) {
-          final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
-          if (cast != null) nfoActors = cast;
+          final cast = details['credits']['cast'] as List?;
+          if (cast != null && cast.isNotEmpty) {
+            final topCast = cast.take(5).toList();
+            nfoActors = topCast.map((c) => c['name']).join(', ');
+            nfoActorThumbs = topCast.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+          }
+
           if (isSeries) {
             if (details['created_by'] != null) {
-              nfoDirectors = (details['created_by'] as List).map((c) => c['name']).join(', ');
+              final creators = details['created_by'] as List;
+              nfoDirectors = creators.map((c) => c['name']).join(', ');
+              nfoDirectorThumbs = creators.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
             }
           } else {
-            final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
-            if (crew != null) nfoDirectors = crew;
+            final directors = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').toList();
+            if (directors != null && directors.isNotEmpty) {
+              nfoDirectors = directors.map((c) => c['name']).join(', ');
+              nfoDirectorThumbs = directors.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+            }
           }
         }
 
@@ -283,7 +296,9 @@ class VideoProcessingService {
           year: nfoYear,
           genres: gList,
           directors: nfoDirectors,
+          directorThumbs: nfoDirectorThumbs,
           actors: nfoActors,
+          actorThumbs: nfoActorThumbs,
           plot: nfoPlot,
           rating: nfoRating,
           posterPath: localPosterPath,

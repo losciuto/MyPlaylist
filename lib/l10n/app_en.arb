@@ -329,5 +329,7 @@
   "settingsAutoSyncSubtitle": "Automatically watch scanned folders for changes",
   "settingsWatchedFolders": "Watched Folders",
   "settingsNoWatchedFolders": "No folders being watched",
-  "fanartApiKey": "Fanart.tv API Key"
+  "fanartApiKey": "Fanart.tv API Key",
+  "settingsAutoSyncNfo": "Sync NFO on Edit",
+  "settingsAutoSyncNfoSubtitle": "Automatically save metadata to .nfo file when you edit a video"
 }

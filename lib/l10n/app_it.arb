@@ -329,5 +329,7 @@
   "settingsAutoSyncSubtitle": "Monitora automaticamente le cartelle scansionate per modifiche",
   "settingsWatchedFolders": "Cartelle Monitorate",
   "settingsNoWatchedFolders": "Nessuna cartella monitorata",
-  "fanartApiKey": "Fanart.tv API Key"
+  "fanartApiKey": "Fanart.tv API Key",
+  "settingsAutoSyncNfo": "Sincronizza NFO su modifica",
+  "settingsAutoSyncNfoSubtitle": "Salva automaticamente i metadati nel file .nfo quando modifichi un video"
 }

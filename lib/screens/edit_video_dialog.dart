@@ -11,6 +11,7 @@ import '../utils/nfo_parser.dart';
 import '../utils/nfo_generator.dart';
 import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
+import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class EditVideoDialog extends StatefulWidget {
@@ -259,23 +260,32 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
          
          _posterPathController.text = localPosterPath;
          _sagaController.text = (details['belongs_to_collection'] != null) ? (details['belongs_to_collection']['name'] ?? '') : '';
-         
-         if (details['credits'] != null) {
-            final cast = (details['credits']['cast'] as List?)?.take(5).map((c) => c['name']).join(', ');
-            if (cast != null) _actorsController.text = cast;
+                  if (details['credits'] != null) {
+            final topCast = (details['credits']['cast'] as List?)?.take(5).toList() ?? [];
+            _actorsController.text = topCast.map((c) => c['name']).join(', ');
             
+            // Extract Actor Thumbs
+            final aThumbs = topCast.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+            // We need to store these in the video object eventually, 
+            // but controllers only handle text fields.
+            // I'll keep them as local variables to use in _save.
+
             if (isSeries) {
-               // For series, created_by is distinct, but we can check crew too
                if (details['created_by'] != null) {
-                 _directorsController.text = (details['created_by'] as List).map((c) => c['name']).join(', ');
+                  final creators = (details['created_by'] as List);
+                  _directorsController.text = creators.map((c) => c['name']).join(', ');
+                  // Extract Director Thumbs
+                  final dThumbs = creators.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
                }
             } else {
-               final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').map((c) => c['name']).join(', ');
-               if (crew != null) _directorsController.text = crew;
+               final crew = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').toList() ?? [];
+               _directorsController.text = crew.map((c) => c['name']).join(', ');
+               // Extract Director Thumbs
+               final dThumbs = crew.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
             }
-         }
-         
-         _isDownloading = false;
+          }
+          
+          _isDownloading = false;
       });
       
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbUpdatedMsg)));
@@ -390,8 +400,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       // ignore: avoid_print
       print('DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb');
 
-      // Update Database
-      await db.AppDatabase.instance.updateVideo(updatedVideo);
+      // Update Database via Provider (handles Refresh and NFO auto-sync)
+      final settings = context.read<SettingsService>();
+      await context.read<DatabaseProvider>().updateVideo(
+        updatedVideo, 
+        syncNfo: settings.autoSyncNfoOnEdit
+      );
 
       if (onlyDb) {
         if (mounted) {
@@ -448,14 +462,28 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                              style: TextButton.styleFrom(foregroundColor: Colors.orangeAccent),
                            ),
                            const SizedBox(width: 10),
-                           ElevatedButton.icon(
-                             onPressed: _downloadTmdbInfo,
-                             icon: const Icon(Icons.download, size: 16),
-                             label: Text(AppLocalizations.of(context)!.downloadTmdb),
-                             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-                           ),
-                         ],
-                       ),
+                            ElevatedButton.icon(
+                              onPressed: _downloadTmdbInfo,
+                              icon: const Icon(Icons.download, size: 16),
+                              label: Text(AppLocalizations.of(context)!.downloadTmdb),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
+                            ),
+                            const SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () async {
+                                final success = await context.read<DatabaseProvider>().saveToNfo(widget.video);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text(success ? AppLocalizations.of(context)!.successUpdateMsg : AppLocalizations.of(context)!.errorUpdateMsg),
+                                    backgroundColor: success ? Colors.green : Colors.red,
+                                  ));
+                                }
+                              },
+                              icon: const Icon(Icons.save, color: Colors.greenAccent),
+                              tooltip: AppLocalizations.of(context)!.saveToNfo,
+                            ),
+                          ],
+                        ),
                  ],
                ),
                 Padding(

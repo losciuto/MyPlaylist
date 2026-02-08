@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import '../providers/database_provider.dart';
 
 class PersonAvatar extends StatelessWidget {
   final String name;
@@ -112,16 +115,34 @@ class PersonAvatar extends StatelessWidget {
             ),
             Positioned(
               bottom: 20,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  name,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+              child: Column(
+                children: [
+                   Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      name,
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<DatabaseProvider>().filterByPerson(name);
+                      Navigator.of(context).pop(); // Close dialog
+                      Navigator.of(context).pop(); // Close details dialog if it's open
+                    },
+                    icon: const Icon(Icons.search),
+                    label: const Text('Filtra per questa persona'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -132,10 +153,12 @@ class PersonAvatar extends StatelessWidget {
 
   Widget _buildEnlargedImage() {
     if (thumbUrl.startsWith('http')) {
-      return Image.network(
-        thumbUrl.replaceFirst('/w185/', '/w500/'), // Try to get higher resolution if from TMDB
+      final highResUrl = thumbUrl.replaceFirst('/w185/', '/w500/');
+      return CachedNetworkImage(
+        imageUrl: highResUrl,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => _buildErrorImage(),
+        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => _buildErrorImage(),
       );
     } else {
       final file = File(thumbUrl);
@@ -165,10 +188,11 @@ class PersonAvatar extends StatelessWidget {
     }
 
     if (thumbUrl.startsWith('http')) {
-      return Image.network(
-        thumbUrl,
+      return CachedNetworkImage(
+        imageUrl: thumbUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
+        placeholder: (context, url) => Container(color: Colors.grey[200]),
+        errorWidget: (context, url, error) =>
             Icon(Icons.person, size: size * 0.6, color: Colors.grey),
       );
     } else {

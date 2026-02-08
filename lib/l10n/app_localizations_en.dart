@@ -997,4 +997,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fanartApiKey => 'Fanart.tv API Key';
+
+  @override
+  String get settingsAutoSyncNfo => 'Sync NFO on Edit';
+
+  @override
+  String get settingsAutoSyncNfoSubtitle =>
+      'Automatically save metadata to .nfo file when you edit a video';
 }

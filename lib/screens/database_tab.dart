@@ -167,7 +167,34 @@ class _DatabaseTabState extends State<DatabaseTab> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _searchController.text = context.read<DatabaseProvider>().searchQuery;
+    
+    // Sync search bar when provider changes (e.g. from photo filter)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DatabaseProvider>().addListener(_onProviderChange);
+    });
+  }
+
+  void _onProviderChange() {
+    final query = context.read<DatabaseProvider>().searchQuery;
+    if (_searchController.text != query) {
+      setState(() {
+        _searchController.text = query;
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    // We should safely remove the listener
+    // This is tricky without a reference to the same provider instance if it changes
+    // But usually provider is stable during tab lifetime.
+    try {
+      context.read<DatabaseProvider>().removeListener(_onProviderChange);
+    } catch (e) {}
+    
     _searchController.dispose();
     _horizontalScrollController.dispose();
     super.dispose();

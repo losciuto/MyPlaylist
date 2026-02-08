@@ -7,6 +7,7 @@ import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
+import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
 
@@ -21,6 +22,22 @@ class VideoDetailsDialog extends StatefulWidget {
 
 class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
   bool _isDownloading = false;
+  late final ScrollController _directorsController;
+  late final ScrollController _actorsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _directorsController = ScrollController();
+    _actorsController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _directorsController.dispose();
+    _actorsController.dispose();
+    super.dispose();
+  }
 
   Future<void> _downloadInfo() async {
     final apiKey = context.read<SettingsService>().tmdbApiKey;
@@ -177,16 +194,62 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         if (widget.video.year.isNotEmpty) _buildTag(widget.video.year, Colors.blue),
                         if (widget.video.duration.isNotEmpty) _buildTag(widget.video.duration, Colors.purple),
-                        _buildTag('★ ${widget.video.rating.toStringAsFixed(1)}', Colors.amber),
                         if (widget.video.saga.isNotEmpty) _buildTag('Saga: ${widget.video.saga}', Colors.orangeAccent),
+                        
+                        // Interactive Rating
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star, color: Colors.amber, size: 18),
+                              const SizedBox(width: 4),
+                              Text(
+                                widget.video.rating.toStringAsFixed(1),
+                                style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 120,
+                                child: SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    trackHeight: 2,
+                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                  ),
+                                  child: Slider(
+                                    value: widget.video.rating,
+                                    min: 0,
+                                    max: 10,
+                                    divisions: 20,
+                                    activeColor: Colors.amber,
+                                    onChanged: (val) {
+                                      final settings = context.read<SettingsService>();
+                                      context.read<DatabaseProvider>().updateVideo(
+                                        widget.video.copyWith(rating: val),
+                                        syncNfo: settings.autoSyncNfoOnEdit,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
                     
-                    // Buttons: Play & TMDB
+                    // Buttons: Play & Sync
                     Row(
                       children: [
                         SizedBox(
@@ -206,24 +269,51 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             ),
                           ),
                         ),
-                        /*
                         const SizedBox(width: 15),
+                        // Refresh from NFO
                         SizedBox(
                           height: 36,
-                          child: ElevatedButton.icon(
-                            onPressed: _isDownloading ? null : _downloadInfo,
-                            icon: _isDownloading 
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue))
-                              : const Icon(Icons.download),
-                            label: const Text('Info TMDB', style: TextStyle(fontWeight: FontWeight.bold)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              await context.read<DatabaseProvider>().refreshFromNfo(widget.video);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.nfoLoadedMsg)));
+                                Navigator.pop(context); // Close and reopen or just refresh (easier to close for now)
+                              }
+                            },
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: Text(l10n.loadFromNfo),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.blue,
+                              side: const BorderSide(color: Colors.blue),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                           ),
                         ),
-                        */
+                        const SizedBox(width: 10),
+                        // Save to NFO
+                        SizedBox(
+                          height: 36,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final success = await context.read<DatabaseProvider>().saveToNfo(widget.video);
+                              if (mounted) {
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('NFO salvato con successo!'), backgroundColor: Colors.green));
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore durante il salvataggio NFO'), backgroundColor: Colors.red));
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.save, size: 18),
+                            label: Text(l10n.saveAll),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.orange,
+                              side: const BorderSide(color: Colors.orange),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     
@@ -239,12 +329,12 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                         ],
                         if (widget.video.directors.isNotEmpty) ...[
                           _buildSectionTitle(l10n.sectionDirectors ?? 'REGIA'),
-                          _buildPeopleList(widget.video.directors, widget.video.directorThumbs),
+                          _buildPeopleList(widget.video.directors, widget.video.directorThumbs, _directorsController),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.actors.isNotEmpty) ...[
                           _buildSectionTitle(l10n.sectionCast),
-                          _buildPeopleList(widget.video.actors, widget.video.actorThumbs),
+                          _buildPeopleList(widget.video.actors, widget.video.actorThumbs, _actorsController),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.plot.isNotEmpty) ...[
@@ -299,10 +389,9 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
     );
   }
 
-  Widget _buildPeopleList(String namesStr, String thumbsStr) {
+  Widget _buildPeopleList(String namesStr, String thumbsStr, ScrollController controller) {
     final names = namesStr.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     final thumbs = thumbsStr.split('|').map((e) => e.trim()).toList();
-    final controller = ScrollController();
 
     return SizedBox(
       height: 125, // Slightly increased to accommodate scrollbar
