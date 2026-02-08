@@ -23,6 +23,8 @@ class Videos extends Table {
   IntColumn get isSeries => integer().withDefault(const Constant(0))();
   TextColumn get posterPath => text().withDefault(const Constant(''))();
   TextColumn get saga => text().withDefault(const Constant(''))();
+  TextColumn get actorThumbs => text().withDefault(const Constant(''))();
+  TextColumn get directorThumbs => text().withDefault(const Constant(''))();
   IntColumn get sagaIndex => integer().withDefault(const Constant(0))();
 }
 
@@ -32,13 +34,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async {
         await m.createAll();
+      },
+      onUpgrade: (m, from, to) async {
+        if (from < 2) {
+          // Add actorThumbs and directorThumbs columns
+          await m.addColumn(videos, videos.actorThumbs);
+          await m.addColumn(videos, videos.directorThumbs);
+        }
       },
       beforeOpen: (details) async {
         // Migration logic removed - sqflite is no longer used
@@ -58,8 +67,10 @@ class AppDatabase extends _$AppDatabase {
         genres: Value(video.genres),
         year: Value(video.year),
         directors: Value(video.directors),
+        directorThumbs: Value(video.directorThumbs),
         plot: Value(video.plot),
         actors: Value(video.actors),
+        actorThumbs: Value(video.actorThumbs),
         duration: Value(video.duration),
         rating: Value(video.rating),
         isSeries: Value(video.isSeries ? 1 : 0),
@@ -79,8 +90,10 @@ class AppDatabase extends _$AppDatabase {
         genres: Value(video.genres),
         year: Value(video.year),
         directors: Value(video.directors),
+        directorThumbs: Value(video.directorThumbs),
         plot: Value(video.plot),
         actors: Value(video.actors),
+        actorThumbs: Value(video.actorThumbs),
         duration: Value(video.duration),
         rating: Value(video.rating),
         isSeries: Value(video.isSeries ? 1 : 0),
@@ -101,8 +114,10 @@ class AppDatabase extends _$AppDatabase {
         genres: Value(video.genres),
         year: Value(video.year),
         directors: Value(video.directors),
+        directorThumbs: Value(video.directorThumbs),
         plot: Value(video.plot),
         actors: Value(video.actors),
+        actorThumbs: Value(video.actorThumbs),
         duration: Value(video.duration),
         rating: Value(video.rating),
         isSeries: Value(video.isSeries ? 1 : 0),
@@ -142,8 +157,10 @@ class AppDatabase extends _$AppDatabase {
       genres: v.genres ?? '',
       year: v.year ?? '',
       directors: v.directors ?? '',
+      directorThumbs: v.directorThumbs ?? '',
       plot: v.plot ?? '',
       actors: v.actors ?? '',
+      actorThumbs: v.actorThumbs ?? '',
       duration: v.duration ?? '',
       rating: v.rating ?? 0.0,
       isSeries: v.isSeries == 1,

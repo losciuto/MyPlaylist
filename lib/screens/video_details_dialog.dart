@@ -8,6 +8,7 @@ import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../widgets/person_avatar.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
   final Video video;
@@ -180,7 +181,6 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                         if (widget.video.year.isNotEmpty) _buildTag(widget.video.year, Colors.blue),
                         if (widget.video.duration.isNotEmpty) _buildTag(widget.video.duration, Colors.purple),
                         _buildTag('★ ${widget.video.rating.toStringAsFixed(1)}', Colors.amber),
-                        if (widget.video.directors.isNotEmpty) _buildTag('Regia: ${widget.video.directors}', Colors.teal),
                         if (widget.video.saga.isNotEmpty) _buildTag('Saga: ${widget.video.saga}', Colors.orangeAccent),
                       ],
                     ),
@@ -237,9 +237,14 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                           Text(widget.video.genres, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
                           const SizedBox(height: 15),
                         ],
+                        if (widget.video.directors.isNotEmpty) ...[
+                          _buildSectionTitle(l10n.sectionDirectors ?? 'REGIA'),
+                          _buildPeopleList(widget.video.directors, widget.video.directorThumbs),
+                          const SizedBox(height: 15),
+                        ],
                         if (widget.video.actors.isNotEmpty) ...[
                           _buildSectionTitle(l10n.sectionCast),
-                          Text(widget.video.actors, style: TextStyle(color: secondaryTextColor, fontSize: 16)),
+                          _buildPeopleList(widget.video.actors, widget.video.actorThumbs),
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.plot.isNotEmpty) ...[
@@ -289,6 +294,31 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
           fontWeight: FontWeight.bold,
           fontSize: 14,
           letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeopleList(String namesStr, String thumbsStr) {
+    final names = namesStr.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final thumbs = thumbsStr.split('|').map((e) => e.trim()).toList();
+    final controller = ScrollController();
+
+    return SizedBox(
+      height: 125, // Slightly increased to accommodate scrollbar
+      child: Scrollbar(
+        controller: controller,
+        thumbVisibility: true,
+        child: ListView.builder(
+          controller: controller,
+          padding: const EdgeInsets.only(bottom: 10),
+          scrollDirection: Axis.horizontal,
+          itemCount: names.length,
+          itemBuilder: (context, index) {
+            final name = names[index];
+            final thumb = index < thumbs.length ? thumbs[index] : '';
+            return PersonAvatar(name: name, thumbUrl: thumb);
+          },
         ),
       ),
     );

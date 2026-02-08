@@ -329,7 +329,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionGenres => 'GENRES';
 
   @override
-  String get sectionCast => 'CAST';
+  String get sectionCast => 'Cast';
+
+  @override
+  String get sectionDirectors => 'Directors';
 
   @override
   String get sectionPlot => 'PLOT';

@@ -1,6 +1,18 @@
 # Changelog
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+
+## [3.5.1] - 2026-02-08
+
+### Novità
+- **Foto Registi e Attori**: Estrazione e visualizzazione delle miniature per cast e regia dai file NFO.
+- **Avatar Interattivi**: Clicca sulle foto per vedere un ingrandimento con animazione Hero.
+- **Scorrimento Migliorato**: Abilitato lo scorrimento tramite trascinamento mouse e aggiunte scrollbar visibili per una migliore navigazione su desktop.
+- **Supporto Miniature Locali**: Supporto per percorsi relativi e cartelle locali `.actors` nelle directory della collezione.
+
+### Correzioni
+- **Parsing NFO**: Risolto un bug per cui le foto dei registi potevano essere scambiate per la locandina principale del film.
+
 ## [3.4.0] - 2026-01-21
 
 ### Novità

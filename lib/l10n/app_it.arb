@@ -103,6 +103,7 @@
   "generateNfoTmdbLabel": "Genera NFO (TMDB)",
   "sectionGenres": "GENERI",
   "sectionCast": "CAST",
+  "sectionDirectors": "Regia",
   "sectionPlot": "TRAMA",
   "sectionSaga": "SAGA",
   "sectionFile": "FILE",

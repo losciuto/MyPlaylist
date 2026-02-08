@@ -335,6 +335,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sectionCast => 'CAST';
 
   @override
+  String get sectionDirectors => 'Regia';
+
+  @override
   String get sectionPlot => 'TRAMA';
 
   @override

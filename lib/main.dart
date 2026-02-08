@@ -137,6 +137,14 @@ class MyApp extends StatelessWidget {
       builder: (context, settings, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            dragDevices: {
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.touch,
+              PointerDeviceKind.stylus,
+              PointerDeviceKind.unknown,
+            },
+          ),
           title: AppConfig.appName,
           theme: AppConfig.lightTheme,
           darkTheme: AppConfig.darkTheme,

@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [3.5.1] - 2026-02-08
+
+### Added
+- **Director and Actor Photos**: Extract and display thumbnails for cast and crew from NFO files.
+- **Interactive Avatars**: Click on photos to see an enlarged version with a smooth Hero animation.
+- **Improved Scrolling**: Enabled mouse drag scrolling and added visible scrollbars for better desktop accessibility when browsing long lists of actors.
+- **Local Thumbnails Support**: Support for relative paths and local `.actors` folders in collection directories.
+
+### Fixed
+- **NFO Parsing**: Fixed a bug where director photos could be incorrectly picked as the main movie poster.
+
 ## [3.4.0] - 2026-01-21
 
 ### Added

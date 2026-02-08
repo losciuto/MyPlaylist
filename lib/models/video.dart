@@ -6,8 +6,10 @@ class Video {
   final String genres;
   final String year;
   final String directors;
+  final String directorThumbs;
   final String plot;
   final String actors;
+  final String actorThumbs;
   final String duration;
   final double rating;
   final bool isSeries;
@@ -23,8 +25,10 @@ class Video {
     this.genres = '',
     this.year = '',
     this.directors = '',
+    this.directorThumbs = '',
     this.plot = '',
     this.actors = '',
+    this.actorThumbs = '',
     this.duration = '',
     this.rating = 0.0,
     this.isSeries = false,
@@ -42,8 +46,10 @@ class Video {
       'genres': genres,
       'year': year,
       'directors': directors,
+      'directorThumbs': directorThumbs,
       'plot': plot,
       'actors': actors,
+      'actorThumbs': actorThumbs,
       'duration': duration,
       'rating': rating,
       'isSeries': isSeries ? 1 : 0,
@@ -62,8 +68,10 @@ class Video {
       genres: map['genres'] ?? '',
       year: map['year']?.toString() ?? '',
       directors: map['directors'] ?? '',
+      directorThumbs: map['directorThumbs'] ?? '',
       plot: map['plot'] ?? '',
       actors: map['actors'] ?? '',
+      actorThumbs: map['actorThumbs'] ?? '',
       duration: map['duration'] ?? '',
       rating: (map['rating'] is int) ? (map['rating'] as int).toDouble() : (map['rating'] as double? ?? 0.0),
       isSeries: map['isSeries'] == 1,
@@ -81,8 +89,10 @@ class Video {
     String? genres,
     String? year,
     String? directors,
+    String? directorThumbs,
     String? plot,
     String? actors,
+    String? actorThumbs,
     String? duration,
     double? rating,
     bool? isSeries,
@@ -98,8 +108,10 @@ class Video {
       genres: genres ?? this.genres,
       year: year ?? this.year,
       directors: directors ?? this.directors,
+      directorThumbs: directorThumbs ?? this.directorThumbs,
       plot: plot ?? this.plot,
       actors: actors ?? this.actors,
+      actorThumbs: actorThumbs ?? this.actorThumbs,
       duration: duration ?? this.duration,
       rating: rating ?? this.rating,
       isSeries: isSeries ?? this.isSeries,

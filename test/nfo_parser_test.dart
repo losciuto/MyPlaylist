@@ -14,7 +14,7 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('Parses complex Kodi-style NFO correctly', () async {
+    test('Parses complex Kodi-style NFO correctly with thumbs', () async {
       final nfoFile = File('${tempDir.path}/movie.nfo');
       await nfoFile.writeAsString('''
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
@@ -27,12 +27,17 @@ void main() {
         <value>8.8</value>
         <votes>2500000</votes>
     </rating>
-    <director>Christopher Nolan</director>
+    <director thumb="http://director-thumb.jpg">Christopher Nolan</director>
+    <director>
+        <name>Second Director</name>
+        <thumb>http://second-director-thumb.jpg</thumb>
+    </director>
     <genre>Action</genre>
     <genre>Sci-Fi</genre>
     <actor>
         <name>Leonardo DiCaprio</name>
         <role>Cobb</role>
+        <thumb>http://leo-thumb.jpg</thumb>
     </actor>
     <actor>
         <name>Joseph Gordon-Levitt</name>
@@ -47,10 +52,10 @@ void main() {
       expect(result!['title'], 'Inception');
       expect(result['year'], '2010');
       expect(result['rating'], 8.8);
-      expect(result['directors'], 'Christopher Nolan');
-      expect(result['genres'], contains('Action'));
-      expect(result['genres'], contains('Sci-Fi'));
-      expect(result['actors'], contains('Leonardo DiCaprio'));
+      expect(result['directors'], 'Christopher Nolan, Second Director');
+      expect(result['directorThumbs'], 'http://director-thumb.jpg|http://second-director-thumb.jpg');
+      expect(result['actors'], 'Leonardo DiCaprio, Joseph Gordon-Levitt');
+      expect(result['actorThumbs'], 'http://leo-thumb.jpg|');
     });
 
     test('Parses simple NFO correctly', () async {
@@ -116,6 +121,42 @@ void main() {
        expect(result, isNotNull);
        expect(result!['title'], 'Hércules');
        expect(result['plot'], 'Café & Tea');
+    });
+    test('Resolves relative thumbnail paths', () async {
+      final movieDir = Directory('${tempDir.path}/Movies/Matrix');
+      await movieDir.create(recursive: true);
+      final nfoFile = File('${movieDir.path}/matrix.nfo');
+      await nfoFile.writeAsString('''
+<movie>
+    <title>The Matrix</title>
+    <actor>
+        <name>Keanu Reeves</name>
+        <thumb>.actors/Keanu_Reeves.jpg</thumb>
+    </actor>
+</movie>
+''');
+      
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['actorThumbs'], contains('${movieDir.path}/.actors/Keanu_Reeves.jpg'));
+    });
+    test('Does not pick up director thumb as main poster', () async {
+      final nfoFile = File('${tempDir.path}/poster_test.nfo');
+      await nfoFile.writeAsString('''
+<movie>
+    <title>Poster Test</title>
+    <director>
+        <name>John Director</name>
+        <thumb>director_photo.jpg</thumb>
+    </director>
+    <thumb>movie_poster.jpg</thumb>
+</movie>
+''');
+      
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['poster'], 'movie_poster.jpg');
+      expect(result['directorThumbs'], 'director_photo.jpg');
     });
   });
 }

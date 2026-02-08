@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:xml/xml.dart';
+import 'package:path/path.dart' as p;
 
 class NfoParser {
   static Future<Map<String, dynamic>?> parseNfo(String path) async {
@@ -26,14 +27,14 @@ class NfoParser {
       }
 
       String? getString(String tag) {
-        final nodes = document.findAllElements(tag);
+        final nodes = document.rootElement.findElements(tag);
         if (nodes.isEmpty) return null;
         final res = clean(nodes.first.innerText);
         return res.isEmpty ? null : res;
       }
 
       List<String> getList(String tag) {
-        return document.findAllElements(tag)
+        return document.rootElement.findElements(tag)
             .map((e) => clean(e.innerText))
             .where((s) => s.isNotEmpty)
             .toList();
@@ -42,15 +43,61 @@ class NfoParser {
       final title = getString('title') ?? getString('originaltitle');
       final year = getString('year') ?? getString('premiered')?.split('-').firstOrNull;
       final genres = getList('genre');
-      final directors = getList('director');
+      final directors = <String>[];
+      final directorThumbs = <String>[];
+      final nfoDir = File(path).parent.path;
+
+      for (final directorNode in document.rootElement.findElements('director')) {
+        String? name;
+        String? thumb;
+
+        final nameNode = directorNode.findElements('name').firstOrNull;
+        if (nameNode != null) {
+          name = clean(nameNode.innerText);
+          thumb = directorNode.findElements('thumb').firstOrNull?.innerText ??
+              directorNode.findElements('thumbnail').firstOrNull?.innerText ??
+              directorNode.getAttribute('thumb') ??
+              directorNode.getAttribute('thumbnail');
+        } else {
+          name = clean(directorNode.children
+              .whereType<XmlText>()
+              .map((e) => e.value)
+              .join(''));
+          thumb = directorNode.getAttribute('thumb') ??
+              directorNode.getAttribute('thumbnail') ??
+              directorNode.findElements('thumb').firstOrNull?.innerText ??
+              directorNode.findElements('thumbnail').firstOrNull?.innerText;
+        }
+
+        if (name != null && name.isNotEmpty) {
+          directors.add(name);
+          if (thumb != null && thumb.isNotEmpty && !thumb.startsWith('http') && !thumb.startsWith('/')) {
+             thumb = p.join(nfoDir, thumb);
+          }
+          directorThumbs.add(thumb ?? '');
+          print('DEBUG [NfoParser]: Found director: $name, thumb: $thumb');
+        }
+      }
+
       final plot = getString('plot') ?? getString('outline');
       
       final safeActors = <String>[];
-      for (final actorNode in document.findAllElements('actor')) {
+      final actorThumbs = <String>[];
+      for (final actorNode in document.rootElement.findElements('actor')) {
          try {
            final nameNode = actorNode.findElements('name').firstOrNull;
            if (nameNode != null && nameNode.innerText.trim().isNotEmpty) {
-             safeActors.add(nameNode.innerText.trim());
+             final name = nameNode.innerText.trim();
+             safeActors.add(name);
+             
+             final thumbNode = actorNode.findElements('thumb').firstOrNull ?? 
+                               actorNode.findElements('thumbnail').firstOrNull;
+             String? thumb = thumbNode?.innerText.trim();
+             if (thumb != null && thumb.isNotEmpty && !thumb.startsWith('http') && !thumb.startsWith('/')) {
+                thumb = p.join(nfoDir, thumb);
+             }
+             actorThumbs.add(thumb ?? '');
+             print('DEBUG [NfoParser]: Found actor: $name, thumb: $thumb');
            }
          } catch (_) {}
       }
@@ -64,7 +111,7 @@ class NfoParser {
 
       // 2. Try complex rating tags (Kodi standard)
       if (rating == null || rating.isEmpty) {
-        final ratingNodes = document.findAllElements('rating');
+        final ratingNodes = document.rootElement.findElements('rating');
         XmlElement? bestNode;
 
         for (final node in ratingNodes) {
@@ -133,7 +180,7 @@ class NfoParser {
       
       // Extract Saga (Set)
       String? saga;
-      final setNode = document.findAllElements('set').firstOrNull;
+      final setNode = document.rootElement.findElements('set').firstOrNull;
       if (setNode != null) {
         final nameNode = setNode.findElements('name').firstOrNull;
         if (nameNode != null) {
@@ -155,8 +202,10 @@ class NfoParser {
         'genres': genres.join(', '),
         'year': year,
         'directors': directors.join(', '),
+        'directorThumbs': directorThumbs.join('|'),
         'plot': plot,
         'actors': safeActors.join(', '),
+        'actorThumbs': actorThumbs.join('|'),
         'rating': safeRating,
         'duration': duration,
         'poster': thumb,

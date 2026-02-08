@@ -45,7 +45,12 @@ class NfoGenerator {
         if (crew != null) {
            for (final member in crew) {
              if (member['job'] == 'Director') {
-               builder.element('director', nest: member['name']);
+               builder.element('director', nest: () {
+                 builder.element('name', nest: member['name']);
+                 if (member['profile_path'] != null) {
+                   builder.element('thumb', nest: 'https://image.tmdb.org/t/p/w185${member['profile_path']}');
+                 }
+               });
              }
            }
         }
@@ -135,7 +140,12 @@ class NfoGenerator {
         // Directors (usually creators for TV shows, or encoded in crew)
         if (tmdbData['created_by'] != null) {
            for (final creator in tmdbData['created_by']) {
-             builder.element('director', nest: creator['name']); // Map creators to director for simplicity
+             builder.element('director', nest: () {
+               builder.element('name', nest: creator['name']);
+               if (creator['profile_path'] != null) {
+                 builder.element('thumb', nest: 'https://image.tmdb.org/t/p/w185${creator['profile_path']}');
+               }
+             });
            }
         }
 

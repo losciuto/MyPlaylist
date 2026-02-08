@@ -692,6 +692,12 @@ abstract class AppLocalizations {
   /// **'CAST'**
   String get sectionCast;
 
+  /// No description provided for @sectionDirectors.
+  ///
+  /// In it, this message translates to:
+  /// **'Regia'**
+  String get sectionDirectors;
+
   /// No description provided for @sectionPlot.
   ///
   /// In it, this message translates to:
