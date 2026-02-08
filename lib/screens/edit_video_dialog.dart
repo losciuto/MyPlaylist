@@ -113,8 +113,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       }
 
       if (results.isEmpty) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbNoResults)));
-        setState(() => _isDownloading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbNoResults)));
+          setState(() => _isDownloading = false);
+        }
         return;
       }
 
@@ -141,7 +143,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       );
 
       if (selectedMovie == null) {
-         setState(() => _isDownloading = false);
+         if (mounted) setState(() => _isDownloading = false);
          return;
       }
 
@@ -151,9 +153,11 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
       if (isSeries) {
         details = await service.getTvShowDetails(selectedMovie['id']);
+        if (!mounted) return;
         nfoContent = NfoGenerator.generateTvShowNfo(details);
       } else {
         details = await service.getMovieDetails(selectedMovie['id']);
+        if (!mounted) return;
         nfoContent = NfoGenerator.generateMovieNfo(details);
       }
 
@@ -223,11 +227,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
              logoPath = '$baseDir/$baseFileName-clearlogo.png';
           }
           final resp = await http.get(Uri.parse(logoUrl));
+          if (!mounted) return;
           if (resp.statusCode == 200) {
             await File(logoPath).writeAsBytes(resp.bodyBytes);
           }
         }
       }
+
+      if (!mounted) return;
 
       // 5. Update UI
       setState(() {
@@ -336,8 +343,9 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     }
     
     final metadata = await NfoParser.parseNfo(nfoPath);
+    if (!mounted) return;
     if (metadata == null) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nfoErrorMsg)));
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.nfoErrorMsg)));
        return;
     }
     
@@ -400,18 +408,20 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       // ignore: avoid_print
       print('DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb');
 
-      // Update Database via Provider (handles Refresh and NFO auto-sync)
+      final databaseProvider = context.read<DatabaseProvider>();
+      final localizations = AppLocalizations.of(context)!;
       final settings = context.read<SettingsService>();
-      await context.read<DatabaseProvider>().updateVideo(
+      
+      await databaseProvider.updateVideo(
         updatedVideo, 
         syncNfo: settings.autoSyncNfoOnEdit
       );
 
+      if (!mounted) return;
+
       if (onlyDb) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.dbUpdatedMsg)));
-          Navigator.pop(context, true);
-        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(localizations.dbUpdatedMsg)));
+        Navigator.pop(context, true);
         return;
       }
 
@@ -471,10 +481,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                             const SizedBox(width: 10),
                             IconButton(
                               onPressed: () async {
-                                final success = await context.read<DatabaseProvider>().saveToNfo(widget.video);
+                                final databaseProvider = context.read<DatabaseProvider>();
+                                final localizations = AppLocalizations.of(context)!;
+                                final success = await databaseProvider.saveToNfo(widget.video);
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text(success ? AppLocalizations.of(context)!.successUpdateMsg : AppLocalizations.of(context)!.errorUpdateMsg),
+                                    content: Text(success ? localizations.successUpdateMsg : localizations.errorUpdateMsg),
                                     backgroundColor: success ? Colors.green : Colors.red,
                                   ));
                                 }

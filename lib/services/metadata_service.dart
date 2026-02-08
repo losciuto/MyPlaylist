@@ -88,6 +88,7 @@ class MetadataService {
       // 2. Run ffmpeg
       final List<String> args = [
         '-i', tempPath,
+        '-map', '0',
         '-map_metadata', '0',
         '-c', 'copy',
         '-metadata', 'genre=${video.genres}',

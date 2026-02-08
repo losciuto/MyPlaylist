@@ -178,6 +178,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
   }
 
   void _onProviderChange() {
+    if (!mounted) return;
     final query = context.read<DatabaseProvider>().searchQuery;
     if (_searchController.text != query) {
       setState(() {
