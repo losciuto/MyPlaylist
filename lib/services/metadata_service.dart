@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import 'logger_service.dart';
+import '../utils/video_extensions.dart';
 
 class MetadataService {
   static final MetadataService _instance = MetadataService._internal();

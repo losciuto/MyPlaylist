@@ -9,6 +9,7 @@ import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_parser.dart';
 import '../utils/nfo_generator.dart';
+import '../utils/video_extensions.dart';
 import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
 import '../providers/database_provider.dart';
