@@ -223,13 +223,6 @@ class MetadataService {
     final dir = Directory(video.path);
     if (!await dir.exists()) return false;
 
-    // Reuse extension connection or hardcode
-    const videoExtensions = [
-      '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
-      '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
-      '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
-    ];
-
     bool allSuccess = true;
     try {
       await for (final entity in dir.list(recursive: true, followLinks: false)) {
@@ -237,7 +230,7 @@ class MetadataService {
            final ext = p.extension(entity.path).toLowerCase();
            final basename = p.basenameWithoutExtension(entity.path);
            
-           if (videoExtensions.contains(ext)) {
+           if (VideoExtensions.supported.contains(ext)) {
              debugPrint('Updating metadata for episode: ${entity.path}');
              
              final formattedTitle = _generateEpisodeTitle(video.title, basename);

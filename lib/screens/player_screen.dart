@@ -4,7 +4,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:path/path.dart' as p;
 import '../models/video.dart' as model;
-import '../services/scan_service.dart';
+import '../utils/video_extensions.dart';
 
 class PlayerScreen extends StatefulWidget {
   final List<model.Video> playlist;
@@ -53,7 +53,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             await for (final entity in dir.list(recursive: true, followLinks: false)) {
               if (entity is File) {
                 final ext = p.extension(entity.path).toLowerCase();
-                if (ScanService.videoExtensions.contains(ext)) {
+                if (VideoExtensions.supported.contains(ext)) {
                   episodes.add(entity);
                 }
               }

@@ -8,6 +8,7 @@ import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
 import '../utils/nfo_generator.dart';
+import '../utils/video_extensions.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
@@ -49,18 +50,12 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       return;
     }
 
-    const videoExtensions = [
-      '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
-      '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
-      '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
-    ];
-
     List<File> files = [];
     try {
       await for (final entity in dir.list(recursive: true, followLinks: false)) {
         if (entity is File) {
           final ext = p.extension(entity.path).toLowerCase();
-          if (videoExtensions.contains(ext)) {
+          if (VideoExtensions.supported.contains(ext)) {
             files.add(entity);
           }
         }

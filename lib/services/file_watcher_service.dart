@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../database/app_database.dart' as db;
 import '../utils/nfo_parser.dart';
 import '../models/video.dart';
+import '../utils/video_extensions.dart';
 import 'package:flutter/foundation.dart';
 
 class FileWatcherService {
@@ -17,7 +18,6 @@ class FileWatcherService {
   Timer? _debounceTimer;
   final Set<String> _pendingFiles = {};
 
-  static const _videoExtensions = ['.mp4', '.avi', '.mkv', '.mov', '.m4v', '.flv', '.wmv'];
   static const _debounceDuration = Duration(seconds: 2);
 
   bool get isWatching => _watchers.isNotEmpty;
@@ -91,7 +91,7 @@ class FileWatcherService {
 
   bool _isVideoFile(String path) {
     final ext = p.extension(path).toLowerCase();
-    return _videoExtensions.contains(ext);
+    return VideoExtensions.supported.contains(ext);
   }
 
   bool _isNfoFile(String path) {
@@ -199,7 +199,7 @@ class FileWatcherService {
 
   String _findVideoExtension(String nfoPath) {
     final basePath = p.withoutExtension(nfoPath);
-    for (final ext in _videoExtensions) {
+    for (final ext in VideoExtensions.supported) {
       if (File('$basePath$ext').existsSync()) {
         return ext;
       }

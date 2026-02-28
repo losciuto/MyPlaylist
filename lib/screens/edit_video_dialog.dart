@@ -654,23 +654,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
        return;
     }
 
-    // Reuse extension logic (duplicated for simplicity to avoid import cycle if service is not standard)
-    // Actually we can import ScanService if it's not a circular dep. 
-    // ScanService is in services/scan_service.dart. 
-    // We can assume ScanService.videoExtensions is available.
-    // If not, use hardcoded list.
-    const videoExtensions = [
-    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
-    '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
-    '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
-  ];
-
     List<File> files = [];
     try {
       await for (final entity in dir.list(recursive: true, followLinks: false)) {
         if (entity is File) {
           final ext = p.extension(entity.path).toLowerCase();
-          if (videoExtensions.contains(ext)) {
+          if (VideoExtensions.supported.contains(ext)) {
             files.add(entity);
           }
         }

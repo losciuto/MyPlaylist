@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 import '../database/app_database.dart' as db;
 import '../models/video.dart' as model;
 import '../utils/nfo_parser.dart';
+import '../utils/video_extensions.dart';
 import 'media_asset_service.dart';
 
 class ScanStatus {
@@ -17,12 +18,6 @@ class ScanService {
   ScanService._();
 
   final _mediaAssetService = MediaAssetService();
-
-  static const List<String> videoExtensions = [
-    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', 
-    '.mpeg', '.m2v', '.ts', '.mts', '.m2ts', '.vob', '.ogv', '.ogg', '.qt', 
-    '.yuv', '.rm', '.rmvb', '.asf', '.amv', '.divx', '.3gp', '.3g2', '.mxf'
-  ];
 
   final List<String> seriesKeywords = [
     'serie', 'series', 'seriale', 'tv show', 'tvshow'
@@ -122,7 +117,7 @@ class ScanService {
             return subCount;
           } else if (entity is File) {
             final ext = p.extension(entity.path).toLowerCase();
-            if (videoExtensions.contains(ext)) {
+            if (VideoExtensions.supported.contains(ext)) {
               try {
                 await _processVideo(entity);
                 return 1;
