@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.6.3] - 28/02/2026
+
+### Varie
+- Aggiornamento della versione e preparazione per la build tramite GitHub Actions.
+
 ## [3.6.2] - 08/02/2026
 
 ### Correzioni
