@@ -16,6 +16,7 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 - **Smart Playlists**: Generate random or filtered playlists with session-based exclusion and inclusion/exclusion criteria.
 - **TV Series Management**: Full support for TV series folders, recursive episode metadata updates, and `tvshow.nfo` generation.
 - **VLC Integration**: Advanced support for VLC with automatic process management.
+- **Advanced Duplicate Management**: Side-by-side technical metadata comparison for duplicates. Delete permanently from Disk/DB and persistent "Ignore" function for false-positives.
 - **Modern UI**: Tooltips, real-time progress, and a clean interface.
 
 ## Quick Start
@@ -24,8 +25,8 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 3.  Run `flutter run -d linux` (or windows).
 
 ---
-**Version**: 3.6.2  
-**Last Update**: 10/02/2026
+**Version**: 3.7.0  
+**Last Update**: 02/28/2026
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

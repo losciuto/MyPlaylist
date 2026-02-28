@@ -13,6 +13,7 @@ Creatore di Playlist Video e Gestore Database Locale.
 *   **Remote Protocol**: Server TCP AES-GCM per il controllo remoto dal client VLC Remote, con supporto anteprima playlist.
 *   **Persistenza**: Salva l'ultima playlist generata tra le sessioni.
 *   **Esclusione Sessione**: Le playlist casuali non ripetono video già proposti nella stessa sessione.
+*   **Gestione Doppioni Avanzata**: Rilevamento automatico copie doppie, confronto side-by-side dei metadati tecnici (ffprobe) con supporto raggruppamento per serie TV. Possibilità di eliminare copie dal DB o dal Disco in modo permanente, e funzione "Ignora" per nascondere falsi positivi in modo persistente.
 *   **UI Advanced**: Tooltip sui titoli lunghi e visualizzazione del video in elaborazione durante la rinomina.
 
 ## Requisiti di Sistema (Linux)
@@ -37,7 +38,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 10/02/2026 (v3.6.2)
+Ultimo Aggiornamento: 28/02/2026 (v3.7.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

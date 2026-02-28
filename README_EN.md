@@ -12,6 +12,7 @@ Video Playlist Creator and Local Database Manager.
 *   **VLC Control**: Advanced VLC support (auto-kill previous instances, remote control launch).
 *   **Persistence**: Saves the last generated playlist between sessions.
 *   **Session Exclusion**: Random playlists do not repeat videos already proposed in the current session.
+*   **Advanced Duplicate Management**: Automatic detection of duplicates with a side-by-side technical metadata comparison (using ffprobe) and TV series grouping support. Manage your storage by deleting copies permanently from DB and Disk, and hide false-positives with a persistent "Ignore" function.
 *   **Advanced UI**: Tooltips for long titles and real-time processing title display during renaming.
 
 ## System Requirements (Linux)
@@ -36,7 +37,7 @@ If you experience black screens or "Codec not found" errors, run the command abo
 ## Credits
 Built with Flutter.
 Author: Massimo
-Last Update: 10/02/2026 (v3.6.2)
+Last Update: 02/28/2026 (v3.7.0)
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
