@@ -100,7 +100,6 @@ class ScanService {
     }
 
     // 3. Normal Recursive Scan
-    int localCount = 0;
     try {
       final entities = await dir.list(recursive: false, followLinks: false).toList();
       
@@ -138,7 +137,6 @@ class ScanService {
         final results = await Future.wait(tasks);
         final batchAddedCount = results.fold<int>(0, (sum, val) => sum + val);
         if (batchAddedCount > 0) {
-          localCount += batchAddedCount;
           yield ScanStatus('COUNT_UPDATE', batchAddedCount);
         }
       }
@@ -153,8 +151,6 @@ class ScanService {
     final mtime = stat.modified.millisecondsSinceEpoch / 1000.0;
 
     String nfoPath = p.join(path, 'tvshow.nfo');
-    File nfoFile = File(nfoPath);
-    bool nfoExists = await nfoFile.exists();
 
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
     

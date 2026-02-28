@@ -47,7 +47,7 @@ void main() {
       
       // Verify Director
       final directors = document.findAllElements('director');
-      expect(directors.first.innerText, 'Christopher Nolan');
+      expect(directors.first.findElements('name').first.innerText.trim(), 'Christopher Nolan');
     });
   });
 }

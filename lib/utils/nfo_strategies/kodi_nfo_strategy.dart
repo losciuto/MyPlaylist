@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:xml/xml.dart';
 import 'package:path/path.dart' as p;
 import 'nfo_strategy.dart';

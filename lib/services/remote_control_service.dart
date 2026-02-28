@@ -205,7 +205,7 @@ class RemoteControlService with ChangeNotifier {
       case 'generate_random':
         final count = args['count'] as int? ?? settingsService.defaultPlaylistSize;
         final preview = args['preview'] as bool? ?? false;
-        final titles = await playlistProvider.generateRandom(
+        await playlistProvider.generateRandom(
           count: count,
           launchPlayer: !preview,
         );
@@ -216,7 +216,7 @@ class RemoteControlService with ChangeNotifier {
       case 'generate_recent':
         final count = args['count'] as int? ?? settingsService.defaultPlaylistSize;
         final preview = args['preview'] as bool? ?? false;
-        final titles = await playlistProvider.generateRecentPlaylist(
+        await playlistProvider.generateRecentPlaylist(
           count: count,
           launchPlayer: !preview,
         );
@@ -226,7 +226,7 @@ class RemoteControlService with ChangeNotifier {
         break;
       case 'generate_filtered':
         final preview = args['preview'] as bool? ?? false;
-        final titles = await playlistProvider.generateFilteredPlaylist(
+        await playlistProvider.generateFilteredPlaylist(
           genres: (args['genres'] as List?)?.cast<String>(),
           years: (args['years'] as List?)?.cast<String>(),
           minRating: (args['min_rating'] as num?)?.toDouble(),
