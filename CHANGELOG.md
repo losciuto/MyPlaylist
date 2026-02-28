@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.6.3] - 2026-02-28
+## [3.6.4] - 2026-02-28
 
 ### Miscellaneous
 - Version update and preparation for GitHub Actions build.
