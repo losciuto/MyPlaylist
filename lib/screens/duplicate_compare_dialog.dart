@@ -186,8 +186,12 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
       ),
     );
     if (confirm != true || !mounted) return;
+    
+    // Extract provider before async gap
+    final dbProvider = context.read<DatabaseProvider>();
+    
     await _svc.deleteVideoWithFiles(video);
-    await context.read<DatabaseProvider>().refreshVideos();
+    await dbProvider.refreshVideos();
     if (mounted) Navigator.pop(context, true);
   }
 
@@ -475,7 +479,7 @@ class _VideoColumn extends StatelessWidget {
                     label: const Text('Elimina solo dal DB'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
-                      side: BorderSide(color: theme.colorScheme.error.withOpacity(0.5)),
+                      side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
                     ),
                   ),
                 ),

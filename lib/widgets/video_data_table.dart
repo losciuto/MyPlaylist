@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/video.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
-import '../screens/edit_video_dialog.dart';
-import '../providers/database_provider.dart';
-import 'package:provider/provider.dart';
 
 class VideoDataTable extends StatelessWidget {
   final List<Video> videos;
@@ -89,9 +86,9 @@ class VideoDataTable extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: index.isEven 
-          ? (isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.02)) 
+          ? (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02)) 
           : Colors.transparent,
-        border: Border(bottom: BorderSide(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.1))),
+        border: Border(bottom: BorderSide(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.1))),
       ),
       child: Row(
         children: [

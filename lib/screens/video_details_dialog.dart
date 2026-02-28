@@ -276,10 +276,9 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                           child: OutlinedButton.icon(
                             onPressed: () async {
                               await context.read<DatabaseProvider>().refreshFromNfo(widget.video);
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.nfoLoadedMsg)));
-                                Navigator.pop(context); // Close and reopen or just refresh (easier to close for now)
-                              }
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.nfoLoadedMsg)));
+                              Navigator.pop(context); // Close and reopen or just refresh (easier to close for now)
                             },
                             icon: const Icon(Icons.refresh, size: 18),
                             label: Text(l10n.loadFromNfo),
@@ -297,12 +296,11 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                           child: OutlinedButton.icon(
                             onPressed: () async {
                               final success = await context.read<DatabaseProvider>().saveToNfo(widget.video);
-                              if (mounted) {
-                                if (success) {
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('NFO salvato con successo!'), backgroundColor: Colors.green));
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore durante il salvataggio NFO'), backgroundColor: Colors.red));
-                                }
+                              if (!context.mounted) return;
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('NFO salvato con successo!'), backgroundColor: Colors.green));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore durante il salvataggio NFO'), backgroundColor: Colors.red));
                               }
                             },
                             icon: const Icon(Icons.save, size: 18),
@@ -328,7 +326,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                           const SizedBox(height: 15),
                         ],
                         if (widget.video.directors.isNotEmpty) ...[
-                          _buildSectionTitle(l10n.sectionDirectors ?? 'REGIA'),
+                          _buildSectionTitle(l10n.sectionDirectors),
                           _buildPeopleList(widget.video.directors, widget.video.directorThumbs, _directorsController),
                           const SizedBox(height: 15),
                         ],
@@ -366,9 +364,9 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
     );

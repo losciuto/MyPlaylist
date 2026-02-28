@@ -175,17 +175,7 @@ class DatabaseProvider extends ChangeNotifier {
     final ignored = SettingsService().ignoredDuplicateKeys;
     final Map<String, List<model.Video>> groups = {};
     for (final video in _videos) {
-      final String key;
-      if (video.isSeries) {
-        // Use folder basename so that Season 1 and Season 2 are NOT grouped.
-        // Two series entries are duplicates only if they share the same
-        // title AND the same folder name (e.g. same show imported twice from
-        // different parent paths).
-        final folderName = p.basename(video.path).trim().toLowerCase();
-        key = '${video.title.trim().toLowerCase()}|${video.year.trim()}|series|$folderName';
-      } else {
-        key = '${video.title.trim().toLowerCase()}|${video.year.trim()}';
-      }
+      final String key = duplicateKey(video);
       if (key == '|' || key.startsWith('|series|') || key.isEmpty) continue;
       if (ignored.contains(key)) continue;  // Skip ignored groups
       groups.putIfAbsent(key, () => []).add(video);

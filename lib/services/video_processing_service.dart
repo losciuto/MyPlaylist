@@ -420,7 +420,9 @@ class VideoProcessingService {
     }
 
     if (_isCancelled) {
-      for (final dir in processedDirs) onCancelCleanup(dir);
+      for (final dir in processedDirs) {
+        onCancelCleanup(dir);
+      }
     }
 
     return VideoProcessingResult(updated: updatedCount, skipped: skippedCount, errors: errorCount);

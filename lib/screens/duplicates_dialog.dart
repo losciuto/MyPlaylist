@@ -75,11 +75,18 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     if (!mounted) return;
 
     setState(() => _isLoading = true);
+    
+    // Extract provider before async gap
+    final dbProvider = context.read<DatabaseProvider>();
+    
     final deleted = await _processingService.deleteVideoWithFiles(video);
-    await context.read<DatabaseProvider>().refreshVideos();
-    _lastMessage = 'Eliminati ${deleted.length} file di ${video.title}';
-    _refresh();
-    setState(() => _isLoading = false);
+    await dbProvider.refreshVideos();
+    
+    if (mounted) {
+      _lastMessage = 'Eliminati ${deleted.length} file di ${video.title}';
+      _refresh();
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -190,7 +197,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.errorContainer.withOpacity(0.4),
+                                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
                                   borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
                                 ),
                                 child: Row(
@@ -358,7 +365,7 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
       decoration: BoxDecoration(
         border: widget.isLast
             ? null
-            : Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5))),
+            : Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5))),
       ),
       child: InkWell(
         onTap: () async {
