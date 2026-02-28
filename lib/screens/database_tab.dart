@@ -15,6 +15,7 @@ import '../utils/nfo_generator.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/video_data_table.dart';
 import '../services/video_processing_service.dart';
+import 'duplicates_dialog.dart';
 
 class DatabaseTab extends StatefulWidget {
   const DatabaseTab({super.key});
@@ -432,6 +433,19 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     onPressed: _bulkGenerateNfo,
                     icon: const Icon(Icons.auto_fix_high),
                     label: Text(l10n.tmdbGenAuto),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton.icon(
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (_) => const DuplicatesDialog(),
+                    ).then((_) => provider.refreshVideos()),
+                    icon: const Icon(Icons.copy_all),
+                    label: const Text('Doppioni'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange.shade800,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ],
               ),

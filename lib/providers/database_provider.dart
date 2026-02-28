@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../utils/filter_utils.dart';
 import '../services/nfo_sync_service.dart';
 import '../services/settings_service.dart';
+import 'package:path/path.dart' as p;
 
 class DatabaseProvider extends ChangeNotifier {
   final AppDatabase _db;
@@ -163,5 +164,41 @@ class DatabaseProvider extends ChangeNotifier {
   void setSortedVideos(List<model.Video> sortedVideos) {
     _filteredVideos = sortedVideos;
     notifyListeners();
+  }
+
+  /// Returns groups of duplicate videos (same title + year, case-insensitive).
+  /// Only groups with 2 or more entries are returned.
+  /// For series, the folder name is also included in the key to avoid
+  /// grouping different seasons of the same show as duplicates.
+  /// Groups whose key is in SettingsService.ignoredDuplicateKeys are excluded.
+  List<List<model.Video>> getDuplicateGroups() {
+    final ignored = SettingsService().ignoredDuplicateKeys;
+    final Map<String, List<model.Video>> groups = {};
+    for (final video in _videos) {
+      final String key;
+      if (video.isSeries) {
+        // Use folder basename so that Season 1 and Season 2 are NOT grouped.
+        // Two series entries are duplicates only if they share the same
+        // title AND the same folder name (e.g. same show imported twice from
+        // different parent paths).
+        final folderName = p.basename(video.path).trim().toLowerCase();
+        key = '${video.title.trim().toLowerCase()}|${video.year.trim()}|series|$folderName';
+      } else {
+        key = '${video.title.trim().toLowerCase()}|${video.year.trim()}';
+      }
+      if (key == '|' || key.startsWith('|series|') || key.isEmpty) continue;
+      if (ignored.contains(key)) continue;  // Skip ignored groups
+      groups.putIfAbsent(key, () => []).add(video);
+    }
+    return groups.values.where((group) => group.length > 1).toList();
+  }
+
+  /// Returns the duplicate-group key for a given video (same logic as getDuplicateGroups).
+  static String duplicateKey(model.Video video) {
+    if (video.isSeries) {
+      final folderName = p.basename(video.path).trim().toLowerCase();
+      return '${video.title.trim().toLowerCase()}|${video.year.trim()}|series|$folderName';
+    }
+    return '${video.title.trim().toLowerCase()}|${video.year.trim()}';
   }
 }

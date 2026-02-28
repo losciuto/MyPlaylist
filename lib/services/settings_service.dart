@@ -29,6 +29,7 @@ class SettingsService with ChangeNotifier {
   static const String _keyAutoSyncEnabled = 'auto_sync_enabled';
   static const String _keyWatchedDirectories = 'watched_directories';
   static const String _keyAutoSyncNfoOnEdit = 'auto_sync_nfo_on_edit';
+  static const String _keyIgnoredDuplicateKeys = 'ignored_duplicate_keys';
 
   // State
   String _playerPath = '';
@@ -45,6 +46,7 @@ class SettingsService with ChangeNotifier {
   bool _autoSyncEnabled = false;
   List<String> _watchedDirectories = [];
   bool _autoSyncNfoOnEdit = false;
+  Set<String> _ignoredDuplicateKeys = {};
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -61,6 +63,7 @@ class SettingsService with ChangeNotifier {
   bool get autoSyncEnabled => _autoSyncEnabled;
   List<String> get watchedDirectories => List.unmodifiable(_watchedDirectories);
   bool get autoSyncNfoOnEdit => _autoSyncNfoOnEdit;
+  Set<String> get ignoredDuplicateKeys => Set.unmodifiable(_ignoredDuplicateKeys);
 
   Future<void> init() async {
     if (_initialized) return;
@@ -103,6 +106,7 @@ class SettingsService with ChangeNotifier {
     _autoSyncEnabled = _prefs.getBool(_keyAutoSyncEnabled) ?? false;
     _watchedDirectories = _prefs.getStringList(_keyWatchedDirectories) ?? [];
     _autoSyncNfoOnEdit = _prefs.getBool(_keyAutoSyncNfoOnEdit) ?? false;
+    _ignoredDuplicateKeys = Set.from(_prefs.getStringList(_keyIgnoredDuplicateKeys) ?? []);
     
     _initialized = true;
     notifyListeners();
@@ -220,6 +224,24 @@ class SettingsService with ChangeNotifier {
   Future<void> setAutoSyncNfoOnEdit(bool enabled) async {
     _autoSyncNfoOnEdit = enabled;
     await _prefs.setBool(_keyAutoSyncNfoOnEdit, enabled);
+    notifyListeners();
+  }
+
+  Future<void> addIgnoredDuplicateKey(String key) async {
+    _ignoredDuplicateKeys.add(key);
+    await _prefs.setStringList(_keyIgnoredDuplicateKeys, _ignoredDuplicateKeys.toList());
+    notifyListeners();
+  }
+
+  Future<void> removeIgnoredDuplicateKey(String key) async {
+    _ignoredDuplicateKeys.remove(key);
+    await _prefs.setStringList(_keyIgnoredDuplicateKeys, _ignoredDuplicateKeys.toList());
+    notifyListeners();
+  }
+
+  Future<void> clearIgnoredDuplicateKeys() async {
+    _ignoredDuplicateKeys.clear();
+    await _prefs.remove(_keyIgnoredDuplicateKeys);
     notifyListeners();
   }
 }

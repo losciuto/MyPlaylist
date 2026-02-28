@@ -425,4 +425,79 @@ class VideoProcessingService {
 
     return VideoProcessingResult(updated: updatedCount, skipped: skippedCount, errors: errorCount);
   }
+
+  /// Deletes a video entry from the database and from disk (video file + all
+  /// associated files: .nfo, poster, fanart, clearlogo, disc).
+  /// For series, the entire folder is deleted.
+  /// Returns a list of deleted file paths for reference.
+  Future<List<String>> deleteVideoWithFiles(model.Video video) async {
+    final List<String> deleted = [];
+
+    try {
+      if (video.isSeries) {
+        // For series: delete the entire folder
+        final dir = Directory(video.path);
+        if (await dir.exists()) {
+          await dir.delete(recursive: true);
+          deleted.add(video.path);
+        }
+      } else {
+        // For single-file videos: delete the video and all associated sidecar files
+        final videoFile = File(video.path);
+        final dir = p.dirname(video.path);
+        final baseName = p.basenameWithoutExtension(video.path);
+
+        // Delete the video file itself
+        if (await videoFile.exists()) {
+          await videoFile.delete();
+          deleted.add(video.path);
+        }
+
+        // Delete sidecar files with the same base name in the same directory
+        final suffixesToDelete = [
+          '.nfo',
+          '-poster.jpg',
+          '-fanart.jpg',
+          '-clearlogo.png',
+          '-disc.png',
+          '-landscape.jpg',
+          '-banner.jpg',
+          '-thumb.jpg',
+        ];
+
+        for (final suffix in suffixesToDelete) {
+          final sidecar = File(p.join(dir, '$baseName$suffix'));
+          if (await sidecar.exists()) {
+            await sidecar.delete();
+            deleted.add(sidecar.path);
+          }
+        }
+
+        // Also delete any file that starts with baseName (catch-all for variants)
+        try {
+          final parentDir = Directory(dir);
+          await for (final entity in parentDir.list()) {
+            if (entity is File) {
+              final name = p.basename(entity.path);
+              if (name.startsWith('$baseName-') && !deleted.contains(entity.path)) {
+                await entity.delete();
+                deleted.add(entity.path);
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('Error scanning dir for sidecar files: $e');
+        }
+      }
+
+      // Delete from DB
+      if (video.id != null) {
+        await db.AppDatabase.instance.deleteVideo(video.id!);
+      }
+    } catch (e) {
+      debugPrint('Error deleting video with files: $e');
+    }
+
+    return deleted;
+  }
 }
