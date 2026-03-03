@@ -15,6 +15,7 @@ import '../utils/nfo_generator.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/video_data_table.dart';
 import '../services/video_processing_service.dart';
+import 'failed_renames_screen.dart';
 import 'duplicates_dialog.dart';
 
 class DatabaseTab extends StatefulWidget {
@@ -446,6 +447,16 @@ class _DatabaseTabState extends State<DatabaseTab> {
                       backgroundColor: Colors.orange.shade800,
                       foregroundColor: Colors.white,
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const FailedRenamesScreen()),
+                      );
+                    },
+                    icon: const Icon(Icons.list_alt_rounded),
+                    label: const Text('File Ignorati/Falliti'),
                   ),
                 ],
               ),

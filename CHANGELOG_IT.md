@@ -2,10 +2,13 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
-## [3.6.4] - 28/02/2026
+## [3.6.5] - 03/03/2026
 
-### Varie
-- Aggiornamento della versione e preparazione per la build tramite GitHub Actions.
+### Correzioni
+- **Log Rinomina**: Migliorata la gestione degli errori durante le operazioni di rinomina in massa. Gli errori durante l'aggiornamento dei metadati (FFmpeg) vengono ora registrati correttamente nella tabella del database "Errori Rinomina".
+- **Log di Debug Dettagliati**: Aggiunto logging dettagliato per i file saltati durante la rinomina per identificare i motivi dello stato "già sincronizzato".
+
+## [3.6.4] - 28/02/2026
 
 ## [3.6.2] - 08/02/2026
 

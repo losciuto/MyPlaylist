@@ -330,11 +330,25 @@ class VideoProcessingService {
     int errorCount = 0;
     final total = videos.length;
     final Set<String> processedDirs = {};
+    
+    // Cache per evitare di listare la stessa directory più volte
+    final Map<String, List<String>> dirCache = {}; 
+    
+    // 1. Leggi tutti i path precedentemente falliti per ignorarli
+    final failedPaths = await db.AppDatabase.instance.getAllFailedRenamePaths();
 
     for (int i = 0; i < total; i++) {
       if (_isCancelled) break;
 
       final video = videos[i];
+
+      // Se il file era già marcato come fallito/ignorato, saltalo subito
+      if (failedPaths.contains(video.path)) {
+        debugPrint('DEBUG: Skipping previously failed file: ${video.path}');
+        skippedCount++;
+        continue;
+      }
+
       onProgress(VideoProcessingStatus(
         current: i + 1,
         total: total,
@@ -349,37 +363,57 @@ class VideoProcessingService {
         bool nfoFound = await nfoFile.exists();
         
         if (!nfoFound && !video.isSeries) {
-           final parentDir = Directory(p.dirname(video.path));
-           if (await parentDir.exists()) {
-             final videoBasenameNoExt = p.basenameWithoutExtension(video.path).toLowerCase();
-             await for (final entity in parentDir.list()) {
-               if (entity is File && p.extension(entity.path).toLowerCase() == '.nfo') {
-                 if (p.basenameWithoutExtension(entity.path).toLowerCase() == videoBasenameNoExt) {
-                   nfoPath = entity.path;
-                   nfoFile = File(nfoPath);
-                   nfoFound = true;
-                   break;
-                 }
+           final dirPath = p.dirname(video.path);
+           List<String>? dirFiles;
+           
+           if (dirCache.containsKey(dirPath)) {
+             debugPrint('DEBUG: Cache hit for directory: $dirPath');
+             dirFiles = dirCache[dirPath];
+           } else {
+             debugPrint('DEBUG: Cache miss for directory: $dirPath, scanning...');
+             final parentDir = Directory(dirPath);
+             if (await parentDir.exists()) {
+               try {
+                 dirFiles = await parentDir.list()
+                    .where((e) => e is File && p.extension(e.path).toLowerCase() == '.nfo')
+                    .map((e) => e.path)
+                    .toList();
+                 dirCache[dirPath] = dirFiles;
+               } catch (e) {
+                 debugPrint('Error listing directory $dirPath: $e');
                }
              }
            }
+
+           if (dirFiles != null) {
+              final videoBasenameNoExt = p.basenameWithoutExtension(video.path).toLowerCase();
+              for (final path in dirFiles) {
+                if (p.basenameWithoutExtension(path).toLowerCase() == videoBasenameNoExt) {
+                  nfoPath = path;
+                  nfoFile = File(nfoPath);
+                  nfoFound = true;
+                  break;
+                }
+              }
+           }
         }
 
-        if (!nfoFound) {
-          skippedCount++;
+         if (!nfoFound) {
+          // Registra il fallimento per evitare di ritentare in futuro
+          await db.AppDatabase.instance.insertFailedRename(video.path, "File .nfo non trovato");
+          errorCount++;
           continue;
         }
 
         final metadata = await NfoParser.parseNfo(nfoPath);
-        if (metadata == null || metadata['title'] == null || metadata['title'].isEmpty) {
-          skippedCount++;
+        if (metadata == null || metadata['title'] == null || metadata['title'].toString().isEmpty) {
+          await db.AppDatabase.instance.insertFailedRename(video.path, "Titolo mancante o nfo invalido");
+          errorCount++;
           continue;
         }
 
         final nfoTitle = metadata['title'];
         final nfoYear = metadata['year'];
-        final fileMetadata = await MetadataService().getFileMetadata(video.path);
-        final fileTitle = fileMetadata['title'] ?? '';
         
         String norm(String? s) => (s ?? '').trim().toLowerCase()
             .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
@@ -387,10 +421,19 @@ class VideoProcessingService {
 
         String targetTitle = (nfoYear != null && nfoYear.isNotEmpty) ? '$nfoTitle ($nfoYear)' : nfoTitle;
 
+        // Controllo se il DB è disallineato rispetto alla target title
         bool dbMismatch = norm(video.title) != norm(targetTitle);
+        
+        // Controllo se i metadati interni del file sono disallineati
+        // Nota: Questo è più lento ma garantisce che il file fisico sia aggiornato
+        final fileMetadata = await MetadataService().getFileMetadata(video.path);
+        final fileTitle = fileMetadata['title'] ?? '';
         bool fileMismatch = norm(fileTitle) != norm(targetTitle);
 
         if (!dbMismatch && !fileMismatch) {
+          debugPrint('DEBUG: Skip ${video.path} (Already in sync)');
+          debugPrint('      DB Title: "${video.title}" | Target: "$targetTitle"');
+          debugPrint('      File Title: "$fileTitle" | Target: "$targetTitle"');
           skippedCount++;
           continue;
         }
@@ -408,13 +451,27 @@ class VideoProcessingService {
           saga: (metadata['saga'] != null && metadata['saga'].toString().isNotEmpty) ? metadata['saga'] : video.saga,
         );
 
-        if (dbMismatch) await db.AppDatabase.instance.updateVideo(updatedVideo);
-        if (fileMismatch) await MetadataService().updateFileMetadata(updatedVideo);
+        bool success = true;
+        if (dbMismatch) {
+          await db.AppDatabase.instance.updateVideo(updatedVideo);
+        }
+        
+        if (fileMismatch) {
+          success = await MetadataService().updateFileMetadata(updatedVideo);
+          if (!success) {
+            errorCount++;
+            final errorMsg = "Errore durante l'aggiornamento dei metadati del file (FFmpeg o file occupato)";
+            debugPrint('ERROR updating metadata for ${video.path}: $errorMsg');
+            await db.AppDatabase.instance.insertFailedRename(video.path, errorMsg);
+            continue;
+          }
+        }
 
         updatedCount++;
       } catch (e) {
         errorCount++;
         debugPrint('ERROR renaming video ${video.path}: $e');
+        await db.AppDatabase.instance.insertFailedRename(video.path, "Eccezione durante la rinomina: ${e.toString()}");
       }
       await Future.delayed(Duration.zero);
     }

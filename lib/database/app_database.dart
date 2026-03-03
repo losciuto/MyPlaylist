@@ -34,13 +34,21 @@ class Videos extends Table {
   ];
 }
 
-@DriftDatabase(tables: [Videos])
+@DataClassName('FailedRename')
+class FailedRenames extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get path => text().unique()();
+  TextColumn get errorMessage => text()();
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DriftDatabase(tables: [Videos, FailedRenames])
 class AppDatabase extends _$AppDatabase {
   static final AppDatabase instance = AppDatabase();
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -58,6 +66,10 @@ class AppDatabase extends _$AppDatabase {
           // Add indices
           await m.createIndex(Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'));
           await m.createIndex(Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'));
+        }
+        if (from < 4) {
+          // Add FailedRenames table
+          await m.createTable(failedRenames);
         }
       },
       beforeOpen: (details) async {
@@ -164,6 +176,40 @@ class AppDatabase extends _$AppDatabase {
     final query = selectOnly(videos)..addColumns([count]);
     final result = await query.map((row) => row.read(count)).getSingle();
     return result ?? 0;
+  }
+
+  // --- Failed Renames CRUD ---
+
+  Future<void> insertFailedRename(String path, String errorMessage) async {
+    await into(failedRenames).insert(
+      FailedRenamesCompanion.insert(
+        path: path,
+        errorMessage: errorMessage,
+        timestamp: Value(DateTime.now()),
+      ),
+      mode: InsertMode.replace, // Aggiorna se già esiste
+    );
+  }
+
+  Future<List<FailedRename>> getAllFailedRenames() async {
+    return await (select(failedRenames)..orderBy([(t) => OrderingTerm(expression: t.timestamp, mode: OrderingMode.desc)])).get();
+  }
+
+  Future<Set<String>> getAllFailedRenamePaths() async {
+    final rows = await select(failedRenames).get();
+    return rows.map((r) => r.path).toSet();
+  }
+
+  Future<int> deleteFailedRename(int id) async {
+    return await (delete(failedRenames)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<int> deleteFailedRenameByPath(String path) async {
+    return await (delete(failedRenames)..where((t) => t.path.equals(path))).go();
+  }
+
+  Future<void> clearFailedRenames() async {
+    await delete(failedRenames).go();
   }
 
   Future<List<model.Video>> getAllVideos() async {

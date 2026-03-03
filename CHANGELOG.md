@@ -2,10 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.6.4] - 2026-02-28
+## [3.6.5] - 2026-03-03
 
-### Miscellaneous
-- Version update and preparation for GitHub Actions build.
+### Fixed
+- **Rename Logging**: Improved error handling during bulk rename operations. Errors during metadata updates (FFmpeg) are now correctly logged into the "Failed Renames" database table.
+- **Detailed Debug Logs**: Added verbose logging for skipped files during rename to identify "already in sync" status reasons.
+
+## [3.6.4] - 2026-02-28
 
 ## [3.6.2] - 2026-02-10
 

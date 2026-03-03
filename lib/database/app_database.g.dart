@@ -903,15 +903,318 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
   }
 }
 
+class $FailedRenamesTable extends FailedRenames
+    with TableInfo<$FailedRenamesTable, FailedRename> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FailedRenamesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _errorMessageMeta = const VerificationMeta(
+    'errorMessage',
+  );
+  @override
+  late final GeneratedColumn<String> errorMessage = GeneratedColumn<String>(
+    'error_message',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, path, errorMessage, timestamp];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'failed_renames';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FailedRename> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('error_message')) {
+      context.handle(
+        _errorMessageMeta,
+        errorMessage.isAcceptableOrUnknown(
+          data['error_message']!,
+          _errorMessageMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_errorMessageMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FailedRename map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FailedRename(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      errorMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_message'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+    );
+  }
+
+  @override
+  $FailedRenamesTable createAlias(String alias) {
+    return $FailedRenamesTable(attachedDatabase, alias);
+  }
+}
+
+class FailedRename extends DataClass implements Insertable<FailedRename> {
+  final int id;
+  final String path;
+  final String errorMessage;
+  final DateTime timestamp;
+  const FailedRename({
+    required this.id,
+    required this.path,
+    required this.errorMessage,
+    required this.timestamp,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['path'] = Variable<String>(path);
+    map['error_message'] = Variable<String>(errorMessage);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  FailedRenamesCompanion toCompanion(bool nullToAbsent) {
+    return FailedRenamesCompanion(
+      id: Value(id),
+      path: Value(path),
+      errorMessage: Value(errorMessage),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory FailedRename.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FailedRename(
+      id: serializer.fromJson<int>(json['id']),
+      path: serializer.fromJson<String>(json['path']),
+      errorMessage: serializer.fromJson<String>(json['errorMessage']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'path': serializer.toJson<String>(path),
+      'errorMessage': serializer.toJson<String>(errorMessage),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  FailedRename copyWith({
+    int? id,
+    String? path,
+    String? errorMessage,
+    DateTime? timestamp,
+  }) => FailedRename(
+    id: id ?? this.id,
+    path: path ?? this.path,
+    errorMessage: errorMessage ?? this.errorMessage,
+    timestamp: timestamp ?? this.timestamp,
+  );
+  FailedRename copyWithCompanion(FailedRenamesCompanion data) {
+    return FailedRename(
+      id: data.id.present ? data.id.value : this.id,
+      path: data.path.present ? data.path.value : this.path,
+      errorMessage: data.errorMessage.present
+          ? data.errorMessage.value
+          : this.errorMessage,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FailedRename(')
+          ..write('id: $id, ')
+          ..write('path: $path, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, path, errorMessage, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FailedRename &&
+          other.id == this.id &&
+          other.path == this.path &&
+          other.errorMessage == this.errorMessage &&
+          other.timestamp == this.timestamp);
+}
+
+class FailedRenamesCompanion extends UpdateCompanion<FailedRename> {
+  final Value<int> id;
+  final Value<String> path;
+  final Value<String> errorMessage;
+  final Value<DateTime> timestamp;
+  const FailedRenamesCompanion({
+    this.id = const Value.absent(),
+    this.path = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  FailedRenamesCompanion.insert({
+    this.id = const Value.absent(),
+    required String path,
+    required String errorMessage,
+    this.timestamp = const Value.absent(),
+  }) : path = Value(path),
+       errorMessage = Value(errorMessage);
+  static Insertable<FailedRename> custom({
+    Expression<int>? id,
+    Expression<String>? path,
+    Expression<String>? errorMessage,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (path != null) 'path': path,
+      if (errorMessage != null) 'error_message': errorMessage,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  FailedRenamesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? path,
+    Value<String>? errorMessage,
+    Value<DateTime>? timestamp,
+  }) {
+    return FailedRenamesCompanion(
+      id: id ?? this.id,
+      path: path ?? this.path,
+      errorMessage: errorMessage ?? this.errorMessage,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (errorMessage.present) {
+      map['error_message'] = Variable<String>(errorMessage.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FailedRenamesCompanion(')
+          ..write('id: $id, ')
+          ..write('path: $path, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $VideosTable videos = $VideosTable(this);
+  late final $FailedRenamesTable failedRenames = $FailedRenamesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [videos];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [videos, failedRenames];
 }
 
 typedef $$VideosTableCreateCompanionBuilder =
@@ -1336,10 +1639,189 @@ typedef $$VideosTableProcessedTableManager =
       DriftVideo,
       PrefetchHooks Function()
     >;
+typedef $$FailedRenamesTableCreateCompanionBuilder =
+    FailedRenamesCompanion Function({
+      Value<int> id,
+      required String path,
+      required String errorMessage,
+      Value<DateTime> timestamp,
+    });
+typedef $$FailedRenamesTableUpdateCompanionBuilder =
+    FailedRenamesCompanion Function({
+      Value<int> id,
+      Value<String> path,
+      Value<String> errorMessage,
+      Value<DateTime> timestamp,
+    });
+
+class $$FailedRenamesTableFilterComposer
+    extends Composer<_$AppDatabase, $FailedRenamesTable> {
+  $$FailedRenamesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FailedRenamesTableOrderingComposer
+    extends Composer<_$AppDatabase, $FailedRenamesTable> {
+  $$FailedRenamesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FailedRenamesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FailedRenamesTable> {
+  $$FailedRenamesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$FailedRenamesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FailedRenamesTable,
+          FailedRename,
+          $$FailedRenamesTableFilterComposer,
+          $$FailedRenamesTableOrderingComposer,
+          $$FailedRenamesTableAnnotationComposer,
+          $$FailedRenamesTableCreateCompanionBuilder,
+          $$FailedRenamesTableUpdateCompanionBuilder,
+          (
+            FailedRename,
+            BaseReferences<_$AppDatabase, $FailedRenamesTable, FailedRename>,
+          ),
+          FailedRename,
+          PrefetchHooks Function()
+        > {
+  $$FailedRenamesTableTableManager(_$AppDatabase db, $FailedRenamesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FailedRenamesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FailedRenamesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FailedRenamesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> path = const Value.absent(),
+                Value<String> errorMessage = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => FailedRenamesCompanion(
+                id: id,
+                path: path,
+                errorMessage: errorMessage,
+                timestamp: timestamp,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String path,
+                required String errorMessage,
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => FailedRenamesCompanion.insert(
+                id: id,
+                path: path,
+                errorMessage: errorMessage,
+                timestamp: timestamp,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FailedRenamesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FailedRenamesTable,
+      FailedRename,
+      $$FailedRenamesTableFilterComposer,
+      $$FailedRenamesTableOrderingComposer,
+      $$FailedRenamesTableAnnotationComposer,
+      $$FailedRenamesTableCreateCompanionBuilder,
+      $$FailedRenamesTableUpdateCompanionBuilder,
+      (
+        FailedRename,
+        BaseReferences<_$AppDatabase, $FailedRenamesTable, FailedRename>,
+      ),
+      FailedRename,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$VideosTableTableManager get videos =>
       $$VideosTableTableManager(_db, _db.videos);
+  $$FailedRenamesTableTableManager get failedRenames =>
+      $$FailedRenamesTableTableManager(_db, _db.failedRenames);
 }
