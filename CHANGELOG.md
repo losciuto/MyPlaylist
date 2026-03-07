@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0] - 2026-03-07
+
+### Added
+- **Persistent "Most Recent" Sorting**: Introduced `date_added` column in the database. The "Most Recent" playlist is now based on the actual date the video was added to the library rather than the file modification date. This prevents metadata edits from moving old videos to the top of the list.
+- **Automatic Migration**: On first launch, existing videos are migrated while preserving their current chronological order.
+
 ## [3.6.5] - 2026-03-03
 
 ### Fixed

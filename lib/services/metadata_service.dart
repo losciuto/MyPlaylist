@@ -5,6 +5,14 @@ import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import 'logger_service.dart';
 import '../utils/video_extensions.dart';
+import '../config/app_config.dart';
+import 'package:intl/intl.dart';
+
+enum MetadataUpdateResult {
+  updated,
+  alreadyInSync,
+  failed
+}
 
 class MetadataService {
   static final MetadataService _instance = MetadataService._internal();
@@ -61,7 +69,7 @@ class MetadataService {
     }
   }
 
-  Future<bool> updateFileMetadata(Video video) async {
+  Future<MetadataUpdateResult> updateFileMetadata(Video video) async {
     final FileSystemEntityType type = await FileSystemEntity.type(video.path);
     
     if (type == FileSystemEntityType.directory) {
@@ -70,27 +78,50 @@ class MetadataService {
       return _updateSingleFile(video.path, video);
     } else {
       debugPrint('Path not found or invalid: ${video.path}');
-      return false;
+      return MetadataUpdateResult.failed;
     }
   }
 
-  Future<bool> _updateSingleFile(String path, Video video, {bool preserveTitle = false, String? forcedTitle}) async {
+  Future<MetadataUpdateResult> _updateSingleFile(String path, Video video, {bool preserveTitle = false, String? forcedTitle}) async {
     final File originalFile = File(path);
-    if (!await originalFile.exists()) return false;
+    if (!await originalFile.exists()) return MetadataUpdateResult.failed;
 
     final String dir = p.dirname(path);
     final String filename = p.basename(path);
     final String tempPath = p.join(dir, 'temp_$filename');
 
     try {
-      // 1. Rename original to temp
-      await originalFile.rename(tempPath);
+      // 1. Check if update is needed BEFORE renaming to temp
+      final String encodedBy = 'MyPlaylist ${AppConfig.appVersion} il ${DateFormat('dd/MM/yyyy').format(DateTime.now())}';
+      final currentMetadata = await getFileMetadata(path);
       
-      // 2. Build common metadata args
+      // If metadata is empty, it might be a corrupted file or unsupported format
+      if (currentMetadata.isEmpty) {
+        await LoggerService().error('Could not read metadata for $path. File might be corrupted.');
+        return MetadataUpdateResult.failed;
+      }
+
+      final targetTitle = forcedTitle ?? video.title;
+      bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
+      
+      // Controllo rilassato per l'encoder: basta che ci sia MyPlaylist e la versione corretta.
+      final String encoderPrefix = norm('MyPlaylist ${AppConfig.appVersion}');
+      bool encoderMatch = norm(currentMetadata['Codificato da']).startsWith(encoderPrefix);
+      
+      if (titleMatch && encoderMatch) {
+         debugPrint('Skip $path (Metadata title and encoder already in sync)');
+         return MetadataUpdateResult.alreadyInSync;
+      }
+
+      // 2. Now that we know we need an update, rename original to temp
+      await originalFile.rename(tempPath);
+
+      // 3. Build common metadata args (including encoder)
       final List<String> metadataArgs = [
         '-metadata', 'genre=${video.genres}',
         '-metadata', 'date=${video.year}',
         '-metadata', 'artist=${video.directors}',
+        '-metadata', 'Codificato da=$encodedBy',
         if (preserveTitle) ...[
            '-metadata', 'album=${video.title}',
            '-metadata', 'show=${video.title}',
@@ -135,13 +166,13 @@ class MetadataService {
 
       if (result.exitCode == 0) {
         await File(tempPath).delete();
-        return true;
+        return MetadataUpdateResult.updated;
       } else {
         await LoggerService().error('FFmpeg failed for $path after retry: ${result.stderr}');
         // Restore original
         if (await File(path).exists()) await File(path).delete();
         await File(tempPath).rename(path);
-        return false;
+        return MetadataUpdateResult.failed;
       }
     } catch (e) {
       await LoggerService().error('Error updating metadata for $path', e);
@@ -149,9 +180,13 @@ class MetadataService {
          if (await File(path).exists()) await File(path).delete();
          await File(tempPath).rename(path);
       }
-      return false;
+      return MetadataUpdateResult.failed;
     }
   }
+
+  String norm(String? s) => (s ?? '').trim().toLowerCase()
+      .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
+      .replaceAll(RegExp(r'\s+'), ' ');
 
   String _cleanRemainder(String input) {
     String cleaned = input;
@@ -220,11 +255,14 @@ class MetadataService {
     return '$seriesName - $cleaned'; 
   }
 
-  Future<bool> _updateSeriesFiles(Video video) async {
+  Future<MetadataUpdateResult> _updateSeriesFiles(Video video) async {
     final dir = Directory(video.path);
-    if (!await dir.exists()) return false;
+    if (!await dir.exists()) return MetadataUpdateResult.failed;
 
-    bool allSuccess = true;
+    int updatedCount = 0;
+    int alreadyInSyncCount = 0;
+    bool hadError = false;
+
     try {
       await for (final entity in dir.list(recursive: true, followLinks: false)) {
         if (entity is File) {
@@ -232,25 +270,31 @@ class MetadataService {
            final basename = p.basenameWithoutExtension(entity.path);
            
            if (VideoExtensions.supported.contains(ext)) {
-             debugPrint('Updating metadata for episode: ${entity.path}');
+             debugPrint('Checking/Updating metadata for episode: ${entity.path}');
              
              final formattedTitle = _generateEpisodeTitle(video.title, basename);
              
-             final success = await _updateSingleFile(
+             final result = await _updateSingleFile(
                 entity.path, 
                 video, 
                 preserveTitle: true,
                 forcedTitle: formattedTitle
              );
-             if (!success) allSuccess = false;
+             
+             if (result == MetadataUpdateResult.updated) updatedCount++;
+             if (result == MetadataUpdateResult.alreadyInSync) alreadyInSyncCount++;
+             if (result == MetadataUpdateResult.failed) hadError = true;
            }
         }
       }
     } catch (e) {
       debugPrint('Error scanning series directory: $e');
-      return false;
+      return MetadataUpdateResult.failed;
     }
-    return allSuccess;
+
+    if (hadError) return MetadataUpdateResult.failed;
+    if (updatedCount > 0) return MetadataUpdateResult.updated;
+    return MetadataUpdateResult.alreadyInSync;
   }
 
   Future<void> cleanupTempFiles(String directoryPath) async {

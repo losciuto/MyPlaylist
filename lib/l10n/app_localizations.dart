@@ -1160,6 +1160,17 @@ abstract class AppLocalizations {
   /// **'File creati: {created}\nSaltati/Non trovati: {skipped}\nErrori: {errors}'**
   String genStats(Object created, Object errors, Object skipped);
 
+  /// No description provided for @genStatsDetailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornati: {updated}\nGià presenti: {sync}\nNon trovati: {skipped}\nErrori: {errors}'**
+  String genStatsDetailed(
+    Object errors,
+    Object skipped,
+    Object sync,
+    Object updated,
+  );
+
   /// No description provided for @confirmDeleteTitle.
   ///
   /// In it, this message translates to:
@@ -1657,6 +1668,17 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aggiornati: {updated}\nSaltati: {skipped}\nErrori: {errors}'**
   String bulkOpStats(Object errors, Object skipped, Object updated);
+
+  /// No description provided for @bulkOpStatsDetailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornati: {updated}\nGià corretti: {sync}\nGià in elenco (ignorati): {failed}\nNuovi errori: {errors}'**
+  String bulkOpStatsDetailed(
+    Object errors,
+    Object failed,
+    Object sync,
+    Object updated,
+  );
 
   /// No description provided for @openGitHubLabel.
   ///

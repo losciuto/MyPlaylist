@@ -431,10 +431,10 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.fileUpdateMsg)));
       }
 
-      final success = await MetadataService().updateFileMetadata(updatedVideo);
+      final result = await MetadataService().updateFileMetadata(updatedVideo);
       
       if (mounted) {
-        if (success) {
+        if (result != MetadataUpdateResult.failed) {
            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.successUpdateMsg)));
         } else {
            ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(AppLocalizations.of(context)!.errorUpdateMsg)));

@@ -17,6 +17,8 @@ class Video {
   final String saga;
   final int sagaIndex;
 
+  final DateTime? dateAdded;
+
   Video({
     this.id,
     required this.path,
@@ -35,6 +37,7 @@ class Video {
     this.posterPath = '',
     this.saga = '',
     this.sagaIndex = 0,
+    this.dateAdded,
   });
 
   Map<String, dynamic> toMap() {
@@ -56,6 +59,7 @@ class Video {
       'posterPath': posterPath,
       'saga': saga,
       'sagaIndex': sagaIndex,
+      'date_added': dateAdded?.millisecondsSinceEpoch,
     };
   }
 
@@ -78,6 +82,7 @@ class Video {
       posterPath: map['posterPath'] ?? '',
       saga: map['saga'] ?? '',
       sagaIndex: map['sagaIndex'] ?? 0,
+      dateAdded: map['date_added'] != null ? DateTime.fromMillisecondsSinceEpoch(map['date_added']) : null,
     );
   }
 
@@ -99,6 +104,7 @@ class Video {
     String? posterPath,
     String? saga,
     int? sagaIndex,
+    DateTime? dateAdded,
   }) {
     return Video(
       id: id ?? this.id,
@@ -118,6 +124,7 @@ class Video {
       posterPath: posterPath ?? this.posterPath,
       saga: saga ?? this.saga,
       sagaIndex: sagaIndex ?? this.sagaIndex,
+      dateAdded: dateAdded ?? this.dateAdded,
     );
   }
 }

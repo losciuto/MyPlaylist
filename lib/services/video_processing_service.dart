@@ -7,6 +7,8 @@ import '../services/tmdb_service.dart';
 import '../services/fanart_service.dart';
 import '../utils/nfo_generator.dart';
 import '../utils/nfo_parser.dart';
+import 'package:intl/intl.dart';
+import '../config/app_config.dart';
 import '../services/metadata_service.dart';
 import '../database/app_database.dart' as db;
 
@@ -26,12 +28,16 @@ class VideoProcessingStatus {
 
 class VideoProcessingResult {
   final int updated;
-  final int skipped;
+  final int skipped; // Generic skipped (if any)
+  final int alreadyInSync;
+  final int previouslyFailed;
   final int errors;
 
   VideoProcessingResult({
     required this.updated,
     required this.skipped,
+    this.alreadyInSync = 0,
+    this.previouslyFailed = 0,
     required this.errors,
   });
 }
@@ -55,7 +61,8 @@ class VideoProcessingService {
   }) async {
     _isCancelled = false;
     int updated = 0;
-    int skipped = 0;
+    int alreadyInSync = 0;
+    int skippedCount = 0;
     int errors = 0;
     final total = videos.length;
     final tmdb = TmdbService(apiKey);
@@ -67,7 +74,7 @@ class VideoProcessingService {
 
       // Skip found videos in interactive mode if they already have info
       if (mode == 'interactive' && video.title.isNotEmpty && video.year.isNotEmpty) {
-        skipped++;
+        alreadyInSync++;
         continue;
       }
 
@@ -75,7 +82,7 @@ class VideoProcessingService {
       if (onlyMissingNfo) {
         final nfoPath = p.setExtension(video.path, '.nfo');
         if (await File(nfoPath).exists()) {
-          skipped++;
+          alreadyInSync++;
           continue;
         }
       }
@@ -117,7 +124,7 @@ class VideoProcessingService {
 
         Map<String, dynamic>? selectedMovie;
         if (results.isEmpty) {
-          skipped++;
+          skippedCount++;
           continue;
         }
 
@@ -129,7 +136,7 @@ class VideoProcessingService {
 
         if (selectedMovie == null) {
           if (_isCancelled) break;
-          skipped++;
+          skippedCount++;
           continue;
         }
 
@@ -316,7 +323,12 @@ class VideoProcessingService {
       await Future.delayed(const Duration(milliseconds: 50));
     }
 
-    return VideoProcessingResult(updated: updated, skipped: skipped, errors: errors);
+    return VideoProcessingResult(
+      updated: updated, 
+      skipped: skippedCount, 
+      alreadyInSync: alreadyInSync,
+      errors: errors
+    );
   }
 
   Future<VideoProcessingResult> bulkRenameTitles({
@@ -326,7 +338,8 @@ class VideoProcessingService {
   }) async {
     _isCancelled = false;
     int updatedCount = 0;
-    int skippedCount = 0;
+    int alreadyInSyncCount = 0;
+    int previouslyFailedCount = 0;
     int errorCount = 0;
     final total = videos.length;
     final Set<String> processedDirs = {};
@@ -345,7 +358,7 @@ class VideoProcessingService {
       // Se il file era già marcato come fallito/ignorato, saltalo subito
       if (failedPaths.contains(video.path)) {
         debugPrint('DEBUG: Skipping previously failed file: ${video.path}');
-        skippedCount++;
+        previouslyFailedCount++;
         continue;
       }
 
@@ -424,19 +437,12 @@ class VideoProcessingService {
         // Controllo se il DB è disallineato rispetto alla target title
         bool dbMismatch = norm(video.title) != norm(targetTitle);
         
-        // Controllo se i metadati interni del file sono disallineati
-        // Nota: Questo è più lento ma garantisce che il file fisico sia aggiornato
-        final fileMetadata = await MetadataService().getFileMetadata(video.path);
-        final fileTitle = fileMetadata['title'] ?? '';
-        bool fileMismatch = norm(fileTitle) != norm(targetTitle);
-
-        if (!dbMismatch && !fileMismatch) {
-          debugPrint('DEBUG: Skip ${video.path} (Already in sync)');
-          debugPrint('      DB Title: "${video.title}" | Target: "$targetTitle"');
-          debugPrint('      File Title: "$fileTitle" | Target: "$targetTitle"');
-          skippedCount++;
-          continue;
-        }
+        // Usiamo un controllo completo passando sempre da MetadataService.
+        // Questo garantisce che:
+        // 1. Il tag 'Codificato da' sia presente anche se il titolo DB è già corretto.
+        // 2. Eventuali errori di FFmpeg/integrità vengano rilevati e loggati.
+        // La velocità è garantita dal pre-check interno a MetadataService.
+        bool fileMismatch = dbMismatch; 
 
         final updatedVideo = model.Video(
           id: video.id, path: video.path, mtime: video.mtime, duration: video.duration,
@@ -456,17 +462,23 @@ class VideoProcessingService {
           await db.AppDatabase.instance.updateVideo(updatedVideo);
         }
         
-        if (fileMismatch) {
-          success = await MetadataService().updateFileMetadata(updatedVideo);
-          if (!success) {
-            errorCount++;
-            final errorMsg = "Errore durante l'aggiornamento dei metadati del file (FFmpeg o file occupato)";
-            debugPrint('ERROR updating metadata for ${video.path}: $errorMsg');
-            await db.AppDatabase.instance.insertFailedRename(video.path, errorMsg);
+        // Chiamiamo SEMPRE updateFileMetadata per verificare l'integrità fisica 
+        // e la presenza del tag 'Codificato da', anche se il titolo DB è corretto.
+        final result = await MetadataService().updateFileMetadata(updatedVideo);
+        
+        if (result == MetadataUpdateResult.failed) {
+          errorCount++;
+          final errorMsg = "Errore durante l'aggiornamento dei metadati (FFmpeg rimosso o file corrotto)";
+          debugPrint('ERROR updating metadata for ${video.path}: $errorMsg');
+          await db.AppDatabase.instance.insertFailedRename(video.path, errorMsg);
+          continue;
+        } else if (result == MetadataUpdateResult.alreadyInSync) {
+          if (!dbMismatch) {
+            alreadyInSyncCount++;
             continue;
           }
         }
-
+        
         updatedCount++;
       } catch (e) {
         errorCount++;
@@ -482,7 +494,13 @@ class VideoProcessingService {
       }
     }
 
-    return VideoProcessingResult(updated: updatedCount, skipped: skippedCount, errors: errorCount);
+    return VideoProcessingResult(
+      updated: updatedCount, 
+      skipped: 0, 
+      alreadyInSync: alreadyInSyncCount,
+      previouslyFailed: previouslyFailedCount,
+      errors: errorCount
+    );
   }
 
   /// Deletes a video entry from the database and from disk (video file + all

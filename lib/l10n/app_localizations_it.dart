@@ -674,6 +674,16 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String genStatsDetailed(
+    Object errors,
+    Object skipped,
+    Object sync,
+    Object updated,
+  ) {
+    return 'Aggiornati: $updated\nGià presenti: $sync\nNon trovati: $skipped\nErrori: $errors';
+  }
+
+  @override
   String get confirmDeleteTitle => 'Conferma Eliminazione';
 
   @override
@@ -956,6 +966,16 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String bulkOpStats(Object errors, Object skipped, Object updated) {
     return 'Aggiornati: $updated\nSaltati: $skipped\nErrori: $errors';
+  }
+
+  @override
+  String bulkOpStatsDetailed(
+    Object errors,
+    Object failed,
+    Object sync,
+    Object updated,
+  ) {
+    return 'Aggiornati: $updated\nGià corretti: $sync\nGià in elenco (ignorati): $failed\nNuovi errori: $errors';
   }
 
   @override

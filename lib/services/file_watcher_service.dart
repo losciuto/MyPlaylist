@@ -156,6 +156,7 @@ class FileWatcherService {
       posterPath: '',
       saga: '',
       sagaIndex: 0,
+      dateAdded: DateTime.now(),
     );
 
     await database.insertVideo(video);

@@ -66,7 +66,7 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('File Ignorati/Falliti'),
+        title: Text('File Ignorati/Falliti (${_failedItems.length})'),
         actions: [
           if (_failedItems.isNotEmpty)
             IconButton(

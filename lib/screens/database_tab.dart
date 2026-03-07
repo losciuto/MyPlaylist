@@ -161,7 +161,12 @@ class _DatabaseTabState extends State<DatabaseTab> {
          context: context, 
          builder: (ctx) => AlertDialog(
            title: Text(AppLocalizations.of(context)!.genComplete),
-           content: Text(AppLocalizations.of(context)!.genStats(result.updated.toString(), result.skipped.toString(), result.errors.toString())),
+          content: Text(AppLocalizations.of(context)!.genStatsDetailed(
+            result.updated.toString(),
+            result.alreadyInSync.toString(),
+            result.skipped.toString(),
+            result.errors.toString(),
+          )),
            actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok))]
          )
        );
@@ -353,7 +358,12 @@ class _DatabaseTabState extends State<DatabaseTab> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(_processingService.isCancelled ? AppLocalizations.of(context)!.opCancelled : AppLocalizations.of(context)!.opCompleted),
-          content: Text(AppLocalizations.of(context)!.bulkOpStats(result.updated.toString(), result.skipped.toString(), result.errors.toString())),
+          content: Text(AppLocalizations.of(context)!.bulkOpStatsDetailed(
+            result.updated.toString(),
+            result.alreadyInSync.toString(),
+            result.previouslyFailed.toString(),
+            result.errors.toString(),
+          )),
           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok))],
         ),
       );
@@ -453,10 +463,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const FailedRenamesScreen()),
-                      );
+                      ).then((_) {
+                        if (mounted) {
+                          context.read<DatabaseProvider>().refreshFailedRenamesCount();
+                        }
+                      });
                     },
                     icon: const Icon(Icons.list_alt_rounded),
-                    label: const Text('File Ignorati/Falliti'),
+                    label: Text('File Ignorati/Falliti (${provider.failedRenamesCount})'),
                   ),
                 ],
               ),

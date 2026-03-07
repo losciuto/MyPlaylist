@@ -14,6 +14,7 @@ class DatabaseProvider extends ChangeNotifier {
   List<model.Video> _videos = [];
   List<model.Video> _filteredVideos = [];
   bool _isLoading = false;
+  int _failedRenamesCount = 0;
 
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
@@ -25,6 +26,7 @@ class DatabaseProvider extends ChangeNotifier {
   List<model.Video> get videos => _videos;
   List<model.Video> get filteredVideos => _filteredVideos;
   bool get isLoading => _isLoading;
+  int get failedRenamesCount => _failedRenamesCount;
   int get sortColumnIndex => _sortColumnIndex;
   bool get sortAscending => _sortAscending;
   String get searchQuery => _searchQuery;
@@ -41,6 +43,7 @@ class DatabaseProvider extends ChangeNotifier {
     
     final driftVideos = await _db.select(_db.videos).get();
     _videos = driftVideos.map((v) => _mapDriftToModel(v)).toList();
+    _failedRenamesCount = await _db.getFailedRenamesCount();
     _applyFilterAndSort();
     
     _isLoading = false;
@@ -163,6 +166,11 @@ class DatabaseProvider extends ChangeNotifier {
 
   void setSortedVideos(List<model.Video> sortedVideos) {
     _filteredVideos = sortedVideos;
+    notifyListeners();
+  }
+
+  Future<void> refreshFailedRenamesCount() async {
+    _failedRenamesCount = await _db.getFailedRenamesCount();
     notifyListeners();
   }
 

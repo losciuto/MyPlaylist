@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.7.0] - 07/03/2026
+
+### Novità
+- **Ordinamento Persistente "Più Recenti"**: Introdotta la colonna `date_added` nel database. La playlist "Più Recenti" ora si basa sulla data effettiva di aggiunta del video alla libreria anziché sulla data di modifica del file. Questo evita che la modifica dei metadati sposti i video in cima alla lista.
+- **Migrazione Automatica**: Al primo avvio, i video esistenti vengono migrati preservando l'ordine cronologico attuale.
+
 ## [3.6.5] - 03/03/2026
 
 ### Correzioni

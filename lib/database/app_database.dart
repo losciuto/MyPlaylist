@@ -26,6 +26,7 @@ class Videos extends Table {
   TextColumn get actorThumbs => text().withDefault(const Constant(''))();
   TextColumn get directorThumbs => text().withDefault(const Constant(''))();
   IntColumn get sagaIndex => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dateAdded => dateTime().nullable()();
 
   @override
   List<Index> get indexes => [
@@ -48,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -70,6 +71,12 @@ class AppDatabase extends _$AppDatabase {
         if (from < 4) {
           // Add FailedRenames table
           await m.createTable(failedRenames);
+        }
+        if (from < 5) {
+          // Add dateAdded column
+          await m.addColumn(videos, videos.dateAdded);
+          // Initialize date_added with mtime (converted from seconds to DateTime)
+          await customStatement('UPDATE videos SET date_added = CAST(mtime * 1000 AS INTEGER) WHERE date_added IS NULL');
         }
       },
       beforeOpen: (details) async {
@@ -105,9 +112,10 @@ class AppDatabase extends _$AppDatabase {
               duration: Value(video.duration),
               rating: Value(video.rating),
               isSeries: Value(video.isSeries ? 1 : 0),
-              posterPath: Value(video.posterPath),
+               posterPath: Value(video.posterPath),
               saga: Value(video.saga),
               sagaIndex: Value(video.sagaIndex),
+              dateAdded: Value(video.dateAdded ?? DateTime.now()),
             ),
           ],
           mode: InsertMode.insertOrReplace,
@@ -135,6 +143,7 @@ class AppDatabase extends _$AppDatabase {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
+        dateAdded: Value(video.dateAdded ?? DateTime.now()),
       ),
       mode: InsertMode.insertOrIgnore,
     );
@@ -159,6 +168,7 @@ class AppDatabase extends _$AppDatabase {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
+        dateAdded: video.dateAdded != null ? Value(video.dateAdded) : const Value.absent(),
       ),
     );
   }
@@ -212,6 +222,13 @@ class AppDatabase extends _$AppDatabase {
     await delete(failedRenames).go();
   }
 
+  Future<int> getFailedRenamesCount() async {
+    final count = failedRenames.id.count();
+    final query = selectOnly(failedRenames)..addColumns([count]);
+    final result = await query.map((row) => row.read(count)).getSingle();
+    return result ?? 0;
+  }
+
   Future<List<model.Video>> getAllVideos() async {
     final driftVideos = await (select(videos)..orderBy([(t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc)])).get();
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
@@ -236,6 +253,7 @@ class AppDatabase extends _$AppDatabase {
       posterPath: v.posterPath ?? '',
       saga: v.saga ?? '',
       sagaIndex: v.sagaIndex ?? 0,
+      dateAdded: v.dateAdded,
     );
   }
 
@@ -252,7 +270,7 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<model.Video>> getRecentPlaylist(int limit) async {
     final result = await (select(videos)
-      ..orderBy([(t) => OrderingTerm(expression: t.mtime, mode: OrderingMode.desc)])
+      ..orderBy([(t) => OrderingTerm(expression: t.dateAdded, mode: OrderingMode.desc)])
       ..limit(limit)).get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
