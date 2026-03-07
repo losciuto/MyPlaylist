@@ -194,6 +194,17 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _dateAddedMeta = const VerificationMeta(
+    'dateAdded',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateAdded = GeneratedColumn<DateTime>(
+    'date_added',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -213,6 +224,7 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     actorThumbs,
     directorThumbs,
     sagaIndex,
+    dateAdded,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -335,6 +347,12 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
         sagaIndex.isAcceptableOrUnknown(data['saga_index']!, _sagaIndexMeta),
       );
     }
+    if (data.containsKey('date_added')) {
+      context.handle(
+        _dateAddedMeta,
+        dateAdded.isAcceptableOrUnknown(data['date_added']!, _dateAddedMeta),
+      );
+    }
     return context;
   }
 
@@ -412,6 +430,10 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
         DriftSqlType.int,
         data['${effectivePrefix}saga_index'],
       )!,
+      dateAdded: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_added'],
+      ),
     );
   }
 
@@ -439,6 +461,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
   final String actorThumbs;
   final String directorThumbs;
   final int sagaIndex;
+  final DateTime? dateAdded;
   const DriftVideo({
     required this.id,
     required this.path,
@@ -457,6 +480,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     required this.actorThumbs,
     required this.directorThumbs,
     required this.sagaIndex,
+    this.dateAdded,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -478,6 +502,9 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     map['actor_thumbs'] = Variable<String>(actorThumbs);
     map['director_thumbs'] = Variable<String>(directorThumbs);
     map['saga_index'] = Variable<int>(sagaIndex);
+    if (!nullToAbsent || dateAdded != null) {
+      map['date_added'] = Variable<DateTime>(dateAdded);
+    }
     return map;
   }
 
@@ -500,6 +527,9 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       actorThumbs: Value(actorThumbs),
       directorThumbs: Value(directorThumbs),
       sagaIndex: Value(sagaIndex),
+      dateAdded: dateAdded == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateAdded),
     );
   }
 
@@ -526,6 +556,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       actorThumbs: serializer.fromJson<String>(json['actorThumbs']),
       directorThumbs: serializer.fromJson<String>(json['directorThumbs']),
       sagaIndex: serializer.fromJson<int>(json['sagaIndex']),
+      dateAdded: serializer.fromJson<DateTime?>(json['dateAdded']),
     );
   }
   @override
@@ -549,6 +580,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       'actorThumbs': serializer.toJson<String>(actorThumbs),
       'directorThumbs': serializer.toJson<String>(directorThumbs),
       'sagaIndex': serializer.toJson<int>(sagaIndex),
+      'dateAdded': serializer.toJson<DateTime?>(dateAdded),
     };
   }
 
@@ -570,6 +602,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     String? actorThumbs,
     String? directorThumbs,
     int? sagaIndex,
+    Value<DateTime?> dateAdded = const Value.absent(),
   }) => DriftVideo(
     id: id ?? this.id,
     path: path ?? this.path,
@@ -588,6 +621,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     actorThumbs: actorThumbs ?? this.actorThumbs,
     directorThumbs: directorThumbs ?? this.directorThumbs,
     sagaIndex: sagaIndex ?? this.sagaIndex,
+    dateAdded: dateAdded.present ? dateAdded.value : this.dateAdded,
   );
   DriftVideo copyWithCompanion(VideosCompanion data) {
     return DriftVideo(
@@ -614,6 +648,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           ? data.directorThumbs.value
           : this.directorThumbs,
       sagaIndex: data.sagaIndex.present ? data.sagaIndex.value : this.sagaIndex,
+      dateAdded: data.dateAdded.present ? data.dateAdded.value : this.dateAdded,
     );
   }
 
@@ -636,7 +671,8 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           ..write('saga: $saga, ')
           ..write('actorThumbs: $actorThumbs, ')
           ..write('directorThumbs: $directorThumbs, ')
-          ..write('sagaIndex: $sagaIndex')
+          ..write('sagaIndex: $sagaIndex, ')
+          ..write('dateAdded: $dateAdded')
           ..write(')'))
         .toString();
   }
@@ -660,6 +696,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     actorThumbs,
     directorThumbs,
     sagaIndex,
+    dateAdded,
   );
   @override
   bool operator ==(Object other) =>
@@ -681,7 +718,8 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           other.saga == this.saga &&
           other.actorThumbs == this.actorThumbs &&
           other.directorThumbs == this.directorThumbs &&
-          other.sagaIndex == this.sagaIndex);
+          other.sagaIndex == this.sagaIndex &&
+          other.dateAdded == this.dateAdded);
 }
 
 class VideosCompanion extends UpdateCompanion<DriftVideo> {
@@ -702,6 +740,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
   final Value<String> actorThumbs;
   final Value<String> directorThumbs;
   final Value<int> sagaIndex;
+  final Value<DateTime?> dateAdded;
   const VideosCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
@@ -720,6 +759,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.actorThumbs = const Value.absent(),
     this.directorThumbs = const Value.absent(),
     this.sagaIndex = const Value.absent(),
+    this.dateAdded = const Value.absent(),
   });
   VideosCompanion.insert({
     this.id = const Value.absent(),
@@ -739,6 +779,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.actorThumbs = const Value.absent(),
     this.directorThumbs = const Value.absent(),
     this.sagaIndex = const Value.absent(),
+    this.dateAdded = const Value.absent(),
   }) : path = Value(path),
        mtime = Value(mtime);
   static Insertable<DriftVideo> custom({
@@ -759,6 +800,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Expression<String>? actorThumbs,
     Expression<String>? directorThumbs,
     Expression<int>? sagaIndex,
+    Expression<DateTime>? dateAdded,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -778,6 +820,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       if (actorThumbs != null) 'actor_thumbs': actorThumbs,
       if (directorThumbs != null) 'director_thumbs': directorThumbs,
       if (sagaIndex != null) 'saga_index': sagaIndex,
+      if (dateAdded != null) 'date_added': dateAdded,
     });
   }
 
@@ -799,6 +842,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Value<String>? actorThumbs,
     Value<String>? directorThumbs,
     Value<int>? sagaIndex,
+    Value<DateTime?>? dateAdded,
   }) {
     return VideosCompanion(
       id: id ?? this.id,
@@ -818,6 +862,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       actorThumbs: actorThumbs ?? this.actorThumbs,
       directorThumbs: directorThumbs ?? this.directorThumbs,
       sagaIndex: sagaIndex ?? this.sagaIndex,
+      dateAdded: dateAdded ?? this.dateAdded,
     );
   }
 
@@ -875,6 +920,9 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     if (sagaIndex.present) {
       map['saga_index'] = Variable<int>(sagaIndex.value);
     }
+    if (dateAdded.present) {
+      map['date_added'] = Variable<DateTime>(dateAdded.value);
+    }
     return map;
   }
 
@@ -897,7 +945,8 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
           ..write('saga: $saga, ')
           ..write('actorThumbs: $actorThumbs, ')
           ..write('directorThumbs: $directorThumbs, ')
-          ..write('sagaIndex: $sagaIndex')
+          ..write('sagaIndex: $sagaIndex, ')
+          ..write('dateAdded: $dateAdded')
           ..write(')'))
         .toString();
   }
@@ -1236,6 +1285,7 @@ typedef $$VideosTableCreateCompanionBuilder =
       Value<String> actorThumbs,
       Value<String> directorThumbs,
       Value<int> sagaIndex,
+      Value<DateTime?> dateAdded,
     });
 typedef $$VideosTableUpdateCompanionBuilder =
     VideosCompanion Function({
@@ -1256,6 +1306,7 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<String> actorThumbs,
       Value<String> directorThumbs,
       Value<int> sagaIndex,
+      Value<DateTime?> dateAdded,
     });
 
 class $$VideosTableFilterComposer
@@ -1349,6 +1400,11 @@ class $$VideosTableFilterComposer
 
   ColumnFilters<int> get sagaIndex => $composableBuilder(
     column: $table.sagaIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateAdded => $composableBuilder(
+    column: $table.dateAdded,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1446,6 +1502,11 @@ class $$VideosTableOrderingComposer
     column: $table.sagaIndex,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get dateAdded => $composableBuilder(
+    column: $table.dateAdded,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VideosTableAnnotationComposer
@@ -1513,6 +1574,9 @@ class $$VideosTableAnnotationComposer
 
   GeneratedColumn<int> get sagaIndex =>
       $composableBuilder(column: $table.sagaIndex, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dateAdded =>
+      $composableBuilder(column: $table.dateAdded, builder: (column) => column);
 }
 
 class $$VideosTableTableManager
@@ -1560,6 +1624,7 @@ class $$VideosTableTableManager
                 Value<String> actorThumbs = const Value.absent(),
                 Value<String> directorThumbs = const Value.absent(),
                 Value<int> sagaIndex = const Value.absent(),
+                Value<DateTime?> dateAdded = const Value.absent(),
               }) => VideosCompanion(
                 id: id,
                 path: path,
@@ -1578,6 +1643,7 @@ class $$VideosTableTableManager
                 actorThumbs: actorThumbs,
                 directorThumbs: directorThumbs,
                 sagaIndex: sagaIndex,
+                dateAdded: dateAdded,
               ),
           createCompanionCallback:
               ({
@@ -1598,6 +1664,7 @@ class $$VideosTableTableManager
                 Value<String> actorThumbs = const Value.absent(),
                 Value<String> directorThumbs = const Value.absent(),
                 Value<int> sagaIndex = const Value.absent(),
+                Value<DateTime?> dateAdded = const Value.absent(),
               }) => VideosCompanion.insert(
                 id: id,
                 path: path,
@@ -1616,6 +1683,7 @@ class $$VideosTableTableManager
                 actorThumbs: actorThumbs,
                 directorThumbs: directorThumbs,
                 sagaIndex: sagaIndex,
+                dateAdded: dateAdded,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
