@@ -14,6 +14,7 @@ import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 class EditVideoDialog extends StatefulWidget {
   final Video video;
@@ -37,6 +38,9 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   late TextEditingController _durationController;
   late TextEditingController _sagaController;
   late TextEditingController _sagaIndexController;
+  late TextEditingController _dateAddedController;
+  late TextEditingController _timeController;
+  late DateTime? _dateAdded;
   late double _rating;
 
   bool _isSaving = false;
@@ -55,6 +59,13 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _durationController = TextEditingController(text: widget.video.duration);
     _sagaController = TextEditingController(text: widget.video.saga);
     _sagaIndexController = TextEditingController(text: widget.video.sagaIndex.toString());
+    _dateAdded = widget.video.dateAdded;
+    _dateAddedController = TextEditingController(
+      text: _dateAdded != null ? DateFormat('yyyy-MM-dd').format(_dateAdded!) : ''
+    );
+    _timeController = TextEditingController(
+      text: _dateAdded != null ? DateFormat('HH:mm').format(_dateAdded!) : ''
+    );
     _rating = widget.video.rating;
     _loadFileSize();
   }
@@ -380,6 +391,8 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _durationController.dispose();
     _sagaController.dispose();
     _sagaIndexController.dispose();
+    _dateAddedController.dispose();
+    _timeController.dispose();
     super.dispose();
   }
 
@@ -404,6 +417,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         isSeries: widget.video.isSeries,
         saga: _sagaController.text,
         sagaIndex: int.tryParse(_sagaIndexController.text) ?? 0,
+        dateAdded: _dateAdded,
       );
 
       // ignore: avoid_print
@@ -556,6 +570,68 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                                   Expanded(child: _buildTextField(_sagaController, AppLocalizations.of(context)!.labelSaga, false, 1, AppLocalizations.of(context)!.sagaTooltip)),
                                   const SizedBox(width: 10),
                                   Expanded(child: _buildTextField(_sagaIndexController, AppLocalizations.of(context)!.labelSagaIndex, false, 1, AppLocalizations.of(context)!.sagaIndexTooltip)),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () async {
+                                        final pickedDate = await showDatePicker(
+                                          context: context,
+                                          initialDate: _dateAdded ?? DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime(2100),
+                                        );
+                                        if (pickedDate != null) {
+                                          setState(() {
+                                            final current = _dateAdded ?? DateTime.now();
+                                            _dateAdded = DateTime(
+                                              pickedDate.year,
+                                              pickedDate.month,
+                                              pickedDate.day,
+                                              current.hour,
+                                              current.minute,
+                                            );
+                                            _dateAddedController.text = DateFormat('yyyy-MM-dd').format(_dateAdded!);
+                                            _timeController.text = DateFormat('HH:mm').format(_dateAdded!);
+                                          });
+                                        }
+                                      },
+                                      child: AbsorbPointer(
+                                        child: _buildTextField(_dateAddedController, AppLocalizations.of(context)!.labelDateAdded, false, 1, null),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () async {
+                                        final pickedTime = await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.fromDateTime(_dateAdded ?? DateTime.now()),
+                                        );
+                                        if (pickedTime != null) {
+                                          setState(() {
+                                            final current = _dateAdded ?? DateTime.now();
+                                            _dateAdded = DateTime(
+                                              current.year,
+                                              current.month,
+                                              current.day,
+                                              pickedTime.hour,
+                                              pickedTime.minute,
+                                            );
+                                            _dateAddedController.text = DateFormat('yyyy-MM-dd').format(_dateAdded!);
+                                            _timeController.text = DateFormat('HH:mm').format(_dateAdded!);
+                                          });
+                                        }
+                                      },
+                                      child: AbsorbPointer(
+                                        child: _buildTextField(_timeController, AppLocalizations.of(context)!.labelTime, false, 1, null),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                            ],

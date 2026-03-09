@@ -19,7 +19,8 @@ class DatabaseProvider extends ChangeNotifier {
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
   String _searchQuery = '';
-  int _currentTabIndex = 2; // Default to PlaylistTab (previously _initialIndex logic)
+  int _currentTabIndex = 0; // Default to PlaylistTab (previously _initialIndex logic)
+  int _serviceTabIndex = 0; // Index for sub-tabs in 'Servizio'
 
   DatabaseProvider(this._db);
 
@@ -31,9 +32,16 @@ class DatabaseProvider extends ChangeNotifier {
   bool get sortAscending => _sortAscending;
   String get searchQuery => _searchQuery;
   int get currentTabIndex => _currentTabIndex;
+  int get currentServiceTabIndex => _serviceTabIndex;
 
   void setTabIndex(int index) {
     _currentTabIndex = index;
+    notifyListeners();
+  }
+
+  void setServiceTabIndex(int index) {
+    _serviceTabIndex = index;
+    _currentTabIndex = 1; // Always switch to Servizio tab
     notifyListeners();
   }
 
@@ -69,6 +77,7 @@ class DatabaseProvider extends ChangeNotifier {
       sagaIndex: v.sagaIndex,
       actorThumbs: v.actorThumbs ?? '',
       directorThumbs: v.directorThumbs ?? '',
+      dateAdded: v.dateAdded,
     );
   }
 
@@ -93,7 +102,8 @@ class DatabaseProvider extends ChangeNotifier {
       return actors.contains(search) || directors.contains(search);
     }).toList();
     _doSort();
-    _currentTabIndex = 1; // Switch to DatabaseTab
+    _currentTabIndex = 1; // Switch to Servizio tab
+    _serviceTabIndex = 1; // Switch to Database sub-tab in Servizio
     notifyListeners();
   }
 
@@ -129,6 +139,7 @@ class DatabaseProvider extends ChangeNotifier {
         sagaIndex: Value(video.sagaIndex),
         actorThumbs: Value(video.actorThumbs),
         directorThumbs: Value(video.directorThumbs),
+        dateAdded: video.dateAdded != null ? Value(video.dateAdded) : const Value.absent(),
       ),
     );
 
@@ -162,6 +173,11 @@ class DatabaseProvider extends ChangeNotifier {
       await (_db.delete(_db.videos)..where((t) => t.id.equals(video.id!))).go();
       await refreshVideos();
     }
+  }
+
+  Future<void> syncDatesWithMtime() async {
+    await _db.syncDatesWithMtime();
+    await refreshVideos();
   }
 
   void setSortedVideos(List<model.Video> sortedVideos) {

@@ -2,6 +2,25 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.9.0] - 09/03/2026
+
+### Novità
+- **Riorganizzazione Navigazione**: Introdotta la scheda "Servizio" che raggruppa Scansione, Gestione DB, Priorità e Statistiche per un'interfaccia più pulita.
+- **Ricerca in Priorità**: Aggiunta barra di ricerca nella scheda Priorità per filtrare i video per titolo, regista o attore.
+- **Spostamento Manutenzione**: Le funzioni di Backup e Ripristino sono ora accessibili direttamente nella scheda Servizio.
+- **Ottimizzazione UI**: Ordine delle schede ottimizzato con "Scansione" al primo posto nel gruppo Servizio per facilitare l'importazione iniziale.
+
+## [3.8.0] - 07/03/2026
+
+### Novità
+- **Sezione Gestione Priorità**: Nuovo tab "Priorità" per gestire i video in base alla data effettiva di inserimento.
+- **Modifica Granulare Ora/Data**: Separazione di data e ora nel dialogo di modifica per un controllo preciso dell'ordinamento.
+- **Sincronizzazione Date Massiva**: Nuova funzione "Sincronizza Date" nel tab Priorità per allineare il database con le date dei file.
+
+### Correzioni
+- **Bug Anno Incoerente**: Risolto il problema dell'anno 58150 causato da errori di conversione nel database.
+- **Cattura Date Affidabile**: Le scansioni ora utilizzano la data di modifica reale del file come data di inserimento predefinita.
+
 ## [3.7.0] - 07/03/2026
 
 ### Novità
@@ -143,7 +162,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
 Autore: Massimo
-Ultimo Aggiornamento: 08/02/2026 (v3.6.0)
+Ultimo Aggiornamento: 09/03/2026 (v3.9.0)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.

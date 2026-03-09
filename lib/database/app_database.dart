@@ -76,7 +76,7 @@ class AppDatabase extends _$AppDatabase {
           // Add dateAdded column
           await m.addColumn(videos, videos.dateAdded);
           // Initialize date_added with mtime (converted from seconds to DateTime)
-          await customStatement('UPDATE videos SET date_added = CAST(mtime * 1000 AS INTEGER) WHERE date_added IS NULL');
+          await customStatement('UPDATE videos SET date_added = CAST(mtime AS INTEGER) WHERE date_added IS NULL');
         }
       },
       beforeOpen: (details) async {
@@ -115,7 +115,7 @@ class AppDatabase extends _$AppDatabase {
                posterPath: Value(video.posterPath),
               saga: Value(video.saga),
               sagaIndex: Value(video.sagaIndex),
-              dateAdded: Value(video.dateAdded ?? DateTime.now()),
+              dateAdded: Value(video.dateAdded ?? DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt())),
             ),
           ],
           mode: InsertMode.insertOrReplace,
@@ -143,7 +143,7 @@ class AppDatabase extends _$AppDatabase {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
-        dateAdded: Value(video.dateAdded ?? DateTime.now()),
+        dateAdded: Value(video.dateAdded ?? DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt())),
       ),
       mode: InsertMode.insertOrIgnore,
     );
@@ -416,6 +416,10 @@ class AppDatabase extends _$AppDatabase {
     query.orderBy([(t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc)]);
     final result = await query.get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
+  }
+
+  Future<void> syncDatesWithMtime() async {
+    await customStatement('UPDATE videos SET date_added = CAST(mtime AS INTEGER)');
   }
 
   Future<String> getDatabasePath() async {

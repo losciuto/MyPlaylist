@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.0] - 2026-03-09
+
+### Added
+- **Navigation Refactoring**: Introduced the "Service" tab, grouping Scan, DB Management, Priority, and Statistics for a cleaner interface.
+- **Priority Search**: Added a search bar in the Priority tab to filter videos by title, director, or actor.
+- **Maintenance Section**: Backup and Restore functions are now accessible directly within the Service tab.
+- **UI Optimization**: Optimized tab order with "Scan" as the first item in the Service group for easier initial import.
+
+## [3.8.0] - 2026-03-07
+
+### Added
+- **Priority Management Section**: New "Priority" tab to manage videos based on their actual insertion date.
+- **Granular Date/Time Editing**: Split date and time editing in the video modification dialog for precise sorting control.
+- **Bulk Date Synchronization**: New "Sync Dates" feature in the Priority tab to align database records with file modification dates.
+
+### Fixed
+- **Corrupt Year Bug**: Resolved the "year 58150" issue caused by incorrect unit conversion in the database.
+- **Reliable Date Capture**: Scans now use the actual file modification time as the default insertion date.
+
 ## [3.7.0] - 2026-03-07
 
 ### Added

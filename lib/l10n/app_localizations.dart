@@ -458,6 +458,30 @@ abstract class AppLocalizations {
   /// **'Scansione'**
   String get navScan;
 
+  /// No description provided for @navPriority.
+  ///
+  /// In it, this message translates to:
+  /// **'Priorità'**
+  String get navPriority;
+
+  /// No description provided for @navService.
+  ///
+  /// In it, this message translates to:
+  /// **'Servizio'**
+  String get navService;
+
+  /// No description provided for @labelDateAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'Data Inserimento'**
+  String get labelDateAdded;
+
+  /// No description provided for @labelTime.
+  ///
+  /// In it, this message translates to:
+  /// **'Ora'**
+  String get labelTime;
+
   /// No description provided for @colTitle.
   ///
   /// In it, this message translates to:
@@ -1632,6 +1656,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aggiorna'**
   String get refreshButton;
+
+  /// No description provided for @btnSyncDates.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza Date'**
+  String get btnSyncDates;
 
   /// No description provided for @renameTitlesButton.
   ///

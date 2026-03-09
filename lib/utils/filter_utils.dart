@@ -28,6 +28,11 @@ class FilterUtils {
         case 14: comparison = a.saga.toLowerCase().compareTo(b.saga.toLowerCase()); break;
         case 3: comparison = a.genres.toLowerCase().compareTo(b.genres.toLowerCase()); break;
         case 6: comparison = a.directors.toLowerCase().compareTo(b.directors.toLowerCase()); break;
+        case 100: // Sorting by date added (Priority Tab)
+          final aDate = a.dateAdded ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bDate = b.dateAdded ?? DateTime.fromMillisecondsSinceEpoch(0);
+          comparison = aDate.compareTo(bDate);
+          break;
         default: comparison = 0;
       }
       return ascending ? comparison : -comparison;

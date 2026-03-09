@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/app_database.dart' as db;
-import 'scan_tab.dart';
-import 'database_tab.dart';
 import 'playlist_tab.dart';
+import 'service_tab.dart';
 import '../services/github_service.dart';
 import '../widgets/update_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
@@ -26,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _loadVideos();
     
     // Listen for tab changes from provider
@@ -81,11 +80,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (mounted) {
       setState(() {
         if (count > 0) {
-          _tabController.index = 2; // Index of 'Genera Playlist'
-          context.read<DatabaseProvider>().setTabIndex(2);
-        } else {
-          _tabController.index = 0; // Index of 'Scansione'
+          _tabController.index = 0; // Index of 'Playlist'
           context.read<DatabaseProvider>().setTabIndex(0);
+        } else {
+          _tabController.index = 1; // Index of 'Servizio'
+          context.read<DatabaseProvider>().setTabIndex(1);
+          context.read<DatabaseProvider>().setServiceTabIndex(0); // Index of 'Scansione' inside Servizio
         }
         _isLoading = false;
       });
@@ -109,10 +109,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(icon: const Icon(Icons.folder_open), text: AppLocalizations.of(context)!.navScan),
-            Tab(icon: const Icon(Icons.storage), text: AppLocalizations.of(context)!.navDatabase),
             Tab(icon: const Icon(Icons.playlist_play), text: AppLocalizations.of(context)!.navPlaylist),
-            Tab(icon: const Icon(Icons.bar_chart), text: AppLocalizations.of(context)!.tabStatistics),
+            Tab(icon: const Icon(Icons.grid_view_rounded), text: AppLocalizations.of(context)!.navService),
           ],
           indicatorColor: AppConfig.seedColor,
           labelColor: AppConfig.seedColor,
@@ -160,10 +158,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: const [
-          ScanTab(),
-          DatabaseTab(),
           PlaylistTab(),
-          StatisticsTab(),
+          ServiceTab(),
         ],
       ),
     );

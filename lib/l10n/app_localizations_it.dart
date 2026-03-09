@@ -204,6 +204,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get navScan => 'Scansione';
 
   @override
+  String get navPriority => 'Priorità';
+
+  @override
+  String get navService => 'Servizio';
+
+  @override
+  String get labelDateAdded => 'Data Inserimento';
+
+  @override
+  String get labelTime => 'Ora';
+
+  @override
   String get colTitle => 'Titolo';
 
   @override
@@ -947,6 +959,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get refreshButton => 'Aggiorna';
+
+  @override
+  String get btnSyncDates => 'Sincronizza Date';
 
   @override
   String get renameTitlesButton => 'Rinomina Titoli';
