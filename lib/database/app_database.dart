@@ -28,7 +28,6 @@ class Videos extends Table {
   IntColumn get sagaIndex => integer().withDefault(const Constant(0))();
   DateTimeColumn get dateAdded => dateTime().nullable()();
 
-  @override
   List<Index> get indexes => [
     Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'),
     Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'),
@@ -239,20 +238,20 @@ class AppDatabase extends _$AppDatabase {
       id: v.id,
       path: v.path,
       mtime: v.mtime,
-      title: v.title ?? '',
-      genres: v.genres ?? '',
-      year: v.year ?? '',
-      directors: v.directors ?? '',
-      directorThumbs: v.directorThumbs ?? '',
-      plot: v.plot ?? '',
-      actors: v.actors ?? '',
-      actorThumbs: v.actorThumbs ?? '',
-      duration: v.duration ?? '',
-      rating: v.rating ?? 0.0,
+      title: v.title,
+      genres: v.genres,
+      year: v.year,
+      directors: v.directors,
+      directorThumbs: v.directorThumbs,
+      plot: v.plot,
+      actors: v.actors,
+      actorThumbs: v.actorThumbs,
+      duration: v.duration,
+      rating: v.rating,
       isSeries: v.isSeries == 1,
-      posterPath: v.posterPath ?? '',
-      saga: v.saga ?? '',
-      sagaIndex: v.sagaIndex ?? 0,
+      posterPath: v.posterPath,
+      saga: v.saga,
+      sagaIndex: v.sagaIndex,
       dateAdded: v.dateAdded,
     );
   }

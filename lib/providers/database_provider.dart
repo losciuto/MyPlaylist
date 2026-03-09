@@ -75,8 +75,8 @@ class DatabaseProvider extends ChangeNotifier {
       posterPath: v.posterPath,
       saga: v.saga,
       sagaIndex: v.sagaIndex,
-      actorThumbs: v.actorThumbs ?? '',
-      directorThumbs: v.directorThumbs ?? '',
+      actorThumbs: v.actorThumbs,
+      directorThumbs: v.directorThumbs,
       dateAdded: v.dateAdded,
     );
   }

@@ -1,0 +1,115 @@
+Analyzing MyPlaylist...                                         
+
+warning • The getter doesn't override an inherited getter • lib/database/app_database.dart:32:19 • override_on_non_overriding_member
+warning • Dead code • lib/database/app_database.dart:242:22 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:242:25 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:243:27 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:244:23 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:245:33 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:246:43 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:247:23 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:248:27 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:249:37 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:250:31 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:251:27 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:253:35 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:254:23 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/database/app_database.dart:255:33 • dead_null_aware_expression
+warning • Dead code • lib/providers/database_provider.dart:78:34 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/providers/database_provider.dart:78:37 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/providers/database_provider.dart:79:43 • dead_null_aware_expression
+   info • Statements in an if should be enclosed in a block • lib/providers/playlist_provider.dart:295:27 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/providers/playlist_provider.dart:296:14 • curly_braces_in_flow_control_structures
+warning • Unused import: '../utils/nfo_parser.dart' • lib/screens/database_tab.dart:7:8 • unused_import
+warning • Unused import: 'dart:io' • lib/screens/database_tab.dart:9:8 • unused_import
+warning • Unused import: 'package:path/path.dart' • lib/screens/database_tab.dart:10:8 • unused_import
+warning • Unused import: 'package:http/http.dart' • lib/screens/database_tab.dart:11:8 • unused_import
+warning • Unused import: '../services/tmdb_service.dart' • lib/screens/database_tab.dart:13:8 • unused_import
+warning • Unused import: '../utils/nfo_generator.dart' • lib/screens/database_tab.dart:14:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:161:10 • use_build_context_synchronously
+   info • Empty catch block • lib/screens/database_tab.dart:204:17 • empty_catches
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:229:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:229:93 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:252:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:252:93 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:273:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:273:93 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/database_tab.dart:320:101 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:358:9 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/database_tab.dart:468:27 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/duplicate_compare_dialog.dart:307:50 • use_build_context_synchronously
+   info • Unnecessary use of multiple underscores • lib/screens/duplicates_dialog.dart:182:45 • unnecessary_underscores
+warning • Unused import: '../database/app_database.dart' • lib/screens/edit_video_dialog.dart:6:8 • unused_import
+warning • The value of the local variable 'nfoFileName' isn't used • lib/screens/edit_video_dialog.dart:164:14 • unused_local_variable
+warning • The value of the local variable 'aThumbs' isn't used • lib/screens/edit_video_dialog.dart:287:19 • unused_local_variable
+warning • The value of the local variable 'dThumbs' isn't used • lib/screens/edit_video_dialog.dart:297:25 • unused_local_variable
+warning • The value of the local variable 'dThumbs' isn't used • lib/screens/edit_video_dialog.dart:303:22 • unused_local_variable
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/edit_video_dialog.dart:503:56 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/edit_video_dialog.dart:677:90 • deprecated_member_use
+warning • The value of the local variable 'l10n' isn't used • lib/screens/failed_renames_screen.dart:33:11 • unused_local_variable
+warning • The value of the local variable 'l10n' isn't used • lib/screens/failed_renames_screen.dart:65:11 • unused_local_variable
+warning • Unused import: 'statistics_tab.dart' • lib/screens/home_screen.dart:10:8 • unused_import
+warning • The declaration '_getEpisodes' isn't referenced • lib/screens/manual_selection_dialog.dart:89:22 • unused_element
+   info • Don't use 'BuildContext's across async gaps • lib/screens/playlist_tab.dart:73:43 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/playlist_tab.dart:138:40 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/playlist_tab.dart:141:43 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/playlist_tab.dart:160:41 • use_build_context_synchronously
+   info • Unnecessary use of multiple underscores • lib/screens/playlist_tab.dart:202:102 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/screens/playlist_tab.dart:202:105 • unnecessary_underscores
+   info • Don't use 'BuildContext's across async gaps • lib/screens/playlist_tab.dart:242:38 • use_build_context_synchronously
+   info • Empty catch block • lib/screens/priority_tab.dart:60:17 • empty_catches
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/priority_tab.dart:97:44 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/scan_tab.dart:125:84 • deprecated_member_use
+   info • Empty catch block • lib/screens/service_tab.dart:57:17 • empty_catches
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/service_tab.dart:125:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/service_tab.dart:125:87 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/screens/service_tab.dart:209:13 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/service_tab.dart:291:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/service_tab.dart:293:58 • deprecated_member_use
+warning • Unused import: '../models/player_config.dart' • lib/screens/settings_screen.dart:13:8 • unused_import
+warning • The value of the local variable 'fillColor' isn't used • lib/screens/settings_screen.dart:121:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:229:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:229:87 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/screens/settings_screen.dart:302:15 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:388:32 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:390:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/screens/settings_screen.dart:420:19 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/screens/settings_screen.dart:429:19 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/screens/settings_screen.dart:538:15 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:649:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:651:50 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/screens/settings_screen.dart:734:11 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/statistics_tab.dart:81:20 • deprecated_member_use
+warning • The value of the field '_isDownloading' isn't used • lib/screens/video_details_dialog.dart:24:8 • unused_field
+warning • The declaration '_downloadInfo' isn't referenced • lib/screens/video_details_dialog.dart:42:16 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/video_details_dialog.dart:146:51 • deprecated_member_use
+   info • Unnecessary use of multiple underscores • lib/screens/video_details_dialog.dart:157:51 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/screens/video_details_dialog.dart:157:55 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/video_details_dialog.dart:207:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/video_details_dialog.dart:209:68 • deprecated_member_use
+warning • Unused import: 'package:http/http.dart' • lib/screens/video_preview_dialog.dart:4:8 • unused_import
+warning • Unused import: '../services/settings_service.dart' • lib/screens/video_preview_dialog.dart:8:8 • unused_import
+warning • Unused import: '../services/tmdb_service.dart' • lib/screens/video_preview_dialog.dart:9:8 • unused_import
+warning • Unused import: '../utils/nfo_generator.dart' • lib/screens/video_preview_dialog.dart:10:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/github_service.dart:61:7 • avoid_print
+warning • The value of the local variable 'alreadyInSyncCount' isn't used • lib/services/metadata_service.dart:263:9 • unused_local_variable
+warning • The value of the local variable 'videoFile' isn't used • lib/services/nfo_sync_service.dart:14:13 • unused_local_variable
+   info • The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart' • lib/services/remote_control_service.dart:3:8 • unnecessary_import
+   info • Don't invoke 'print' in production code • lib/services/scan_service.dart:67:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/scan_service.dart:92:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/scan_service.dart:125:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/scan_service.dart:139:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/scan_service.dart:216:5 • avoid_print
+warning • Unused import: 'package:intl/intl.dart' • lib/services/video_processing_service.dart:10:8 • unused_import
+warning • Unused import: '../config/app_config.dart' • lib/services/video_processing_service.dart:11:8 • unused_import
+warning • The value of the local variable 'fileMismatch' isn't used • lib/services/video_processing_service.dart:445:14 • unused_local_variable
+warning • The value of the local variable 'success' isn't used • lib/services/video_processing_service.dart:460:14 • unused_local_variable
+warning • The value of the local variable 'crew' isn't used • lib/utils/nfo_generator.dart:265:15 • unused_local_variable
+warning • The operand can't be 'null', so the condition is always 'true' • lib/utils/nfo_strategies/kodi_nfo_strategy.dart:68:16 • unnecessary_null_comparison
+   info • Don't invoke 'print' in production code • test/remote_test_client.dart:16:3 • avoid_print
+   info • Don't invoke 'print' in production code • test/remote_test_client.dart:26:7 • avoid_print
+   info • Don't invoke 'print' in production code • test/remote_test_client.dart:31:5 • avoid_print
+warning • Unused import: 'package:my_playlist/services/remote_control_service.dart' • test/server_restart_test.dart:3:8 • unused_import
+   info • Don't invoke 'print' in production code • test/server_restart_test.dart:17:5 • avoid_print
+
+111 issues found. (ran in 7.8s)
