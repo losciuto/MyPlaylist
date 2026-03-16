@@ -197,7 +197,7 @@ class VideoProcessingService {
         // Poster (TMDB usually better for localized posters, keep TMDB as primary unless missing)
         if (details['poster_path'] != null) {
           final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
-          final posterPath = isSeries ? p.join(baseDir, 'poster.jpg') : '$baseDir/$baseFileName-poster.jpg';
+          final posterPath = isSeries ? p.join(baseDir, 'poster.jpg') : p.join(baseDir, '$baseFileName-poster.jpg');
           await downloadFile(posterUrl, posterPath);
           localPosterPath = posterPath;
         }
@@ -218,7 +218,7 @@ class VideoProcessingService {
         }
 
         if (backdropUrl != null) {
-          final fanartPath = isSeries ? p.join(baseDir, 'fanart.jpg') : '$baseDir/$baseFileName-fanart.jpg';
+          final fanartPath = isSeries ? p.join(baseDir, 'fanart.jpg') : p.join(baseDir, '$baseFileName-fanart.jpg');
           await downloadFile(backdropUrl, fanartPath);
         }
 
@@ -245,7 +245,7 @@ class VideoProcessingService {
         }
 
         if (logoUrl != null) {
-           final logoPath = isSeries ? p.join(baseDir, 'clearlogo.png') : '$baseDir/$baseFileName-clearlogo.png';
+           final logoPath = isSeries ? p.join(baseDir, 'clearlogo.png') : p.join(baseDir, '$baseFileName-clearlogo.png');
            await downloadFile(logoUrl, logoPath);
         }
         
@@ -254,7 +254,7 @@ class VideoProcessingService {
            final discs = fanartImages['moviedisc'] as List?;
            if (discs != null && discs.isNotEmpty) {
               final discUrl = discs.first['url'];
-              final discPath = '$baseDir/$baseFileName-disc.png';
+              final discPath = p.join(baseDir, '$baseFileName-disc.png');
               await downloadFile(discUrl, discPath);
            }
         }

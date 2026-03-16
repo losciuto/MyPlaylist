@@ -67,7 +67,7 @@ class KodiNfoStrategy implements NfoStrategy {
 
       if (name != null && name.isNotEmpty) {
         directors.add(name);
-        if (dThumb != null && dThumb.isNotEmpty && !dThumb.startsWith('http') && !dThumb.startsWith('/')) {
+        if (dThumb != null && dThumb.isNotEmpty && !dThumb.startsWith('http') && !p.isAbsolute(dThumb)) {
           dThumb = p.join(nfoDir, dThumb);
         }
         directorThumbs.add(dThumb ?? '');
@@ -85,7 +85,7 @@ class KodiNfoStrategy implements NfoStrategy {
         final thumbNode = actorNode.findElements('thumb').firstOrNull ?? 
                           actorNode.findElements('thumbnail').firstOrNull;
         String? aThumb = thumbNode?.innerText.trim();
-        if (aThumb != null && aThumb.isNotEmpty && !aThumb.startsWith('http') && !aThumb.startsWith('/')) {
+        if (aThumb != null && aThumb.isNotEmpty && !aThumb.startsWith('http') && !p.isAbsolute(aThumb)) {
           aThumb = p.join(nfoDir, aThumb);
         }
         actorThumbs.add(aThumb ?? '');

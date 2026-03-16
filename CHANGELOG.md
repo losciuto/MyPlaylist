@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.1] - 2026-03-16
+
+### Changed
+- **Cross-Platform**: Aligned core path building and external process management logic to function consistently on both Windows and Linux OS.
+- **Refactoring**: Replaced hardcoded string paths and '/' separators with the `path` library functions (`p.join`, `p.isAbsolute`).
+- **XDG/Explorer Fix**: Addressed platform-specific implementations for 'Open directory' handlers on non-UNIX systems.
+
+
 ## [3.9.0] - 2026-03-09
 
 ### Added

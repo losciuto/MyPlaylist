@@ -37,7 +37,7 @@ If you experience black screens or "Codec not found" errors, run the command abo
 ## Credits
 Built with Flutter.
 Author: Massimo
-Last Update: 09/03/2026 (v3.9.0)
+Last Update: 16/03/2026 (v3.9.1)
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

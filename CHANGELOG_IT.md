@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.9.1] - 2026-03-16
+
+### Changed
+- **Cross-Platform**: Allineato l'ecosistema del player e la manipolazione dei file system per supportare pienamente sia Linux sia macchine host Windows.
+- **Refactoring**: Sostituiti path strings hardcoded con estensioni sicure multipiattaforma garantite dalla libreria `path` (`p.join`, `p.isAbsolute`).
+- **Gestione Processi**: Estesa chiusura VLC selettiva per Windows (`taskkill`) e fallbacks per apertura directory root tramite file manager OS nativo.
+
+
 ## [3.9.0] - 09/03/2026
 
 ### Novità

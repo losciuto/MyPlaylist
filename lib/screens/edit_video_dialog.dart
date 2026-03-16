@@ -196,7 +196,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         if (isSeries) {
            newPosterPath = p.join(widget.video.path, 'poster.jpg');
         } else {
-           newPosterPath = '${p.dirname(videoFile.path)}/${p.basenameWithoutExtension(videoFile.path)}-poster.jpg';
+           newPosterPath = p.join(p.dirname(videoFile.path), '${p.basenameWithoutExtension(videoFile.path)}-poster.jpg');
         }
         
         final response = await http.get(Uri.parse(posterUrl));
@@ -215,7 +215,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         } else {
            final baseDir = p.dirname(videoFile.path);
            final baseFileName = p.basenameWithoutExtension(videoFile.path);
-           fanartPath = '$baseDir/$baseFileName-fanart.jpg';
+           fanartPath = p.join(baseDir, '$baseFileName-fanart.jpg');
         }
         
         final resp = await http.get(Uri.parse(fanartUrl));
@@ -236,7 +236,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
           } else {
              final baseDir = p.dirname(videoFile.path);
              final baseFileName = p.basenameWithoutExtension(videoFile.path);
-             logoPath = '$baseDir/$baseFileName-clearlogo.png';
+             logoPath = p.join(baseDir, '$baseFileName-clearlogo.png');
           }
           final resp = await http.get(Uri.parse(logoUrl));
           if (!mounted) return;
