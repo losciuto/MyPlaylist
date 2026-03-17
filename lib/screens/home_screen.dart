@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/app_database.dart' as db;
-import 'database_tab.dart';
+import 'playlist_tab.dart';
+import 'service_tab.dart';
 import '../services/github_service.dart';
 import '../widgets/update_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';

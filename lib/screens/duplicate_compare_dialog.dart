@@ -103,13 +103,15 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     // Bitrate in Mbps
     String? bitrateStr;
     final brRaw = int.tryParse(format?['bit_rate']?.toString() ?? '');
-    if (brRaw != null)
-      bitrateStr = '${(brRaw / 1_000_000).toStringAsFixed(2)} Mbps';
+    if (brRaw != null) {
+      bitrateStr = '${(brRaw / 1000000).toStringAsFixed(2)} Mbps';
+    }
 
     String? vBitrateStr;
     final vBrRaw = int.tryParse(videoStream?['bit_rate']?.toString() ?? '');
-    if (vBrRaw != null)
-      vBitrateStr = '${(vBrRaw / 1_000_000).toStringAsFixed(2)} Mbps';
+    if (vBrRaw != null) {
+      vBitrateStr = '${(vBrRaw / 1000000).toStringAsFixed(2)} Mbps';
+    }
 
     // Container
     final formatName = (format?['format_long_name'] as String?)
@@ -210,10 +212,12 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
 
   String _formatSize(int? bytes) {
     if (bytes == null) return '?';
-    if (bytes > 1_000_000_000)
-      return '${(bytes / 1_000_000_000).toStringAsFixed(2)} GB';
-    if (bytes > 1_000_000)
-      return '${(bytes / 1_000_000).toStringAsFixed(1)} MB';
+    if (bytes > 1000000000) {
+      return '${(bytes / 1000000000).toStringAsFixed(2)} GB';
+    }
+    if (bytes > 1000000) {
+      return '${(bytes / 1000000).toStringAsFixed(1)} MB';
+    }
     return '${(bytes / 1024).toStringAsFixed(0)} KB';
   }
 

@@ -69,7 +69,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
         _checkResult(provider.playlist);
       } catch (e) {
         debugPrint('Error generating playlist: $e');
-        _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
+        if (mounted) {
+          _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
+        }
       }
     }
   }

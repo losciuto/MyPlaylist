@@ -321,8 +321,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
               (details['credits']['cast'] as List?)?.take(5).toList() ?? [];
           _actorsController.text = topCast.map((c) => c['name']).join(', ');
 
-          // Extract Actor Thumbs
-          .join('|');
           // We need to store these in the video object eventually,
           // but controllers only handle text fields.
           // I'll keep them as local variables to use in _save.
@@ -334,7 +332,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                   .map((c) => c['name'])
                   .join(', ');
               // Extract Director Thumbs
-              .join('|');
             }
           } else {
             final crew =
@@ -343,14 +340,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                     .toList() ??
                 [];
             _directorsController.text = crew.map((c) => c['name']).join(', ');
-            // Extract Director Thumbs
-            final dThumbs = crew
-                .map(
-                  (c) => c['profile_path'] != null
-                      ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
-                      : '',
-                )
-                .join('|');
+            _directorsController.text = crew.map((c) => c['name']).join(', ');
           }
         }
 

@@ -204,8 +204,9 @@ class VideoProcessingService {
         Future<void> downloadFile(String url, String path) async {
           try {
             final resp = await http.get(Uri.parse(url));
-            if (resp.statusCode == 200)
+            if (resp.statusCode == 200) {
               await File(path).writeAsBytes(resp.bodyBytes);
+            }
           } catch (e) {
             debugPrint('Download failed ($url): $e');
           }
