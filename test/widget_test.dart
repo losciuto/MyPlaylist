@@ -13,25 +13,27 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 class FakeDatabaseProvider extends ChangeNotifier implements DatabaseProvider {
   @override
   int get currentTabIndex => 0;
-  
+
   @override
   int get currentServiceTabIndex => 0;
 
   @override
   void setTabIndex(int index) {}
-  
+
   @override
   void setServiceTabIndex(int index) {}
 
   @override
   Future<void> refreshVideos() async {}
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
-  testWidgets('App smoke test - HomeScreen renders', (WidgetTester tester) async {
+  testWidgets('App smoke test - HomeScreen renders', (
+    WidgetTester tester,
+  ) async {
     // Setup initial state
     SharedPreferences.setMockInitialValues({});
     final settings = SettingsService();
@@ -41,7 +43,9 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<SettingsService>.value(value: settings),
-          ChangeNotifierProvider<DatabaseProvider>(create: (_) => FakeDatabaseProvider()),
+          ChangeNotifierProvider<DatabaseProvider>(
+            create: (_) => FakeDatabaseProvider(),
+          ),
           ChangeNotifierProvider(create: (_) => PlaylistProvider()),
         ],
         child: MaterialApp(
@@ -51,10 +55,7 @@ void main() {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale('it'),
-            Locale('en'),
-          ],
+          supportedLocales: const [Locale('it'), Locale('en')],
           home: const HomeScreen(),
         ),
       ),
