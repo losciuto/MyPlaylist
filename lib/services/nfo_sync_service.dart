@@ -11,7 +11,6 @@ class NfoSyncService {
   /// Saves the current video metadata to a local .nfo file.
   Future<bool> saveNfo(model.Video video) async {
     try {
-      final videoFile = File(video.path);
       if (video.isSeries) {
         // For series, the NFO is usually tvshow.nfo in the directory
         final nfoPath = p.join(video.path, 'tvshow.nfo');

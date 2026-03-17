@@ -314,7 +314,6 @@ class MetadataService {
     if (!await dir.exists()) return MetadataUpdateResult.failed;
 
     int updatedCount = 0;
-    int alreadyInSyncCount = 0;
     bool hadError = false;
 
     try {
@@ -340,9 +339,12 @@ class MetadataService {
               forcedTitle: formattedTitle,
             );
 
-            if (result == MetadataUpdateResult.updated) updatedCount++;
-            if (result == MetadataUpdateResult.alreadyInSync)
-              alreadyInSyncCount++;
+            if (result == MetadataUpdateResult.updated) {
+              updatedCount++;
+            }
+            if (result == MetadataUpdateResult.alreadyInSync) {
+              // alreadyInSync
+            }
             if (result == MetadataUpdateResult.failed) hadError = true;
           }
         }

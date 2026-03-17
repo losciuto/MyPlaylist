@@ -1,13 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import '../providers/playlist_provider.dart';
-import '../services/settings_service.dart';
-import '../services/tmdb_service.dart';
-import '../utils/nfo_generator.dart';
 import '../utils/video_extensions.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
