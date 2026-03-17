@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.5] - 2026-03-17
+
+### Fixed
+- **Android Build**: Downgraded AGP to 8.10.1 (or 8.7.3) to resolve compatibility and plugin availability issues.
+- **Gradle**: Switched to Gradle 8.10.2 `all` distribution for full build feature support.
+
+## [3.9.4] - 2026-03-17
+
+### Changed
+- **Android Build**: Upgraded AGP to 8.10.2 and Kotlin to 2.0.21 for dependency compatibility.
+
+## [3.9.3] - 2026-03-17
+
+### Fixed
+- **Android Build**: Removed hardcoded Java path to improve build portability.
+
+## [3.9.2] - 2026-03-17
+
+### Changed
+- **Maintenance**: Version bump for release alignment.
+
 ## [3.9.1] - 2026-03-16
 
 ### Changed

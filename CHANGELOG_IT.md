@@ -2,6 +2,27 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
+## [3.9.5] - 2026-03-17
+
+### Correzioni
+- **Android Build**: Downgrade AGP a 8.10.1 (o 8.7.3) per risolvere problemi di compatibilità e reperibilità dei plugin.
+- **Gradle**: Passaggio alla distribuzione `all` di Gradle 8.10.2 per supporto completo alle feature di build.
+
+## [3.9.4] - 2026-03-17
+
+### Changed
+- **Android Build**: Aggiornamento AGP a 8.10.2 e Kotlin a 2.0.21 per compatibilità dipendenze.
+
+## [3.9.3] - 2026-03-17
+
+### Correzioni
+- **Android Build**: Rimosso path Java hardcoded per migliorare la portabilità della build.
+
+## [3.9.2] - 2026-03-17
+
+### Changed
+- **Maintenance**: Incremento versione per allineamento release.
+
 ## [3.9.1] - 2026-03-16
 
 ### Changed
@@ -170,7 +191,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
 Autore: Massimo
-Ultimo Aggiornamento: 09/03/2026 (v3.9.0)
+Ultimo Aggiornamento: 17/03/2026 (v3.9.5)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.
