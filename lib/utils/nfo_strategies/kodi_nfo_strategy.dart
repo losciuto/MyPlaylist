@@ -74,7 +74,7 @@ class KodiNfoStrategy implements NfoStrategy {
             directorNode.findElements('thumbnail').firstOrNull?.innerText;
       }
 
-      if (name != null && name.isNotEmpty) {
+      if (name.isNotEmpty) {
         directors.add(name);
         if (dThumb != null &&
             dThumb.isNotEmpty &&

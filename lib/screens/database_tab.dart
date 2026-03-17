@@ -4,14 +4,8 @@ import '../providers/database_provider.dart';
 import '../models/video.dart';
 import 'edit_video_dialog.dart';
 import '../services/metadata_service.dart';
-import '../utils/nfo_parser.dart';
 import '../widgets/movie_selection_dialog.dart';
-import 'dart:io';
-import 'package:path/path.dart' as p;
-import 'package:http/http.dart' as http;
 import '../services/settings_service.dart';
-import '../services/tmdb_service.dart';
-import '../utils/nfo_generator.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/video_data_table.dart';
 import '../services/video_processing_service.dart';
@@ -37,12 +31,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final fanartApiKey = context.read<SettingsService>().fanartApiKey;
 
     if (apiKey.isEmpty) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing),
           ),
         );
+      }
       return;
     }
 
@@ -98,10 +93,11 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final total = allVideos.length;
 
     if (total == 0) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.noVideoInDb)),
         );
+      }
       return;
     }
 
@@ -201,8 +197,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
       },
     );
 
-    if (mounted && !_processingService.isCancelled)
+    if (mounted && !_processingService.isCancelled) {
       Navigator.pop(context); // Close progress dialog
+    }
 
     if (mounted) {
       await provider.refreshVideos();
@@ -375,10 +372,11 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final total = allVideos.length;
 
     if (total == 0) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.noVideoFound)),
         );
+      }
       return;
     }
 
@@ -405,7 +403,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 Text(
                   AppLocalizations.of(context)!.processing,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),

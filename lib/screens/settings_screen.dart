@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import '../database/app_database.dart' as db;
 import '../providers/database_provider.dart';
 import 'dart:io';
-import '../models/player_config.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
 import '../config/app_config.dart';
@@ -131,7 +130,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
 
     return Scaffold(
       appBar: AppBar(
@@ -268,8 +266,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () => setState(() => _currentTab = index),
       tileColor: isSelected
           ? (isDark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.05))
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05))
           : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
     );
@@ -477,9 +475,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -525,7 +523,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(l10n.settingsAutoSyncNfoSubtitle),
                   value: settings.autoSyncNfoOnEdit,
                   onChanged: (val) => settings.setAutoSyncNfoOnEdit(val),
-                  activeColor: const Color(0xFF4CAF50),
+                  activeThumbColor: const Color(0xFF4CAF50),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 20),

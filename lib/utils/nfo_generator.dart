@@ -411,7 +411,6 @@ class NfoGenerator {
         final credits = tmdbData['credits'];
         if (credits != null) {
           final cast = credits['cast'] as List?;
-          final crew = credits['crew'] as List?;
 
           // Directors (usually creators for TV shows, or encoded in crew)
           if (tmdbData['created_by'] != null) {

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import '../database/app_database.dart' as db;
 import '../models/video.dart' as model;
@@ -68,7 +69,7 @@ class ScanService {
         await _processSeries(dir);
         yield ScanStatus('COUNT_UPDATE', 1);
       } catch (e) {
-        print('Error processing series ${dir.path}: $e');
+        debugPrint('Error processing series ${dir.path}: $e');
       }
       return; // Stop recursion, we handled this folder as a unit
     }
@@ -96,7 +97,7 @@ class ScanService {
           }
         }
       } catch (e) {
-        print('Error processing series container ${dir.path}: $e');
+        debugPrint('Error processing series container ${dir.path}: $e');
       }
       return; // Stop recursion, we've handled the contents
     }
@@ -134,7 +135,7 @@ class ScanService {
                 await _processVideo(entity);
                 return 1;
               } catch (e) {
-                print('Error processing video ${entity.path}: $e');
+                debugPrint('Error processing video ${entity.path}: $e');
               }
             }
           }
@@ -148,7 +149,7 @@ class ScanService {
         }
       }
     } catch (e) {
-      print('Error listing directory ${dir.path}: $e');
+      debugPrint('Error listing directory ${dir.path}: $e');
     }
   }
 
@@ -226,7 +227,7 @@ class ScanService {
       }
     }
 
-    print(
+    debugPrint(
       'DEBUG [ScanService]: model.Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath',
     );
 

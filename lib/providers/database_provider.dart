@@ -50,8 +50,9 @@ class DatabaseProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final driftVideos = await _db.select(_db.videos).get();
-    _videos = driftVideos.map((v) => _mapDriftToModel(v)).toList();
+    _videos = (await _db.select(_db.videos).get())
+        .map((v) => _mapDriftToModel(v))
+        .toList();
     _failedRenamesCount = await _db.getFailedRenamesCount();
     _applyFilterAndSort();
 

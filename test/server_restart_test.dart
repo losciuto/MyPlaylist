@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:my_playlist/services/remote_control_service.dart';
 import 'package:my_playlist/services/settings_service.dart';
 import 'package:my_playlist/providers/playlist_provider.dart';
 
@@ -15,8 +14,6 @@ void main() {
   test('RemoteControlService restarts when port changes', () async {
     // This is more of a documentation of the logic.
     // In a real scenario we'd use a mock settings service and verify it triggers start/stop.
-    print(
-      'Logic verified in code: _handleSettingsChange now checks for port/secret changes.',
-    );
+    // Logic verified in code: _handleSettingsChange now checks for port/secret changes.
   });
 }

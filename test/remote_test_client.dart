@@ -13,6 +13,7 @@ Future<void> main() async {
     'args': {'count': 5},
   };
 
+  // ignore: avoid_print
   print('Sending command: $command');
 
   try {
@@ -23,11 +24,13 @@ Future<void> main() async {
     await socket.flush();
 
     await for (final data in socket) {
+      // ignore: avoid_print
       print('Response from server: ${utf8.decode(data)}');
     }
 
     await socket.close();
   } catch (e) {
+    // ignore: avoid_print
     print('Error: $e');
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import '../models/video.dart';
-import '../database/app_database.dart' as db;
 import '../services/metadata_service.dart';
 import '../services/settings_service.dart';
 import '../services/tmdb_service.dart';
@@ -178,10 +177,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
       Map<String, dynamic> details;
       String nfoContent;
-      String nfoFileName = isSeries
-          ? 'tvshow.nfo'
-          : p.setExtension(p.basename(widget.video.path), '.nfo');
-
       if (isSeries) {
         details = await service.getTvShowDetails(selectedMovie['id']);
         if (!mounted) return;
@@ -297,8 +292,9 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
           _genresController.text = gList;
         }
 
-        if (details['overview'] != null)
+        if (details['overview'] != null) {
           _plotController.text = details['overview'];
+        }
 
         if (isSeries) {
           if (details['episode_run_time'] != null &&
@@ -307,12 +303,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                 .toString();
           }
         } else {
-          if (details['runtime'] != null)
+          if (details['runtime'] != null) {
             _durationController.text = details['runtime'].toString();
+          }
         }
 
-        if (details['vote_average'] != null)
+        if (details['vote_average'] != null) {
           _rating = (details['vote_average'] as num).toDouble();
+        }
 
         _posterPathController.text = localPosterPath;
         _sagaController.text = (details['belongs_to_collection'] != null)
@@ -324,13 +322,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
           _actorsController.text = topCast.map((c) => c['name']).join(', ');
 
           // Extract Actor Thumbs
-          final aThumbs = topCast
-              .map(
-                (c) => c['profile_path'] != null
-                    ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
-                    : '',
-              )
-              .join('|');
+          .join('|');
           // We need to store these in the video object eventually,
           // but controllers only handle text fields.
           // I'll keep them as local variables to use in _save.
@@ -342,13 +334,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                   .map((c) => c['name'])
                   .join(', ');
               // Extract Director Thumbs
-              final dThumbs = creators
-                  .map(
-                    (c) => c['profile_path'] != null
-                        ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
-                        : '',
-                  )
-                  .join('|');
+              .join('|');
             }
           } else {
             final crew =
@@ -533,10 +519,9 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         dateAdded: _dateAdded,
       );
 
-      // ignore: avoid_print
-      print(
-        'DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb',
-      );
+      // debugPrint(
+      //   'DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb',
+      // );
 
       final databaseProvider = context.read<DatabaseProvider>();
       final localizations = AppLocalizations.of(context)!;
@@ -938,7 +923,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                   ElevatedButton(
                     onPressed: _isSaving ? null : () => _save(onlyDb: true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange.withOpacity(0.8),
+                      backgroundColor: Colors.deepOrange.withValues(alpha: 0.8),
                     ),
                     child: _isSaving
                         ? const SizedBox(

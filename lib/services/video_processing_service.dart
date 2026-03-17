@@ -7,8 +7,6 @@ import '../services/tmdb_service.dart';
 import '../services/fanart_service.dart';
 import '../utils/nfo_generator.dart';
 import '../utils/nfo_parser.dart';
-import 'package:intl/intl.dart';
-import '../config/app_config.dart';
 import '../services/metadata_service.dart';
 import '../database/app_database.dart' as db;
 
@@ -534,7 +532,6 @@ class VideoProcessingService {
         // 1. Il tag 'Codificato da' sia presente anche se il titolo DB è già corretto.
         // 2. Eventuali errori di FFmpeg/integrità vengano rilevati e loggati.
         // La velocità è garantita dal pre-check interno a MetadataService.
-        bool fileMismatch = dbMismatch;
 
         final updatedVideo = model.Video(
           id: video.id,
@@ -557,7 +554,6 @@ class VideoProcessingService {
               : video.saga,
         );
 
-        bool success = true;
         if (dbMismatch) {
           await db.AppDatabase.instance.updateVideo(updatedVideo);
         }
