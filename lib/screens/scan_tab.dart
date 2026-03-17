@@ -15,7 +15,7 @@ class ScanTab extends StatefulWidget {
 
 class _ScanTabState extends State<ScanTab> {
   String _statusMessage = ''; // Will be set in initState or build
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -23,6 +23,7 @@ class _ScanTabState extends State<ScanTab> {
       _statusMessage = AppLocalizations.of(context)!.scanStatusReady;
     }
   }
+
   int _count = 0;
   bool _isScanning = false;
   StreamSubscription? _scanSubscription;
@@ -50,43 +51,51 @@ class _ScanTabState extends State<ScanTab> {
       _count = 0;
     });
 
-    _scanSubscription = ScanService.instance.scanFolder(folder).listen(
-      (status) {
-        if (mounted) {
-          setState(() {
-            _statusMessage = status.message;
-            _count = status.count;
-          });
-        }
-      },
-      onDone: () {
-        if (mounted) {
-          setState(() {
-            _isScanning = false;
-            _scanSubscription = null;
-          });
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.scanFinishedMsg(_count))),
-          );
-          
-          final settings = context.read<SettingsService>();
-          if (settings.autoSyncEnabled) {
-            settings.addWatchedDirectory(folder);
-          }
-        }
-      },
-      onError: (e) {
-        if (mounted) {
-          setState(() {
-            _isScanning = false;
-            _scanSubscription = null;
-            _statusMessage = AppLocalizations.of(context)!.genericError(e.toString());
-          });
-        }
-      },
-      cancelOnError: true,
-    );
+    _scanSubscription = ScanService.instance
+        .scanFolder(folder)
+        .listen(
+          (status) {
+            if (mounted) {
+              setState(() {
+                _statusMessage = status.message;
+                _count = status.count;
+              });
+            }
+          },
+          onDone: () {
+            if (mounted) {
+              setState(() {
+                _isScanning = false;
+                _scanSubscription = null;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context)!.scanFinishedMsg(_count),
+                  ),
+                ),
+              );
+
+              final settings = context.read<SettingsService>();
+              if (settings.autoSyncEnabled) {
+                settings.addWatchedDirectory(folder);
+              }
+            }
+          },
+          onError: (e) {
+            if (mounted) {
+              setState(() {
+                _isScanning = false;
+                _scanSubscription = null;
+                _statusMessage = AppLocalizations.of(
+                  context,
+                )!.genericError(e.toString());
+              });
+            }
+          },
+          cancelOnError: true,
+        );
   }
 
   void _stopScan() {
@@ -113,16 +122,25 @@ class _ScanTabState extends State<ScanTab> {
             ),
             child: Text(
               AppLocalizations.of(context)!.scanTitle,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50)),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4CAF50),
+              ),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 20),
-            const SizedBox(height: 20),
-            Text(
+          const SizedBox(height: 20),
+          Text(
             AppLocalizations.of(context)!.scanDescription,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+              fontSize: 14,
+            ),
           ),
           const SizedBox(height: 30),
           Center(
@@ -131,9 +149,16 @@ class _ScanTabState extends State<ScanTab> {
                 ElevatedButton.icon(
                   onPressed: _isScanning ? null : _selectFolder,
                   icon: const Icon(Icons.folder_open),
-                  label: Text(_isScanning ? AppLocalizations.of(context)!.scanInProgress : AppLocalizations.of(context)!.selectFolderToScan),
+                  label: Text(
+                    _isScanning
+                        ? AppLocalizations.of(context)!.scanInProgress
+                        : AppLocalizations.of(context)!.selectFolderToScan,
+                  ),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 20,
+                    ),
                     textStyle: const TextStyle(fontSize: 18),
                   ),
                 ),
@@ -142,7 +167,10 @@ class _ScanTabState extends State<ScanTab> {
                   TextButton.icon(
                     onPressed: _stopScan,
                     icon: const Icon(Icons.stop, color: Colors.red),
-                    label: const Text('Ferma Scansione', style: TextStyle(color: Colors.red)),
+                    label: const Text(
+                      'Ferma Scansione',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ],
@@ -150,7 +178,7 @@ class _ScanTabState extends State<ScanTab> {
           ),
           const SizedBox(height: 30),
           if (_isScanning)
-             const LinearProgressIndicator(color: Color(0xFF4CAF50)),
+            const LinearProgressIndicator(color: Color(0xFF4CAF50)),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(20),
@@ -162,18 +190,25 @@ class _ScanTabState extends State<ScanTab> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.scanStats,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50)),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4CAF50),
+                  ),
                 ),
                 const SizedBox(height: 15),
                 Text(
                   _statusMessage,
-                  style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 5),
                 Text(
                   AppLocalizations.of(context)!.videosFoundCount(_count),
-                   style: const TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),

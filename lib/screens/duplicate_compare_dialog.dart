@@ -50,8 +50,10 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     final fileSizeBytes = await file.length();
 
     final result = await Process.run('ffprobe', [
-      '-v', 'quiet',
-      '-print_format', 'json',
+      '-v',
+      'quiet',
+      '-print_format',
+      'json',
       '-show_format',
       '-show_streams',
       path,
@@ -65,14 +67,18 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     final format = json['format'] as Map<String, dynamic>?;
     final streams = json['streams'] as List<dynamic>?;
 
-    final videoStream = streams?.firstWhere(
-      (s) => s['codec_type'] == 'video',
-      orElse: () => null,
-    ) as Map<String, dynamic>?;
-    final audioStream = streams?.firstWhere(
-      (s) => s['codec_type'] == 'audio',
-      orElse: () => null,
-    ) as Map<String, dynamic>?;
+    final videoStream =
+        streams?.firstWhere(
+              (s) => s['codec_type'] == 'video',
+              orElse: () => null,
+            )
+            as Map<String, dynamic>?;
+    final audioStream =
+        streams?.firstWhere(
+              (s) => s['codec_type'] == 'audio',
+              orElse: () => null,
+            )
+            as Map<String, dynamic>?;
 
     // Parse frame rate (e.g. "24000/1001" → "23.98")
     String? fps;
@@ -97,11 +103,13 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     // Bitrate in Mbps
     String? bitrateStr;
     final brRaw = int.tryParse(format?['bit_rate']?.toString() ?? '');
-    if (brRaw != null) bitrateStr = '${(brRaw / 1_000_000).toStringAsFixed(2)} Mbps';
+    if (brRaw != null)
+      bitrateStr = '${(brRaw / 1_000_000).toStringAsFixed(2)} Mbps';
 
     String? vBitrateStr;
     final vBrRaw = int.tryParse(videoStream?['bit_rate']?.toString() ?? '');
-    if (vBrRaw != null) vBitrateStr = '${(vBrRaw / 1_000_000).toStringAsFixed(2)} Mbps';
+    if (vBrRaw != null)
+      vBitrateStr = '${(vBrRaw / 1_000_000).toStringAsFixed(2)} Mbps';
 
     // Container
     final formatName = (format?['format_long_name'] as String?)
@@ -111,14 +119,16 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     return _TechInfo(
       fileSizeBytes: fileSizeBytes,
       containerFormat: formatName,
-      videoCodec: videoStream?['codec_long_name'] as String? ??
+      videoCodec:
+          videoStream?['codec_long_name'] as String? ??
           videoStream?['codec_name'] as String?,
       resolution: (videoStream != null)
           ? '${videoStream['width']}×${videoStream['height']}'
           : null,
       frameRate: fps != null ? '$fps fps' : null,
       videoBitrate: vBitrateStr,
-      audioCodec: audioStream?['codec_long_name'] as String? ??
+      audioCodec:
+          audioStream?['codec_long_name'] as String? ??
           audioStream?['codec_name'] as String?,
       audioChannels: () {
         final ch = audioStream?['channels'] as int?;
@@ -126,8 +136,8 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
         return ch == 1
             ? 'Mono'
             : ch == 2
-                ? 'Stereo'
-                : '$ch canali';
+            ? 'Stereo'
+            : '$ch canali';
       }(),
       audioSampleRate: audioStream?['sample_rate'] != null
           ? '${int.tryParse(audioStream!['sample_rate'].toString()) != null ? (int.parse(audioStream['sample_rate'].toString()) / 1000).toStringAsFixed(1) : audioStream['sample_rate']} kHz'
@@ -176,7 +186,10 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
           'Verranno eliminati permanently:\n• Il file video\n• NFO, poster, fanart e tutti i file associati\n\n${p.basename(video.path)}\n\nConfermi?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annulla')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annulla'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -186,10 +199,10 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
       ),
     );
     if (confirm != true || !mounted) return;
-    
+
     // Extract provider before async gap
     final dbProvider = context.read<DatabaseProvider>();
-    
+
     await _svc.deleteVideoWithFiles(video);
     await dbProvider.refreshVideos();
     if (mounted) Navigator.pop(context, true);
@@ -197,8 +210,10 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
 
   String _formatSize(int? bytes) {
     if (bytes == null) return '?';
-    if (bytes > 1_000_000_000) return '${(bytes / 1_000_000_000).toStringAsFixed(2)} GB';
-    if (bytes > 1_000_000) return '${(bytes / 1_000_000).toStringAsFixed(1)} MB';
+    if (bytes > 1_000_000_000)
+      return '${(bytes / 1_000_000_000).toStringAsFixed(2)} GB';
+    if (bytes > 1_000_000)
+      return '${(bytes / 1_000_000).toStringAsFixed(1)} MB';
     return '${(bytes / 1024).toStringAsFixed(0)} KB';
   }
 
@@ -221,7 +236,9 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
               ),
               child: Row(
                 children: [
@@ -231,11 +248,15 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Confronto doppioni', style: theme.textTheme.titleMedium),
+                        Text(
+                          'Confronto doppioni',
+                          style: theme.textTheme.titleMedium,
+                        ),
                         Text(
                           title,
                           style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant),
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -262,7 +283,8 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                       future: _futures[idx],
                       builder: (context, snap) {
                         final info = snap.data;
-                        final loading = snap.connectionState != ConnectionState.done;
+                        final loading =
+                            snap.connectionState != ConnectionState.done;
                         return _VideoColumn(
                           video: video,
                           info: info,
@@ -285,24 +307,36 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-                border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
+                border: Border(
+                  top: BorderSide(color: theme.colorScheme.outlineVariant),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'Scegli quale copia eliminare. "Solo DB" rimuove il record. "+ Disco" elimina anche tutti i file dalla cartella.',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   // Ignora button
                   OutlinedButton.icon(
                     onPressed: () async {
-                      final key = DatabaseProvider.duplicateKey(widget.group.first);
+                      final key = DatabaseProvider.duplicateKey(
+                        widget.group.first,
+                      );
                       await SettingsService().addIgnoredDuplicateKey(key);
                       if (mounted) Navigator.pop(context, true);
                     },
@@ -313,7 +347,10 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Chiudi')),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Chiudi'),
+                  ),
                 ],
               ),
             ),
@@ -366,7 +403,9 @@ class _VideoColumn extends StatelessWidget {
               children: [
                 Text(
                   p.basename(video.path),
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
@@ -374,7 +413,8 @@ class _VideoColumn extends StatelessWidget {
                 Text(
                   p.dirname(video.path),
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant),
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -397,17 +437,33 @@ class _VideoColumn extends StatelessWidget {
                       children: [
                         // ---- File ----
                         _section(context, '📁 FILE'),
-                        _row(context, 'Dimensione', formatSize(info?.fileSizeBytes),
-                            big: true, accent: theme.colorScheme.primary),
+                        _row(
+                          context,
+                          'Dimensione',
+                          formatSize(info?.fileSizeBytes),
+                          big: true,
+                          accent: theme.colorScheme.primary,
+                        ),
                         _row(context, 'Contenitore', info?.containerFormat),
-                        if (!( info?.fileExists ?? true))
-                          _row(context, 'Stato', '⚠ File non trovato', accent: Colors.red),
+                        if (!(info?.fileExists ?? true))
+                          _row(
+                            context,
+                            'Stato',
+                            '⚠ File non trovato',
+                            accent: Colors.red,
+                          ),
                         const SizedBox(height: 12),
 
                         // ---- Video ----
                         _section(context, '🎬 VIDEO'),
                         _row(context, 'Codec', info?.videoCodec),
-                        _row(context, 'Risoluzione', info?.resolution, big: true, accent: theme.colorScheme.primary),
+                        _row(
+                          context,
+                          'Risoluzione',
+                          info?.resolution,
+                          big: true,
+                          accent: theme.colorScheme.primary,
+                        ),
                         _row(context, 'Frame rate', info?.frameRate),
                         _row(context, 'Bitrate video', info?.videoBitrate),
                         _row(context, 'Bitrate totale', info?.overallBitrate),
@@ -427,13 +483,26 @@ class _VideoColumn extends StatelessWidget {
                         _row(context, 'Durata (DB)', video.duration),
                         _row(context, 'Durata (file)', info?.duration),
                         _row(context, 'Generi', video.genres),
-                        _row(context, 'Voto', video.rating > 0 ? video.rating.toStringAsFixed(1) : null),
-                        _row(context, 'Saga', video.saga.isEmpty ? null : video.saga),
+                        _row(
+                          context,
+                          'Voto',
+                          video.rating > 0
+                              ? video.rating.toStringAsFixed(1)
+                              : null,
+                        ),
+                        _row(
+                          context,
+                          'Saga',
+                          video.saga.isEmpty ? null : video.saga,
+                        ),
                         if (video.plot.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text('Trama',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant)),
+                          Text(
+                            'Trama',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             video.plot,
@@ -451,7 +520,9 @@ class _VideoColumn extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+              border: Border(
+                top: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
             ),
             child: Column(
               children: [
@@ -479,7 +550,9 @@ class _VideoColumn extends StatelessWidget {
                     label: const Text('Elimina solo dal DB'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
-                      side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
+                      side: BorderSide(
+                        color: theme.colorScheme.error.withValues(alpha: 0.5),
+                      ),
                     ),
                   ),
                 ),
@@ -506,17 +579,24 @@ class _VideoColumn extends StatelessWidget {
   Widget _section(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(title,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-          )),
+      child: Text(
+        title,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+        ),
+      ),
     );
   }
 
-  Widget _row(BuildContext context, String label, String? value,
-      {bool big = false, Color? accent}) {
+  Widget _row(
+    BuildContext context,
+    String label,
+    String? value, {
+    bool big = false,
+    Color? accent,
+  }) {
     if (value == null || value.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -525,16 +605,21 @@ class _VideoColumn extends StatelessWidget {
         children: [
           SizedBox(
             width: 110,
-            child: Text(label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant)),
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
           Expanded(
             child: Text(
               value,
               style: big
                   ? theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold, color: accent)
+                      fontWeight: FontWeight.bold,
+                      color: accent,
+                    )
                   : theme.textTheme.bodySmall?.copyWith(color: accent),
               overflow: TextOverflow.ellipsis,
             ),

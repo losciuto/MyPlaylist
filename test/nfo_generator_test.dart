@@ -16,38 +16,51 @@ void main() {
         'runtime': 148,
         'genres': [
           {'name': 'Action'},
-          {'name': 'Sci-Fi'}
+          {'name': 'Sci-Fi'},
         ],
         'credits': {
           'cast': [
-             {'name': 'Leonardo DiCaprio', 'character': 'Cobb', 'profile_path': '/leo.jpg'}
+            {
+              'name': 'Leonardo DiCaprio',
+              'character': 'Cobb',
+              'profile_path': '/leo.jpg',
+            },
           ],
           'crew': [
-             {'name': 'Christopher Nolan', 'job': 'Director'}
-          ]
+            {'name': 'Christopher Nolan', 'job': 'Director'},
+          ],
         },
         'poster_path': '/poster.jpg',
-        'backdrop_path': '/backdrop.jpg'
+        'backdrop_path': '/backdrop.jpg',
       };
 
       final xmlString = NfoGenerator.generateMovieNfo(mockData);
-      
+
       // Verify basic structure
       final document = XmlDocument.parse(xmlString);
       expect(document.findAllElements('movie').isNotEmpty, true);
       expect(document.findAllElements('title').first.innerText, 'Inception');
       expect(document.findAllElements('year').first.innerText, '2010');
-      expect(document.findAllElements('rating').first.getAttribute('default'), 'true');
+      expect(
+        document.findAllElements('rating').first.getAttribute('default'),
+        'true',
+      );
       expect(document.findAllElements('value').first.innerText, '8.8');
-      
+
       // Verify Actors
       final actors = document.findAllElements('actor');
       expect(actors.isNotEmpty, true);
-      expect(actors.first.findElements('name').first.innerText, 'Leonardo DiCaprio');
-      
+      expect(
+        actors.first.findElements('name').first.innerText,
+        'Leonardo DiCaprio',
+      );
+
       // Verify Director
       final directors = document.findAllElements('director');
-      expect(directors.first.findElements('name').first.innerText.trim(), 'Christopher Nolan');
+      expect(
+        directors.first.findElements('name').first.innerText.trim(),
+        'Christopher Nolan',
+      );
     });
   });
 }

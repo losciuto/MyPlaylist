@@ -37,7 +37,8 @@ class SettingsService with ChangeNotifier {
   int _defaultPlaylistSize = 20;
   bool _remoteServerEnabled = false;
   int _remoteServerPort = 8080;
-  String _remoteServerSecret = 'my_default_secret_key_32chars_long'; // Should be 32 chars for AES-256
+  String _remoteServerSecret =
+      'my_default_secret_key_32chars_long'; // Should be 32 chars for AES-256
   int _vlcPort = 4212;
   String _serverInterface = '0.0.0.0';
   ThemeMode _themeMode = ThemeMode.system;
@@ -63,14 +64,15 @@ class SettingsService with ChangeNotifier {
   bool get autoSyncEnabled => _autoSyncEnabled;
   List<String> get watchedDirectories => List.unmodifiable(_watchedDirectories);
   bool get autoSyncNfoOnEdit => _autoSyncNfoOnEdit;
-  Set<String> get ignoredDuplicateKeys => Set.unmodifiable(_ignoredDuplicateKeys);
+  Set<String> get ignoredDuplicateKeys =>
+      Set.unmodifiable(_ignoredDuplicateKeys);
 
   Future<void> init() async {
     if (_initialized) return;
     _prefs = await SharedPreferences.getInstance();
-    
+
     _playerPath = _prefs.getString(_keyPlayerPath) ?? '';
-    
+
     // Load player config (new format)
     final playerConfigJson = _prefs.getString(_keyPlayerConfig);
     if (playerConfigJson != null) {
@@ -80,34 +82,40 @@ class SettingsService with ChangeNotifier {
         // Invalid config, will use legacy playerPath
       }
     }
-    
+
     // Backward compatibility: if no config but playerPath exists, create custom config
     if (_playerConfig == null && _playerPath.isNotEmpty) {
       _playerConfig = PlayerConfig.custom(_playerPath);
     }
-    
+
     _defaultPlaylistSize = _prefs.getInt(_keyDefaultPlaylistSize) ?? 20;
     _remoteServerEnabled = _prefs.getBool(_keyRemoteServerEnabled) ?? false;
     _remoteServerPort = _prefs.getInt(_keyRemoteServerPort) ?? 8080;
-    _remoteServerSecret = _prefs.getString(_keyRemoteServerSecret) ?? 'my_default_secret_key_32chars_long';
+    _remoteServerSecret =
+        _prefs.getString(_keyRemoteServerSecret) ??
+        'my_default_secret_key_32chars_long';
     _vlcPort = _prefs.getInt(_keyVlcPort) ?? 4212;
     _serverInterface = _prefs.getString(_keyServerInterface) ?? '0.0.0.0';
     _tmdbApiKey = _prefs.getString(_keyTmdbApiKey) ?? '';
     _fanartApiKey = _prefs.getString(_keyFanartApiKey) ?? '';
-    
+
     final themeIndex = _prefs.getInt(_keyThemeMode);
-    if (themeIndex != null && themeIndex >= 0 && themeIndex < ThemeMode.values.length) {
+    if (themeIndex != null &&
+        themeIndex >= 0 &&
+        themeIndex < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[themeIndex];
     }
 
     final languageCode = _prefs.getString('language_code') ?? 'it';
     _locale = Locale(languageCode);
-    
+
     _autoSyncEnabled = _prefs.getBool(_keyAutoSyncEnabled) ?? false;
     _watchedDirectories = _prefs.getStringList(_keyWatchedDirectories) ?? [];
     _autoSyncNfoOnEdit = _prefs.getBool(_keyAutoSyncNfoOnEdit) ?? false;
-    _ignoredDuplicateKeys = Set.from(_prefs.getStringList(_keyIgnoredDuplicateKeys) ?? []);
-    
+    _ignoredDuplicateKeys = Set.from(
+      _prefs.getStringList(_keyIgnoredDuplicateKeys) ?? [],
+    );
+
     _initialized = true;
     notifyListeners();
   }
@@ -117,7 +125,10 @@ class SettingsService with ChangeNotifier {
     await _prefs.setString(_keyPlayerPath, path);
     // Also update config for backward compatibility
     _playerConfig = PlayerConfig.custom(path);
-    await _prefs.setString(_keyPlayerConfig, json.encode(_playerConfig!.toJson()));
+    await _prefs.setString(
+      _keyPlayerConfig,
+      json.encode(_playerConfig!.toJson()),
+    );
     notifyListeners();
   }
 
@@ -193,6 +204,7 @@ class SettingsService with ChangeNotifier {
     await _prefs.setString(_keyFanartApiKey, key);
     notifyListeners();
   }
+
   Future<void> setAutoSyncEnabled(bool enabled) async {
     _autoSyncEnabled = enabled;
     await _prefs.setBool(_keyAutoSyncEnabled, enabled);
@@ -229,13 +241,19 @@ class SettingsService with ChangeNotifier {
 
   Future<void> addIgnoredDuplicateKey(String key) async {
     _ignoredDuplicateKeys.add(key);
-    await _prefs.setStringList(_keyIgnoredDuplicateKeys, _ignoredDuplicateKeys.toList());
+    await _prefs.setStringList(
+      _keyIgnoredDuplicateKeys,
+      _ignoredDuplicateKeys.toList(),
+    );
     notifyListeners();
   }
 
   Future<void> removeIgnoredDuplicateKey(String key) async {
     _ignoredDuplicateKeys.remove(key);
-    await _prefs.setStringList(_keyIgnoredDuplicateKeys, _ignoredDuplicateKeys.toList());
+    await _prefs.setStringList(
+      _keyIgnoredDuplicateKeys,
+      _ignoredDuplicateKeys.toList(),
+    );
     notifyListeners();
   }
 

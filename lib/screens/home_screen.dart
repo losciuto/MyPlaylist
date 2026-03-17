@@ -27,12 +27,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadVideos();
-    
+
     // Listen for tab changes from provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<DatabaseProvider>();
       _tabController.index = provider.currentTabIndex;
-      
+
       provider.addListener(_onProviderChange);
       _tabController.addListener(_onTabControllerChange);
     });
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController.removeListener(_onTabControllerChange);
-    // Note: provider listener will be handled by provider lifecycle usually, 
+    // Note: provider listener will be handled by provider lifecycle usually,
     // but here we joined them. Better to ignore for now or use a proper lifecycle.
     _tabController.dispose();
     super.dispose();
@@ -85,7 +85,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         } else {
           _tabController.index = 1; // Index of 'Servizio'
           context.read<DatabaseProvider>().setTabIndex(1);
-          context.read<DatabaseProvider>().setServiceTabIndex(0); // Index of 'Scansione' inside Servizio
+          context.read<DatabaseProvider>().setServiceTabIndex(
+            0,
+          ); // Index of 'Scansione' inside Servizio
         }
         _isLoading = false;
       });
@@ -96,9 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_isLoading) {
       // Show loading while checking DB to prevent flash
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -109,8 +109,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(icon: const Icon(Icons.playlist_play), text: AppLocalizations.of(context)!.navPlaylist),
-            Tab(icon: const Icon(Icons.grid_view_rounded), text: AppLocalizations.of(context)!.navService),
+            Tab(
+              icon: const Icon(Icons.playlist_play),
+              text: AppLocalizations.of(context)!.navPlaylist,
+            ),
+            Tab(
+              icon: const Icon(Icons.grid_view_rounded),
+              text: AppLocalizations.of(context)!.navService,
+            ),
           ],
           indicatorColor: AppConfig.seedColor,
           labelColor: AppConfig.seedColor,
@@ -129,16 +135,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${AppConfig.appName} App', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        '${AppConfig.appName} App',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 10),
-                      Text('${AppLocalizations.of(context)!.author}: ${AppConfig.appAuthor}'),
-                      Text('${AppLocalizations.of(context)!.buildDate}: ${AppConfig.appBuildDate}'),
+                      Text(
+                        '${AppLocalizations.of(context)!.author}: ${AppConfig.appAuthor}',
+                      ),
+                      Text(
+                        '${AppLocalizations.of(context)!.buildDate}: ${AppConfig.appBuildDate}',
+                      ),
                       const SizedBox(height: 10),
-                      Text(AppLocalizations.of(context)!.currentVersion(AppConfig.appVersion)),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.currentVersion(AppConfig.appVersion),
+                      ),
                     ],
                   ),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok)),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(AppLocalizations.of(context)!.ok),
+                    ),
                   ],
                 ),
               );
@@ -157,10 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          PlaylistTab(),
-          ServiceTab(),
-        ],
+        children: const [PlaylistTab(), ServiceTab()],
       ),
     );
   }

@@ -21,13 +21,12 @@ class PlaylistTab extends StatefulWidget {
 }
 
 class _PlaylistTabState extends State<PlaylistTab> {
-
   @override
   void initState() {
     super.initState();
     // Refresh video count when tab is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-       context.read<PlaylistProvider>().updateVideoCount();
+      context.read<PlaylistProvider>().updateVideoCount();
     });
   }
 
@@ -37,7 +36,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
     await provider.generateRandom(count: count);
     _checkResult(provider.playlist);
   }
-  
+
   Future<void> _generateRecent(PlaylistProvider provider) async {
     final count = await _inputCount();
     if (count == null) return;
@@ -65,7 +64,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
           excludedDirectors: settings.excludedDirectors,
           sagas: settings.sagas,
           excludedSagas: settings.excludedSagas,
-          limit: settings.limit
+          limit: settings.limit,
         );
         _checkResult(provider.playlist);
       } catch (e) {
@@ -106,10 +105,15 @@ class _PlaylistTabState extends State<PlaylistTab> {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.inputCountLabel),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.inputCountLabel,
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text)),
             child: Text(AppLocalizations.of(context)!.ok),
@@ -120,7 +124,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
   }
 
   void _showSnack(String msg) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    if (mounted)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Future<void> _playPlaylist(PlaylistProvider provider) async {
@@ -132,18 +137,24 @@ class _PlaylistTabState extends State<PlaylistTab> {
     if (playerPath.isNotEmpty) {
       try {
         final playlistPath = await provider.createTempPlaylistFile();
-        
+
         // Launch player process via provider
         await provider.launchPlayer(playerPath, playlistPath);
-        _showSnack(AppLocalizations.of(context)!.playerStarted(p.basename(playerPath)));
-
+        _showSnack(
+          AppLocalizations.of(context)!.playerStarted(p.basename(playerPath)),
+        );
       } catch (e) {
         _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
         debugPrint('External player error: $e');
       }
     } else {
       // Use internal player
-      Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(playlist: provider.playlist)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PlayerScreen(playlist: provider.playlist),
+        ),
+      );
     }
   }
 
@@ -152,16 +163,16 @@ class _PlaylistTabState extends State<PlaylistTab> {
       final dir = p.dirname(provider.lastTempPlaylistPath!);
       try {
         if (Platform.isLinux) {
-           await Process.run('xdg-open', [dir]);
+          await Process.run('xdg-open', [dir]);
         } else if (Platform.isWindows) {
-           await Process.run('explorer', [dir]);
+          await Process.run('explorer', [dir]);
         }
       } catch (e) {
-         _showSnack(AppLocalizations.of(context)!.folderOpenError(e.toString()));
+        _showSnack(AppLocalizations.of(context)!.folderOpenError(e.toString()));
       }
     }
   }
-  
+
   void _showVideoDetails(Video video) {
     showDialog(
       context: context,
@@ -170,74 +181,105 @@ class _PlaylistTabState extends State<PlaylistTab> {
   }
 
   void _showPosters(PlaylistProvider provider) {
-     if (!provider.hasPlaylist) return;
-     showDialog(
-       context: context,
-       builder: (ctx) => Dialog(
-         child: Container(
-           width: 800,
-           height: 600,
-           padding: const EdgeInsets.all(20),
-           child: GridView.builder(
-             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-               crossAxisCount: 4,
-               childAspectRatio: 0.7,
-               crossAxisSpacing: 10,
-               mainAxisSpacing: 10,
-             ),
-             itemCount: provider.playlist.length,
-             itemBuilder: (ctx, index) {
-               final v = provider.playlist[index];
-               return GestureDetector(
-                 onTap: () => _showVideoDetails(v),
-                 child: Column(
-                   children: [
-                     Expanded(
-                       child: Stack(
-                         fit: StackFit.expand,
-                         children: [
-                           v.posterPath.isNotEmpty 
-                             ? (v.posterPath.startsWith('http') 
-                                ? Image.network(v.posterPath, fit: BoxFit.cover) 
-                                : Image.file(File(v.posterPath), fit: BoxFit.cover, errorBuilder: (_,__,___) => const Icon(Icons.movie, size: 50)))
-                             : const Icon(Icons.movie, size: 50),
-                           if (v.isSeries)
-                             Positioned(
-                               top: 5,
-                               right: 5,
-                               child: Container(
-                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                 decoration: BoxDecoration(
-                                   color: Colors.blueAccent,
-                                   borderRadius: BorderRadius.circular(4),
-                                 ),
-                                 child: Text(AppLocalizations.of(context)!.seriesLabel, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                               ),
-                             ),
-                         ],
-                       ),
-                     ),
-                     Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10)),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         const Icon(Icons.star, color: Colors.orange, size: 10),
-                         const SizedBox(width: 2),
-                         Text(v.rating.toStringAsFixed(1), style: const TextStyle(fontSize: 10, color: Colors.white70)),
-                       ],
-                     ),
-                    ],
-                  ),
-               );
-             },
-           ),
-         ),
-       ),
-     );
+    if (!provider.hasPlaylist) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: Container(
+          width: 800,
+          height: 600,
+          padding: const EdgeInsets.all(20),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: provider.playlist.length,
+            itemBuilder: (ctx, index) {
+              final v = provider.playlist[index];
+              return GestureDetector(
+                onTap: () => _showVideoDetails(v),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          v.posterPath.isNotEmpty
+                              ? (v.posterPath.startsWith('http')
+                                    ? Image.network(
+                                        v.posterPath,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.file(
+                                        File(v.posterPath),
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.movie, size: 50),
+                                      ))
+                              : const Icon(Icons.movie, size: 50),
+                          if (v.isSeries)
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)!.seriesLabel,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      v.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.star, color: Colors.orange, size: 10),
+                        const SizedBox(width: 2),
+                        Text(
+                          v.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _exportPlaylist(PlaylistProvider provider) async {
-    final path = await provider.exportPlaylist(AppLocalizations.of(context)!.exportPlaylistTitle);
+    final path = await provider.exportPlaylist(
+      AppLocalizations.of(context)!.exportPlaylistTitle,
+    );
     if (path != null) {
       _showSnack(AppLocalizations.of(context)!.playlistExported(path));
     }
@@ -251,24 +293,48 @@ class _PlaylistTabState extends State<PlaylistTab> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Text(AppLocalizations.of(context)!.genPlaylistTitle(provider.totalVideoCount),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.genPlaylistTitle(provider.totalVideoCount),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4CAF50),
+                ),
+              ),
               const SizedBox(height: 20),
-              
+
               // Generation Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildBtn(AppLocalizations.of(context)!.btnRandom, Colors.orange, () => _generateRandom(provider)),
-                  _buildBtn(AppLocalizations.of(context)!.btnRecent, Colors.blue, () => _generateRecent(provider)),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnRandom,
+                    Colors.orange,
+                    () => _generateRandom(provider),
+                  ),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnRecent,
+                    Colors.blue,
+                    () => _generateRecent(provider),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
-               Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                   _buildBtn(AppLocalizations.of(context)!.btnFiltered, Colors.purple, () => _generateFiltered(provider)),
-                   _buildBtn(AppLocalizations.of(context)!.btnManual, Colors.blueGrey, () => _generateManual(provider)),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnFiltered,
+                    Colors.purple,
+                    () => _generateFiltered(provider),
+                  ),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnManual,
+                    Colors.blueGrey,
+                    () => _generateManual(provider),
+                  ),
                 ],
               ),
               if (provider.proposedVideoCount > 0)
@@ -276,65 +342,121 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   padding: const EdgeInsets.only(top: 10),
                   child: TextButton.icon(
                     onPressed: () => provider.resetProposedVideos(),
-                    icon: const Icon(Icons.refresh, size: 16, color: Colors.orange),
-                    label: Text(AppLocalizations.of(context)!.btnResetSession(provider.proposedVideoCount), 
-                      style: const TextStyle(fontSize: 11, color: Colors.orange)),
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 16,
+                      color: Colors.orange,
+                    ),
+                    label: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.btnResetSession(provider.proposedVideoCount),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.orange,
+                      ),
+                    ),
                   ),
                 ),
-              
+
               const Divider(height: 40, color: Colors.grey),
-              
+
               // Action Buttons
-              Text(AppLocalizations.of(context)!.actionsTitle, style: const TextStyle(fontSize: 16, color: Color(0xFF4CAF50))),
+              Text(
+                AppLocalizations.of(context)!.actionsTitle,
+                style: const TextStyle(fontSize: 16, color: Color(0xFF4CAF50)),
+              ),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildBtn(AppLocalizations.of(context)!.btnShowPosters, Colors.pink, provider.hasPlaylist ? () => _showPosters(provider) : null),
-                  _buildBtn(AppLocalizations.of(context)!.playButtonLabel, const Color(0xFF4CAF50), provider.hasPlaylist ? () => _playPlaylist(provider) : null),
-                  _buildBtn(AppLocalizations.of(context)!.btnExport, Colors.orange, provider.hasPlaylist ? () => _exportPlaylist(provider) : null),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnShowPosters,
+                    Colors.pink,
+                    provider.hasPlaylist ? () => _showPosters(provider) : null,
+                  ),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.playButtonLabel,
+                    const Color(0xFF4CAF50),
+                    provider.hasPlaylist ? () => _playPlaylist(provider) : null,
+                  ),
+                  _buildBtn(
+                    AppLocalizations.of(context)!.btnExport,
+                    Colors.orange,
+                    provider.hasPlaylist
+                        ? () => _exportPlaylist(provider)
+                        : null,
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
               if (provider.lastTempPlaylistPath != null)
-                 Center(
-                   child: TextButton.icon(
-                     onPressed: () => _openTempPlaylistFolder(provider),
-                     icon: const Icon(Icons.folder_open, color: Colors.grey),
-                     label: Text(AppLocalizations.of(context)!.openTempFolder, style: const TextStyle(color: Colors.grey)),
-                   ),
-                 ),
-              
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => _openTempPlaylistFolder(provider),
+                    icon: const Icon(Icons.folder_open, color: Colors.grey),
+                    label: Text(
+                      AppLocalizations.of(context)!.openTempFolder,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+
               const Spacer(),
-              
+
               // Remote Command Logs Section
               Consumer<RemoteControlService>(
                 builder: (context, remoteService, _) {
                   return Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600), // Limita la larghezza a 600px
+                      constraints: const BoxConstraints(
+                        maxWidth: 600,
+                      ), // Limita la larghezza a 600px
                       child: Container(
                         margin: const EdgeInsets.only(top: 20),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor.withValues(alpha: 0.5),
+                          color: Theme.of(
+                            context,
+                          ).cardColor.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: Colors.white10),
                         ),
                         child: ExpansionTile(
                           initiallyExpanded: true,
-                          leading: const Icon(Icons.history, color: Colors.blue, size: 20),
-                          title: Text(AppLocalizations.of(context)!.logTitle, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          leading: const Icon(
+                            Icons.history,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          title: Text(
+                            AppLocalizations.of(context)!.logTitle,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           subtitle: Text(
-                            remoteService.commandLogs.isEmpty 
-                              ? AppLocalizations.of(context)!.logWaiting 
-                              : AppLocalizations.of(context)!.logLast(remoteService.commandLogs.first.command), 
-                            style: const TextStyle(fontSize: 11, color: Colors.grey)
+                            remoteService.commandLogs.isEmpty
+                                ? AppLocalizations.of(context)!.logWaiting
+                                : AppLocalizations.of(context)!.logLast(
+                                    remoteService.commandLogs.first.command,
+                                  ),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
                           ),
                           children: [
                             if (remoteService.commandLogs.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text(AppLocalizations.of(context)!.noCommandsMsg, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                child: Text(
+                                  AppLocalizations.of(context)!.noCommandsMsg,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               )
                             else
                               SizedBox(
@@ -343,15 +465,39 @@ class _PlaylistTabState extends State<PlaylistTab> {
                                   shrinkWrap: true,
                                   itemCount: remoteService.commandLogs.length,
                                   itemBuilder: (context, index) {
-                                    final log = remoteService.commandLogs[index];
-                                    final timeStr = '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}:${log.timestamp.second.toString().padLeft(2, '0')}';
-                                    
+                                    final log =
+                                        remoteService.commandLogs[index];
+                                    final timeStr =
+                                        '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}:${log.timestamp.second.toString().padLeft(2, '0')}';
+
                                     return ListTile(
                                       dense: true,
                                       visualDensity: VisualDensity.compact,
-                                      title: Text(log.command, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12)),
-                                      subtitle: Text(log.args.isEmpty ? AppLocalizations.of(context)!.paramsNone : AppLocalizations.of(context)!.paramsLabel(log.args), style: const TextStyle(fontSize: 10)),
-                                      trailing: Text(timeStr, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                      title: Text(
+                                        log.command,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        log.args.isEmpty
+                                            ? AppLocalizations.of(
+                                                context,
+                                              )!.paramsNone
+                                            : AppLocalizations.of(
+                                                context,
+                                              )!.paramsLabel(log.args),
+                                        style: const TextStyle(fontSize: 10),
+                                      ),
+                                      trailing: Text(
+                                        timeStr,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                     );
                                   },
                                 ),
@@ -363,16 +509,27 @@ class _PlaylistTabState extends State<PlaylistTab> {
                   );
                 },
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               Container(
-                 padding: const EdgeInsets.all(10),
-                 decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(5)),
-                 child: Text(
-                   !provider.hasPlaylist ? AppLocalizations.of(context)!.noPlaylist : AppLocalizations.of(context)!.currentPlaylist(provider.playlist.length),
-                   style: TextStyle(color: Theme.of(context).listTileTheme.textColor ?? Theme.of(context).textTheme.bodyMedium?.color),
-                 ),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  !provider.hasPlaylist
+                      ? AppLocalizations.of(context)!.noPlaylist
+                      : AppLocalizations.of(
+                          context,
+                        )!.currentPlaylist(provider.playlist.length),
+                  style: TextStyle(
+                    color:
+                        Theme.of(context).listTileTheme.textColor ??
+                        Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
               ),
             ],
           ),
@@ -388,7 +545,11 @@ class _PlaylistTabState extends State<PlaylistTab> {
         backgroundColor: color,
         fixedSize: const Size(150, 60),
       ),
-      child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 12),
+      ),
     );
   }
 }

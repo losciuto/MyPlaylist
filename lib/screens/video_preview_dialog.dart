@@ -17,7 +17,7 @@ class VideoPreviewDialog extends StatefulWidget {
   final VoidCallback? onSelectionChanged;
 
   const VideoPreviewDialog({
-    super.key, 
+    super.key,
     required this.video,
     this.selectedEpisodePaths,
     this.onSelectionChanged,
@@ -52,7 +52,10 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
 
     List<File> files = [];
     try {
-      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      await for (final entity in dir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is File) {
           final ext = p.extension(entity.path).toLowerCase();
           if (VideoExtensions.supported.contains(ext)) {
@@ -60,7 +63,9 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
           }
         }
       }
-      files.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
+      files.sort(
+        (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
+      );
     } catch (e) {
       debugPrint('Error loading episodes: $e');
     }
@@ -72,7 +77,6 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +92,9 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Container(
         width: 500,
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
@@ -116,7 +122,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Poster
               Container(
                 height: 350,
@@ -136,31 +142,49 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                   borderRadius: BorderRadius.circular(10),
                   child: widget.video.posterPath.isNotEmpty
                       ? (widget.video.posterPath.startsWith('http')
-                          ? Image.network(widget.video.posterPath, fit: BoxFit.contain)
-                          : Image.file(
-                              File(widget.video.posterPath),
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => Center(
-                                child: Icon(Icons.movie, size: 80, color: secondaryTextColor),
-                              ),
-                            ))
+                            ? Image.network(
+                                widget.video.posterPath,
+                                fit: BoxFit.contain,
+                              )
+                            : Image.file(
+                                File(widget.video.posterPath),
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Center(
+                                      child: Icon(
+                                        Icons.movie,
+                                        size: 80,
+                                        color: secondaryTextColor,
+                                      ),
+                                    ),
+                              ))
                       : Center(
-                          child: Icon(Icons.movie, size: 80, color: secondaryTextColor),
+                          child: Icon(
+                            Icons.movie,
+                            size: 80,
+                            color: secondaryTextColor,
+                          ),
                         ),
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Info Row
               Wrap(
                 alignment: WrapAlignment.center,
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  if (widget.video.year.isNotEmpty) _buildChip(widget.video.year, Colors.blue),
-                  if (widget.video.duration.isNotEmpty) _buildChip(widget.video.duration, Colors.purple),
-                  _buildChip('★ ${widget.video.rating.toStringAsFixed(1)}', Colors.orange),
-                  if (widget.video.directors.isNotEmpty) _buildChip('Regia: ${widget.video.directors}', Colors.teal),
+                  if (widget.video.year.isNotEmpty)
+                    _buildChip(widget.video.year, Colors.blue),
+                  if (widget.video.duration.isNotEmpty)
+                    _buildChip(widget.video.duration, Colors.purple),
+                  _buildChip(
+                    '★ ${widget.video.rating.toStringAsFixed(1)}',
+                    Colors.orange,
+                  ),
+                  if (widget.video.directors.isNotEmpty)
+                    _buildChip('Regia: ${widget.video.directors}', Colors.teal),
                 ],
               ),
               const SizedBox(height: 24),
@@ -169,22 +193,32 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   ElevatedButton.icon(
+                  ElevatedButton.icon(
                     onPressed: () {
-                      context.read<PlaylistProvider>().playSingleVideo(widget.video);
+                      context.read<PlaylistProvider>().playSingleVideo(
+                        widget.video,
+                      );
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(l10n.playButtonLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(
+                      l10n.playButtonLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 15),
-/*
+                  /*
                   ElevatedButton.icon(
                     onPressed: _isDownloading ? null : _downloadInfo,
                     icon: _isDownloading 
@@ -203,7 +237,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
               ),
 
               const SizedBox(height: 24),
-  
+
               // Plot
               if (widget.video.plot.isNotEmpty) ...[
                 Align(
@@ -266,39 +300,56 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                   child: _isLoadingEpisodes
                       ? const Center(child: CircularProgressIndicator())
                       : (_episodes == null || _episodes!.isEmpty)
-                          ? Center(child: Text(l10n.noEpisodesFound, style: const TextStyle(color: Colors.grey)))
-                          : ListView.separated(
-                              itemCount: _episodes!.length,
-                              separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),
-                              itemBuilder: (ctx, i) {
-                                final episodeFile = _episodes![i];
-                                final epPath = episodeFile.path;
-                                final isSelected = widget.selectedEpisodePaths?.contains(epPath) ?? false;
-                                
-                                return CheckboxListTile(
-                                  value: isSelected,
-                                  onChanged: widget.selectedEpisodePaths == null ? null : (val) {
-                                    setState(() {
-                                      if (val == true) {
-                                        widget.selectedEpisodePaths!.add(epPath);
-                                      } else {
-                                        widget.selectedEpisodePaths!.remove(epPath);
+                      ? Center(
+                          child: Text(
+                            l10n.noEpisodesFound,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        )
+                      : ListView.separated(
+                          itemCount: _episodes!.length,
+                          separatorBuilder: (ctx, i) =>
+                              const Divider(height: 1, color: Colors.white10),
+                          itemBuilder: (ctx, i) {
+                            final episodeFile = _episodes![i];
+                            final epPath = episodeFile.path;
+                            final isSelected =
+                                widget.selectedEpisodePaths?.contains(epPath) ??
+                                false;
+
+                            return CheckboxListTile(
+                              value: isSelected,
+                              onChanged: widget.selectedEpisodePaths == null
+                                  ? null
+                                  : (val) {
+                                      setState(() {
+                                        if (val == true) {
+                                          widget.selectedEpisodePaths!.add(
+                                            epPath,
+                                          );
+                                        } else {
+                                          widget.selectedEpisodePaths!.remove(
+                                            epPath,
+                                          );
+                                        }
+                                      });
+                                      if (widget.onSelectionChanged != null) {
+                                        widget.onSelectionChanged!();
                                       }
-                                    });
-                                    if (widget.onSelectionChanged != null) {
-                                      widget.onSelectionChanged!();
-                                    }
-                                  },
-                                  title: Text(
-                                    p.basename(epPath),
-                                    style: TextStyle(color: textColor, fontSize: 13),
-                                  ),
-                                  dense: true,
-                                  activeColor: const Color(0xFF4CAF50),
-                                  controlAffinity: ListTileControlAffinity.leading,
-                                );
-                              },
-                            ),
+                                    },
+                              title: Text(
+                                p.basename(epPath),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              dense: true,
+                              activeColor: const Color(0xFF4CAF50),
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          },
+                        ),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -319,7 +370,11 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

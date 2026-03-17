@@ -89,18 +89,23 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   Future<List<File>> _getEpisodes(String path) async {
     final dir = Directory(path);
     if (!await dir.exists()) return [];
-    
+
     List<File> episodes = [];
     try {
-      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      await for (final entity in dir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is File) {
-           final ext = p.extension(entity.path).toLowerCase();
-           if (VideoExtensions.supported.contains(ext)) {
-             episodes.add(entity);
-           }
+          final ext = p.extension(entity.path).toLowerCase();
+          if (VideoExtensions.supported.contains(ext)) {
+            episodes.add(entity);
+          }
         }
       }
-      episodes.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
+      episodes.sort(
+        (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
+      );
     } catch (e) {
       debugPrint('Error scanning episodes: $e');
     }
@@ -125,13 +130,17 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                 const SizedBox(width: 10),
                 Text(
                   AppLocalizations.of(context)!.manualSelectionTitle,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
                   onPressed: () => Navigator.pop(context),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -146,7 +155,10 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.searchHint,
                       hintStyle: const TextStyle(color: Colors.grey),
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF4CAF50),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFF3C3C3C),
                       border: OutlineInputBorder(
@@ -162,15 +174,22 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.selectedItemsCount(_selectedIds.length),
-                      style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold),
+                      AppLocalizations.of(
+                        context,
+                      )!.selectedItemsCount(_selectedIds.length),
+                      style: const TextStyle(
+                        color: Color(0xFF4CAF50),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
-                      AppLocalizations.of(context)!.visibleCount(_filteredVideos.length),
+                      AppLocalizations.of(
+                        context,
+                      )!.visibleCount(_filteredVideos.length),
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
-                )
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -206,51 +225,73 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                       ),
                       child: ListView.separated(
                         itemCount: _filteredVideos.length,
-                        separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),
+                        separatorBuilder: (ctx, i) =>
+                            const Divider(height: 1, color: Colors.white10),
                         itemBuilder: (ctx, index) {
-                            final video = _filteredVideos[index];
-                            final isSelected = _selectedIds.contains(video.id);
+                          final video = _filteredVideos[index];
+                          final isSelected = _selectedIds.contains(video.id);
 
-                            return ListTile(
-                              onTap: () => _showPreview(video),
-                              onLongPress: () => _toggleSelection(video),
-                              leading: Checkbox(
-                                value: isSelected,
-                                activeColor: const Color(0xFF4CAF50),
-                                onChanged: (v) => _toggleSelection(video),
-                              ),
-                              title: Row(
-                                children: [
-                                  if (video.isSeries) ...[
-                                    const Icon(Icons.tv, color: Colors.blueAccent, size: 16),
-                                    const SizedBox(width: 5),
-                                    Text(AppLocalizations.of(context)!.seriesLabel, style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                                    const SizedBox(width: 5),
-                                  ],
-                                  Expanded(
-                                    child: Text(
-                                      video.title,
-                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                          return ListTile(
+                            onTap: () => _showPreview(video),
+                            onLongPress: () => _toggleSelection(video),
+                            leading: Checkbox(
+                              value: isSelected,
+                              activeColor: const Color(0xFF4CAF50),
+                              onChanged: (v) => _toggleSelection(video),
+                            ),
+                            title: Row(
+                              children: [
+                                if (video.isSeries) ...[
+                                  const Icon(
+                                    Icons.tv,
+                                    color: Colors.blueAccent,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    AppLocalizations.of(context)!.seriesLabel,
+                                    style: const TextStyle(
+                                      color: Colors.blueAccent,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  const SizedBox(width: 5),
                                 ],
+                                Expanded(
+                                  child: Text(
+                                    video.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              video.isSeries
+                                  ? '${video.year} • ${video.genres} • ★ ${video.rating.toStringAsFixed(1)}'
+                                  : '${video.year} • ★ ${video.rating.toStringAsFixed(1)} • ${video.directors}',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
                               ),
-                              subtitle: Text(
-                                video.isSeries
-                                    ? '${video.year} • ${video.genres} • ★ ${video.rating.toStringAsFixed(1)}'
-                                    : '${video.year} • ★ ${video.rating.toStringAsFixed(1)} • ${video.directors}',
-                                style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                maxLines: 1,
-                              ),
-                              trailing: video.posterPath.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.image, color: Colors.white24, size: 20),
-                                      onPressed: () => _showPreview(video),
-                                    )
-                                  : null,
-                            );
+                              maxLines: 1,
+                            ),
+                            trailing: video.posterPath.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.image,
+                                      color: Colors.white24,
+                                      size: 20,
+                                    ),
+                                    onPressed: () => _showPreview(video),
+                                  )
+                                : null,
+                          );
                         },
                       ),
                     ),
@@ -263,14 +304,19 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.grey)),
+                  child: Text(
+                    AppLocalizations.of(context)!.cancel,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
                   onPressed: () {
                     // 1. Get standard selected videos
-                    final selectedVideos = _allVideos.where((v) => _selectedIds.contains(v.id)).toList();
-                    
+                    final selectedVideos = _allVideos
+                        .where((v) => _selectedIds.contains(v.id))
+                        .toList();
+
                     // 2. Create virtual Video objects for selected episodes
                     for (final epPath in _selectedEpisodePaths) {
                       // Find parent series for metadata
@@ -281,27 +327,34 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                           (v) => v.isSeries && epPath.startsWith(v.path),
                           orElse: () => Video(path: '', mtime: 0), // Dummy
                         );
-                        
+
                         if (parentSeries.path.isNotEmpty) {
-                          selectedVideos.add(Video(
-                            id: null, // Virtual
-                            path: epPath,
-                            mtime: File(epPath).lastModifiedSync().millisecondsSinceEpoch.toDouble(),
-                            title: p.basename(epPath),
-                            isSeries: false, // Treated as individual file
-                            year: parentSeries.year,
-                            genres: parentSeries.genres,
-                            directors: parentSeries.directors,
-                            rating: parentSeries.rating,
-                            posterPath: parentSeries.posterPath,
-                            plot: parentSeries.plot,
-                          ));
+                          selectedVideos.add(
+                            Video(
+                              id: null, // Virtual
+                              path: epPath,
+                              mtime: File(epPath)
+                                  .lastModifiedSync()
+                                  .millisecondsSinceEpoch
+                                  .toDouble(),
+                              title: p.basename(epPath),
+                              isSeries: false, // Treated as individual file
+                              year: parentSeries.year,
+                              genres: parentSeries.genres,
+                              directors: parentSeries.directors,
+                              rating: parentSeries.rating,
+                              posterPath: parentSeries.posterPath,
+                              plot: parentSeries.plot,
+                            ),
+                          );
                         }
                       } catch (e) {
-                         debugPrint('Error creating virtual video for $epPath: $e');
+                        debugPrint(
+                          'Error creating virtual video for $epPath: $e',
+                        );
                       }
                     }
-                    
+
                     Navigator.pop(context, selectedVideos);
                   },
                   icon: const Icon(Icons.playlist_add),
@@ -309,7 +362,10 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                   ),
                 ),
               ],

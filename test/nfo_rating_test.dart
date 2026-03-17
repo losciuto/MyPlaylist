@@ -73,28 +73,27 @@ void main() {
     final result = await strategy.parse(xml, '/tmp/movie.nfo');
     expect(result?['rating'], 8.5);
   });
-  
+
   test('Parse empty rating', () async {
-      const xml = '''
+    const xml = '''
       <movie>
         <title>Test Movie</title>
         <userrating></userrating>
       </movie>
       ''';
-      final result = await strategy.parse(xml, '/tmp/movie.nfo');
-      // Should fall back or be 0.0
-      expect(result?['rating'], 0.0);
-    });
+    final result = await strategy.parse(xml, '/tmp/movie.nfo');
+    // Should fall back or be 0.0
+    expect(result?['rating'], 0.0);
+  });
 
-    test('Parse zero rating', () async {
-      const xml = '''
+  test('Parse zero rating', () async {
+    const xml = '''
       <movie>
         <title>Test Movie</title>
         <userrating>0</userrating>
       </movie>
       ''';
-      final result = await strategy.parse(xml, '/tmp/movie.nfo');
-      expect(result?['rating'], 0.0);
-    });
-
+    final result = await strategy.parse(xml, '/tmp/movie.nfo');
+    expect(result?['rating'], 0.0);
+  });
 }

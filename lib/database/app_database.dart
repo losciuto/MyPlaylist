@@ -29,8 +29,14 @@ class Videos extends Table {
   DateTimeColumn get dateAdded => dateTime().nullable()();
 
   List<Index> get indexes => [
-    Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'),
-    Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'),
+    Index(
+      'videos_actors_idx',
+      'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)',
+    ),
+    Index(
+      'videos_directors_idx',
+      'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)',
+    ),
   ];
 }
 
@@ -64,8 +70,18 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 3) {
           // Add indices
-          await m.createIndex(Index('videos_actors_idx', 'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)'));
-          await m.createIndex(Index('videos_directors_idx', 'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)'));
+          await m.createIndex(
+            Index(
+              'videos_actors_idx',
+              'CREATE INDEX IF NOT EXISTS videos_actors_idx ON videos (actors)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_directors_idx',
+              'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)',
+            ),
+          );
         }
         if (from < 4) {
           // Add FailedRenames table
@@ -75,7 +91,9 @@ class AppDatabase extends _$AppDatabase {
           // Add dateAdded column
           await m.addColumn(videos, videos.dateAdded);
           // Initialize date_added with mtime (converted from seconds to DateTime)
-          await customStatement('UPDATE videos SET date_added = CAST(mtime AS INTEGER) WHERE date_added IS NULL');
+          await customStatement(
+            'UPDATE videos SET date_added = CAST(mtime AS INTEGER) WHERE date_added IS NULL',
+          );
         }
       },
       beforeOpen: (details) async {
@@ -94,31 +112,32 @@ class AppDatabase extends _$AppDatabase {
   Future<void> insertVideos(List<model.Video> videoList) async {
     await batch((b) {
       for (final video in videoList) {
-        b.insertAll(
-          videos,
-          [
-            VideosCompanion.insert(
-              path: video.path,
-              mtime: video.mtime,
-              title: Value(video.title),
-              genres: Value(video.genres),
-              year: Value(video.year),
-              directors: Value(video.directors),
-              directorThumbs: Value(video.directorThumbs),
-              plot: Value(video.plot),
-              actors: Value(video.actors),
-              actorThumbs: Value(video.actorThumbs),
-              duration: Value(video.duration),
-              rating: Value(video.rating),
-              isSeries: Value(video.isSeries ? 1 : 0),
-               posterPath: Value(video.posterPath),
-              saga: Value(video.saga),
-              sagaIndex: Value(video.sagaIndex),
-              dateAdded: Value(video.dateAdded ?? DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt())),
+        b.insertAll(videos, [
+          VideosCompanion.insert(
+            path: video.path,
+            mtime: video.mtime,
+            title: Value(video.title),
+            genres: Value(video.genres),
+            year: Value(video.year),
+            directors: Value(video.directors),
+            directorThumbs: Value(video.directorThumbs),
+            plot: Value(video.plot),
+            actors: Value(video.actors),
+            actorThumbs: Value(video.actorThumbs),
+            duration: Value(video.duration),
+            rating: Value(video.rating),
+            isSeries: Value(video.isSeries ? 1 : 0),
+            posterPath: Value(video.posterPath),
+            saga: Value(video.saga),
+            sagaIndex: Value(video.sagaIndex),
+            dateAdded: Value(
+              video.dateAdded ??
+                  DateTime.fromMillisecondsSinceEpoch(
+                    (video.mtime * 1000).toInt(),
+                  ),
             ),
-          ],
-          mode: InsertMode.insertOrReplace,
-        );
+          ),
+        ], mode: InsertMode.insertOrReplace);
       }
     });
   }
@@ -142,7 +161,10 @@ class AppDatabase extends _$AppDatabase {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
-        dateAdded: Value(video.dateAdded ?? DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt())),
+        dateAdded: Value(
+          video.dateAdded ??
+              DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt()),
+        ),
       ),
       mode: InsertMode.insertOrIgnore,
     );
@@ -167,7 +189,9 @@ class AppDatabase extends _$AppDatabase {
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
         sagaIndex: Value(video.sagaIndex),
-        dateAdded: video.dateAdded != null ? Value(video.dateAdded) : const Value.absent(),
+        dateAdded: video.dateAdded != null
+            ? Value(video.dateAdded)
+            : const Value.absent(),
       ),
     );
   }
@@ -201,7 +225,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<FailedRename>> getAllFailedRenames() async {
-    return await (select(failedRenames)..orderBy([(t) => OrderingTerm(expression: t.timestamp, mode: OrderingMode.desc)])).get();
+    return await (select(failedRenames)..orderBy([
+          (t) => OrderingTerm(expression: t.timestamp, mode: OrderingMode.desc),
+        ]))
+        .get();
   }
 
   Future<Set<String>> getAllFailedRenamePaths() async {
@@ -214,7 +241,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> deleteFailedRenameByPath(String path) async {
-    return await (delete(failedRenames)..where((t) => t.path.equals(path))).go();
+    return await (delete(
+      failedRenames,
+    )..where((t) => t.path.equals(path))).go();
   }
 
   Future<void> clearFailedRenames() async {
@@ -229,7 +258,11 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<model.Video>> getAllVideos() async {
-    final driftVideos = await (select(videos)..orderBy([(t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc)])).get();
+    final driftVideos =
+        await (select(videos)..orderBy([
+              (t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc),
+            ]))
+            .get();
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
@@ -256,7 +289,10 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<List<model.Video>> getRandomPlaylist(int limit, {List<int>? excludeIds}) async {
+  Future<List<model.Video>> getRandomPlaylist(
+    int limit, {
+    List<int>? excludeIds,
+  }) async {
     final query = select(videos)
       ..orderBy([(t) => OrderingTerm.random()])
       ..limit(limit);
@@ -268,24 +304,41 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<model.Video>> getRecentPlaylist(int limit) async {
-    final result = await (select(videos)
-      ..orderBy([(t) => OrderingTerm(expression: t.dateAdded, mode: OrderingMode.desc)])
-      ..limit(limit)).get();
+    final result =
+        await (select(videos)
+              ..orderBy([
+                (t) => OrderingTerm(
+                  expression: t.dateAdded,
+                  mode: OrderingMode.desc,
+                ),
+              ])
+              ..limit(limit))
+            .get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
   Future<Map<String, int>> getValuesWithCounts(String column) async {
     final result = await select(videos).get();
-    
+
     final Map<String, int> counts = {};
     for (var row in result) {
       String? val;
       switch (column) {
-        case 'genres': val = row.genres; break;
-        case 'year': val = row.year; break;
-        case 'directors': val = row.directors; break;
-        case 'actors': val = row.actors; break;
-        case 'saga': val = row.saga; break;
+        case 'genres':
+          val = row.genres;
+          break;
+        case 'year':
+          val = row.year;
+          break;
+        case 'directors':
+          val = row.directors;
+          break;
+        case 'actors':
+          val = row.actors;
+          break;
+        case 'saga':
+          val = row.saga;
+          break;
       }
       if (val == null || val.isEmpty) continue;
 
@@ -306,43 +359,55 @@ class AppDatabase extends _$AppDatabase {
     return counts;
   }
 
-  Future<List<model.Video>> getFilteredPlaylist(
-      {List<String>? genres,
-      List<String>? years,
-      double? minRating,
-      List<String>? actors,
-      List<String>? directors,
-      List<String>? excludedGenres,
-      List<String>? excludedYears,
-      List<String>? excludedActors,
-      List<String>? excludedDirectors,
-      List<String>? sagas,
-      List<String>? excludedSagas,
-      int limit = 20,
-      List<int>? excludeIds}) async {
-        
+  Future<List<model.Video>> getFilteredPlaylist({
+    List<String>? genres,
+    List<String>? years,
+    double? minRating,
+    List<String>? actors,
+    List<String>? directors,
+    List<String>? excludedGenres,
+    List<String>? excludedYears,
+    List<String>? excludedActors,
+    List<String>? excludedDirectors,
+    List<String>? sagas,
+    List<String>? excludedSagas,
+    int limit = 20,
+    List<int>? excludeIds,
+  }) async {
     final query = select(videos);
-    
+
     query.where((t) {
       final List<Expression<bool>> predicates = [];
 
       if (genres != null && genres.isNotEmpty) {
-        predicates.add(genres.map((g) => t.genres.like('%$g%')).reduce((a, b) => a | b));
+        predicates.add(
+          genres.map((g) => t.genres.like('%$g%')).reduce((a, b) => a | b),
+        );
       }
       if (years != null && years.isNotEmpty) {
-        predicates.add(years.map((y) => t.year.equals(y)).reduce((a, b) => a | b));
+        predicates.add(
+          years.map((y) => t.year.equals(y)).reduce((a, b) => a | b),
+        );
       }
       if (minRating != null && minRating > 0) {
         predicates.add(t.rating.isBiggerOrEqualValue(minRating));
       }
       if (actors != null && actors.isNotEmpty) {
-        predicates.add(actors.map((a) => t.actors.like('%$a%')).reduce((a, b) => a | b));
+        predicates.add(
+          actors.map((a) => t.actors.like('%$a%')).reduce((a, b) => a | b),
+        );
       }
       if (directors != null && directors.isNotEmpty) {
-        predicates.add(directors.map((d) => t.directors.like('%$d%')).reduce((a, b) => a | b));
+        predicates.add(
+          directors
+              .map((d) => t.directors.like('%$d%'))
+              .reduce((a, b) => a | b),
+        );
       }
       if (sagas != null && sagas.isNotEmpty) {
-        predicates.add(sagas.map((s) => t.saga.like('%$s%')).reduce((a, b) => a | b));
+        predicates.add(
+          sagas.map((s) => t.saga.like('%$s%')).reduce((a, b) => a | b),
+        );
       }
 
       if (excludedGenres != null && excludedGenres.isNotEmpty) {
@@ -372,7 +437,9 @@ class AppDatabase extends _$AppDatabase {
         predicates.add(t.id.isIn(excludeIds).not());
       }
 
-      return predicates.isEmpty ? const Constant(true) : predicates.reduce((a, b) => a & b);
+      return predicates.isEmpty
+          ? const Constant(true)
+          : predicates.reduce((a, b) => a & b);
     });
 
     query.orderBy([(t) => OrderingTerm.random()]);
@@ -384,9 +451,11 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<model.Video>> getVideosByPaths(List<String> paths) async {
     if (paths.isEmpty) return [];
-    final result = await (select(videos)..where((t) => t.path.isIn(paths))).get();
+    final result = await (select(
+      videos,
+    )..where((t) => t.path.isIn(paths))).get();
     final vList = result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
-    
+
     // Restore order
     final videoMap = {for (var v in vList) v.path: v};
     final ordered = <model.Video>[];
@@ -399,26 +468,45 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<model.Video?> getVideoByPath(String path) async {
-    final driftVideo = await (select(videos)..where((t) => t.path.equals(path))).getSingleOrNull();
+    final driftVideo = await (select(
+      videos,
+    )..where((t) => t.path.equals(path))).getSingleOrNull();
     return driftVideo == null ? null : _mapDriftToModel(driftVideo);
   }
 
-  Future<List<model.Video>> getVideosByFilter(String column, String value) async {
+  Future<List<model.Video>> getVideosByFilter(
+    String column,
+    String value,
+  ) async {
     final query = select(videos);
     switch (column) {
-      case 'year': query.where((t) => t.year.equals(value)); break;
-      case 'genres': query.where((t) => t.genres.like('%$value%')); break;
-      case 'directors': query.where((t) => t.directors.like('%$value%')); break;
-      case 'actors': query.where((t) => t.actors.like('%$value%')); break;
-      case 'saga': query.where((t) => t.saga.like('%$value%')); break;
+      case 'year':
+        query.where((t) => t.year.equals(value));
+        break;
+      case 'genres':
+        query.where((t) => t.genres.like('%$value%'));
+        break;
+      case 'directors':
+        query.where((t) => t.directors.like('%$value%'));
+        break;
+      case 'actors':
+        query.where((t) => t.actors.like('%$value%'));
+        break;
+      case 'saga':
+        query.where((t) => t.saga.like('%$value%'));
+        break;
     }
-    query.orderBy([(t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc)]);
+    query.orderBy([
+      (t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc),
+    ]);
     final result = await query.get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
   Future<void> syncDatesWithMtime() async {
-    await customStatement('UPDATE videos SET date_added = CAST(mtime AS INTEGER)');
+    await customStatement(
+      'UPDATE videos SET date_added = CAST(mtime AS INTEGER)',
+    );
   }
 
   Future<String> getDatabasePath() async {

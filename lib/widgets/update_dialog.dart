@@ -18,9 +18,10 @@ class UpdateDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDirectDownload = updateInfo.downloadUrl.toLowerCase().contains('.appimage') || 
-                             updateInfo.downloadUrl.toLowerCase().contains('.deb') ||
-                             updateInfo.downloadUrl.toLowerCase().contains('.tar.gz');
+    final isDirectDownload =
+        updateInfo.downloadUrl.toLowerCase().contains('.appimage') ||
+        updateInfo.downloadUrl.toLowerCase().contains('.deb') ||
+        updateInfo.downloadUrl.toLowerCase().contains('.tar.gz');
 
     return AlertDialog(
       title: Text(l10n.updateAvailableTitle(updateInfo.version)),
@@ -38,9 +39,7 @@ class UpdateDialog extends StatelessWidget {
             Text(l10n.whatsNewHeader),
             const Divider(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Text(updateInfo.body),
-              ),
+              child: SingleChildScrollView(child: Text(updateInfo.body)),
             ),
           ],
         ),
@@ -49,17 +48,19 @@ class UpdateDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
-            l10n.ignoreButtonLabel, 
+            l10n.ignoreButtonLabel,
             style: const TextStyle(color: Colors.grey),
           ),
         ),
         ElevatedButton.icon(
           onPressed: () {
-             _launchUrl();
-             Navigator.of(context).pop();
+            _launchUrl();
+            Navigator.of(context).pop();
           },
           icon: Icon(isDirectDownload ? Icons.download : Icons.open_in_new),
-          label: Text(isDirectDownload ? l10n.downloadButtonLabel : l10n.openGitHubLabel),
+          label: Text(
+            isDirectDownload ? l10n.downloadButtonLabel : l10n.openGitHubLabel,
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,

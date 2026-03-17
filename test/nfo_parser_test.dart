@@ -53,7 +53,10 @@ void main() {
       expect(result['year'], '2010');
       expect(result['rating'], 8.8);
       expect(result['directors'], 'Christopher Nolan, Second Director');
-      expect(result['directorThumbs'], 'http://director-thumb.jpg|http://second-director-thumb.jpg');
+      expect(
+        result['directorThumbs'],
+        'http://director-thumb.jpg|http://second-director-thumb.jpg',
+      );
       expect(result['actors'], 'Leonardo DiCaprio, Joseph Gordon-Levitt');
       expect(result['actorThumbs'], 'http://leo-thumb.jpg|');
     });
@@ -97,7 +100,10 @@ void main() {
       final result = await NfoParser.parseNfo(nfoFile.path);
       expect(result, isNotNull);
       expect(result!['title'], isNull);
-      expect(result['year'], isNull); // Empty string usually maps to null or empty in parser logic
+      expect(
+        result['year'],
+        isNull,
+      ); // Empty string usually maps to null or empty in parser logic
       expect(result['rating'], 0.0);
     });
 
@@ -108,19 +114,19 @@ void main() {
       expect(result, isNotNull);
       expect(result!['rating'], 0.0);
     });
-    
+
     test('Handles UTF-8 content', () async {
-       final nfoFile = File('${tempDir.path}/utf8.nfo');
-       await nfoFile.writeAsString('''
+      final nfoFile = File('${tempDir.path}/utf8.nfo');
+      await nfoFile.writeAsString('''
 <movie>
     <title>Hércules</title>
     <plot>Café &amp; Tea</plot>
 </movie>
 ''');
-       final result = await NfoParser.parseNfo(nfoFile.path);
-       expect(result, isNotNull);
-       expect(result!['title'], 'Hércules');
-       expect(result['plot'], 'Café & Tea');
+      final result = await NfoParser.parseNfo(nfoFile.path);
+      expect(result, isNotNull);
+      expect(result!['title'], 'Hércules');
+      expect(result['plot'], 'Café & Tea');
     });
     test('Resolves relative thumbnail paths', () async {
       final movieDir = Directory('${tempDir.path}/Movies/Matrix');
@@ -135,10 +141,13 @@ void main() {
     </actor>
 </movie>
 ''');
-      
+
       final result = await NfoParser.parseNfo(nfoFile.path);
       expect(result, isNotNull);
-      expect(result!['actorThumbs'], contains('${movieDir.path}/.actors/Keanu_Reeves.jpg'));
+      expect(
+        result!['actorThumbs'],
+        contains('${movieDir.path}/.actors/Keanu_Reeves.jpg'),
+      );
     });
     test('Does not pick up director thumb as main poster', () async {
       final nfoFile = File('${tempDir.path}/poster_test.nfo');
@@ -152,7 +161,7 @@ void main() {
     <thumb>movie_poster.jpg</thumb>
 </movie>
 ''');
-      
+
       final result = await NfoParser.parseNfo(nfoFile.path);
       expect(result, isNotNull);
       expect(result!['poster'], 'movie_poster.jpg');
@@ -178,17 +187,24 @@ void main() {
       expect(result!['rating'], 8.5);
     });
 
-    test('Handles complex rating string "8,5 (100 votes)" (Power Parser)', () async {
-      final nfoFile = File('${tempDir.path}/complex_rating.nfo');
-      await nfoFile.writeAsString('<movie><rating>8,5 (100 votes)</rating></movie>');
-      final result = await NfoParser.parseNfo(nfoFile.path);
-      expect(result, isNotNull);
-      expect(result!['rating'], 8.5);
-    });
+    test(
+      'Handles complex rating string "8,5 (100 votes)" (Power Parser)',
+      () async {
+        final nfoFile = File('${tempDir.path}/complex_rating.nfo');
+        await nfoFile.writeAsString(
+          '<movie><rating>8,5 (100 votes)</rating></movie>',
+        );
+        final result = await NfoParser.parseNfo(nfoFile.path);
+        expect(result, isNotNull);
+        expect(result!['rating'], 8.5);
+      },
+    );
 
-    test('Prioritizes default rating over zero userrating (Real World Case)', () async {
-      final nfoFile = File('${tempDir.path}/priority_test.nfo');
-      await nfoFile.writeAsString('''
+    test(
+      'Prioritizes default rating over zero userrating (Real World Case)',
+      () async {
+        final nfoFile = File('${tempDir.path}/priority_test.nfo');
+        await nfoFile.writeAsString('''
 <movie>
     <ratings>
         <rating name="metacritic"><value>90.0</value></rating>
@@ -197,9 +213,13 @@ void main() {
     <userrating>0</userrating>
 </movie>
 ''');
-      final result = await NfoParser.parseNfo(nfoFile.path);
-      expect(result, isNotNull);
-      expect(result!['rating'], 8.2); // Should pick IMDb 8.2, not Metacritic 90.0 or Userrating 0.0
-    });
+        final result = await NfoParser.parseNfo(nfoFile.path);
+        expect(result, isNotNull);
+        expect(
+          result!['rating'],
+          8.2,
+        ); // Should pick IMDb 8.2, not Metacritic 90.0 or Userrating 0.0
+      },
+    );
   });
 }

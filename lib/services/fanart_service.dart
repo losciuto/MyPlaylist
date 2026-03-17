@@ -16,9 +16,9 @@ class FanartTvService {
   Future<Map<String, dynamic>?> getMovieImages(int tmdbId) async {
     if (!hasKey) return null;
 
-    final uri = Uri.parse('$_baseUrl/movies/$tmdbId').replace(queryParameters: {
-      'api_key': apiKey,
-    });
+    final uri = Uri.parse(
+      '$_baseUrl/movies/$tmdbId',
+    ).replace(queryParameters: {'api_key': apiKey});
 
     try {
       final response = await http.get(uri);
@@ -45,9 +45,9 @@ class FanartTvService {
   Future<Map<String, dynamic>?> getTvShowImages(int tvdbId) async {
     if (!hasKey) return null;
 
-    final uri = Uri.parse('$_baseUrl/tv/$tvdbId').replace(queryParameters: {
-      'api_key': apiKey,
-    });
+    final uri = Uri.parse(
+      '$_baseUrl/tv/$tvdbId',
+    ).replace(queryParameters: {'api_key': apiKey});
 
     try {
       final response = await http.get(uri);
@@ -56,7 +56,9 @@ class FanartTvService {
       } else if (response.statusCode == 404) {
         return null;
       } else {
-        debugPrint('Fanart.tv TV Error ${response.statusCode}: ${response.body}');
+        debugPrint(
+          'Fanart.tv TV Error ${response.statusCode}: ${response.body}',
+        );
         return null;
       }
     } catch (e) {

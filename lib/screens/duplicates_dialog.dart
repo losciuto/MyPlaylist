@@ -61,7 +61,10 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
           'Verranno eliminati il file video e tutti i file associati (NFO, poster, fanart, ecc.).\n\n${p.basename(video.path)}\n\nConfermi?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annulla')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annulla'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -75,13 +78,13 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     if (!mounted) return;
 
     setState(() => _isLoading = true);
-    
+
     // Extract provider before async gap
     final dbProvider = context.read<DatabaseProvider>();
-    
+
     final deleted = await _processingService.deleteVideoWithFiles(video);
     await dbProvider.refreshVideos();
-    
+
     if (mounted) {
       _lastMessage = 'Eliminati ${deleted.length} file di ${video.title}';
       _refresh();
@@ -92,7 +95,10 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final totalDuplicates = _duplicateGroups.fold<int>(0, (sum, g) => sum + g.length - 1);
+    final totalDuplicates = _duplicateGroups.fold<int>(
+      0,
+      (sum, g) => sum + g.length - 1,
+    );
 
     return Dialog(
       insetPadding: const EdgeInsets.all(24),
@@ -105,7 +111,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
               ),
               child: Row(
                 children: [
@@ -115,10 +123,15 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Gestione Doppioni', style: theme.textTheme.titleLarge),
+                        Text(
+                          'Gestione Doppioni',
+                          style: theme.textTheme.titleLarge,
+                        ),
                         Text(
                           '${_duplicateGroups.length} gruppi trovati · $totalDuplicates file duplicati',
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
@@ -135,11 +148,17 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
             if (_lastMessage != null)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: theme.colorScheme.primaryContainer,
                 child: Text(
                   _lastMessage!,
-                  style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 12),
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontSize: 12,
+                  ),
                 ),
               ),
 
@@ -153,24 +172,38 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_outline, size: 64, color: Colors.green.shade400),
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 64,
+                            color: Colors.green.shade400,
+                          ),
                           const SizedBox(height: 12),
-                          const Text('Nessun doppione trovato!', style: TextStyle(fontSize: 18)),
+                          const Text(
+                            'Nessun doppione trovato!',
+                            style: TextStyle(fontSize: 18),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             'Tutti i titoli nell\'archivio sono unici.',
-                            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                           // Show reset button if there are ignored groups
-                          if (SettingsService().ignoredDuplicateKeys.isNotEmpty) ...[
+                          if (SettingsService()
+                              .ignoredDuplicateKeys
+                              .isNotEmpty) ...[
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () async {
-                                await SettingsService().clearIgnoredDuplicateKeys();
+                                await SettingsService()
+                                    .clearIgnoredDuplicateKeys();
                                 _refresh();
                               },
                               icon: const Icon(Icons.refresh, size: 16),
-                              label: Text('Ripristina ${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati'),
+                              label: Text(
+                                'Ripristina ${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati',
+                              ),
                             ),
                           ],
                         ],
@@ -183,31 +216,50 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                       itemBuilder: (context, groupIdx) {
                         final group = _duplicateGroups[groupIdx];
                         // Use first video's title for group header
-                        final groupTitle = group.first.title.isNotEmpty ? group.first.title : '(senza titolo)';
+                        final groupTitle = group.first.title.isNotEmpty
+                            ? group.first.title
+                            : '(senza titolo)';
                         return Card(
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: theme.colorScheme.outlineVariant),
+                            side: BorderSide(
+                              color: theme.colorScheme.outlineVariant,
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // Group header with 'Confronta' button
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                                  color: theme.colorScheme.errorContainer
+                                      .withValues(alpha: 0.4),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(8),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 16,
+                                      color: theme.colorScheme.error,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         '$groupTitle  ·  ${group.length} copie',
-                                        style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onErrorContainer),
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onErrorContainer,
+                                            ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -216,17 +268,31 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                       onPressed: () async {
                                         final changed = await showDialog<bool>(
                                           context: context,
-                                          builder: (_) => DuplicateCompareDialog(group: group),
+                                          builder: (_) =>
+                                              DuplicateCompareDialog(
+                                                group: group,
+                                              ),
                                         );
                                         if (changed == true) _refresh();
                                       },
-                                      icon: const Icon(Icons.compare_arrows, size: 14),
-                                      label: const Text('Confronta', style: TextStyle(fontSize: 12)),
+                                      icon: const Icon(
+                                        Icons.compare_arrows,
+                                        size: 14,
+                                      ),
+                                      label: const Text(
+                                        'Confronta',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
                                       style: TextButton.styleFrom(
-                                        foregroundColor: theme.colorScheme.onErrorContainer,
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        foregroundColor:
+                                            theme.colorScheme.onErrorContainer,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
                                       ),
                                     ),
                                   ],
@@ -239,8 +305,12 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                   video: video,
                                   group: group,
                                   getFileSizeKb: _getFileSizeKb,
-                                  onDeleteDb: _isLoading ? null : () => _deleteFromDb(video),
-                                  onDeleteDisk: _isLoading ? null : () => _deleteFromDbAndDisk(video),
+                                  onDeleteDb: _isLoading
+                                      ? null
+                                      : () => _deleteFromDb(video),
+                                  onDeleteDisk: _isLoading
+                                      ? null
+                                      : () => _deleteFromDbAndDisk(video),
                                   onGroupChanged: _refresh,
                                   isLast: entry.key == group.length - 1,
                                 );
@@ -257,34 +327,50 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-                border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
+                border: Border(
+                  top: BorderSide(color: theme.colorScheme.outlineVariant),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       '"Solo DB" rimuove il record ma lascia i file intatti. "Disco" elimina permanentemente tutti i file associati.',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   // Reset ignored button (shown only when ignored groups exist)
                   if (SettingsService().ignoredDuplicateKeys.isNotEmpty)
                     Tooltip(
-                      message: '${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati — clicca per ripristinarli',
+                      message:
+                          '${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati — clicca per ripristinarli',
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           await SettingsService().clearIgnoredDuplicateKeys();
                           _refresh();
                         },
                         icon: const Icon(Icons.visibility_outlined, size: 14),
-                        label: Text('Reset ignorati (${SettingsService().ignoredDuplicateKeys.length})'),
+                        label: Text(
+                          'Reset ignorati (${SettingsService().ignoredDuplicateKeys.length})',
+                        ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onSurfaceVariant,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                         ),
                       ),
                     ),
@@ -365,7 +451,13 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
       decoration: BoxDecoration(
         border: widget.isLast
             ? null
-            : Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5))),
+            : Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
+                ),
+              ),
       ),
       child: InkWell(
         onTap: () async {
@@ -400,13 +492,18 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                         Expanded(
                           child: Text(
                             filename,
-                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(4),
@@ -414,11 +511,18 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.info_outline, size: 10, color: theme.colorScheme.onPrimaryContainer),
+                              Icon(
+                                Icons.info_outline,
+                                size: 10,
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
                               const SizedBox(width: 3),
                               Text(
                                 'Dettagli',
-                                style: TextStyle(fontSize: 10, color: theme.colorScheme.onPrimaryContainer),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                ),
                               ),
                             ],
                           ),
@@ -427,37 +531,66 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                     ),
                     Text(
                       dirPath,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Row(
                       children: [
                         if (video.duration.isNotEmpty) ...[
-                          Icon(Icons.timer_outlined, size: 12, color: theme.colorScheme.onSurfaceVariant),
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 3),
-                          Text(video.duration, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                          Text(
+                            video.duration,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(width: 10),
                         ],
                         if (video.genres.isNotEmpty) ...[
-                          Icon(Icons.local_movies_outlined, size: 12, color: theme.colorScheme.onSurfaceVariant),
+                          Icon(
+                            Icons.local_movies_outlined,
+                            size: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 3),
                           Flexible(
                             child: Text(
                               video.genres,
-                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 10),
                         ],
-                        Icon(Icons.storage_outlined, size: 12, color: theme.colorScheme.onSurfaceVariant),
+                        Icon(
+                          Icons.storage_outlined,
+                          size: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 3),
                         _sizeLoaded
-                            ? Text(_formatSize(_sizeKb), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+                            ? Text(
+                                _formatSize(_sizeKb),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              )
                             : SizedBox(
                                 width: 10,
                                 height: 10,
-                                child: CircularProgressIndicator(strokeWidth: 1.5, color: theme.colorScheme.onSurfaceVariant),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
                         if (video.rating > 0) ...[
                           const SizedBox(width: 10),
@@ -465,7 +598,9 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                           const SizedBox(width: 2),
                           Text(
                             video.rating.toStringAsFixed(1),
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.amber),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.amber,
+                            ),
                           ),
                         ],
                       ],
@@ -483,9 +618,15 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                   OutlinedButton.icon(
                     onPressed: widget.onDeleteDb,
                     icon: const Icon(Icons.delete_outline, size: 14),
-                    label: const Text('Solo DB', style: TextStyle(fontSize: 12)),
+                    label: const Text(
+                      'Solo DB',
+                      style: TextStyle(fontSize: 12),
+                    ),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -494,10 +635,16 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                   FilledButton.icon(
                     onPressed: widget.onDeleteDisk,
                     icon: const Icon(Icons.delete_forever, size: 14),
-                    label: const Text('+ Disco', style: TextStyle(fontSize: 12)),
+                    label: const Text(
+                      '+ Disco',
+                      style: TextStyle(fontSize: 12),
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade700,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),

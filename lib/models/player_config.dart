@@ -1,11 +1,6 @@
 import 'dart:io';
 
-enum PlayerPreset {
-  vlc,
-  mpv,
-  mpcHc,
-  custom,
-}
+enum PlayerPreset { vlc, mpv, mpcHc, custom }
 
 class PlayerConfig {
   final PlayerPreset preset;
@@ -69,7 +64,7 @@ class PlayerConfig {
   // Auto-detect common players
   static Future<PlayerConfig?> autoDetect() async {
     final detectionPaths = _getDetectionPaths();
-    
+
     for (final entry in detectionPaths.entries) {
       for (final path in entry.value) {
         if (await File(path).exists()) {
@@ -109,10 +104,7 @@ class PlayerConfig {
           r'C:\Program Files\VideoLAN\VLC\vlc.exe',
           r'C:\Program Files (x86)\VideoLAN\VLC\vlc.exe',
         ],
-        PlayerPreset.mpv: [
-          r'C:\Program Files\mpv\mpv.exe',
-          r'C:\mpv\mpv.exe',
-        ],
+        PlayerPreset.mpv: [r'C:\Program Files\mpv\mpv.exe', r'C:\mpv\mpv.exe'],
         PlayerPreset.mpcHc: [
           r'C:\Program Files\MPC-HC\mpc-hc64.exe',
           r'C:\Program Files (x86)\MPC-HC\mpc-hc.exe',
@@ -120,13 +112,8 @@ class PlayerConfig {
       };
     } else if (Platform.isMacOS) {
       return {
-        PlayerPreset.vlc: [
-          '/Applications/VLC.app/Contents/MacOS/VLC',
-        ],
-        PlayerPreset.mpv: [
-          '/usr/local/bin/mpv',
-          '/opt/homebrew/bin/mpv',
-        ],
+        PlayerPreset.vlc: ['/Applications/VLC.app/Contents/MacOS/VLC'],
+        PlayerPreset.mpv: ['/usr/local/bin/mpv', '/opt/homebrew/bin/mpv'],
       };
     }
     return {};

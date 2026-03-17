@@ -35,7 +35,9 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Pulisci Lista'),
-        content: const Text('Vuoi rimuovere tutti i file ignorati? L\'app proverà di nuovo a rinominarli alla prossima esecuzione.'),
+        content: const Text(
+          'Vuoi rimuovere tutti i file ignorati? L\'app proverà di nuovo a rinominarli alla prossima esecuzione.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -79,53 +81,59 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _failedItems.isEmpty
-              ? Center(
-                  child: Text(
-                    'Nessun file fallito o ignorato.',
-                    style: Theme.of(context).textTheme.titleMedium,
+          ? Center(
+              child: Text(
+                'Nessun file fallito o ignorato.',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            )
+          : ListView.builder(
+              itemCount: _failedItems.length,
+              itemBuilder: (context, index) {
+                final item = _failedItems[index];
+                return Dismissible(
+                  key: ValueKey(item.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                )
-              : ListView.builder(
-                  itemCount: _failedItems.length,
-                  itemBuilder: (context, index) {
-                    final item = _failedItems[index];
-                    return Dismissible(
-                      key: ValueKey(item.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      onDismissed: (_) => _deleteItem(item),
-                      child: ListTile(
-                        leading: const Icon(Icons.error_outline, color: Colors.redAccent),
-                        title: Text(p.basename(item.path)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.errorMessage,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                            Text(
-                              item.path,
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                  onDismissed: (_) => _deleteItem(item),
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.error_outline,
+                      color: Colors.redAccent,
+                    ),
+                    title: Text(p.basename(item.path)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.errorMessage,
+                          style: const TextStyle(color: Colors.red),
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () => _deleteItem(item),
-                          tooltip: 'Rimuovi dalla lista e ritenta',
+                        Text(
+                          item.path,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      ],
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () => _deleteItem(item),
+                      tooltip: 'Rimuovi dalla lista e ritenta',
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

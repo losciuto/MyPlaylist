@@ -45,9 +45,7 @@ class PersonAvatar extends StatelessWidget {
               ),
               child: Hero(
                 tag: 'avatar_$name',
-                child: ClipOval(
-                  child: _buildAvatarImage(),
-                ),
+                child: ClipOval(child: _buildAvatarImage()),
               ),
             ),
             const SizedBox(height: 8),
@@ -117,15 +115,22 @@ class PersonAvatar extends StatelessWidget {
               bottom: 20,
               child: Column(
                 children: [
-                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       name,
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -133,7 +138,9 @@ class PersonAvatar extends StatelessWidget {
                     onPressed: () {
                       context.read<DatabaseProvider>().filterByPerson(name);
                       Navigator.of(context).pop(); // Close dialog
-                      Navigator.of(context).pop(); // Close details dialog if it's open
+                      Navigator.of(
+                        context,
+                      ).pop(); // Close details dialog if it's open
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Filtra per questa persona'),
@@ -157,7 +164,8 @@ class PersonAvatar extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: highResUrl,
         fit: BoxFit.contain,
-        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) =>
+            const Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) => _buildErrorImage(),
       );
     } else {

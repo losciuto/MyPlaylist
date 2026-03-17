@@ -67,7 +67,9 @@ class Video {
     return Video(
       id: map['id'],
       path: map['path'],
-      mtime: (map['mtime'] is int) ? (map['mtime'] as int).toDouble() : (map['mtime'] as double? ?? 0.0),
+      mtime: (map['mtime'] is int)
+          ? (map['mtime'] as int).toDouble()
+          : (map['mtime'] as double? ?? 0.0),
       title: map['title'] ?? '',
       genres: map['genres'] ?? '',
       year: map['year']?.toString() ?? '',
@@ -77,12 +79,16 @@ class Video {
       actors: map['actors'] ?? '',
       actorThumbs: map['actorThumbs'] ?? '',
       duration: map['duration'] ?? '',
-      rating: (map['rating'] is int) ? (map['rating'] as int).toDouble() : (map['rating'] as double? ?? 0.0),
+      rating: (map['rating'] is int)
+          ? (map['rating'] as int).toDouble()
+          : (map['rating'] as double? ?? 0.0),
       isSeries: map['isSeries'] == 1,
       posterPath: map['posterPath'] ?? '',
       saga: map['saga'] ?? '',
       sagaIndex: map['sagaIndex'] ?? 0,
-      dateAdded: map['date_added'] != null ? DateTime.fromMillisecondsSinceEpoch(map['date_added']) : null,
+      dateAdded: map['date_added'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['date_added'])
+          : null,
     );
   }
 

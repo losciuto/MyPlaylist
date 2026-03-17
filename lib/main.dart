@@ -18,7 +18,7 @@ import 'services/file_watcher_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize MediaKit for video playback
   MediaKit.ensureInitialized();
 
@@ -41,7 +41,7 @@ void main() async {
     logger.error('Platform Error', error, stack);
     return true;
   };
-  
+
   // Initialize Window Manager for desktop
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     await windowManager.ensureInitialized();
@@ -54,7 +54,7 @@ void main() async {
       titleBarStyle: TitleBarStyle.normal,
       title: AppConfig.appName,
     );
-    
+
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -63,7 +63,7 @@ void main() async {
 
   // Initialize File Watcher
   final fileWatcher = FileWatcherService();
-  
+
   // Initial sync state
   if (settingsService.autoSyncEnabled) {
     for (final dir in settingsService.watchedDirectories) {
@@ -74,29 +74,30 @@ void main() async {
   // Listen for settings changes to update watcher
   settingsService.addListener(() async {
     if (settingsService.autoSyncEnabled) {
-      if (!fileWatcher.isWatching && settingsService.watchedDirectories.isNotEmpty) {
-          // Re-enable or start watching new dirs
-          for (final dir in settingsService.watchedDirectories) {
-             await fileWatcher.startWatching(dir);
-          }
+      if (!fileWatcher.isWatching &&
+          settingsService.watchedDirectories.isNotEmpty) {
+        // Re-enable or start watching new dirs
+        for (final dir in settingsService.watchedDirectories) {
+          await fileWatcher.startWatching(dir);
+        }
       } else {
-         // Check for diffs in watched directories
-         final currentWatched = fileWatcher.watchedDirectories.toSet();
-         final targetWatched = settingsService.watchedDirectories.toSet();
-         
-         // Remove no longer watched
-         for (final dir in currentWatched) {
-           if (!targetWatched.contains(dir)) {
-             await fileWatcher.stopWatching(dir);
-           }
-         }
-         
-         // Add newly watched
-         for (final dir in targetWatched) {
-           if (!currentWatched.contains(dir)) {
-             await fileWatcher.startWatching(dir);
-           }
-         }
+        // Check for diffs in watched directories
+        final currentWatched = fileWatcher.watchedDirectories.toSet();
+        final targetWatched = settingsService.watchedDirectories.toSet();
+
+        // Remove no longer watched
+        for (final dir in currentWatched) {
+          if (!targetWatched.contains(dir)) {
+            await fileWatcher.stopWatching(dir);
+          }
+        }
+
+        // Add newly watched
+        for (final dir in targetWatched) {
+          if (!currentWatched.contains(dir)) {
+            await fileWatcher.startWatching(dir);
+          }
+        }
       }
     } else {
       if (fileWatcher.isWatching) {
@@ -112,9 +113,15 @@ void main() async {
       providers: [
         Provider.value(value: database),
         ChangeNotifierProvider.value(value: settingsService),
-        ChangeNotifierProvider(create: (_) => DatabaseProvider(database)..refreshVideos()),
+        ChangeNotifierProvider(
+          create: (_) => DatabaseProvider(database)..refreshVideos(),
+        ),
         ChangeNotifierProvider(create: (context) => PlaylistProvider()),
-        ChangeNotifierProxyProvider2<SettingsService, PlaylistProvider, RemoteControlService>(
+        ChangeNotifierProxyProvider2<
+          SettingsService,
+          PlaylistProvider,
+          RemoteControlService
+        >(
           lazy: false,
           create: (context) => RemoteControlService(
             settingsService: context.read<SettingsService>(),

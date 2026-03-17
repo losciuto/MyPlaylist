@@ -48,44 +48,52 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<Map<String, dynamic>>> generateRandom({int? count, bool launchPlayer = true}) async {
+  Future<List<Map<String, dynamic>>> generateRandom({
+    int? count,
+    bool launchPlayer = true,
+  }) async {
     final limit = count ?? 20;
     // Check if we exhausted the available videos in this session
     if (_proposedVideoIds.length >= _totalVideoCount) {
       _proposedVideoIds.clear();
     }
-    
+
     final videos = await db.AppDatabase.instance.getRandomPlaylist(
-      limit, 
-      excludeIds: _proposedVideoIds.toList()
+      limit,
+      excludeIds: _proposedVideoIds.toList(),
     );
 
-    // If we didn't get enough (maybe some were deleted or filtered out), 
+    // If we didn't get enough (maybe some were deleted or filtered out),
     // and we have proposed IDs, clear and try once more.
     if (videos.isEmpty && _proposedVideoIds.isNotEmpty) {
-       _proposedVideoIds.clear();
-       final retryVideos = await db.AppDatabase.instance.getRandomPlaylist(limit);
-       await setPlaylist(retryVideos);
+      _proposedVideoIds.clear();
+      final retryVideos = await db.AppDatabase.instance.getRandomPlaylist(
+        limit,
+      );
+      await setPlaylist(retryVideos);
     } else {
-       await setPlaylist(videos);
+      await setPlaylist(videos);
     }
 
     if (launchPlayer) {
       await playCurrentPlaylist();
     }
-    
+
     return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
-  Future<List<Map<String, dynamic>>> generateRecentPlaylist({int? count, bool launchPlayer = true}) async {
+  Future<List<Map<String, dynamic>>> generateRecentPlaylist({
+    int? count,
+    bool launchPlayer = true,
+  }) async {
     final limit = count ?? 20; // Default to 20 if count is not provided
     final videos = await db.AppDatabase.instance.getRecentPlaylist(limit);
     await setPlaylist(videos);
-    
+
     if (launchPlayer) {
       await playCurrentPlaylist();
     }
-    
+
     return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
@@ -106,7 +114,7 @@ class PlaylistProvider extends ChangeNotifier {
   }) async {
     // For filtered, if the pool is too small, we might want to reset proposed IDs too?
     // Let's implement it similar to random but specifically for filtered results.
-    
+
     final videos = await db.AppDatabase.instance.getFilteredPlaylist(
       genres: genres,
       years: years,
@@ -120,7 +128,7 @@ class PlaylistProvider extends ChangeNotifier {
       sagas: sagas,
       excludedSagas: excludedSagas,
       limit: limit ?? 20,
-      excludeIds: _proposedVideoIds.toList()
+      excludeIds: _proposedVideoIds.toList(),
     );
 
     if (videos.isEmpty && _proposedVideoIds.isNotEmpty) {
@@ -140,7 +148,7 @@ class PlaylistProvider extends ChangeNotifier {
         excludedDirectors: excludedDirectors,
         sagas: sagas,
         excludedSagas: excludedSagas,
-        limit: limit ?? 20
+        limit: limit ?? 20,
       );
       await setPlaylist(retryVideos);
     } else {
@@ -150,7 +158,7 @@ class PlaylistProvider extends ChangeNotifier {
     if (launchPlayer) {
       await playCurrentPlaylist();
     }
-    
+
     return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
@@ -172,11 +180,11 @@ class PlaylistProvider extends ChangeNotifier {
 
   Future<void> _savePlaylistState() async {
     try {
-       final prefs = await SharedPreferences.getInstance();
-       final paths = _currentPlaylist.map((v) => v.path).toList();
-       await prefs.setStringList('last_playlist_paths', paths);
+      final prefs = await SharedPreferences.getInstance();
+      final paths = _currentPlaylist.map((v) => v.path).toList();
+      await prefs.setStringList('last_playlist_paths', paths);
     } catch (e) {
-       debugPrint('Error saving playlist state: $e');
+      debugPrint('Error saving playlist state: $e');
     }
   }
 
@@ -205,7 +213,7 @@ class PlaylistProvider extends ChangeNotifier {
   Future<String> createTempPlaylistFile() async {
     final tempDir = await getTemporaryDirectory();
     final playlistFile = File(p.join(tempDir.path, 'playlist.m3u'));
-    
+
     final buffer = StringBuffer();
     buffer.writeln('#EXTM3U');
     for (final v in _currentPlaylist) {
@@ -213,11 +221,11 @@ class PlaylistProvider extends ChangeNotifier {
       buffer.writeln(v.path);
     }
     await playlistFile.writeAsString(buffer.toString());
-    
+
     notifyListeners();
     return playlistFile.path;
   }
-  
+
   Future<void> playCurrentPlaylist() async {
     final settings = SettingsService();
     final path = await createTempPlaylistFile();
@@ -228,13 +236,13 @@ class PlaylistProvider extends ChangeNotifier {
     final settings = SettingsService();
     final tempDir = await getTemporaryDirectory();
     final playlistFile = File(p.join(tempDir.path, 'single_video.m3u'));
-    
+
     final buffer = StringBuffer();
     buffer.writeln('#EXTM3U');
     buffer.writeln('#EXTINF:-1,${video.title}');
     buffer.writeln(video.path);
     await playlistFile.writeAsString(buffer.toString());
-    
+
     await launchPlayer(settings.playerPath, playlistFile.path);
   }
 
@@ -269,10 +277,12 @@ class PlaylistProvider extends ChangeNotifier {
       // Get player config (with backward compatibility)
       final config = settings.playerConfig ?? PlayerConfig.custom(playerPath);
       final execPath = config.getExecutablePath();
-      
+
       // Special VLC handling (kill existing + RC interface)
-      final isVlc = config.preset == PlayerPreset.vlc || execPath.toLowerCase().contains('vlc');
-      
+      final isVlc =
+          config.preset == PlayerPreset.vlc ||
+          execPath.toLowerCase().contains('vlc');
+
       if (isVlc) {
         try {
           if (Platform.isLinux) {
@@ -289,20 +299,29 @@ class PlaylistProvider extends ChangeNotifier {
       // Build args
       List<String> args;
       if (isVlc) {
-        args = ['--extraintf', 'rc', '--rc-host', '0.0.0.0:${settings.vlcPort}', playlistPath];
+        args = [
+          '--extraintf',
+          'rc',
+          '--rc-host',
+          '0.0.0.0:${settings.vlcPort}',
+          playlistPath,
+        ];
       } else {
         args = List<String>.from(config.playlistArgs);
-        if (args.isEmpty) args = [playlistPath];
-        else args.add(playlistPath);
+        if (args.isEmpty)
+          args = [playlistPath];
+        else
+          args.add(playlistPath);
       }
 
-      debugPrint('Starting player: ${config.name} ($execPath) with args: $args');
+      debugPrint(
+        'Starting player: ${config.name} ($execPath) with args: $args',
+      );
       _playerProcess = await Process.start(execPath, args);
-      
+
       _playerProcess!.exitCode.then((_) {
         _playerProcess = null;
       });
-      
     } catch (e) {
       debugPrint('Error launching player: $e');
       rethrow;

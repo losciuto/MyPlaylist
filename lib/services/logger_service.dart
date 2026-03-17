@@ -23,21 +23,25 @@ class LoggerService {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       _logFile = File(p.join(appDir.path, 'myplaylist_app.log'));
-      
+
       // Basic rotation: if file is too big (> 5MB), rename it to .old
       if (await _logFile!.exists()) {
         final length = await _logFile!.length();
         if (length > 5 * 1024 * 1024) {
-           final oldFile = File('${_logFile!.path}.old');
-           if (await oldFile.exists()) {
-             await oldFile.delete();
-           }
-           await _logFile!.rename(oldFile.path);
-           _logFile = File(p.join(appDir.path, 'myplaylist_app.log')); // Recreate file handle
+          final oldFile = File('${_logFile!.path}.old');
+          if (await oldFile.exists()) {
+            await oldFile.delete();
+          }
+          await _logFile!.rename(oldFile.path);
+          _logFile = File(
+            p.join(appDir.path, 'myplaylist_app.log'),
+          ); // Recreate file handle
         }
       }
 
-      await info('LoggerService initialized. App version: ${AppConfig.appVersion}');
+      await info(
+        'LoggerService initialized. App version: ${AppConfig.appVersion}',
+      );
       _initialized = true;
     } catch (e) {
       debugPrint('Failed to initialize LoggerService: $e');
@@ -47,7 +51,7 @@ class LoggerService {
   Future<void> _writeLine(String level, String message) async {
     final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     final line = '[$timestamp] [$level] $message\n';
-    
+
     // Always print to console in debug mode
     if (kDebugMode) {
       debugPrint(line.trim());
@@ -70,7 +74,11 @@ class LoggerService {
     await _writeLine('WARN', message);
   }
 
-  Future<void> error(String message, [dynamic error, StackTrace? stackTrace]) async {
+  Future<void> error(
+    String message, [
+    dynamic error,
+    StackTrace? stackTrace,
+  ]) async {
     var msg = message;
     if (error != null) {
       msg += ' | Error: $error';
@@ -94,7 +102,7 @@ class LoggerService {
       await info('Logs cleared by user.');
     }
   }
-  
+
   Future<String?> getLogFilePath() async {
     return _logFile?.path;
   }

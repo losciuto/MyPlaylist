@@ -23,19 +23,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void initState() {
     super.initState();
     player = Player(
-       configuration: const PlayerConfiguration(
-          logLevel: MPVLogLevel.info,
-       ),
+      configuration: const PlayerConfiguration(logLevel: MPVLogLevel.info),
     );
     controller = VideoController(player);
-    
+
     _initPlaylist();
 
     // Listen for errors
     player.stream.error.listen((event) {
       debugPrint('Player Error: $event');
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore Player: $event')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Errore Player: $event')));
       }
     });
   }
@@ -50,7 +50,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
           final List<File> episodes = [];
           try {
             // Recursive scan for video files
-            await for (final entity in dir.list(recursive: true, followLinks: false)) {
+            await for (final entity in dir.list(
+              recursive: true,
+              followLinks: false,
+            )) {
               if (entity is File) {
                 final ext = p.extension(entity.path).toLowerCase();
                 if (VideoExtensions.supported.contains(ext)) {
@@ -59,11 +62,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
               }
             }
             // Sort episodes alphabetically to ensure correct order
-            episodes.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
-            
+            episodes.sort(
+              (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
+            );
+
             mediaList.addAll(episodes.map((e) => Media(e.path)));
           } catch (e) {
-             debugPrint('Error scanning series folder: $e');
+            debugPrint('Error scanning series folder: $e');
           }
         }
       } else {
@@ -76,10 +81,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
         await player.open(Playlist(mediaList));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Nessun file video trovato per la riproduzione.'))
+          const SnackBar(
+            content: Text('Nessun file video trovato per la riproduzione.'),
+          ),
         );
       }
-      
+
       setState(() {
         _isLoading = false;
       });
@@ -99,9 +106,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
       body: Stack(
         children: [
           Center(
-            child: _isLoading 
-              ? const CircularProgressIndicator()
-              : Video(controller: controller),
+            child: _isLoading
+                ? const CircularProgressIndicator()
+                : Video(controller: controller),
           ),
           Positioned(
             top: 20,

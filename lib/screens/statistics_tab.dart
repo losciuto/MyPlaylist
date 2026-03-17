@@ -32,7 +32,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -65,13 +65,37 @@ class _StatisticsTabState extends State<StatisticsTab> {
     final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        Expanded(child: _buildStatCard(l10n.statsTotalVideos, _stats!.totalVideos.toString(), Colors.blue)),
+        Expanded(
+          child: _buildStatCard(
+            l10n.statsTotalVideos,
+            _stats!.totalVideos.toString(),
+            Colors.blue,
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _buildStatCard(l10n.statsMovies, _stats!.moviesCount.toString(), Colors.green)),
+        Expanded(
+          child: _buildStatCard(
+            l10n.statsMovies,
+            _stats!.moviesCount.toString(),
+            Colors.green,
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _buildStatCard(l10n.statsSeries, _stats!.seriesCount.toString(), Colors.orange)),
+        Expanded(
+          child: _buildStatCard(
+            l10n.statsSeries,
+            _stats!.seriesCount.toString(),
+            Colors.orange,
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _buildStatCard(l10n.statsAvgRating, _stats!.averageRating.toStringAsFixed(1), Colors.amber)),
+        Expanded(
+          child: _buildStatCard(
+            l10n.statsAvgRating,
+            _stats!.averageRating.toStringAsFixed(1),
+            Colors.amber,
+          ),
+        ),
       ],
     );
   }
@@ -85,7 +109,14 @@ class _StatisticsTabState extends State<StatisticsTab> {
           children: [
             Text(title, style: TextStyle(color: color, fontSize: 12)),
             const SizedBox(height: 8),
-            Text(value, style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -108,7 +139,10 @@ class _StatisticsTabState extends State<StatisticsTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.statsTopGenres, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              l10n.statsTopGenres,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               height: 300,
@@ -129,12 +163,18 @@ class _StatisticsTabState extends State<StatisticsTab> {
                     );
                   }).toList(),
                   titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                      ),
+                    ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= topGenres.length) return const Text('');
+                          if (value.toInt() >= topGenres.length)
+                            return const Text('');
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
@@ -145,8 +185,12 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                 ),
               ),
@@ -172,7 +216,10 @@ class _StatisticsTabState extends State<StatisticsTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.statsVideosByYear, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              l10n.statsVideosByYear,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               height: 250,
@@ -181,7 +228,10 @@ class _StatisticsTabState extends State<StatisticsTab> {
                   lineBarsData: [
                     LineChartBarData(
                       spots: sortedYears.asMap().entries.map((entry) {
-                        return FlSpot(entry.key.toDouble(), entry.value.value.toDouble());
+                        return FlSpot(
+                          entry.key.toDouble(),
+                          entry.value.value.toDouble(),
+                        );
                       }).toList(),
                       isCurved: true,
                       color: Colors.green,
@@ -190,20 +240,33 @@ class _StatisticsTabState extends State<StatisticsTab> {
                     ),
                   ],
                   titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                      ),
+                    ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         interval: (sortedYears.length / 10).ceil().toDouble(),
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
-                          if (index >= sortedYears.length) return const Text('');
-                          return Text(sortedYears[index].key, style: const TextStyle(fontSize: 10));
+                          if (index >= sortedYears.length)
+                            return const Text('');
+                          return Text(
+                            sortedYears[index].key,
+                            style: const TextStyle(fontSize: 10),
+                          );
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                 ),
               ),
@@ -230,13 +293,20 @@ class _StatisticsTabState extends State<StatisticsTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.statsTopSagas, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              l10n.statsTopSagas,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
-            ...topSagas.map((entry) => ListTile(
-              leading: CircleAvatar(child: Text(entry.value.toString())),
-              title: Text(entry.key),
-              subtitle: Text('${entry.value} ${entry.value == 1 ? 'video' : 'videos'}'),
-            )),
+            ...topSagas.map(
+              (entry) => ListTile(
+                leading: CircleAvatar(child: Text(entry.value.toString())),
+                title: Text(entry.key),
+                subtitle: Text(
+                  '${entry.value} ${entry.value == 1 ? 'video' : 'videos'}',
+                ),
+              ),
+            ),
           ],
         ),
       ),

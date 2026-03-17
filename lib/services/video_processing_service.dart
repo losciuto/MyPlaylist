@@ -57,7 +57,11 @@ class VideoProcessingService {
     required String mode, // 'auto' or 'interactive'
     required bool onlyMissingNfo,
     required Function(VideoProcessingStatus) onProgress,
-    required Future<Map<String, dynamic>?> Function(model.Video video, List<Map<String, dynamic>> results) onInteractiveSelection,
+    required Future<Map<String, dynamic>?> Function(
+      model.Video video,
+      List<Map<String, dynamic>> results,
+    )
+    onInteractiveSelection,
   }) async {
     _isCancelled = false;
     int updated = 0;
@@ -73,7 +77,9 @@ class VideoProcessingService {
       final video = videos[i];
 
       // Skip found videos in interactive mode if they already have info
-      if (mode == 'interactive' && video.title.isNotEmpty && video.year.isNotEmpty) {
+      if (mode == 'interactive' &&
+          video.title.isNotEmpty &&
+          video.year.isNotEmpty) {
         alreadyInSync++;
         continue;
       }
@@ -87,28 +93,40 @@ class VideoProcessingService {
         }
       }
 
-      onProgress(VideoProcessingStatus(
-        current: i + 1,
-        total: total,
-        currentTitle: video.title.isNotEmpty ? video.title : p.basename(video.path),
-      ));
+      onProgress(
+        VideoProcessingStatus(
+          current: i + 1,
+          total: total,
+          currentTitle: video.title.isNotEmpty
+              ? video.title
+              : p.basename(video.path),
+        ),
+      );
 
       try {
         // Tiered Search Logic
-        String baseQuery = p.basenameWithoutExtension(video.path)
+        String baseQuery = p
+            .basenameWithoutExtension(video.path)
             .replaceAll('.', ' ')
             .replaceAll('_', ' ')
             .replaceAll(RegExp(r'\(\d{4}\)'), '')
             .trim();
 
         List<String> queriesToTry = [baseQuery];
-        final words = baseQuery.split(RegExp(r'\s+')).where((w) => w.length > 1).toList();
+        final words = baseQuery
+            .split(RegExp(r'\s+'))
+            .where((w) => w.length > 1)
+            .toList();
         if (words.length >= 3) queriesToTry.add(words.take(2).join(' '));
         if (words.isNotEmpty) queriesToTry.add(words.first);
         queriesToTry = queriesToTry.toSet().toList();
 
-        final yearMatch = RegExp(r'\((\d{4})\)').firstMatch(video.title) ?? RegExp(r'\((\d{4})\)').firstMatch(p.basename(video.path));
-        final int? year = yearMatch != null ? int.tryParse(yearMatch.group(1)!) : null;
+        final yearMatch =
+            RegExp(r'\((\d{4})\)').firstMatch(video.title) ??
+            RegExp(r'\((\d{4})\)').firstMatch(p.basename(video.path));
+        final int? year = yearMatch != null
+            ? int.tryParse(yearMatch.group(1)!)
+            : null;
 
         List<Map<String, dynamic>> results = [];
         final isSeries = video.isSeries;
@@ -155,7 +173,7 @@ class VideoProcessingService {
         }
 
         await File(nfoPath).writeAsString(nfoContent);
-        
+
         String localPosterPath = video.posterPath;
         final baseDir = isSeries ? video.path : p.dirname(video.path);
         final baseFileName = p.basenameWithoutExtension(video.path);
@@ -163,41 +181,45 @@ class VideoProcessingService {
         // Initialize Fanart Service
         final fanart = FanartTvService(fanartApiKey);
         Map<String, dynamic>? fanartImages;
-        
+
         // Fetch Fanart Data
         if (fanart.hasKey) {
-           try {
-             if (isSeries) {
-                // TVDB mapping would be better but simple TMDB ID lookup often works for Fanart v3 if supported
-                // However, without TVDB ID, this might fail for some shows on Fanart.
-                // We'll rely on what we have. TMDB API returns external_ids often? 
-                // Wait, TMDB Service `getTvShowDetails` asks for 'append_to_response': 'credits,images'.
-                // We should check if we can get external_ids from TMDB details.
-                // For now, let's try calling with TMDB ID (Fanart documentation says it supports it for movies, mixed for TV).
-                // Actually, let's just use it and fail gracefully.
-                fanartImages = await fanart.getTvShowImages(selectedMovie['id']);
-             } else {
-                fanartImages = await fanart.getMovieImages(selectedMovie['id']);
-             }
-           } catch (e) {
-             debugPrint('Fanart fetch failed: $e');
-           }
+          try {
+            if (isSeries) {
+              // TVDB mapping would be better but simple TMDB ID lookup often works for Fanart v3 if supported
+              // However, without TVDB ID, this might fail for some shows on Fanart.
+              // We'll rely on what we have. TMDB API returns external_ids often?
+              // Wait, TMDB Service `getTvShowDetails` asks for 'append_to_response': 'credits,images'.
+              // We should check if we can get external_ids from TMDB details.
+              // For now, let's try calling with TMDB ID (Fanart documentation says it supports it for movies, mixed for TV).
+              // Actually, let's just use it and fail gracefully.
+              fanartImages = await fanart.getTvShowImages(selectedMovie['id']);
+            } else {
+              fanartImages = await fanart.getMovieImages(selectedMovie['id']);
+            }
+          } catch (e) {
+            debugPrint('Fanart fetch failed: $e');
+          }
         }
 
         // Helper to download file
         Future<void> downloadFile(String url, String path) async {
-           try {
-             final resp = await http.get(Uri.parse(url));
-             if (resp.statusCode == 200) await File(path).writeAsBytes(resp.bodyBytes);
-           } catch (e) {
-             debugPrint('Download failed ($url): $e');
-           }
+          try {
+            final resp = await http.get(Uri.parse(url));
+            if (resp.statusCode == 200)
+              await File(path).writeAsBytes(resp.bodyBytes);
+          } catch (e) {
+            debugPrint('Download failed ($url): $e');
+          }
         }
 
         // Poster (TMDB usually better for localized posters, keep TMDB as primary unless missing)
         if (details['poster_path'] != null) {
-          final posterUrl = 'https://image.tmdb.org/t/p/original${details['poster_path']}';
-          final posterPath = isSeries ? p.join(baseDir, 'poster.jpg') : p.join(baseDir, '$baseFileName-poster.jpg');
+          final posterUrl =
+              'https://image.tmdb.org/t/p/original${details['poster_path']}';
+          final posterPath = isSeries
+              ? p.join(baseDir, 'poster.jpg')
+              : p.join(baseDir, '$baseFileName-poster.jpg');
           await downloadFile(posterUrl, posterPath);
           localPosterPath = posterPath;
         }
@@ -206,66 +228,87 @@ class VideoProcessingService {
         // We look for 'moviebackground' in fanart or use TMDB
         String? backdropUrl;
         if (fanartImages != null) {
-           final backgrounds = fanartImages[isSeries ? 'showbackground' : 'moviebackground'] as List?;
-           if (backgrounds != null && backgrounds.isNotEmpty) {
-             // Get the most liked or first
-             backdropUrl = backgrounds.first['url'];
-           }
+          final backgrounds =
+              fanartImages[isSeries ? 'showbackground' : 'moviebackground']
+                  as List?;
+          if (backgrounds != null && backgrounds.isNotEmpty) {
+            // Get the most liked or first
+            backdropUrl = backgrounds.first['url'];
+          }
         }
-        
+
         if (backdropUrl == null && details['backdrop_path'] != null) {
-           backdropUrl = 'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
+          backdropUrl =
+              'https://image.tmdb.org/t/p/original${details['backdrop_path']}';
         }
 
         if (backdropUrl != null) {
-          final fanartPath = isSeries ? p.join(baseDir, 'fanart.jpg') : p.join(baseDir, '$baseFileName-fanart.jpg');
+          final fanartPath = isSeries
+              ? p.join(baseDir, 'fanart.jpg')
+              : p.join(baseDir, '$baseFileName-fanart.jpg');
           await downloadFile(backdropUrl, fanartPath);
         }
 
         // Logo / ClearArt (Fanart.tv is KING here)
         String? logoUrl;
         if (fanartImages != null) {
-           // check specifically for hdmovielogo, hdtvlogo (clearlogo), or clearart
-           final logos = fanartImages[isSeries ? 'hdtvlogo' : 'hdmovielogo'] as List?;
-           final clearlogo = fanartImages['clearlogo'] as List?; // fallback
-           
-           if (logos != null && logos.isNotEmpty) {
-             logoUrl = logos.first['url']; // Fanart usually sorts by likes/usage
-           } else if (clearlogo != null && clearlogo.isNotEmpty) {
-             logoUrl = clearlogo.first['url'];
-           }
+          // check specifically for hdmovielogo, hdtvlogo (clearlogo), or clearart
+          final logos =
+              fanartImages[isSeries ? 'hdtvlogo' : 'hdmovielogo'] as List?;
+          final clearlogo = fanartImages['clearlogo'] as List?; // fallback
+
+          if (logos != null && logos.isNotEmpty) {
+            logoUrl = logos.first['url']; // Fanart usually sorts by likes/usage
+          } else if (clearlogo != null && clearlogo.isNotEmpty) {
+            logoUrl = clearlogo.first['url'];
+          }
         }
 
         // Fallback to TMDB logos
-        if (logoUrl == null && details['images'] != null && details['images']['logos'] != null) {
+        if (logoUrl == null &&
+            details['images'] != null &&
+            details['images']['logos'] != null) {
           final logos = details['images']['logos'] as List;
           if (logos.isNotEmpty) {
-            logoUrl = 'https://image.tmdb.org/t/p/original${logos.first['file_path']}';
+            logoUrl =
+                'https://image.tmdb.org/t/p/original${logos.first['file_path']}';
           }
         }
 
         if (logoUrl != null) {
-           final logoPath = isSeries ? p.join(baseDir, 'clearlogo.png') : p.join(baseDir, '$baseFileName-clearlogo.png');
-           await downloadFile(logoUrl, logoPath);
+          final logoPath = isSeries
+              ? p.join(baseDir, 'clearlogo.png')
+              : p.join(baseDir, '$baseFileName-clearlogo.png');
+          await downloadFile(logoUrl, logoPath);
         }
-        
+
         // Disc Art (Exclusive to Fanart/Specialized sites)
         if (fanartImages != null && !isSeries) {
-           final discs = fanartImages['moviedisc'] as List?;
-           if (discs != null && discs.isNotEmpty) {
-              final discUrl = discs.first['url'];
-              final discPath = p.join(baseDir, '$baseFileName-disc.png');
-              await downloadFile(discUrl, discPath);
-           }
+          final discs = fanartImages['moviedisc'] as List?;
+          if (discs != null && discs.isNotEmpty) {
+            final discUrl = discs.first['url'];
+            final discPath = p.join(baseDir, '$baseFileName-disc.png');
+            await downloadFile(discUrl, discPath);
+          }
         }
 
         // Update DB
-        final nfoTitle = isSeries ? details['name'] : (details['title'] ?? video.title);
-        final nfoYear = (isSeries ? details['first_air_date'] : details['release_date'])?.toString().split('-').first ?? video.year;
-        final gList = details['genres'] != null ? (details['genres'] as List).map((g) => g['name']).join(', ') : video.genres;
+        final nfoTitle = isSeries
+            ? details['name']
+            : (details['title'] ?? video.title);
+        final nfoYear =
+            (isSeries ? details['first_air_date'] : details['release_date'])
+                ?.toString()
+                .split('-')
+                .first ??
+            video.year;
+        final gList = details['genres'] != null
+            ? (details['genres'] as List).map((g) => g['name']).join(', ')
+            : video.genres;
         final nfoPlot = details['overview'] ?? video.plot;
-        final nfoRating = (details['vote_average'] as num?)?.toDouble() ?? video.rating;
-        
+        final nfoRating =
+            (details['vote_average'] as num?)?.toDouble() ?? video.rating;
+
         String nfoActors = video.actors;
         String nfoDirectors = video.directors;
         String nfoActorThumbs = video.actorThumbs;
@@ -276,20 +319,40 @@ class VideoProcessingService {
           if (cast != null && cast.isNotEmpty) {
             final topCast = cast.take(5).toList();
             nfoActors = topCast.map((c) => c['name']).join(', ');
-            nfoActorThumbs = topCast.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+            nfoActorThumbs = topCast
+                .map(
+                  (c) => c['profile_path'] != null
+                      ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
+                      : '',
+                )
+                .join('|');
           }
 
           if (isSeries) {
             if (details['created_by'] != null) {
               final creators = details['created_by'] as List;
               nfoDirectors = creators.map((c) => c['name']).join(', ');
-              nfoDirectorThumbs = creators.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+              nfoDirectorThumbs = creators
+                  .map(
+                    (c) => c['profile_path'] != null
+                        ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
+                        : '',
+                  )
+                  .join('|');
             }
           } else {
-            final directors = (details['credits']['crew'] as List?)?.where((c) => c['job'] == 'Director').toList();
+            final directors = (details['credits']['crew'] as List?)
+                ?.where((c) => c['job'] == 'Director')
+                .toList();
             if (directors != null && directors.isNotEmpty) {
               nfoDirectors = directors.map((c) => c['name']).join(', ');
-              nfoDirectorThumbs = directors.map((c) => c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}' : '').join('|');
+              nfoDirectorThumbs = directors
+                  .map(
+                    (c) => c['profile_path'] != null
+                        ? 'https://image.tmdb.org/t/p/w185${c['profile_path']}'
+                        : '',
+                  )
+                  .join('|');
             }
           }
         }
@@ -310,12 +373,13 @@ class VideoProcessingService {
           rating: nfoRating,
           posterPath: localPosterPath,
           isSeries: video.isSeries,
-          saga: (details['belongs_to_collection'] != null) ? details['belongs_to_collection']['name'] : video.saga,
+          saga: (details['belongs_to_collection'] != null)
+              ? details['belongs_to_collection']['name']
+              : video.saga,
         );
 
         await db.AppDatabase.instance.updateVideo(updatedVideo);
         updated++;
-
       } catch (e) {
         errors++;
         debugPrint('Error TMDB processing ${video.path}: $e');
@@ -324,10 +388,10 @@ class VideoProcessingService {
     }
 
     return VideoProcessingResult(
-      updated: updated, 
-      skipped: skippedCount, 
+      updated: updated,
+      skipped: skippedCount,
       alreadyInSync: alreadyInSync,
-      errors: errors
+      errors: errors,
     );
   }
 
@@ -343,10 +407,10 @@ class VideoProcessingService {
     int errorCount = 0;
     final total = videos.length;
     final Set<String> processedDirs = {};
-    
+
     // Cache per evitare di listare la stessa directory più volte
-    final Map<String, List<String>> dirCache = {}; 
-    
+    final Map<String, List<String>> dirCache = {};
+
     // 1. Leggi tutti i path precedentemente falliti per ignorarli
     final failedPaths = await db.AppDatabase.instance.getAllFailedRenamePaths();
 
@@ -362,91 +426,123 @@ class VideoProcessingService {
         continue;
       }
 
-      onProgress(VideoProcessingStatus(
-        current: i + 1,
-        total: total,
-        currentTitle: video.title.isNotEmpty ? video.title : p.basename(video.path),
-      ));
-      
+      onProgress(
+        VideoProcessingStatus(
+          current: i + 1,
+          total: total,
+          currentTitle: video.title.isNotEmpty
+              ? video.title
+              : p.basename(video.path),
+        ),
+      );
+
       processedDirs.add(p.dirname(video.path));
-      
+
       try {
-        String nfoPath = video.isSeries ? p.join(video.path, 'tvshow.nfo') : p.setExtension(video.path, '.nfo');
+        String nfoPath = video.isSeries
+            ? p.join(video.path, 'tvshow.nfo')
+            : p.setExtension(video.path, '.nfo');
         File nfoFile = File(nfoPath);
         bool nfoFound = await nfoFile.exists();
-        
+
         if (!nfoFound && !video.isSeries) {
-           final dirPath = p.dirname(video.path);
-           List<String>? dirFiles;
-           
-           if (dirCache.containsKey(dirPath)) {
-             debugPrint('DEBUG: Cache hit for directory: $dirPath');
-             dirFiles = dirCache[dirPath];
-           } else {
-             debugPrint('DEBUG: Cache miss for directory: $dirPath, scanning...');
-             final parentDir = Directory(dirPath);
-             if (await parentDir.exists()) {
-               try {
-                 dirFiles = await parentDir.list()
-                    .where((e) => e is File && p.extension(e.path).toLowerCase() == '.nfo')
+          final dirPath = p.dirname(video.path);
+          List<String>? dirFiles;
+
+          if (dirCache.containsKey(dirPath)) {
+            debugPrint('DEBUG: Cache hit for directory: $dirPath');
+            dirFiles = dirCache[dirPath];
+          } else {
+            debugPrint(
+              'DEBUG: Cache miss for directory: $dirPath, scanning...',
+            );
+            final parentDir = Directory(dirPath);
+            if (await parentDir.exists()) {
+              try {
+                dirFiles = await parentDir
+                    .list()
+                    .where(
+                      (e) =>
+                          e is File &&
+                          p.extension(e.path).toLowerCase() == '.nfo',
+                    )
                     .map((e) => e.path)
                     .toList();
-                 dirCache[dirPath] = dirFiles;
-               } catch (e) {
-                 debugPrint('Error listing directory $dirPath: $e');
-               }
-             }
-           }
-
-           if (dirFiles != null) {
-              final videoBasenameNoExt = p.basenameWithoutExtension(video.path).toLowerCase();
-              for (final path in dirFiles) {
-                if (p.basenameWithoutExtension(path).toLowerCase() == videoBasenameNoExt) {
-                  nfoPath = path;
-                  nfoFile = File(nfoPath);
-                  nfoFound = true;
-                  break;
-                }
+                dirCache[dirPath] = dirFiles;
+              } catch (e) {
+                debugPrint('Error listing directory $dirPath: $e');
               }
-           }
+            }
+          }
+
+          if (dirFiles != null) {
+            final videoBasenameNoExt = p
+                .basenameWithoutExtension(video.path)
+                .toLowerCase();
+            for (final path in dirFiles) {
+              if (p.basenameWithoutExtension(path).toLowerCase() ==
+                  videoBasenameNoExt) {
+                nfoPath = path;
+                nfoFile = File(nfoPath);
+                nfoFound = true;
+                break;
+              }
+            }
+          }
         }
 
-         if (!nfoFound) {
+        if (!nfoFound) {
           // Registra il fallimento per evitare di ritentare in futuro
-          await db.AppDatabase.instance.insertFailedRename(video.path, "File .nfo non trovato");
+          await db.AppDatabase.instance.insertFailedRename(
+            video.path,
+            "File .nfo non trovato",
+          );
           errorCount++;
           continue;
         }
 
         final metadata = await NfoParser.parseNfo(nfoPath);
-        if (metadata == null || metadata['title'] == null || metadata['title'].toString().isEmpty) {
-          await db.AppDatabase.instance.insertFailedRename(video.path, "Titolo mancante o nfo invalido");
+        if (metadata == null ||
+            metadata['title'] == null ||
+            metadata['title'].toString().isEmpty) {
+          await db.AppDatabase.instance.insertFailedRename(
+            video.path,
+            "Titolo mancante o nfo invalido",
+          );
           errorCount++;
           continue;
         }
 
         final nfoTitle = metadata['title'];
         final nfoYear = metadata['year'];
-        
-        String norm(String? s) => (s ?? '').trim().toLowerCase()
+
+        String norm(String? s) => (s ?? '')
+            .trim()
+            .toLowerCase()
             .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
             .replaceAll(RegExp(r'\s+'), ' ');
 
-        String targetTitle = (nfoYear != null && nfoYear.isNotEmpty) ? '$nfoTitle ($nfoYear)' : nfoTitle;
+        String targetTitle = (nfoYear != null && nfoYear.isNotEmpty)
+            ? '$nfoTitle ($nfoYear)'
+            : nfoTitle;
 
         // Controllo se il DB è disallineato rispetto alla target title
         bool dbMismatch = norm(video.title) != norm(targetTitle);
-        
+
         // Usiamo un controllo completo passando sempre da MetadataService.
         // Questo garantisce che:
         // 1. Il tag 'Codificato da' sia presente anche se il titolo DB è già corretto.
         // 2. Eventuali errori di FFmpeg/integrità vengano rilevati e loggati.
         // La velocità è garantita dal pre-check interno a MetadataService.
-        bool fileMismatch = dbMismatch; 
+        bool fileMismatch = dbMismatch;
 
         final updatedVideo = model.Video(
-          id: video.id, path: video.path, mtime: video.mtime, duration: video.duration,
-          title: targetTitle, year: nfoYear ?? video.year,
+          id: video.id,
+          path: video.path,
+          mtime: video.mtime,
+          duration: video.duration,
+          title: targetTitle,
+          year: nfoYear ?? video.year,
           genres: metadata['genres'] ?? video.genres,
           directors: metadata['directors'] ?? video.directors,
           actors: metadata['actors'] ?? video.actors,
@@ -454,23 +550,31 @@ class VideoProcessingService {
           rating: metadata['rating'] ?? video.rating,
           posterPath: metadata['poster'] ?? video.posterPath,
           isSeries: video.isSeries,
-          saga: (metadata['saga'] != null && metadata['saga'].toString().isNotEmpty) ? metadata['saga'] : video.saga,
+          saga:
+              (metadata['saga'] != null &&
+                  metadata['saga'].toString().isNotEmpty)
+              ? metadata['saga']
+              : video.saga,
         );
 
         bool success = true;
         if (dbMismatch) {
           await db.AppDatabase.instance.updateVideo(updatedVideo);
         }
-        
-        // Chiamiamo SEMPRE updateFileMetadata per verificare l'integrità fisica 
+
+        // Chiamiamo SEMPRE updateFileMetadata per verificare l'integrità fisica
         // e la presenza del tag 'Codificato da', anche se il titolo DB è corretto.
         final result = await MetadataService().updateFileMetadata(updatedVideo);
-        
+
         if (result == MetadataUpdateResult.failed) {
           errorCount++;
-          final errorMsg = "Errore durante l'aggiornamento dei metadati (FFmpeg rimosso o file corrotto)";
+          final errorMsg =
+              "Errore durante l'aggiornamento dei metadati (FFmpeg rimosso o file corrotto)";
           debugPrint('ERROR updating metadata for ${video.path}: $errorMsg');
-          await db.AppDatabase.instance.insertFailedRename(video.path, errorMsg);
+          await db.AppDatabase.instance.insertFailedRename(
+            video.path,
+            errorMsg,
+          );
           continue;
         } else if (result == MetadataUpdateResult.alreadyInSync) {
           if (!dbMismatch) {
@@ -478,12 +582,15 @@ class VideoProcessingService {
             continue;
           }
         }
-        
+
         updatedCount++;
       } catch (e) {
         errorCount++;
         debugPrint('ERROR renaming video ${video.path}: $e');
-        await db.AppDatabase.instance.insertFailedRename(video.path, "Eccezione durante la rinomina: ${e.toString()}");
+        await db.AppDatabase.instance.insertFailedRename(
+          video.path,
+          "Eccezione durante la rinomina: ${e.toString()}",
+        );
       }
       await Future.delayed(Duration.zero);
     }
@@ -495,11 +602,11 @@ class VideoProcessingService {
     }
 
     return VideoProcessingResult(
-      updated: updatedCount, 
-      skipped: 0, 
+      updated: updatedCount,
+      skipped: 0,
       alreadyInSync: alreadyInSyncCount,
       previouslyFailed: previouslyFailedCount,
-      errors: errorCount
+      errors: errorCount,
     );
   }
 
@@ -556,7 +663,8 @@ class VideoProcessingService {
           await for (final entity in parentDir.list()) {
             if (entity is File) {
               final name = p.basename(entity.path);
-              if (name.startsWith('$baseName-') && !deleted.contains(entity.path)) {
+              if (name.startsWith('$baseName-') &&
+                  !deleted.contains(entity.path)) {
                 await entity.delete();
                 deleted.add(entity.path);
               }

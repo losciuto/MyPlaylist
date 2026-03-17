@@ -29,155 +29,211 @@ class _DatabaseTabState extends State<DatabaseTab> {
   final TextEditingController _searchController = TextEditingController();
   final VideoProcessingService _processingService = VideoProcessingService();
   final ScrollController _horizontalScrollController = ScrollController();
-  
+
   bool _onlyMissingNfo = false;
 
   Future<void> _bulkGenerateNfo() async {
-     final apiKey = context.read<SettingsService>().tmdbApiKey;
-     final fanartApiKey = context.read<SettingsService>().fanartApiKey;
-     
-     if (apiKey.isEmpty) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing)));
-       return;
-     }
+    final apiKey = context.read<SettingsService>().tmdbApiKey;
+    final fanartApiKey = context.read<SettingsService>().fanartApiKey;
 
-     final mode = await showDialog<String>(
-       context: context,
-       builder: (ctx) => AlertDialog(
-         title: Text(AppLocalizations.of(context)!.tmdbGenTitle),
-         content: StatefulBuilder(
-           builder: (context, setState) {
-             return Column(
-               mainAxisSize: MainAxisSize.min,
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text(AppLocalizations.of(context)!.tmdbGenModeMsg),
-                 const SizedBox(height: 20),
-                 CheckboxListTile(
-                   title: Text(AppLocalizations.of(context)!.onlyMissingNfo),
-                   value: _onlyMissingNfo,
-                   onChanged: (val) {
-                     setState(() {
-                        _onlyMissingNfo = val ?? false;
-                     });
-                   },
-                   contentPadding: EdgeInsets.zero,
-                   controlAffinity: ListTileControlAffinity.leading,
-                 ),
-               ],
-             );
-           }
-         ),
-         actions: [
-           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
-           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'auto'), child: Text(AppLocalizations.of(context)!.tmdbClickAuto)),
-           ElevatedButton(onPressed: () => Navigator.pop(ctx, 'interactive'), child: Text(AppLocalizations.of(context)!.tmdbClickInteractive)),
-         ],
-       ),
-     );
-     
-     if (mode == null) return;
-     if (!mounted) return;
+    if (apiKey.isEmpty) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing),
+          ),
+        );
+      return;
+    }
 
-     final provider = context.read<DatabaseProvider>();
-     final allVideos = List<Video>.from(provider.videos);
-     final total = allVideos.length;
+    final mode = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.tmdbGenTitle),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppLocalizations.of(context)!.tmdbGenModeMsg),
+                const SizedBox(height: 20),
+                CheckboxListTile(
+                  title: Text(AppLocalizations.of(context)!.onlyMissingNfo),
+                  value: _onlyMissingNfo,
+                  onChanged: (val) {
+                    setState(() {
+                      _onlyMissingNfo = val ?? false;
+                    });
+                  },
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, 'auto'),
+            child: Text(AppLocalizations.of(context)!.tmdbClickAuto),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, 'interactive'),
+            child: Text(AppLocalizations.of(context)!.tmdbClickInteractive),
+          ),
+        ],
+      ),
+    );
 
-     if (total == 0) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.noVideoInDb)));
-       return;
-     }
+    if (mode == null) return;
+    if (!mounted) return;
 
-     final progressNotifier = ValueNotifier<VideoProcessingStatus>(VideoProcessingStatus(current: 0, total: total, currentTitle: '-'));
-     
-     // Show progress dialog always, user can see status
-     showDialog(
+    final provider = context.read<DatabaseProvider>();
+    final allVideos = List<Video>.from(provider.videos);
+    final total = allVideos.length;
+
+    if (total == 0) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.noVideoInDb)),
+        );
+      return;
+    }
+
+    final progressNotifier = ValueNotifier<VideoProcessingStatus>(
+      VideoProcessingStatus(current: 0, total: total, currentTitle: '-'),
+    );
+
+    // Show progress dialog always, user can see status
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF3C3C3C),
+        content: ValueListenableBuilder<VideoProcessingStatus>(
+          valueListenable: progressNotifier,
+          builder: (ctx, status, _) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.downloadingInfo,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  status.currentTitle,
+                  style: const TextStyle(color: Colors.white70),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: status.current / total,
+                  color: Colors.blue,
+                ),
+                Text(
+                  '${status.current} / $total',
+                  style: const TextStyle(color: Colors.white54),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _processingService.cancel();
+              Navigator.pop(ctx);
+            },
+            child: Text(AppLocalizations.of(context)!.stopAllButtonLabel),
+          ),
+        ],
+      ),
+    );
+
+    final result = await _processingService.bulkGenerateNfo(
+      videos: allVideos,
+      apiKey: apiKey,
+      fanartApiKey: fanartApiKey,
+      mode: mode,
+      onlyMissingNfo: _onlyMissingNfo,
+      onProgress: (status) => progressNotifier.value = status,
+      onInteractiveSelection: (video, results) async {
+        if (!mounted) return null;
+        // Hide progress dialog temporarily maybe? No, showDialog stacks.
+        // We show selection dialog on top.
+        final choice = await showDialog<dynamic>(
           context: context,
           barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF3C3C3C),
-            content: ValueListenableBuilder<VideoProcessingStatus>(
-              valueListenable: progressNotifier,
-              builder: (ctx, status, _) {
-                 return Column(
-                   mainAxisSize: MainAxisSize.min,
-                   children: [
-                     Text(AppLocalizations.of(context)!.downloadingInfo, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                     const SizedBox(height: 10),
-                     Text(status.currentTitle, style: const TextStyle(color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
-                     const SizedBox(height: 10),
-                     LinearProgressIndicator(value: status.current / total, color: Colors.blue),
-                     Text('${status.current} / $total', style: const TextStyle(color: Colors.white54)),
-                   ],
-                 );
-              }
+          builder: (ctx) => MovieSelectionDialog(
+            title: AppLocalizations.of(context)!.selectMovieTitle,
+            results: results
+                .map(
+                  (r) => {
+                    'id': r['id'],
+                    'title': video.isSeries ? r['name'] : r['title'],
+                    'release_date': video.isSeries
+                        ? r['first_air_date']
+                        : r['release_date'],
+                    'poster_path': r['poster_path'],
+                    'overview': r['overview'],
+                  },
+                )
+                .toList(),
+            isBulkMode: true,
+          ),
+        );
+
+        if (choice is Map<String, dynamic> && choice['action'] == 'cancel') {
+          _processingService.cancel();
+          return null;
+        }
+        return choice as Map<String, dynamic>?;
+      },
+    );
+
+    if (mounted && !_processingService.isCancelled)
+      Navigator.pop(context); // Close progress dialog
+
+    if (mounted) {
+      await provider.refreshVideos();
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.genComplete),
+          content: Text(
+            AppLocalizations.of(context)!.genStatsDetailed(
+              result.updated.toString(),
+              result.alreadyInSync.toString(),
+              result.skipped.toString(),
+              result.errors.toString(),
             ),
-            actions: [
-              TextButton(onPressed: () { _processingService.cancel(); Navigator.pop(ctx); }, child: Text(AppLocalizations.of(context)!.stopAllButtonLabel))
-            ],
-          )
-     );
-
-     final result = await _processingService.bulkGenerateNfo(
-       videos: allVideos,
-       apiKey: apiKey,
-       fanartApiKey: fanartApiKey,
-       mode: mode,
-       onlyMissingNfo: _onlyMissingNfo,
-       onProgress: (status) => progressNotifier.value = status,
-       onInteractiveSelection: (video, results) async {
-          if (!mounted) return null;
-          // Hide progress dialog temporarily maybe? No, showDialog stacks.
-          // We show selection dialog on top.
-          final choice = await showDialog<dynamic>(
-            context: context,
-            barrierDismissible: false,
-            builder: (ctx) => MovieSelectionDialog(
-              title: AppLocalizations.of(context)!.selectMovieTitle,
-              results: results.map((r) => {
-                'id': r['id'],
-                'title': video.isSeries ? r['name'] : r['title'],
-                'release_date': video.isSeries ? r['first_air_date'] : r['release_date'],
-                'poster_path': r['poster_path'],
-                'overview': r['overview'],
-              }).toList(),
-              isBulkMode: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(AppLocalizations.of(context)!.ok),
             ),
-          );
-
-          if (choice is Map<String, dynamic> && choice['action'] == 'cancel') {
-            _processingService.cancel();
-            return null;
-          }
-          return choice as Map<String, dynamic>?;
-       },
-     );
-
-     if (mounted && !_processingService.isCancelled) Navigator.pop(context); // Close progress dialog
-     
-     if (mounted) {
-       await provider.refreshVideos();
-       showDialog(
-         context: context, 
-         builder: (ctx) => AlertDialog(
-           title: Text(AppLocalizations.of(context)!.genComplete),
-          content: Text(AppLocalizations.of(context)!.genStatsDetailed(
-            result.updated.toString(),
-            result.alreadyInSync.toString(),
-            result.skipped.toString(),
-            result.errors.toString(),
-          )),
-           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok))]
-         )
-       );
-     }
+          ],
+        ),
+      );
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _searchController.text = context.read<DatabaseProvider>().searchQuery;
-    
+
     // Sync search bar when provider changes (e.g. from photo filter)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DatabaseProvider>().addListener(_onProviderChange);
@@ -202,7 +258,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
     } catch (e) {}
-    
+
     _searchController.dispose();
     _horizontalScrollController.dispose();
     super.dispose();
@@ -226,7 +282,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (result == true && mounted) {
       await context.read<DatabaseProvider>().refreshVideos();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.videoUpdated)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.videoUpdated)),
+      );
     }
   }
 
@@ -235,9 +293,14 @@ class _DatabaseTabState extends State<DatabaseTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirmDeleteTitle),
-        content: Text(AppLocalizations.of(context)!.confirmDeleteMsg(video.title)),
+        content: Text(
+          AppLocalizations.of(context)!.confirmDeleteMsg(video.title),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -249,7 +312,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().deleteVideo(video);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.videoDeleted)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.videoDeleted)),
+      );
     }
   }
 
@@ -260,17 +325,26 @@ class _DatabaseTabState extends State<DatabaseTab> {
         title: Text(AppLocalizations.of(context)!.confirm),
         content: Text(AppLocalizations.of(context)!.confirmClearDb),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.no)),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(AppLocalizations.of(context)!.yesDelete, style: const TextStyle(color: Colors.red))),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context)!.no),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              AppLocalizations.of(context)!.yesDelete,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
         ],
       ),
     );
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().clearDatabase();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.dbCleared)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.dbCleared)),
+      );
     }
   }
 
@@ -281,10 +355,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
         title: Text(AppLocalizations.of(context)!.bulkRenameTitle),
         content: Text(AppLocalizations.of(context)!.bulkRenameMsg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true), 
-            child: Text(AppLocalizations.of(context)!.start)
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(AppLocalizations.of(context)!.start),
           ),
         ],
       ),
@@ -298,18 +375,26 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final total = allVideos.length;
 
     if (total == 0) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.noVideoFound)));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.noVideoFound)),
+        );
       return;
     }
 
-    final progressNotifier = ValueNotifier<VideoProcessingStatus>(VideoProcessingStatus(current: 0, total: total, currentTitle: '-'));
-    
+    final progressNotifier = ValueNotifier<VideoProcessingStatus>(
+      VideoProcessingStatus(current: 0, total: total, currentTitle: '-'),
+    );
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF3C3C3C),
-        title: Text(AppLocalizations.of(context)!.renaming, style: const TextStyle(color: Colors.white)),
+        title: Text(
+          AppLocalizations.of(context)!.renaming,
+          style: const TextStyle(color: Colors.white),
+        ),
         content: ValueListenableBuilder<VideoProcessingStatus>(
           valueListenable: progressNotifier,
           builder: (context, status, child) {
@@ -317,19 +402,51 @@ class _DatabaseTabState extends State<DatabaseTab> {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(AppLocalizations.of(context)!.processing, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                Text(
+                  AppLocalizations.of(context)!.processing,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 5),
-                Text(status.currentTitle, style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(
+                  status.currentTitle,
+                  style: const TextStyle(
+                    color: Color(0xFF4CAF50),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 20),
-                LinearProgressIndicator(value: status.current / total, backgroundColor: Colors.white10, color: const Color(0xFF4CAF50)),
+                LinearProgressIndicator(
+                  value: status.current / total,
+                  backgroundColor: Colors.white10,
+                  color: const Color(0xFF4CAF50),
+                ),
                 const SizedBox(height: 15),
-                Text('${status.current} / $total ($percent%)', style: const TextStyle(color: Colors.white70)),
+                Text(
+                  '${status.current} / $total ($percent%)',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ],
             );
           },
         ),
         actions: [
-          TextButton(onPressed: () { _processingService.cancel(); Navigator.pop(ctx); }, child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.redAccent))),
+          TextButton(
+            onPressed: () {
+              _processingService.cancel();
+              Navigator.pop(ctx);
+            },
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+          ),
         ],
       ),
     );
@@ -349,22 +466,35 @@ class _DatabaseTabState extends State<DatabaseTab> {
     if (mounted && !_processingService.isCancelled) Navigator.pop(context);
 
     if (_processingService.isCancelled && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.cancelling)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.cancelling)),
+      );
     }
 
     if (mounted) {
-       await context.read<DatabaseProvider>().refreshVideos();
-       showDialog(
+      await context.read<DatabaseProvider>().refreshVideos();
+      showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(_processingService.isCancelled ? AppLocalizations.of(context)!.opCancelled : AppLocalizations.of(context)!.opCompleted),
-          content: Text(AppLocalizations.of(context)!.bulkOpStatsDetailed(
-            result.updated.toString(),
-            result.alreadyInSync.toString(),
-            result.previouslyFailed.toString(),
-            result.errors.toString(),
-          )),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.ok))],
+          title: Text(
+            _processingService.isCancelled
+                ? AppLocalizations.of(context)!.opCancelled
+                : AppLocalizations.of(context)!.opCompleted,
+          ),
+          content: Text(
+            AppLocalizations.of(context)!.bulkOpStatsDetailed(
+              result.updated.toString(),
+              result.alreadyInSync.toString(),
+              result.previouslyFailed.toString(),
+              result.errors.toString(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(AppLocalizations.of(context)!.ok),
+            ),
+          ],
         ),
       );
     }
@@ -374,7 +504,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
   Widget build(BuildContext context) {
     final provider = Provider.of<DatabaseProvider>(context);
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -384,49 +514,63 @@ class _DatabaseTabState extends State<DatabaseTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.databaseManagementTitle,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
-                Text(l10n.videosInDatabase(provider.filteredVideos.length),
-                      style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
+                Text(
+                  l10n.databaseManagementTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4CAF50),
+                  ),
+                ),
+                Text(
+                  l10n.videosInDatabase(provider.filteredVideos.length),
+                  style: const TextStyle(
+                    color: Color(0xFF4CAF50),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
             // Search Bar
             TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      labelText: l10n.searchVideosPlaceholder,
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 20),
-                              onPressed: () {
-                                _searchController.clear();
-                                _filterVideos('');
-                                setState(() {});
-                              },
-                            )
-                          : null,
-                      border: const OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF3C3C3C)
-                          : Colors.grey[200],
-                    ),
-                    onChanged: _filterVideos, // Calls wrapper
-                  ),
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: l10n.searchVideosPlaceholder,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _filterVideos('');
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF3C3C3C)
+                    : Colors.grey[200],
+              ),
+              onChanged: _filterVideos, // Calls wrapper
+            ),
             const SizedBox(height: 10),
             // Action Buttons
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                   ElevatedButton.icon(
-                      onPressed: _clearDatabase,
-                      icon: const Icon(Icons.delete_sweep),
-                      label: Text(l10n.clearDatabaseButton),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                  ElevatedButton.icon(
+                    onPressed: _clearDatabase,
+                    icon: const Icon(Icons.delete_sweep),
+                    label: Text(l10n.clearDatabaseButton),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
                     ),
+                  ),
                   const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () => provider.refreshVideos(),
@@ -461,22 +605,30 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const FailedRenamesScreen()),
-                      ).then((_) {
-                        if (mounted) {
-                          context.read<DatabaseProvider>().refreshFailedRenamesCount();
-                        }
-                      });
+                      Navigator.of(context)
+                          .push(
+                            MaterialPageRoute(
+                              builder: (_) => const FailedRenamesScreen(),
+                            ),
+                          )
+                          .then((_) {
+                            if (mounted) {
+                              context
+                                  .read<DatabaseProvider>()
+                                  .refreshFailedRenamesCount();
+                            }
+                          });
                     },
                     icon: const Icon(Icons.list_alt_rounded),
-                    label: Text('File Ignorati/Falliti (${provider.failedRenamesCount})'),
+                    label: Text(
+                      'File Ignorati/Falliti (${provider.failedRenamesCount})',
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // The Table
             Expanded(
               child: VideoDataTable(

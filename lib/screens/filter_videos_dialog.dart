@@ -31,7 +31,10 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
   }
 
   Future<void> _loadVideos() async {
-    final videos = await db.AppDatabase.instance.getVideosByFilter(widget.category, widget.filterValue);
+    final videos = await db.AppDatabase.instance.getVideosByFilter(
+      widget.category,
+      widget.filterValue,
+    );
     if (mounted) {
       setState(() {
         _videos = videos;
@@ -61,23 +64,33 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
             // Header
             Row(
               children: [
-                const Icon(Icons.movie_filter, color: Color(0xFF4CAF50), size: 28),
+                const Icon(
+                  Icons.movie_filter,
+                  color: Color(0xFF4CAF50),
+                  size: 28,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    AppLocalizations.of(context)!.videosFor(widget.title, widget.filterValue),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    AppLocalizations.of(
+                      context,
+                    )!.videosFor(widget.title, widget.filterValue),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
                   onPressed: () => Navigator.pop(context),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Stats
             Align(
               alignment: Alignment.centerLeft,
@@ -93,14 +106,57 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: const BoxDecoration(
                 color: Color(0xFF3C3C3C),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                ),
               ),
               child: Row(
                 children: [
-                  Expanded(flex: 3, child: Text(AppLocalizations.of(context)!.labelTitle, style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 1, child: Text(AppLocalizations.of(context)!.labelYear, style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 1, child: Text(AppLocalizations.of(context)!.ratingLabel(''), style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 4, child: Text(AppLocalizations.of(context)!.pathLabel(''), style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      AppLocalizations.of(context)!.labelTitle,
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      AppLocalizations.of(context)!.labelYear,
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      AppLocalizations.of(context)!.ratingLabel(''),
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      AppLocalizations.of(context)!.pathLabel(''),
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -112,26 +168,36 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                   : Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF3C3C3C),
-                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(8), bottomRight: Radius.circular(8)),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(8),
+                          bottomRight: Radius.circular(8),
+                        ),
                         border: Border.all(color: Colors.white10),
                       ),
                       child: ListView.separated(
                         itemCount: _videos.length,
-                        separatorBuilder: (ctx, i) => const Divider(height: 1, color: Colors.white10),
+                        separatorBuilder: (ctx, i) =>
+                            const Divider(height: 1, color: Colors.white10),
                         itemBuilder: (ctx, index) {
                           final video = _videos[index];
                           return InkWell(
                             onTap: () => _showPreview(video),
                             onDoubleTap: () => _showPreview(video),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               child: Row(
                                 children: [
                                   Expanded(
                                     flex: 3,
                                     child: Text(
                                       video.title,
-                                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                      ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -140,18 +206,28 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                                     flex: 1,
                                     child: Text(
                                       video.year,
-                                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 1,
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.star, color: Colors.orange, size: 14),
+                                        const Icon(
+                                          Icons.star,
+                                          color: Colors.orange,
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           video.rating.toStringAsFixed(1),
-                                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -160,7 +236,10 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                                     flex: 4,
                                     child: SelectableText(
                                       video.path,
-                                      style: const TextStyle(color: Colors.grey, fontSize: 11),
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 11,
+                                      ),
                                       maxLines: 1,
                                     ),
                                   ),

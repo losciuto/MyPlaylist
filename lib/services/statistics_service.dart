@@ -31,7 +31,10 @@ class StatisticsService {
     final genreMap = <String, int>{};
     for (final video in videos) {
       if (video.genres.isNotEmpty) {
-        final genres = video.genres.split(',').map((g) => g.trim()).where((g) => g.isNotEmpty);
+        final genres = video.genres
+            .split(',')
+            .map((g) => g.trim())
+            .where((g) => g.isNotEmpty);
         for (final genre in genres) {
           genreMap[genre] = (genreMap[genre] ?? 0) + 1;
         }
@@ -58,7 +61,8 @@ class StatisticsService {
     final videosWithRating = videos.where((v) => v.rating > 0).toList();
     final averageRating = videosWithRating.isEmpty
         ? 0.0
-        : videosWithRating.map((v) => v.rating).reduce((a, b) => a + b) / videosWithRating.length;
+        : videosWithRating.map((v) => v.rating).reduce((a, b) => a + b) /
+              videosWithRating.length;
 
     // Series vs Movies
     final seriesCount = videos.where((v) => v.isSeries).length;

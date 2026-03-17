@@ -71,7 +71,7 @@ class FileWatcherService {
 
   void _handleFileEvent(WatchEvent event) {
     final filePath = event.path;
-    
+
     // Only process video files and NFO files
     if (!_isVideoFile(filePath) && !_isNfoFile(filePath)) {
       return;
@@ -100,7 +100,7 @@ class FileWatcherService {
 
   void _scheduleProcessing(String filePath) {
     _pendingFiles.add(filePath);
-    
+
     // Debounce to avoid processing too frequently
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDuration, () {
@@ -130,7 +130,7 @@ class FileWatcherService {
     if (!await file.exists()) return;
 
     final database = db.AppDatabase.instance;
-    
+
     // Check if video already exists
     final existing = await database.getVideoByPath(videoPath);
     if (existing != null) {
@@ -170,7 +170,8 @@ class FileWatcherService {
   }
 
   Future<void> _processNfoFile(String nfoPath) async {
-    final videoPath = '${p.withoutExtension(nfoPath)}${_findVideoExtension(nfoPath)}';
+    final videoPath =
+        '${p.withoutExtension(nfoPath)}${_findVideoExtension(nfoPath)}';
     if (videoPath.isEmpty) return;
 
     final database = db.AppDatabase.instance;
@@ -189,7 +190,7 @@ class FileWatcherService {
           actors: nfoData['actor'] ?? existing.actors,
           rating: nfoData['rating'] ?? existing.rating,
         );
-        
+
         await database.updateVideo(updatedVideo);
         debugPrint('Auto-updated video from NFO: $videoPath');
       }

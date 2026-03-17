@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 class DatabaseProvider extends ChangeNotifier {
   final AppDatabase _db;
   final NfoSyncService _syncService = NfoSyncService();
-  
+
   List<model.Video> _videos = [];
   List<model.Video> _filteredVideos = [];
   bool _isLoading = false;
@@ -19,7 +19,8 @@ class DatabaseProvider extends ChangeNotifier {
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
   String _searchQuery = '';
-  int _currentTabIndex = 0; // Default to PlaylistTab (previously _initialIndex logic)
+  int _currentTabIndex =
+      0; // Default to PlaylistTab (previously _initialIndex logic)
   int _serviceTabIndex = 0; // Index for sub-tabs in 'Servizio'
 
   DatabaseProvider(this._db);
@@ -48,12 +49,12 @@ class DatabaseProvider extends ChangeNotifier {
   Future<void> refreshVideos() async {
     _isLoading = true;
     notifyListeners();
-    
+
     final driftVideos = await _db.select(_db.videos).get();
     _videos = driftVideos.map((v) => _mapDriftToModel(v)).toList();
     _failedRenamesCount = await _db.getFailedRenamesCount();
     _applyFilterAndSort();
-    
+
     _isLoading = false;
     notifyListeners();
   }
@@ -97,7 +98,9 @@ class DatabaseProvider extends ChangeNotifier {
     _searchQuery = personName;
     _filteredVideos = _videos.where((v) {
       final actors = v.actors.split(',').map((e) => e.trim().toLowerCase());
-      final directors = v.directors.split(',').map((e) => e.trim().toLowerCase());
+      final directors = v.directors
+          .split(',')
+          .map((e) => e.trim().toLowerCase());
       final search = personName.trim().toLowerCase();
       return actors.contains(search) || directors.contains(search);
     }).toList();
@@ -118,30 +121,33 @@ class DatabaseProvider extends ChangeNotifier {
     FilterUtils.sortVideos(_filteredVideos, _sortColumnIndex, _sortAscending);
   }
 
-
   Future<void> updateVideo(model.Video video, {bool syncNfo = false}) async {
-    await _db.update(_db.videos).replace(
-      VideosCompanion(
-        id: Value(video.id!),
-        path: Value(video.path),
-        mtime: Value(video.mtime),
-        title: Value(video.title),
-        genres: Value(video.genres),
-        year: Value(video.year),
-        directors: Value(video.directors),
-        plot: Value(video.plot),
-        actors: Value(video.actors),
-        duration: Value(video.duration),
-        rating: Value(video.rating),
-        isSeries: Value(video.isSeries ? 1 : 0),
-        posterPath: Value(video.posterPath),
-        saga: Value(video.saga),
-        sagaIndex: Value(video.sagaIndex),
-        actorThumbs: Value(video.actorThumbs),
-        directorThumbs: Value(video.directorThumbs),
-        dateAdded: video.dateAdded != null ? Value(video.dateAdded) : const Value.absent(),
-      ),
-    );
+    await _db
+        .update(_db.videos)
+        .replace(
+          VideosCompanion(
+            id: Value(video.id!),
+            path: Value(video.path),
+            mtime: Value(video.mtime),
+            title: Value(video.title),
+            genres: Value(video.genres),
+            year: Value(video.year),
+            directors: Value(video.directors),
+            plot: Value(video.plot),
+            actors: Value(video.actors),
+            duration: Value(video.duration),
+            rating: Value(video.rating),
+            isSeries: Value(video.isSeries ? 1 : 0),
+            posterPath: Value(video.posterPath),
+            saga: Value(video.saga),
+            sagaIndex: Value(video.sagaIndex),
+            actorThumbs: Value(video.actorThumbs),
+            directorThumbs: Value(video.directorThumbs),
+            dateAdded: video.dateAdded != null
+                ? Value(video.dateAdded)
+                : const Value.absent(),
+          ),
+        );
 
     if (syncNfo) {
       await _syncService.saveNfo(video);
@@ -201,7 +207,7 @@ class DatabaseProvider extends ChangeNotifier {
     for (final video in _videos) {
       final String key = duplicateKey(video);
       if (key == '|' || key.startsWith('|series|') || key.isEmpty) continue;
-      if (ignored.contains(key)) continue;  // Skip ignored groups
+      if (ignored.contains(key)) continue; // Skip ignored groups
       groups.putIfAbsent(key, () => []).add(video);
     }
     return groups.values.where((group) => group.length > 1).toList();

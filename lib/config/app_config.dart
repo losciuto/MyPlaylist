@@ -15,7 +15,7 @@ class AppConfig {
   static const Color scaffoldBackgroundColor = Color(0xFF2B2B2B);
   static const Color surfaceColor = Color(0xFF2B2B2B);
   static const Color cardColor = Color(0xFF3C3C3C);
-  
+
   // UI Constants
   static const double defaultPadding = 16.0;
   static const double defaultRadius = 8.0;
@@ -33,7 +33,9 @@ class AppConfig {
           backgroundColor: seedColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(defaultRadius),
+          ),
         ),
       ),
     );
@@ -54,7 +56,9 @@ class AppConfig {
           backgroundColor: seedColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(defaultRadius),
+          ),
         ),
       ),
     );

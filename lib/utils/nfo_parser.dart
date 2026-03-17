@@ -15,7 +15,7 @@ class NfoParser {
       if (!await file.exists()) return null;
 
       final content = await file.readAsString();
-      
+
       // Find first '<' to skip any ASCII art preamble
       final startIndex = content.indexOf('<');
       if (startIndex == -1) {

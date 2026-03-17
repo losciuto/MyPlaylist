@@ -20,7 +20,11 @@ class ScanService {
   final _mediaAssetService = MediaAssetService();
 
   final List<String> seriesKeywords = [
-    'serie', 'series', 'seriale', 'tv show', 'tvshow'
+    'serie',
+    'series',
+    'seriale',
+    'tv show',
+    'tvshow',
   ];
 
   Stream<ScanStatus> scanFolder(String folderPath) async* {
@@ -33,7 +37,7 @@ class ScanService {
     yield ScanStatus('Starting scan in $folderPath...', 0);
 
     int count = 0;
-    
+
     try {
       await for (final status in _scanRecursive(dir)) {
         if (status.message == 'COUNT_UPDATE') {
@@ -81,7 +85,10 @@ class ScanService {
 
     if (isSeriesContainer) {
       try {
-        await for (final entity in dir.list(recursive: false, followLinks: false)) {
+        await for (final entity in dir.list(
+          recursive: false,
+          followLinks: false,
+        )) {
           if (entity is Directory) {
             // Each subdirectory is treated as a Series
             await _processSeries(entity);
@@ -96,13 +103,18 @@ class ScanService {
 
     // 3. Normal Recursive Scan
     try {
-      final entities = await dir.list(recursive: false, followLinks: false).toList();
-      
+      final entities = await dir
+          .list(recursive: false, followLinks: false)
+          .toList();
+
       // Process in batches of 5 to avoid overwhelming file handles/network
       const batchSize = 5;
       for (var i = 0; i < entities.length; i += batchSize) {
-        final batch = entities.sublist(i, i + batchSize > entities.length ? entities.length : i + batchSize);
-        
+        final batch = entities.sublist(
+          i,
+          i + batchSize > entities.length ? entities.length : i + batchSize,
+        );
+
         final tasks = batch.map((entity) async {
           final name = p.basename(entity.path);
           if (name.startsWith('.')) return 0;
@@ -148,10 +160,10 @@ class ScanService {
     String nfoPath = p.join(path, 'tvshow.nfo');
 
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
-    
+
     final rawTitle = metadata?['title'] ?? p.basename(path);
     final year = metadata?['year'] ?? '';
-    
+
     String formattedTitle = rawTitle;
     if (year.isNotEmpty) {
       final yearSuffix = '($year)';
@@ -196,7 +208,8 @@ class ScanService {
   Future<void> _processVideo(File videoFile) async {
     final path = videoFile.path;
     final stat = await videoFile.stat();
-    final mtime = stat.modified.millisecondsSinceEpoch / 1000.0; // Seconds as double
+    final mtime =
+        stat.modified.millisecondsSinceEpoch / 1000.0; // Seconds as double
 
     // Check for NFO (Priority: video_filename.nfo > movie.nfo)
     String nfoPath = p.setExtension(path, '.nfo');
@@ -213,15 +226,17 @@ class ScanService {
       }
     }
 
-    print('DEBUG [ScanService]: model.Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath');
-    
+    print(
+      'DEBUG [ScanService]: model.Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath',
+    );
+
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
-    
+
     // Create model.Video object
     // If metadata is null, use minimal info (filename as title)
     final rawTitle = metadata?['title'] ?? p.basenameWithoutExtension(path);
     final year = metadata?['year'] ?? '';
-    
+
     String formattedTitle = rawTitle;
     if (year.isNotEmpty) {
       final yearSuffix = '($year)';
@@ -229,7 +244,7 @@ class ScanService {
         formattedTitle = '$rawTitle $yearSuffix';
       }
     }
-    
+
     final processedDirects = await _processThumbnails(
       metadata?['directors'] ?? '',
       metadata?['directorThumbs'] ?? '',
@@ -264,7 +279,10 @@ class ScanService {
   }
 
   Future<({String names, String thumbs})> _processThumbnails(
-      String namesStr, String thumbsStr, String baseDir) async {
+    String namesStr,
+    String thumbsStr,
+    String baseDir,
+  ) async {
     if (namesStr.isEmpty) return (names: '', thumbs: '');
 
     final names = namesStr.split(',').map((e) => e.trim()).toList();
@@ -277,7 +295,9 @@ class ScanService {
       final thumb = i < thumbs.length ? thumbs[i] : '';
 
       if (thumb.isNotEmpty && thumb.startsWith('http')) {
-        downloadTasks.add(_mediaAssetService.downloadThumbnail(thumb, baseDir, name));
+        downloadTasks.add(
+          _mediaAssetService.downloadThumbnail(thumb, baseDir, name),
+        );
       } else {
         downloadTasks.add(Future.value(thumb));
       }

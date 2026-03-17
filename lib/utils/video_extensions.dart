@@ -3,7 +3,9 @@ class VideoExtensions {
   /// Keep them all lowercase and starting with a dot.
   static const List<String> supported = [
     // Standard MP4
-    '.mp4', '.m4v', '.m4a', // media_kit supports audio too if needed, but keeping primarily video
+    '.mp4',
+    '.m4v',
+    '.m4a', // media_kit supports audio too if needed, but keeping primarily video
     // Matroska
     '.mkv', '.webm',
     // AVI
@@ -27,6 +29,6 @@ class VideoExtensions {
     // Other Formats
     '.amv', '.divx', '.3gp', '.3g2', '.mxf', '.yuv',
     // Streaming/Playlist formats (supported by media_kit)
-    '.m3u', '.m3u8'
+    '.m3u', '.m3u8',
   ];
 }

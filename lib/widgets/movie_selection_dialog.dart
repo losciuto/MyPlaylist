@@ -55,14 +55,20 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
             Expanded(
               child: ListView.separated(
                 itemCount: pagedResults.length,
-                separatorBuilder: (ctx, idx) => const Divider(color: Colors.white12),
+                separatorBuilder: (ctx, idx) =>
+                    const Divider(color: Colors.white12),
                 itemBuilder: (ctx, idx) {
                   final movie = pagedResults[idx];
                   final posterPath = movie['poster_path'];
-                  final releaseDate = movie['release_date']?.toString().split('-').first ?? 'N/A';
-                  
+                  final releaseDate =
+                      movie['release_date']?.toString().split('-').first ??
+                      'N/A';
+
                   return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
                     leading: Container(
                       width: 50,
                       height: 75,
@@ -75,24 +81,35 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                           ? Image.network(
                               'https://image.tmdb.org/t/p/w92$posterPath',
                               fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) => const Icon(Icons.movie, color: Colors.grey),
+                              errorBuilder: (c, e, s) =>
+                                  const Icon(Icons.movie, color: Colors.grey),
                             )
                           : const Icon(Icons.movie, color: Colors.grey),
                     ),
                     title: Text(
                       movie['title'] ?? l10n.untitled,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.yearLabel(releaseDate), style: const TextStyle(color: Colors.white70)),
-                        if (movie['overview'] != null && movie['overview'].toString().isNotEmpty)
+                        Text(
+                          l10n.yearLabel(releaseDate),
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                        if (movie['overview'] != null &&
+                            movie['overview'].toString().isNotEmpty)
                           Text(
                             movie['overview'],
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Colors.white38, fontSize: 11),
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 11,
+                            ),
                           ),
                       ],
                     ),
@@ -108,17 +125,28 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, size: 16, color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                       onPressed: _currentPage > 0
                           ? () => setState(() => _currentPage--)
                           : null,
                     ),
                     Text(
-                      l10n.pageOf((_currentPage + 1).toString(), totalPages.toString()),
+                      l10n.pageOf(
+                        (_currentPage + 1).toString(),
+                        totalPages.toString(),
+                      ),
                       style: const TextStyle(color: Colors.white70),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                       onPressed: _currentPage < totalPages - 1
                           ? () => setState(() => _currentPage++)
                           : null,
@@ -132,8 +160,15 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
               children: [
                 if (widget.isBulkMode) ...[
                   TextButton(
-                    onPressed: () => Navigator.pop(context, {'action': 'cancel'}),
-                    child: Text(l10n.stopAllButtonLabel, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    onPressed: () =>
+                        Navigator.pop(context, {'action': 'cancel'}),
+                    child: Text(
+                      l10n.stopAllButtonLabel,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const Spacer(),
                 ],
@@ -141,7 +176,9 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                   onPressed: () => Navigator.pop(context, null),
                   child: Text(
                     widget.isBulkMode ? l10n.skipVideo : l10n.cancel,
-                    style: TextStyle(color: widget.isBulkMode ? Colors.orange : Colors.grey),
+                    style: TextStyle(
+                      color: widget.isBulkMode ? Colors.orange : Colors.grey,
+                    ),
                   ),
                 ),
               ],

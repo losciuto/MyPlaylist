@@ -26,19 +26,22 @@ class GitHubService {
         final Map<String, dynamic> data = json.decode(response.body);
         final String tagName = data['tag_name'] ?? '';
         final String body = data['body'] ?? '';
-        
+
         // Default download URL is the release page
         String downloadUrl = data['html_url'] ?? '';
-        
+
         // Try to find a direct download link for Linux (.AppImage or .deb)
         final List<dynamic>? assets = data['assets'];
         if (assets != null && assets.isNotEmpty) {
           for (final asset in assets) {
             final String name = asset['name']?.toString().toLowerCase() ?? '';
-            final String browserDownloadUrl = asset['browser_download_url'] ?? '';
-            
-            if (browserDownloadUrl.isNotEmpty && 
-                (name.endsWith('.appimage') || name.endsWith('.deb') || name.endsWith('.tar.gz'))) {
+            final String browserDownloadUrl =
+                asset['browser_download_url'] ?? '';
+
+            if (browserDownloadUrl.isNotEmpty &&
+                (name.endsWith('.appimage') ||
+                    name.endsWith('.deb') ||
+                    name.endsWith('.tar.gz'))) {
               downloadUrl = browserDownloadUrl;
               break; // Take the first matching Linux asset
             }
@@ -79,10 +82,10 @@ class GitHubService {
         if (remoteParts[i] > currentParts[i]) return true;
         if (remoteParts[i] < currentParts[i]) return false;
       }
-      
+
       return remoteParts.length > currentParts.length;
     } catch (e) {
-      return false; 
+      return false;
     }
   }
 }

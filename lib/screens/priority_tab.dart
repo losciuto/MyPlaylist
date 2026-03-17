@@ -21,7 +21,7 @@ class _PriorityTabState extends State<PriorityTab> {
   void initState() {
     super.initState();
     _searchController.text = context.read<DatabaseProvider>().searchQuery;
-    
+
     // Sync search bar when provider changes (e.g. from DB tab or photo filter)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DatabaseProvider>().addListener(_onProviderChange);
@@ -58,7 +58,7 @@ class _PriorityTabState extends State<PriorityTab> {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
     } catch (e) {}
-    
+
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -68,7 +68,7 @@ class _PriorityTabState extends State<PriorityTab> {
   Widget build(BuildContext context) {
     final provider = Provider.of<DatabaseProvider>(context);
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Use filteredVideos instead of all videos
     final sortedVideos = List<Video>.from(provider.filteredVideos);
     sortedVideos.sort((a, b) {
@@ -88,15 +88,19 @@ class _PriorityTabState extends State<PriorityTab> {
               children: [
                 Text(
                   l10n.navPriority,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                  ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
                     await context.read<DatabaseProvider>().syncDatesWithMtime();
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.opCompleted))
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l10n.opCompleted)));
                     }
                   },
                   icon: const Icon(Icons.history_toggle_off),
@@ -140,24 +144,49 @@ class _PriorityTabState extends State<PriorityTab> {
                   : ListView.separated(
                       controller: _scrollController,
                       itemCount: sortedVideos.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final video = sortedVideos[index];
-                        final dateStr = video.dateAdded != null 
-                            ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(video.dateAdded!)
+                        final dateStr = video.dateAdded != null
+                            ? DateFormat.yMMMd(
+                                Localizations.localeOf(context).toString(),
+                              ).add_Hm().format(video.dateAdded!)
                             : '-';
-                        
+
                         return ListTile(
                           onTap: () => _editVideo(video),
-                          title: Text(video.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(video.path, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          title: Text(
+                            video.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            video.path,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(dateStr, style: const TextStyle(fontSize: 12, color: Colors.blueAccent)),
+                              Text(
+                                dateStr,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blueAccent,
+                                ),
+                              ),
                               if (video.year.isNotEmpty)
-                                Text(video.year, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                Text(
+                                  video.year,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                             ],
                           ),
                         );
