@@ -356,7 +356,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 filled: true,
                 fillColor: fillColor,
               ),
-              value: settings.themeMode,
+              initialValue: settings.themeMode,
               items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
