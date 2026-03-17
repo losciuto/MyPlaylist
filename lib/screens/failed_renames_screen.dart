@@ -64,7 +64,6 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('File Ignorati/Falliti (${_failedItems.length})'),
