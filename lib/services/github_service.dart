@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 
 class UpdateInfo {
@@ -61,7 +62,7 @@ class GitHubService {
         }
       }
     } catch (e) {
-      print('Error checking for updates: $e');
+      debugPrint('Error checking for updates: $e');
     }
     return null;
   }

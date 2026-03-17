@@ -21,7 +21,6 @@ class VideoDetailsDialog extends StatefulWidget {
 }
 
 class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
-  bool _isDownloading = false;
   late final ScrollController _directorsController;
   late final ScrollController _actorsController;
 
@@ -37,111 +36,6 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
     _directorsController.dispose();
     _actorsController.dispose();
     super.dispose();
-  }
-
-  Future<void> _downloadInfo() async {
-    final apiKey = context.read<SettingsService>().tmdbApiKey;
-    if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.tmdbApiKeyMissing),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isDownloading = true);
-
-    try {
-      final service = TmdbService(apiKey);
-      final query = widget.video.title
-          .replaceAll(RegExp(r'\s*\(\d{4}\)'), '')
-          .replaceAll('.', ' ');
-      final yearStr = RegExp(
-        r'\((\d{4})\)',
-      ).firstMatch(widget.video.title)?.group(1);
-      final int? year = yearStr != null ? int.tryParse(yearStr) : null;
-
-      final results = await service.searchMovie(query, year: year);
-
-      if (results.isEmpty) {
-        if (mounted)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.tmdbNoResults),
-            ),
-          );
-        setState(() => _isDownloading = false);
-        return;
-      }
-
-      Map<String, dynamic> selectedMovie;
-      if (results.length == 1) {
-        selectedMovie = results.first;
-      } else {
-        if (!mounted) return;
-        final selection = await showDialog<Map<String, dynamic>>(
-          context: context,
-          builder: (ctx) => SimpleDialog(
-            title: Text(AppLocalizations.of(context)!.selectMovieTitle),
-            children: results
-                .map(
-                  (m) => SimpleDialogOption(
-                    onPressed: () => Navigator.pop(ctx, m),
-                    child: Text(
-                      '${m['title']} (${m['release_date']?.toString().split('-').first ?? 'N/A'})',
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-        if (selection == null) {
-          setState(() => _isDownloading = false);
-          return;
-        }
-        selectedMovie = selection;
-      }
-
-      final details = await service.getMovieDetails(selectedMovie['id']);
-      final nfoContent = NfoGenerator.generateMovieNfo(details);
-
-      // Save NFO
-      final videoFile = File(widget.video.path);
-      final nfoPath =
-          '${videoFile.parent.path}/${videoFile.uri.pathSegments.last.replaceAll(RegExp(r'\.[^.]+$'), '')}.nfo';
-      await File(nfoPath).writeAsString(nfoContent);
-
-      // Download Poster (Optional)
-      if (details['poster_path'] != null) {
-        final posterUrl =
-            'https://image.tmdb.org/t/p/original${details['poster_path']}';
-        final posterPath =
-            '${videoFile.parent.path}/${videoFile.uri.pathSegments.last.replaceAll(RegExp(r'\.[^.]+$'), '')}-poster.jpg';
-        final response = await http.get(Uri.parse(posterUrl));
-        if (response.statusCode == 200) {
-          await File(posterPath).writeAsBytes(response.bodyBytes);
-        }
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.tmdbSuccessMsg)),
-        );
-        Navigator.pop(context); // Close dialog
-      }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.genericError(e.toString()),
-            ),
-          ),
-        );
-    } finally {
-      if (mounted) setState(() => _isDownloading = false);
-    }
   }
 
   @override
@@ -176,7 +70,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                   color: Colors.black,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -193,7 +87,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             : Image.file(
                                 File(widget.video.posterPath),
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Center(
+                                errorBuilder: (_, __, _) => Center(
                                   child: Icon(
                                     Icons.movie,
                                     size: 80,
@@ -256,10 +150,10 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.1),
+                            color: Colors.amber.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.amber.withOpacity(0.3),
+                              color: Colors.amber.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
