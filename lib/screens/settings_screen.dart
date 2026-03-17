@@ -514,7 +514,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(l10n.settingsAutoSyncSubtitle),
                   value: settings.autoSyncEnabled,
                   onChanged: (val) => settings.setAutoSyncEnabled(val),
-                  activeColor: const Color(0xFF4CAF50),
+                  activeThumbColor: const Color(0xFF4CAF50),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 10),
@@ -672,7 +672,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(l10n.remoteControlSubtitle),
               value: settings.remoteServerEnabled,
               onChanged: (val) => settings.setRemoteServerEnabled(val),
-              activeColor: const Color(0xFF4CAF50),
+              activeThumbColor: const Color(0xFF4CAF50),
               contentPadding: EdgeInsets.zero,
             );
           },
@@ -812,9 +812,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.red.withOpacity(0.3)),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,10 +861,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final dbFile = File(dbPath);
 
       if (!await dbFile.exists()) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(l10n.dbNotFoundMsg)));
+        }
         return;
       }
 
@@ -892,13 +893,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.backupErrorMsg(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
+      }
     }
   }
 
@@ -914,16 +916,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final backupPath = result.files.single.path!;
 
         if (!backupPath.endsWith('.db')) {
-          if (mounted)
+          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(l10n.invalidDbMsg),
                 backgroundColor: Colors.orange,
               ),
             );
+          }
           return;
         }
 
+        if (!mounted) return;
         final confirm = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -954,6 +958,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Refresh provider
           if (mounted) {
             await context.read<DatabaseProvider>().refreshVideos();
+            if (!mounted) return;
             if (mounted) {
               final l10n = AppLocalizations.of(context)!;
               ScaffoldMessenger.of(context).showSnackBar(
@@ -967,13 +972,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.restoreErrorMsg(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
+      }
     }
   }
 
@@ -1010,10 +1016,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () async {
                     final logs = await LoggerService().getLogs();
                     await Clipboard.setData(ClipboardData(text: logs));
-                    if (mounted)
+                    if (mounted) {
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text(l10n.logCopied)));
+                    }
                   },
                   tooltip: l10n.copyLog,
                 ),
@@ -1025,10 +1032,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () async {
                     await LoggerService().clearLogs();
                     setState(() {});
-                    if (mounted)
+                    if (mounted) {
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text(l10n.logCleared)));
+                    }
                   },
                   tooltip: l10n.clearLog,
                 ),

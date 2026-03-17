@@ -203,6 +203,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (mounted) {
       await provider.refreshVideos();
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -254,7 +255,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
     // But usually provider is stable during tab lifetime.
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Error removing listener: $e');
+    }
 
     _searchController.dispose();
     _horizontalScrollController.dispose();
@@ -279,6 +282,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (result == true && mounted) {
       await context.read<DatabaseProvider>().refreshVideos();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.videoUpdated)),
       );
@@ -309,6 +313,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().deleteVideo(video);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.videoDeleted)),
       );
@@ -339,6 +344,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (confirm == true && mounted) {
       await context.read<DatabaseProvider>().clearDatabase();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.dbCleared)),
       );
@@ -471,6 +477,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
     if (mounted) {
       await context.read<DatabaseProvider>().refreshVideos();
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -603,6 +610,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () {
+                      final provider = context.read<DatabaseProvider>();
                       Navigator.of(context)
                           .push(
                             MaterialPageRoute(
@@ -610,11 +618,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                             ),
                           )
                           .then((_) {
-                            if (mounted) {
-                              context
-                                  .read<DatabaseProvider>()
-                                  .refreshFailedRenamesCount();
-                            }
+                            provider.refreshFailedRenamesCount();
                           });
                     },
                     icon: const Icon(Icons.list_alt_rounded),

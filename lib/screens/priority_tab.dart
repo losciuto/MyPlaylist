@@ -57,7 +57,9 @@ class _PriorityTabState extends State<PriorityTab> {
   void dispose() {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Error removing listener: $e');
+    }
 
     _scrollController.dispose();
     _searchController.dispose();
@@ -97,11 +99,10 @@ class _PriorityTabState extends State<PriorityTab> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     await context.read<DatabaseProvider>().syncDatesWithMtime();
-                    if (mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.opCompleted)));
-                    }
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(l10n.opCompleted)));
                   },
                   icon: const Icon(Icons.history_toggle_off),
                   label: Text(l10n.btnSyncDates),

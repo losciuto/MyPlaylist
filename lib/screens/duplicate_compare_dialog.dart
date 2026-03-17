@@ -342,7 +342,8 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                         widget.group.first,
                       );
                       await SettingsService().addIgnoredDuplicateKey(key);
-                      if (mounted) Navigator.pop(context, true);
+                      if (!context.mounted) return;
+                      Navigator.of(context).pop(true);
                     },
                     icon: const Icon(Icons.visibility_off_outlined, size: 16),
                     label: const Text('Ignora'),

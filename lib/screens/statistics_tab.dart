@@ -102,7 +102,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
 
   Widget _buildStatCard(String title, String value, Color color) {
     return Card(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -173,8 +173,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= topGenres.length)
+                          if (value.toInt() >= topGenres.length) {
                             return const Text('');
+                          }
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
@@ -252,8 +253,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         interval: (sortedYears.length / 10).ceil().toDouble(),
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
-                          if (index >= sortedYears.length)
+                          if (index >= sortedYears.length) {
                             return const Text('');
+                          }
                           return Text(
                             sortedYears[index].key,
                             style: const TextStyle(fontSize: 10),

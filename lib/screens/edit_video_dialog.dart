@@ -347,12 +347,13 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         _isDownloading = false;
       });
 
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.tmdbUpdatedMsg)),
         );
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -360,6 +361,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
             ),
           ),
         );
+      }
       setState(() => _isDownloading = false);
     }
   }
@@ -428,10 +430,11 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     final nfoPath = p.setExtension(widget.video.path, '.nfo');
     final file = File(nfoPath);
     if (!await file.exists()) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.nfoNotFoundMsg)),
         );
+      }
       return;
     }
 
@@ -462,10 +465,11 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       _sagaController.text = metadata['saga'] ?? '';
     });
 
-    if (mounted)
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.nfoLoadedMsg)),
       );
+    }
   }
 
   @override
@@ -627,20 +631,19 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                             final success = await databaseProvider.saveToNfo(
                               widget.video,
                             );
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    success
-                                        ? localizations.successUpdateMsg
-                                        : localizations.errorUpdateMsg,
-                                  ),
-                                  backgroundColor: success
-                                      ? Colors.green
-                                      : Colors.red,
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? localizations.successUpdateMsg
+                                      : localizations.errorUpdateMsg,
                                 ),
-                              );
-                            }
+                                backgroundColor: success
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            );
                           },
                           icon: const Icon(
                             Icons.save,

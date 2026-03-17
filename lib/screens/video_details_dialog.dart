@@ -1,12 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import '../models/video.dart';
 import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
-import '../services/tmdb_service.dart';
-import '../utils/nfo_generator.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
@@ -87,13 +84,14 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             : Image.file(
                                 File(widget.video.posterPath),
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, _) => Center(
-                                  child: Icon(
-                                    Icons.movie,
-                                    size: 80,
-                                    color: iconColor,
-                                  ),
-                                ),
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Center(
+                                      child: Icon(
+                                        Icons.movie,
+                                        size: 80,
+                                        color: iconColor,
+                                      ),
+                                    ),
                               ),
                       )
                     : Center(

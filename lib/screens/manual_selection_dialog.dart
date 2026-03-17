@@ -5,7 +5,6 @@ import '../models/video.dart';
 import '../database/app_database.dart' as db;
 import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
-import '../utils/video_extensions.dart';
 
 class ManualSelectionDialog extends StatefulWidget {
   const ManualSelectionDialog({super.key});
@@ -84,32 +83,6 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
     setState(() {
       _selectedIds.clear();
     });
-  }
-
-  Future<List<File>> _getEpisodes(String path) async {
-    final dir = Directory(path);
-    if (!await dir.exists()) return [];
-
-    List<File> episodes = [];
-    try {
-      await for (final entity in dir.list(
-        recursive: true,
-        followLinks: false,
-      )) {
-        if (entity is File) {
-          final ext = p.extension(entity.path).toLowerCase();
-          if (VideoExtensions.supported.contains(ext)) {
-            episodes.add(entity);
-          }
-        }
-      }
-      episodes.sort(
-        (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
-      );
-    } catch (e) {
-      debugPrint('Error scanning episodes: $e');
-    }
-    return episodes;
   }
 
   @override

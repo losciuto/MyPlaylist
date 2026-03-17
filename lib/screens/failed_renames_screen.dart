@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_playlist/l10n/app_localizations.dart';
 import '../database/app_database.dart';
 import 'package:path/path.dart' as p;
 
@@ -30,7 +29,6 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
   }
 
   Future<void> _clearAll() async {
-    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

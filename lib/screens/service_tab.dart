@@ -56,7 +56,9 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
     _innerTabController.removeListener(_onTabChange);
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Error removing listener: $e');
+    }
     _innerTabController.dispose();
     super.dispose();
   }
@@ -139,8 +141,8 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
       },
       tileColor: isSelected
           ? (isDark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.05))
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05))
           : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
     );
@@ -177,10 +179,11 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
       final dbFile = File(dbPath);
 
       if (!await dbFile.exists()) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(l10n.dbNotFoundMsg)));
+        }
         return;
       }
 
@@ -208,13 +211,14 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
         }
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.backupErrorMsg(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
+      }
     }
   }
 
@@ -230,16 +234,18 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
         final backupPath = result.files.single.path!;
 
         if (!backupPath.endsWith('.db')) {
-          if (mounted)
+          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(l10n.invalidDbMsg),
                 backgroundColor: Colors.orange,
               ),
             );
+          }
           return;
         }
 
+        if (!mounted) return;
         final confirm = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -268,6 +274,7 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
 
           if (mounted) {
             await context.read<DatabaseProvider>().refreshVideos();
+            if (!mounted) return;
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -280,13 +287,14 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
         }
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.restoreErrorMsg(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
+      }
     }
   }
 
@@ -353,9 +361,9 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.red.withOpacity(0.3)),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

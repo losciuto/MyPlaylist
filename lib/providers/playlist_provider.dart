@@ -308,10 +308,11 @@ class PlaylistProvider extends ChangeNotifier {
         ];
       } else {
         args = List<String>.from(config.playlistArgs);
-        if (args.isEmpty)
+        if (args.isEmpty) {
           args = [playlistPath];
-        else
+        } else {
           args.add(playlistPath);
+        }
       }
 
       debugPrint(

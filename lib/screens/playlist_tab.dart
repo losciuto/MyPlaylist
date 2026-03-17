@@ -126,8 +126,9 @@ class _PlaylistTabState extends State<PlaylistTab> {
   }
 
   void _showSnack(String msg) {
-    if (mounted)
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
   }
 
   Future<void> _playPlaylist(PlaylistProvider provider) async {
@@ -142,6 +143,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
         // Launch player process via provider
         await provider.launchPlayer(playerPath, playlistPath);
+        if (!mounted) return;
         _showSnack(
           AppLocalizations.of(context)!.playerStarted(p.basename(playerPath)),
         );
@@ -170,6 +172,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
           await Process.run('explorer', [dir]);
         }
       } catch (e) {
+        if (!mounted) return;
         _showSnack(AppLocalizations.of(context)!.folderOpenError(e.toString()));
       }
     }
@@ -218,7 +221,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
                                     : Image.file(
                                         File(v.posterPath),
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
+                                        errorBuilder: (_, _, _) =>
                                             const Icon(Icons.movie, size: 50),
                                       ))
                               : const Icon(Icons.movie, size: 50),
@@ -282,6 +285,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
     final path = await provider.exportPlaylist(
       AppLocalizations.of(context)!.exportPlaylistTitle,
     );
+    if (!mounted) return;
     if (path != null) {
       _showSnack(AppLocalizations.of(context)!.playlistExported(path));
     }
