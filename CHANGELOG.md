@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+ 
+ ## [3.9.6] - 2026-03-18
+ 
+ ### Fixed
+ - **Testing**: Replaced default counter widget test with a valid smoke test for MyPlaylist.
+ - **Style**: Formatted codebase according to `dart format`.
 
 ## [3.9.5] - 2026-03-17
 

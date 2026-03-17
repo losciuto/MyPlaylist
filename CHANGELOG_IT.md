@@ -1,6 +1,12 @@
 # Changelog
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+ 
+ ## [3.9.6] - 18/03/2026
+ 
+ ### Correzioni
+ - **Test**: Sostituito il test del contatore predefinito con uno smoke test valido per MyPlaylist.
+ - **Stile**: Formattazione del codice eseguita tramite `dart format`.
 
 ## [3.9.5] - 2026-03-17
 
@@ -191,7 +197,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
 Autore: Massimo
-Ultimo Aggiornamento: 17/03/2026 (v3.9.5)
+Ultimo Aggiornamento: 18/03/2026 (v3.9.6)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.
