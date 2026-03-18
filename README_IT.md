@@ -38,7 +38,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 17/03/2026 (v3.9.5)
+Ultimo Aggiornamento: 18/03/2026 (v3.9.7)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

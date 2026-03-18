@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.9.7] - 2026-03-18
+
+### Changed
+- **Database**: Bulk Rename operation now processes videos dynamically following the 'Priority' order (newest additions first).
+
+
  ## [3.9.6] - 2026-03-18
  
  ### Fixed
