@@ -1,0 +1,36 @@
+name: Publish Precompiled Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag della release (es. v3.9.6)"
+        required: true
+        default: "v0.0.0"
+
+jobs:
+  publish-release:
+    name: Create GitHub Release with Precompiled Files
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            myplaylist-linux-x64.tar.gz
+            myplaylist-windows-x64.zip
+            myplaylist-macos.zip
+            # Se preferisci inserire i file compilati in una cartella specifica, puoi usare un pattern del tipo:
+            # precompiled-releases/*
+          fail_on_unmatched_files: false
+          generate_release_notes: true
