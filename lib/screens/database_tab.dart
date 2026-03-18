@@ -376,11 +376,15 @@ class _DatabaseTabState extends State<DatabaseTab> {
     final provider = context.read<DatabaseProvider>();
     final allVideos = List<Video>.from(provider.videos)
       ..sort((a, b) {
-        final aDate = a.dateAdded ??
+        final aDate =
+            a.dateAdded ??
             DateTime.fromMillisecondsSinceEpoch((a.mtime * 1000).toInt());
-        final bDate = b.dateAdded ??
+        final bDate =
+            b.dateAdded ??
             DateTime.fromMillisecondsSinceEpoch((b.mtime * 1000).toInt());
-        return bDate.compareTo(aDate); // Ordine decrescente (Priorità: più recenti prima)
+        return bDate.compareTo(
+          aDate,
+        ); // Ordine decrescente (Priorità: più recenti prima)
       });
     final total = allVideos.length;
 
