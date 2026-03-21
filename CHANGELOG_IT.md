@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
  
+## [3.9.8] - 21/03/2026
+
+### Correzioni
+- **Layout UI**: Risolti i problemi di visibilità con la colonna delle azioni nella schermata di gestione del database e con il pulsante "Salva nel DB" nel dialogo di selezione della locandina.
+
+## [3.9.7] - 18/03/2026
+
+### Modifiche
+- **Database**: L'operazione di Rinomina in Massa ora processa i video dinamicamente seguendo l'ordine di 'Priorità' (i più recenti per primi).
+
  ## [3.9.6] - 18/03/2026
  
  ### Correzioni
@@ -197,7 +207,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Gestione metadati NFO: recupero più robusto di titolo, anno, generi, attori, registi e trama.
 - Navigazione iniziale: l'app si apre ora sul tab 'Genera Playlist' se sono presenti video nel database.
 Autore: Massimo
-Ultimo Aggiornamento: 18/03/2026 (v3.9.6)
+Ultimo Aggiornamento: 21/03/2026 (v3.9.8)
 
 ### Corretto
 - Risolto bug nella logica di confronto titoli che causava aggiornamenti non necessari anche su file già corretti.
