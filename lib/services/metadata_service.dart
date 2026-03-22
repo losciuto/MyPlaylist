@@ -96,7 +96,7 @@ class MetadataService {
     try {
       // 1. Check if update is needed BEFORE renaming to temp
       final String encodedBy =
-          'MyPlaylist ${AppConfig.appVersion} il ${DateFormat('dd/MM/yyyy').format(DateTime.now())}';
+          'MyPlaylist ${AppConfig.appVersion} ${DateFormat('dd/MM/yyyy').format(DateTime.now())}';
       final currentMetadata = await getFileMetadata(path);
 
       // If metadata is empty, it might be a corrupted file or unsupported format
@@ -110,14 +110,8 @@ class MetadataService {
       final targetTitle = forcedTitle ?? video.title;
       bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
 
-      // Controllo rilassato per l'encoder: basta che ci sia MyPlaylist e la versione corretta.
-      final String encoderPrefix = norm('MyPlaylist ${AppConfig.appVersion}');
-      bool encoderMatch = norm(
-        currentMetadata['Codificato da'],
-      ).startsWith(encoderPrefix);
-
-      if (titleMatch && encoderMatch) {
-        debugPrint('Skip $path (Metadata title and encoder already in sync)');
+      if (titleMatch) {
+        debugPrint('Skip $path (Metadata title already in sync)');
         return MetadataUpdateResult.alreadyInSync;
       }
 
@@ -134,6 +128,10 @@ class MetadataService {
         'artist=${video.directors}',
         '-metadata',
         'Codificato da=$encodedBy',
+        '-metadata',
+        'encoded_by=$encodedBy',
+        '-metadata',
+        'encoder=$encodedBy',
         if (preserveTitle) ...[
           '-metadata',
           'album=${video.title}',

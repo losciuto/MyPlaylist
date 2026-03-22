@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/video.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
-class VideoDataTable extends StatelessWidget {
+class VideoDataTable extends StatefulWidget {
   final List<Video> videos;
   final Function(Video) onEdit;
   final Function(Video) onDelete;
@@ -21,27 +21,61 @@ class VideoDataTable extends StatelessWidget {
   });
 
   @override
+  State<VideoDataTable> createState() => _VideoDataTableState();
+}
+
+class _VideoDataTableState extends State<VideoDataTable> {
+  late final ScrollController _horizontalController;
+  late final ScrollController _verticalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalController = ScrollController();
+    _verticalController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Total width calculation: 250+80+100+80+150+200+150+120 = 1130
     const double totalTableWidth = 1130;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: totalTableWidth,
-        child: Column(
-          children: [
-            _buildTableHeader(context),
-            Expanded(
-              child: ListView.builder(
-                itemCount: videos.length,
-                itemExtent:
-                    50, // Fixed height for performance if rows are uniform
-                itemBuilder: (context, index) =>
-                    _buildTableRow(context, videos[index], index),
+    return Scrollbar(
+      controller: _horizontalController,
+      thumbVisibility: true,
+      trackVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: _horizontalController,
+        child: SizedBox(
+          width: totalTableWidth,
+          child: Column(
+            children: [
+              _buildTableHeader(context),
+              Expanded(
+                child: Scrollbar(
+                  controller: _verticalController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  child: ListView.builder(
+                    controller: _verticalController,
+                    itemCount: widget.videos.length,
+                    itemExtent:
+                        50, // Fixed height for performance if rows are uniform
+                    itemBuilder: (context, index) =>
+                        _buildTableRow(context, widget.videos[index], index),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -74,10 +108,10 @@ class VideoDataTable extends StatelessWidget {
     double width,
     int index,
   ) {
-    final isSorted = sortColumnIndex == index;
+    final isSorted = widget.sortColumnIndex == index;
     return InkWell(
       onTap: index != -1
-          ? () => onSort(index, isSorted ? !isSortedAscending : true)
+          ? () => widget.onSort(index, isSorted ? !widget.isSortedAscending : true)
           : null,
       child: Container(
         width: width,
@@ -92,7 +126,7 @@ class VideoDataTable extends StatelessWidget {
             ),
             if (isSorted)
               Icon(
-                isSortedAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                widget.isSortedAscending ? Icons.arrow_upward : Icons.arrow_downward,
                 size: 16,
               ),
           ],
@@ -156,7 +190,7 @@ class VideoDataTable extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, size: 20),
-                  onPressed: () => onEdit(video),
+                  onPressed: () => widget.onEdit(video),
                   tooltip: AppLocalizations.of(context)!.editTooltip,
                 ),
                 IconButton(
@@ -165,7 +199,7 @@ class VideoDataTable extends StatelessWidget {
                     size: 20,
                     color: Colors.redAccent,
                   ),
-                  onPressed: () => onDelete(video),
+                  onPressed: () => widget.onDelete(video),
                   tooltip: AppLocalizations.of(context)!.deleteTooltip,
                 ),
               ],

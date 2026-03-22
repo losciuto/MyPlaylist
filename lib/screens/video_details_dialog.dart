@@ -210,102 +210,107 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                     const SizedBox(height: 20),
 
                     // Buttons: Play & Sync
-                    Row(
+                    Column(
                       children: [
-                        SizedBox(
-                          height: 36,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              context.read<PlaylistProvider>().playSingleVideo(
-                                widget.video,
-                              );
-                              Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.play_arrow),
-                            label: Text(
-                              l10n.playButtonLabel,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                        Center(
+                          child: SizedBox(
+                            height: 36,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                context.read<PlaylistProvider>().playSingleVideo(
+                                  widget.video,
+                                );
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.play_arrow),
+                              label: Text(
+                                l10n.playButtonLabel,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              backgroundColor: const Color(0xFF4CAF50),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 40,
+                                ),
+                                backgroundColor: const Color(0xFF4CAF50),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 15),
-                        // Refresh from NFO
-                        SizedBox(
-                          height: 36,
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              await context
-                                  .read<DatabaseProvider>()
-                                  .refreshFromNfo(widget.video);
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.nfoLoadedMsg)),
-                              );
-                              Navigator.pop(
-                                context,
-                              ); // Close and reopen or just refresh (easier to close for now)
-                            },
-                            icon: const Icon(Icons.refresh, size: 18),
-                            label: Text(l10n.loadFromNfo),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.blue,
-                              side: const BorderSide(color: Colors.blue),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Refresh from NFO
+                            SizedBox(
+                              height: 36,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await context
+                                      .read<DatabaseProvider>()
+                                      .refreshFromNfo(widget.video);
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(l10n.nfoLoadedMsg)),
+                                  );
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.refresh, size: 18),
+                                label: Text(l10n.loadFromNfo),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.blue,
+                                  side: const BorderSide(color: Colors.blue),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        // Save to NFO
-                        SizedBox(
-                          height: 36,
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final success = await context
-                                  .read<DatabaseProvider>()
-                                  .saveToNfo(widget.video);
-                              if (!context.mounted) return;
-                              if (success) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('NFO salvato con successo!'),
-                                    backgroundColor: Colors.green,
+                            const SizedBox(width: 10),
+                            // Save to NFO
+                            SizedBox(
+                              height: 36,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  final success = await context
+                                      .read<DatabaseProvider>()
+                                      .saveToNfo(widget.video);
+                                  if (!context.mounted) return;
+                                  if (success) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('NFO salvato con successo!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Errore durante il salvataggio NFO',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.save, size: 18),
+                                label: Text(l10n.saveAll),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.orange,
+                                  side: const BorderSide(color: Colors.orange),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Errore durante il salvataggio NFO',
-                                    ),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.save, size: 18),
-                            label: Text(l10n.saveAll),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.orange,
-                              side: const BorderSide(color: Colors.orange),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

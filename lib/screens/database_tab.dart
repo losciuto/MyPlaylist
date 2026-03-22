@@ -574,9 +574,11 @@ class _DatabaseTabState extends State<DatabaseTab> {
             ),
             const SizedBox(height: 10),
             // Action Buttons
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
                 children: [
                   ElevatedButton.icon(
                     onPressed: _clearDatabase,
@@ -587,25 +589,21 @@ class _DatabaseTabState extends State<DatabaseTab> {
                       foregroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () => provider.refreshVideos(),
                     icon: const Icon(Icons.refresh),
                     label: Text(l10n.refreshButton),
                   ),
-                  const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: _bulkRenameTitles,
                     icon: const Icon(Icons.drive_file_rename_outline),
                     label: Text(l10n.renameTitlesButton),
                   ),
-                  const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: _bulkGenerateNfo,
                     icon: const Icon(Icons.auto_fix_high),
                     label: Text(l10n.tmdbGenAuto),
                   ),
-                  const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () => showDialog(
                       context: context,
@@ -618,7 +616,6 @@ class _DatabaseTabState extends State<DatabaseTab> {
                       foregroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () {
                       final provider = context.read<DatabaseProvider>();
