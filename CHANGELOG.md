@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
  
-## [3.9.8] - 2026-03-21
+## [3.9.8] - 2026-03-22
 
 ### Fixed
 - **UI Layout**: Fixed visibility issues with the Actions column in the Database Management screen and the "Save to DB" button in the poster selection dialog.

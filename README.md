@@ -26,7 +26,7 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 
 ---
 **Version**: 3.9.8  
-**Last Update**: 21/03/2026
+**Last Update**: 22/03/2026
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

@@ -5,7 +5,7 @@ class AppConfig {
   static const String appName = 'MyPlaylist';
   static const String appVersion = '3.9.8';
   static const String appAuthor = 'Massimo';
-  static const String appBuildDate = '18/03/2026';
+  static const String appBuildDate = '22/03/2026';
 
   // Window Layout
   static const Size windowSize = Size(1200, 800);
