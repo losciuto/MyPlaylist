@@ -35,11 +35,11 @@ class SettingsService with ChangeNotifier {
   String _playerPath = '';
   PlayerConfig? _playerConfig;
   int _defaultPlaylistSize = 20;
-  bool _remoteServerEnabled = false;
+  bool _remoteServerEnabled = true;
   int _remoteServerPort = 8080;
   String _remoteServerSecret =
       'my_default_secret_key_32chars_long'; // Should be 32 chars for AES-256
-  int _vlcPort = 4212;
+  int _vlcPort = 4242;
   String _serverInterface = '0.0.0.0';
   ThemeMode _themeMode = ThemeMode.system;
   Locale _locale = const Locale('it');
@@ -89,12 +89,12 @@ class SettingsService with ChangeNotifier {
     }
 
     _defaultPlaylistSize = _prefs.getInt(_keyDefaultPlaylistSize) ?? 20;
-    _remoteServerEnabled = _prefs.getBool(_keyRemoteServerEnabled) ?? false;
+    _remoteServerEnabled = _prefs.getBool(_keyRemoteServerEnabled) ?? true;
     _remoteServerPort = _prefs.getInt(_keyRemoteServerPort) ?? 8080;
     _remoteServerSecret =
         _prefs.getString(_keyRemoteServerSecret) ??
         'my_default_secret_key_32chars_long';
-    _vlcPort = _prefs.getInt(_keyVlcPort) ?? 4212;
+    _vlcPort = _prefs.getInt(_keyVlcPort) ?? 4242;
     _serverInterface = _prefs.getString(_keyServerInterface) ?? '0.0.0.0';
     _tmdbApiKey = _prefs.getString(_keyTmdbApiKey) ?? '';
     _fanartApiKey = _prefs.getString(_keyFanartApiKey) ?? '';

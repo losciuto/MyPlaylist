@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.10.0] - 2026-03-27
+
+### Added
+- **VlcRemote Integration**: Full support for bidirectional communication with the dedicated client application.
+- **Kill VLC Command**: Implemented the `kill_vlc` remote command to instantly terminate the player via socket.
+- **Network Alignment**: VLC RC control port moved to 4242 for standard compatibility with the VlcRemote ecosystem.
+- **Default Server Activation**: Remote control server now defaults to 'Enabled' on port 8080 for immediate access.
+
 ## [3.9.8] - 2026-03-22
 
 ### Fixed

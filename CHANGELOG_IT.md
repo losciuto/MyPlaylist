@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
  
+## [3.10.0] - 27/03/2026
+
+### Novità
+- **Integrazione VlcRemote**: Pieno supporto alla comunicazione bidirezionale con l'applicazione client dedicata.
+- **Comando Kill VLC**: Implementato il comando remoto `kill_vlc` per terminare istantaneamente il player via socket.
+- **Configurazione Default**: Abilitata l'attivazione automatica del server remoto all'avvio su porta 8080.
+- **Allineamento Porte**: Porta di controllo VLC RC portata a 4242 per compatibilità standard con l'ecosistema VlcRemote.
+
 ## [3.9.8] - 22/03/2026
 
 ### Correzioni

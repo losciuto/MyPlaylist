@@ -28,7 +28,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 
 > **NOTA IMPORTANTE**: Il player interno potrebbe non riprodurre correttamente video con codec proprietari avanzati (come H.265/HEVC) anche con le librerie di sistema installate, a causa di limitazioni di licensing delle librerie bundle.
 > **Soluzione**: In questi casi, utilizzare l'opzione **Player Esterno** (es. VLC) configurabile nelle Impostazioni.
-> **VLC Features**: Se usi VLC, l'app gestirà automaticamente la chiusura delle istanze precedenti e abiliterà il controllo remoto (porta 4212) per l'uso con app esterne.
+> **VLC Features**: Se usi VLC, l'app gestirà automaticamente la chiusura delle istanze precedenti e abiliterà il controllo remoto (porta 4242) per l'uso con app esterne.
 
 ## Installazione e Avvio
 1.  Assicurati di avere Flutter installato.
@@ -38,7 +38,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 22/03/2026 (v3.9.8)
+Ultimo Aggiornamento: 27/03/2026 (v3.10.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

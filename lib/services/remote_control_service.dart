@@ -267,6 +267,10 @@ class RemoteControlService with ChangeNotifier {
         await playlistProvider.stopPlayer();
         message = 'Riproduzione fermata';
         break;
+      case 'kill_vlc':
+        await playlistProvider.stopPlayer();
+        message = 'VLC terminato correttamente';
+        break;
       default:
         throw Exception('Unknown command: $command');
     }
