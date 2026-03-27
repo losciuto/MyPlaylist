@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.11.0] - 2026-03-27
+
+### Added
+- **VLC Poster Support**: Added an embedded HTTP server running in the background to serve movie posters efficiently to the VlcRemote companion app during smart playlist generation.
+
 ## [3.10.0] - 2026-03-27
 
 ### Added

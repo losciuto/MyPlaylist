@@ -23,4 +23,6 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.1.10" apply false
 }
 
+rootProject.name = "my_playlist_root"
+
 include(":app")

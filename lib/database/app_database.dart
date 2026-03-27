@@ -474,6 +474,13 @@ class AppDatabase extends _$AppDatabase {
     return driftVideo == null ? null : _mapDriftToModel(driftVideo);
   }
 
+  Future<model.Video?> getVideoById(int id) async {
+    final driftVideo = await (select(
+      videos,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    return driftVideo == null ? null : _mapDriftToModel(driftVideo);
+  }
+
   Future<List<model.Video>> getVideosByFilter(
     String column,
     String value,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
+import '../database/app_database.dart';
 import '../providers/playlist_provider.dart';
 import 'settings_service.dart';
 
@@ -22,6 +23,7 @@ class RemoteControlService with ChangeNotifier {
   final SettingsService settingsService;
 
   ServerSocket? _server;
+  HttpServer? _imageServer;
   bool _isRunning = false;
   int? _currentPort;
   String? _currentSecret;
@@ -99,6 +101,21 @@ class RemoteControlService with ChangeNotifier {
       _server!.listen((client) {
         _handleClient(client);
       });
+      
+      // Avvio l'HttpServer sulla porta successiva (per il proxy immagini)
+      try {
+        _imageServer = await HttpServer.bind(
+          address,
+          settingsService.remoteServerPort + 1,
+        );
+        _imageServer!.listen(_handleHttpRequest);
+        debugPrint(
+          'Image Server (MyPlaylist) started on port ${settingsService.remoteServerPort + 1}',
+        );
+      } catch (e) {
+        debugPrint('Error starting image server: $e');
+      }
+
       debugPrint(
         'Remote Server started on port ${settingsService.remoteServerPort}',
       );
@@ -109,13 +126,60 @@ class RemoteControlService with ChangeNotifier {
     }
   }
 
+  void _handleHttpRequest(HttpRequest request) async {
+    final corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    };
+    
+    if (request.method == 'OPTIONS') {
+      corsHeaders.forEach((k, v) => request.response.headers.add(k, v));
+      request.response.statusCode = HttpStatus.ok;
+      await request.response.close();
+      return;
+    }
+
+    if (request.uri.pathSegments.isNotEmpty && request.uri.pathSegments.first == 'poster') {
+      final idString = request.uri.pathSegments.length > 1 ? request.uri.pathSegments.last : null;
+      if (idString != null) {
+        final id = int.tryParse(idString);
+        if (id != null) {
+          final video = await AppDatabase.instance.getVideoById(id);
+          if (video != null && video.posterPath.isNotEmpty) {
+            final file = File(video.posterPath);
+            if (await file.exists()) {
+              corsHeaders.forEach((k, v) => request.response.headers.add(k, v));
+              
+              // Evita problemi di blocco prolungato, scrivi lo stream
+              request.response.headers.contentType = ContentType('image', 'jpeg');
+              try {
+                await request.response.addStream(file.openRead());
+              } catch (e) {
+                debugPrint('Error sending poster stream: $e');
+              }
+              await request.response.close();
+              return;
+            }
+          }
+        }
+      }
+    }
+    
+    // Fallback not found
+    corsHeaders.forEach((k, v) => request.response.headers.add(k, v));
+    request.response.statusCode = HttpStatus.notFound;
+    await request.response.close();
+  }
+
   Future<void> stop() async {
     if (!_isRunning) return;
     await _server?.close();
+    await _imageServer?.close(force: true);
     _server = null;
+    _imageServer = null;
     _isRunning = false;
     notifyListeners();
-    debugPrint('Remote Server stopped');
+    debugPrint('Remote Server and Image Server stopped');
   }
 
   void _handleClient(Socket client) async {

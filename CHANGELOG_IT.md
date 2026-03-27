@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
  
+## [3.11.0] - 27/03/2026
+
+### Aggiunte
+- **Supporto Locandine VLC**: Aggiunto un server HTTP integrato (attivo in background sulla porta successiva) per trasmettere in tempo reale le locandine dei film alla companion app VlcRemote, senza appesantire il parsing base.
+
 ## [3.10.0] - 27/03/2026
 
 ### Novità

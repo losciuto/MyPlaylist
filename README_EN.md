@@ -29,6 +29,19 @@ If you experience black screens or "Codec not found" errors, run the command abo
 > **Solution**: For these specific files, please use the **External Player** option (e.g., VLC) which can be configured in the Settings.
 > **VLC Features**: If using VLC, the app automatically handles checking/killing previous instances and enables remote control (port 4212) for use with external remote apps.
 
+### 🔌 Recommended Setting: VLC HTTP API
+If you use the companion app **VlcRemote** (from your phone) to control *MyPlaylist*, we highly recommend enabling VLC's Web API. This allows VlcRemote to natively display movie posters and read playlists without formatting errors.
+
+**How to enable the Web API on VLC:**
+1. Open **VLC** normally.
+2. Go to **Tools** -> **Preferences**.
+3. At the bottom left, under "Show settings", check **All**.
+4. In the left menu, click on **Main interfaces** and, on the right, check **Web**.
+5. Expand the **Main interfaces** item (on the left) -> **Main interfaces** -> **Lua**.
+6. On the right, enter a **Password** in the "HTTP interface" field (e.g., `1234`).
+7. **Save** and close VLC.
+*(Now you just need to enter the same password in the Server page of the VlcRemote app, and MyPlaylist will automatically launch VLC with both interfaces active!)*
+
 ## Installation & Run
 1.  Ensure Flutter is installed.
 2.  Run `flutter pub get`
@@ -37,7 +50,7 @@ If you experience black screens or "Codec not found" errors, run the command abo
 ## Credits
 Built with Flutter.
 Author: Massimo
-Last Update: 18/03/2026 (v3.9.7)
+Last Update: 27/03/2026 (v3.11.0)
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

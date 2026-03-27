@@ -30,6 +30,19 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 > **Soluzione**: In questi casi, utilizzare l'opzione **Player Esterno** (es. VLC) configurabile nelle Impostazioni.
 > **VLC Features**: Se usi VLC, l'app gestirà automaticamente la chiusura delle istanze precedenti e abiliterà il controllo remoto (porta 4242) per l'uso con app esterne.
 
+### 🔌 Impostazione consigliata: VLC HTTP API
+Se impieghi l'app companion **VlcRemote** (dal telefono) per controllare *MyPlaylist*, ti raccomandiamo caldamente di abilitare l'API Web di VLC. Questo permetterà a VlcRemote di mostrarti in modo nativo le locandine dei film e leggere le playlist senza errori di formattazione.
+
+**Come abilitare la Web API su VLC:**
+1. Apri **VLC** normalmente.
+2. Vai su **Strumenti** -> **Preferenze**.
+3. In basso a sinistra, alla voce "Mostra le impostazioni", spunta **Tutto**.
+4. Nel menù laterale sinistro, clicca su **Interfacce primarie** e, a destra, metti la spunta su **Web**.
+5. Espandi la voce **Interfacce primarie** (a sinistra) -> **Interfacce principali** -> **Lua**.
+6. A destra, inserisci una **Password** nel campo "Interfaccia HTTP" (ad es. `1234`).
+7. **Salva** e chiudi VLC.
+*(Ora basterà inserire la stessa password nella pagina Server dell'app VlcRemote e MyPlaylist avvierà automaticamente VLC con entrambe le interfacce attive!)*
+
 ## Installazione e Avvio
 1.  Assicurati di avere Flutter installato.
 2.  Esegui `flutter pub get`
@@ -38,7 +51,7 @@ Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 27/03/2026 (v3.10.0)
+Ultimo Aggiornamento: 27/03/2026 (v3.11.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.
