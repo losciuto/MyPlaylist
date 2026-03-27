@@ -217,9 +217,9 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                             height: 36,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                context.read<PlaylistProvider>().playSingleVideo(
-                                  widget.video,
-                                );
+                                context
+                                    .read<PlaylistProvider>()
+                                    .playSingleVideo(widget.video);
                                 Navigator.pop(context);
                               },
                               icon: const Icon(Icons.play_arrow),
@@ -284,7 +284,9 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                                   if (success) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('NFO salvato con successo!'),
+                                        content: Text(
+                                          'NFO salvato con successo!',
+                                        ),
                                         backgroundColor: Colors.green,
                                       ),
                                     );

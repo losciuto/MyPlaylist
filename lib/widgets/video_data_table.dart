@@ -111,7 +111,10 @@ class _VideoDataTableState extends State<VideoDataTable> {
     final isSorted = widget.sortColumnIndex == index;
     return InkWell(
       onTap: index != -1
-          ? () => widget.onSort(index, isSorted ? !widget.isSortedAscending : true)
+          ? () => widget.onSort(
+              index,
+              isSorted ? !widget.isSortedAscending : true,
+            )
           : null,
       child: Container(
         width: width,
@@ -126,7 +129,9 @@ class _VideoDataTableState extends State<VideoDataTable> {
             ),
             if (isSorted)
               Icon(
-                widget.isSortedAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                widget.isSortedAscending
+                    ? Icons.arrow_upward
+                    : Icons.arrow_downward,
                 size: 16,
               ),
           ],
