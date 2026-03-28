@@ -146,11 +146,21 @@ class RemoteControlService with ChangeNotifier {
         if (id != null) {
           final video = await AppDatabase.instance.getVideoById(id);
           if (video != null && video.posterPath.isNotEmpty) {
+            
+            // Se è un URL remoto (TMDB), invia un redirect!
+            if (video.posterPath.startsWith('http')) {
+              corsHeaders.forEach((k, v) => request.response.headers.add(k, v));
+              request.response.statusCode = HttpStatus.found; // 302 Redirect
+              request.response.headers.add(HttpHeaders.locationHeader, video.posterPath);
+              await request.response.close();
+              return;
+            }
+            
+            // Altrimenti, se è un path locale su disco
             final file = File(video.posterPath);
             if (await file.exists()) {
               corsHeaders.forEach((k, v) => request.response.headers.add(k, v));
               
-              // Evita problemi di blocco prolungato, scrivi lo stream
               request.response.headers.contentType = ContentType('image', 'jpeg');
               try {
                 await request.response.addStream(file.openRead());

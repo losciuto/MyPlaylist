@@ -13,6 +13,8 @@ import 'dart:io';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
 import '../config/app_config.dart';
+import '../services/metadata_service.dart';
+import '../models/video.dart' as model;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -581,6 +583,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         ),
                 ),
+                const SizedBox(height: 35),
+                Text(
+                  'SYNC MANUALE DEL DATABASE',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: fillColor,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.sync_alt, color: Color(0xFF4CAF50)),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Sincronizza tag file mancanti',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 15),
+                      ElevatedButton.icon(
+                        onPressed: _startBulkMetadataSync,
+                        icon: const Icon(Icons.batch_prediction),
+                        label: const Text('Avvia Scansione e Sincronizzazione'),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             );
           },
@@ -1091,6 +1136,132 @@ class _SettingsScreenState extends State<SettingsScreen> {
             return const SizedBox.shrink();
           },
         ),
+      ],
+    );
+  }
+
+  Future<void> _startBulkMetadataSync() async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sincronizzazione Massiva Metadati'),
+        content: const Text('Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Inizia Sincronizzazione'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    // Show persistent progress dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return const _BulkSyncProgressDialog();
+      },
+    );
+  }
+}
+
+class _BulkSyncProgressDialog extends StatefulWidget {
+  const _BulkSyncProgressDialog({super.key});
+
+  @override
+  _BulkSyncProgressDialogState createState() => _BulkSyncProgressDialogState();
+}
+
+class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
+  int _totalFiles = 0;
+  int _currentIndex = 0;
+  int _updatedCount = 0;
+  int _skippedCount = 0;
+  bool _isFinished = false;
+  bool _isCancelled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _runSync();
+  }
+
+  Future<void> _runSync() async {
+    final videos = await db.AppDatabase.instance.getAllVideos();
+    if (!mounted) return;
+    setState(() {
+      _totalFiles = videos.length;
+    });
+
+    for (int i = 0; i < videos.length; i++) {
+      if (!mounted || _isCancelled) break;
+      
+      setState(() {
+        _currentIndex = i + 1;
+      });
+
+      final result = await MetadataService().updateFileMetadata(videos[i], enforceFullMetadata: true);
+      
+      if (_isCancelled) break;
+
+      if (result == MetadataUpdateResult.updated) {
+        _updatedCount++;
+      } else if (result == MetadataUpdateResult.alreadyInSync) {
+        _skippedCount++;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isFinished = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isFinished) {
+      String title = _isCancelled ? 'Sincronizzazione Interrotta' : 'Sincronizzazione Completata';
+      return AlertDialog(
+        title: Text(title),
+        content: Text('Operazione terminata.\n\nFile esaminati: ${(_isCancelled ? _currentIndex - 1 : _totalFiles)}\nAggiornati: $_updatedCount\nInvariati/Saltati: $_skippedCount'),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Chiudi'),
+          )
+        ],
+      );
+    }
+
+    double progress = _totalFiles > 0 ? _currentIndex / _totalFiles : 0.0;
+    return AlertDialog(
+      title: const Text('Elaborazione Batch...'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('File $_currentIndex di $_totalFiles'),
+          const SizedBox(height: 16),
+          LinearProgressIndicator(value: progress),
+          const SizedBox(height: 16),
+          Text('Aggiornati: $_updatedCount\nSaltati: $_skippedCount'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isCancelled = true;
+            });
+          },
+          child: const Text('Interrompi', style: TextStyle(color: Colors.red)),
+        )
       ],
     );
   }

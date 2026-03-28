@@ -67,13 +67,13 @@ class MetadataService {
     }
   }
 
-  Future<MetadataUpdateResult> updateFileMetadata(Video video) async {
+  Future<MetadataUpdateResult> updateFileMetadata(Video video, {bool enforceFullMetadata = false}) async {
     final FileSystemEntityType type = await FileSystemEntity.type(video.path);
 
     if (type == FileSystemEntityType.directory) {
-      return _updateSeriesFiles(video);
+      return _updateSeriesFiles(video, enforceFullMetadata: enforceFullMetadata);
     } else if (type == FileSystemEntityType.file) {
-      return _updateSingleFile(video.path, video);
+      return _updateSingleFile(video.path, video, enforceFullMetadata: enforceFullMetadata);
     } else {
       debugPrint('Path not found or invalid: ${video.path}');
       return MetadataUpdateResult.failed;
@@ -85,6 +85,7 @@ class MetadataService {
     Video video, {
     bool preserveTitle = false,
     String? forcedTitle,
+    bool enforceFullMetadata = false,
   }) async {
     final File originalFile = File(path);
     if (!await originalFile.exists()) return MetadataUpdateResult.failed;
@@ -110,9 +111,29 @@ class MetadataService {
       final targetTitle = forcedTitle ?? video.title;
       bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
 
-      if (titleMatch) {
-        debugPrint('Skip $path (Metadata title already in sync)');
-        return MetadataUpdateResult.alreadyInSync;
+      if (!enforceFullMetadata) {
+        // Logica originale per la rinomina/aggiornamento standard:
+        // Controlla il titolo. Se combacia, salta (già in sync). Se NON combacia, aggiorna tutto.
+        if (titleMatch) {
+          debugPrint('Skip $path (Metadata title already in sync)');
+          return MetadataUpdateResult.alreadyInSync;
+        }
+      } else {
+        // Logica per l'aggiornamento di massa (Bulk Sync):
+        // Esclude dal controllo il titolo e guarda solo se i tag esterni sono "vuoti".
+        bool hasPlot = currentMetadata['description']?.toString().isNotEmpty == true || 
+                       currentMetadata['comment']?.toString().isNotEmpty == true;
+        bool hasRating = currentMetadata['rating']?.toString().isNotEmpty == true || 
+                         currentMetadata['vote']?.toString().isNotEmpty == true;
+        bool hasPoster = currentMetadata['poster_url']?.toString().isNotEmpty == true || 
+                         currentMetadata['artwork']?.toString().isNotEmpty == true;
+
+        // Se sono TUTTI pieni, allora saltiamo (già in sync).
+        // Diversamente (se almeno uno è vuoto), procediamo ad aggiornare tutti i metadati
+        if (hasPlot && hasRating && hasPoster) {
+          debugPrint('Skip $path (Metadata targets already full in sync)');
+          return MetadataUpdateResult.alreadyInSync;
+        }
       }
 
       // 2. Now that we know we need an update, rename original to temp
@@ -132,6 +153,10 @@ class MetadataService {
         'encoded_by=$encodedBy',
         '-metadata',
         'encoder=$encodedBy',
+        '-metadata',
+        'rating=${video.rating}',
+        '-metadata',
+        'poster_url=${video.posterPath}',
         if (preserveTitle) ...[
           '-metadata',
           'album=${video.title}',
@@ -307,7 +332,7 @@ class MetadataService {
     return '$seriesName - $cleaned';
   }
 
-  Future<MetadataUpdateResult> _updateSeriesFiles(Video video) async {
+  Future<MetadataUpdateResult> _updateSeriesFiles(Video video, {bool enforceFullMetadata = false}) async {
     final dir = Directory(video.path);
     if (!await dir.exists()) return MetadataUpdateResult.failed;
 
@@ -335,6 +360,7 @@ class MetadataService {
               video,
               preserveTitle: true,
               forcedTitle: formattedTitle,
+              enforceFullMetadata: enforceFullMetadata,
             );
 
             if (result == MetadataUpdateResult.updated) {
