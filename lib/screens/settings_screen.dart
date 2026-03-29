@@ -14,7 +14,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import '../config/app_config.dart';
 import '../services/metadata_service.dart';
-import '../models/video.dart' as model;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -1175,7 +1174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class _BulkSyncProgressDialog extends StatefulWidget {
-  const _BulkSyncProgressDialog({super.key});
+  const _BulkSyncProgressDialog();
 
   @override
   _BulkSyncProgressDialogState createState() => _BulkSyncProgressDialogState();
