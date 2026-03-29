@@ -182,9 +182,9 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
           files: |
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
-            artifacts/myplaylist-linux-x64/*.deb
+            artifacts/myplaylist-linux-x64/**/*.deb
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
-            artifacts/myplaylist-windows-x64/*.exe
+            artifacts/myplaylist-windows-x64/**/*.exe
             artifacts/myplaylist-android/app-release.apk
             artifacts/myplaylist-macos/myplaylist-macos.zip
           fail_on_unmatched_files: false
