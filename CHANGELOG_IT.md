@@ -1,10 +1,11 @@
 # Changelog
 
-Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+All notable changes to this project will be documented in this file.
  
-## [3.11.0] - 27/03/2026
+## [3.12.0] - 2026-03-28
 
 ### Aggiunte
+- **Sincronizzazione Metadati in Massa**: Nuova funzione per allineare rapidamente i record del database con i file fisici, preservando l'integrità dei dati durante i processi di rinomina esterna o spostamento file.
 - **Supporto Locandine VLC**: Aggiunto un server HTTP integrato (attivo in background sulla porta successiva) per trasmettere in tempo reale le locandine dei film alla companion app VlcRemote, senza appesantire il parsing base.
 
 ## [3.10.0] - 27/03/2026

@@ -50,7 +50,7 @@ If you use the companion app **VlcRemote** (from your phone) to control *MyPlayl
 ## Credits
 Built with Flutter.
 Author: Massimo
-Last Update: 27/03/2026 (v3.11.0)
+Last Update: 28/03/2026 (v3.12.0)
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
