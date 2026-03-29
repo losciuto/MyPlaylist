@@ -298,6 +298,37 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
     }
   }
 
+  Future<void> _resetPriorityList() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.resetPriorityList),
+        content: Text(l10n.confirmResetPriority),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      await context.read<DatabaseProvider>().syncDatesWithMtime();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.opCompleted)));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -395,6 +426,50 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
                 ),
                 icon: const Icon(Icons.upload),
                 label: Text(l10n.importButton),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 30),
+
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.history_toggle_off, color: Colors.blueAccent),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.resetPriorityList,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.resetPriorityDescription,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton.icon(
+                onPressed: _resetPriorityList,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent[700],
+                ),
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.resetPriorityList),
               ),
             ],
           ),

@@ -339,5 +339,8 @@
   "settingsNoWatchedFolders": "No folders being watched",
   "fanartApiKey": "Fanart.tv API Key",
   "settingsAutoSyncNfo": "Sync NFO on Edit",
-  "settingsAutoSyncNfoSubtitle": "Automatically save metadata to .nfo file when you edit a video"
+  "settingsAutoSyncNfoSubtitle": "Automatically save metadata to .nfo file when you edit a video",
+  "resetPriorityList": "Reset Priority List",
+  "resetPriorityDescription": "Resets all addition dates to the original file modification date on disk. Useful to 'clear' the priority list and start fresh.",
+  "confirmResetPriority": "Do you want to reset all addition dates?"
 }

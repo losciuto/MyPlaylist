@@ -339,5 +339,8 @@
   "settingsNoWatchedFolders": "Nessuna cartella monitorata",
   "fanartApiKey": "Fanart.tv API Key",
   "settingsAutoSyncNfo": "Sincronizza NFO su modifica",
-  "settingsAutoSyncNfoSubtitle": "Salva automaticamente i metadati nel file .nfo quando modifichi un video"
+  "settingsAutoSyncNfoSubtitle": "Salva automaticamente i metadati nel file .nfo quando modifichi un video",
+  "resetPriorityList": "Reset Lista Priorità",
+  "resetPriorityDescription": "Riporta tutte le date di inserimento alla data di modifica originale del file sul disco. Utile per 'pulire' la lista priorità e ricominciare da zero.",
+  "confirmResetPriority": "Vuoi resettare tutte le date di inserimento?"
 }
