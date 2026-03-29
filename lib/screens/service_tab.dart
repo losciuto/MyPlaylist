@@ -445,7 +445,10 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.history_toggle_off, color: Colors.blueAccent),
+                  const Icon(
+                    Icons.history_toggle_off,
+                    color: Colors.blueAccent,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     l10n.resetPriorityList,
