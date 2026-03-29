@@ -42,7 +42,7 @@ jobs:
       - name: Package Linux .deb
         run: |
           export PATH="$PATH":"$HOME/.pub-cache/bin"
-          flutter_distributor package --listing deb --target-platform linux
+          flutter_distributor package --platform linux --targets deb
 
       - name: Compress Release (Legacy)
         run: |
