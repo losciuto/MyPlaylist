@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
  
-## [3.12.0] - 2026-03-28
+## [3.12.0] - 28/03/2026
 
 ### Aggiunte
 - **Sincronizzazione Metadati in Massa**: Nuova funzione per allineare rapidamente i record del database con i file fisici, preservando l'integrità dei dati durante i processi di rinomina esterna o spostamento file.
