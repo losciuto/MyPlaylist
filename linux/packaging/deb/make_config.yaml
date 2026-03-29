@@ -5,6 +5,7 @@ maintainer:
   name: Massimo
   email: massimo@example.com
 architecture: amd64
+installed_size: 0
 priority: optional
 section: utils
 depends:
