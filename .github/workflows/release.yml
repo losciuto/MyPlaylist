@@ -91,9 +91,9 @@ jobs:
         run: flutter build windows --release
 
       - name: Build Windows Installer (Inno Setup)
-        uses: ayu-0315/innosetup-action@v1.1
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          filepath: windows/installer_script.iss
+          path: windows/installer_script.iss
 
       - name: Compress Release (Legacy)
         run: |
