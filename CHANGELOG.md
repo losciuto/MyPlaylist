@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.2] - 2026-03-30
+
+### Added
+- **Video Title in Batch Processing**: The batch sync dialog now shows the title of the video currently being processed.
+
+### Fixed
+- **Database Reset**: Clearing the database now also removes watched directories from Auto-Sync, preventing deleted files from reappearing after a new scan.
+- **Linux .deb Installer**: Fixed the GitHub Actions workflow so the `.deb` package is correctly included in the release assets.
+
 ## [3.12.1] - 2026-03-29
 
 ### Added

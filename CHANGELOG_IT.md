@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.2] - 30/03/2026
+
+### Aggiunte
+- **Titolo Video nell'Elaborazione Batch**: Il dialogo di sincronizzazione batch ora mostra il titolo del video attualmente in elaborazione.
+
+### Correzioni
+- **Reset Database**: La pulizia del database ora rimuove anche le cartelle monitorate dall'Auto-Sync, evitando che i file eliminati ricompaiano dopo una nuova scansione.
+- **Installer Linux .deb**: Corretto il workflow di GitHub Actions affinché il pacchetto `.deb` venga incluso correttamente negli asset della release.
+
 ## [3.12.1] - 29/03/2026
 
 ### Aggiunte

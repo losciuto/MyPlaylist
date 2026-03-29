@@ -8,6 +8,7 @@ architecture: amd64
 installed_size: 0
 priority: optional
 section: utils
+icon: assets/logo.png
 depends:
   - libgtk-3-0
   - libjson-cpp25
