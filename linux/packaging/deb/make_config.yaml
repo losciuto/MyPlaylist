@@ -1,0 +1,13 @@
+display_name: MyPlaylist
+package_name: my-playlist
+version: 3.12.2+1
+maintainer:
+  name: Massimo
+  email: massimo@example.com
+priority: optional
+section: utils
+depends:
+  - libgtk-3-0
+  - libjson-cpp25
+  - libsecret-1-0
+  - ffmpeg
