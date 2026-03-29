@@ -44,3 +44,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 reference_repo/
+
+# SQLite / Database
+*.db
+*.db-shm
+*.db-wal
+videos_drift.db
