@@ -232,7 +232,10 @@ class _ScanTabState extends State<ScanTab> {
                   const SizedBox(height: 4),
                   Text(
                     _currentItem,
-                    style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -42,13 +42,18 @@ class ScanService {
 
     try {
       // Carichiamo la lista dei percorsi che sono falliti durante la rinomina
-      final failedPaths = await db.AppDatabase.instance.getAllFailedRenamePaths();
-      
+      final failedPaths = await db.AppDatabase.instance
+          .getAllFailedRenamePaths();
+
       await for (final status in _scanRecursive(dir, failedPaths)) {
         if (status.message == 'COUNT_UPDATE') {
           count += status.count;
           if (count % 5 == 0) {
-            yield ScanStatus('Processed $count items...', count, currentItem: status.currentItem);
+            yield ScanStatus(
+              'Processed $count items...',
+              count,
+              currentItem: status.currentItem,
+            );
           }
         } else {
           yield status;
@@ -62,7 +67,10 @@ class ScanService {
     yield ScanStatus('Scan complete. Total: $count', count);
   }
 
-  Stream<ScanStatus> _scanRecursive(Directory dir, Set<String> failedPaths) async* {
+  Stream<ScanStatus> _scanRecursive(
+    Directory dir,
+    Set<String> failedPaths,
+  ) async* {
     final dirName = p.basename(dir.path).toLowerCase();
 
     // 1. Explicit Series Check: tvshow.nfo detection
@@ -71,7 +79,11 @@ class ScanService {
     if (await tvshowNfo.exists()) {
       try {
         final added = await _processSeries(dir, failedPaths);
-        yield ScanStatus('COUNT_UPDATE', added ? 1 : 0, currentItem: p.basename(dir.path));
+        yield ScanStatus(
+          'COUNT_UPDATE',
+          added ? 1 : 0,
+          currentItem: p.basename(dir.path),
+        );
       } catch (e) {
         debugPrint('Error processing series ${dir.path}: $e');
       }
@@ -97,7 +109,11 @@ class ScanService {
           if (entity is Directory) {
             // Each subdirectory is treated as a Series
             final added = await _processSeries(entity, failedPaths);
-            yield ScanStatus('COUNT_UPDATE', added ? 1 : 0, currentItem: p.basename(entity.path));
+            yield ScanStatus(
+              'COUNT_UPDATE',
+              added ? 1 : 0,
+              currentItem: p.basename(entity.path),
+            );
           }
         }
       } catch (e) {
@@ -159,19 +175,28 @@ class ScanService {
     }
   }
 
-  Future<bool> _processSeries(Directory seriesDir, Set<String> failedPaths) async {
+  Future<bool> _processSeries(
+    Directory seriesDir,
+    Set<String> failedPaths,
+  ) async {
     final path = seriesDir.path;
 
     // 1. Check if in blacklisted failedPaths
     if (failedPaths.contains(path)) {
-      debugPrint('SKIP [ScanService]: Series in Failed Renames: ${p.basename(path)}');
+      debugPrint(
+        'SKIP [ScanService]: Series in Failed Renames: ${p.basename(path)}',
+      );
       return false;
     }
 
     // 2. Check if already has Poster and Rating
     final existing = await db.AppDatabase.instance.getVideoByPath(path);
-    if (existing != null && existing.posterPath.isNotEmpty && existing.rating > 0.0) {
-      debugPrint('SKIP [ScanService]: Series already has metadata: ${p.basename(path)}');
+    if (existing != null &&
+        existing.posterPath.isNotEmpty &&
+        existing.rating > 0.0) {
+      debugPrint(
+        'SKIP [ScanService]: Series already has metadata: ${p.basename(path)}',
+      );
       return false;
     }
 
@@ -232,14 +257,20 @@ class ScanService {
 
     // 1. Check if in blacklisted failedPaths
     if (failedPaths.contains(path)) {
-      debugPrint('SKIP [ScanService]: Video in Failed Renames: ${p.basename(path)}');
+      debugPrint(
+        'SKIP [ScanService]: Video in Failed Renames: ${p.basename(path)}',
+      );
       return false;
     }
 
     // 2. Check if already has Poster and Rating
     final existing = await db.AppDatabase.instance.getVideoByPath(path);
-    if (existing != null && existing.posterPath.isNotEmpty && existing.rating > 0.0) {
-      debugPrint('SKIP [ScanService]: Video already has metadata: ${p.basename(path)}');
+    if (existing != null &&
+        existing.posterPath.isNotEmpty &&
+        existing.rating > 0.0) {
+      debugPrint(
+        'SKIP [ScanService]: Video already has metadata: ${p.basename(path)}',
+      );
       return false;
     }
 

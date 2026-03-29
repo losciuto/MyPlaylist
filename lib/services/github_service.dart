@@ -25,9 +25,9 @@ class GitHubService {
       final packageInfo = await PackageInfo.fromPlatform();
       final String currentVersion = packageInfo.version;
 
-      final response = await http.get(Uri.parse(_releasesUrl)).timeout(
-        const Duration(seconds: 5),
-      );
+      final response = await http
+          .get(Uri.parse(_releasesUrl))
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -50,7 +50,7 @@ class GitHubService {
                     name.endsWith('.deb') ||
                     name.endsWith('.tar.gz'))) {
               downloadUrl = browserDownloadUrl;
-              break; 
+              break;
             }
           }
         }
@@ -82,8 +82,14 @@ class GitHubService {
 
   bool _isNewerVersion(String remote, String current) {
     try {
-      List<int> remoteParts = remote.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-      List<int> currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      List<int> remoteParts = remote
+          .split('.')
+          .map((e) => int.tryParse(e) ?? 0)
+          .toList();
+      List<int> currentParts = current
+          .split('.')
+          .map((e) => int.tryParse(e) ?? 0)
+          .toList();
 
       for (int i = 0; i < 3; i++) {
         final r = remoteParts.length > i ? remoteParts[i] : 0;

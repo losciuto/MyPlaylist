@@ -1145,7 +1145,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sincronizzazione Massiva Metadati'),
-        content: const Text('Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?'),
+        content: const Text(
+          'Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1202,13 +1204,16 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
 
     for (int i = 0; i < videos.length; i++) {
       if (!mounted || _isCancelled) break;
-      
+
       setState(() {
         _currentIndex = i + 1;
       });
 
-      final result = await MetadataService().updateFileMetadata(videos[i], enforceFullMetadata: true);
-      
+      final result = await MetadataService().updateFileMetadata(
+        videos[i],
+        enforceFullMetadata: true,
+      );
+
       if (_isCancelled) break;
 
       if (result == MetadataUpdateResult.updated) {
@@ -1227,15 +1232,19 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
   @override
   Widget build(BuildContext context) {
     if (_isFinished) {
-      String title = _isCancelled ? 'Sincronizzazione Interrotta' : 'Sincronizzazione Completata';
+      String title = _isCancelled
+          ? 'Sincronizzazione Interrotta'
+          : 'Sincronizzazione Completata';
       return AlertDialog(
         title: Text(title),
-        content: Text('Operazione terminata.\n\nFile esaminati: ${(_isCancelled ? _currentIndex - 1 : _totalFiles)}\nAggiornati: $_updatedCount\nInvariati/Saltati: $_skippedCount'),
+        content: Text(
+          'Operazione terminata.\n\nFile esaminati: ${(_isCancelled ? _currentIndex - 1 : _totalFiles)}\nAggiornati: $_updatedCount\nInvariati/Saltati: $_skippedCount',
+        ),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Chiudi'),
-          )
+          ),
         ],
       );
     }
@@ -1261,7 +1270,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
             });
           },
           child: const Text('Interrompi', style: TextStyle(color: Colors.red)),
-        )
+        ),
       ],
     );
   }

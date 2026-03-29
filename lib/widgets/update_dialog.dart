@@ -19,7 +19,7 @@ class UpdateDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     // Verifica se è un download diretto (.appimage, .deb, .tar.gz)
     final isDirectDownload =
         updateInfo.downloadUrl.toLowerCase().contains('.appimage') ||
@@ -30,11 +30,7 @@ class UpdateDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
         children: [
-          Icon(
-            Icons.system_update,
-            color: theme.colorScheme.primary,
-            size: 28,
-          ),
+          Icon(Icons.system_update, color: theme.colorScheme.primary, size: 28),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -73,7 +69,9 @@ class UpdateDialog extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -82,8 +80,8 @@ class UpdateDialog extends StatelessWidget {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Text(
-                    updateInfo.body.isNotEmpty 
-                        ? updateInfo.body 
+                    updateInfo.body.isNotEmpty
+                        ? updateInfo.body
                         : 'Nessuna nota di rilascio fornita.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       height: 1.5,
@@ -116,9 +114,13 @@ class UpdateDialog extends StatelessWidget {
             _launchUrl();
             Navigator.of(context).pop();
           },
-          icon: Icon(isDirectDownload ? Icons.download : Icons.open_in_new, size: 20),
+          icon: Icon(
+            isDirectDownload ? Icons.download : Icons.open_in_new,
+            size: 20,
+          ),
           label: Text(
-            (isDirectDownload ? l10n.downloadButtonLabel : l10n.openGitHubLabel).toUpperCase(),
+            (isDirectDownload ? l10n.downloadButtonLabel : l10n.openGitHubLabel)
+                .toUpperCase(),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
