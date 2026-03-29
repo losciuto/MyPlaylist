@@ -125,6 +125,10 @@ msix_config:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+# Dependency Overrides to resolve conflicts
+dependency_overrides:
+  uuid: ^4.4.2
+
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
