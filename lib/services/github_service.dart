@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import '../config/app_config.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateInfo {
   final String version;
@@ -21,7 +21,13 @@ class GitHubService {
 
   Future<UpdateInfo?> checkForUpdates() async {
     try {
-      final response = await http.get(Uri.parse(_releasesUrl));
+      // Ottieni la versione reale dell'app dalla piattaforma
+      final packageInfo = await PackageInfo.fromPlatform();
+      final String currentVersion = packageInfo.version;
+
+      final response = await http.get(Uri.parse(_releasesUrl)).timeout(
+        const Duration(seconds: 5),
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -31,7 +37,7 @@ class GitHubService {
         // Default download URL is the release page
         String downloadUrl = data['html_url'] ?? '';
 
-        // Try to find a direct download link for Linux (.AppImage or .deb)
+        // Cerchiamo un asset specifico per Linux (.AppImage o .deb)
         final List<dynamic>? assets = data['assets'];
         if (assets != null && assets.isNotEmpty) {
           for (final asset in assets) {
@@ -44,16 +50,16 @@ class GitHubService {
                     name.endsWith('.deb') ||
                     name.endsWith('.tar.gz'))) {
               downloadUrl = browserDownloadUrl;
-              break; // Take the first matching Linux asset
+              break; 
             }
           }
         }
 
-        // Clean version string: take only digits and dots
-        final String remoteVersion = _extractVersion(tagName);
-        final String currentVersion = _extractVersion(AppConfig.appVersion);
+        // Estrae il numero di versione (puro) dal tag (es: v3.12.0 -> 3.12.0)
+        final String remoteVersion = _cleanVersion(tagName);
+        final String localVersion = _cleanVersion(currentVersion);
 
-        if (_isNewerVersion(remoteVersion, currentVersion)) {
+        if (_isNewerVersion(remoteVersion, localVersion)) {
           return UpdateInfo(
             version: tagName,
             body: body,
@@ -62,13 +68,13 @@ class GitHubService {
         }
       }
     } catch (e) {
-      debugPrint('Error checking for updates: $e');
+      debugPrint('[GitHubService] Error checking for updates: $e');
     }
     return null;
   }
 
-  String _extractVersion(String input) {
-    // Keep only numbers and dots
+  String _cleanVersion(String input) {
+    // Rimuove la 'v' iniziale e caratteri non numerici/punti
     final RegExp regExp = RegExp(r'[0-9]+\.[0-9]+(\.[0-9]+)?');
     final match = regExp.firstMatch(input);
     return match?.group(0) ?? input;
@@ -76,15 +82,16 @@ class GitHubService {
 
   bool _isNewerVersion(String remote, String current) {
     try {
-      List<int> remoteParts = remote.split('.').map(int.parse).toList();
-      List<int> currentParts = current.split('.').map(int.parse).toList();
+      List<int> remoteParts = remote.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      List<int> currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
 
-      for (int i = 0; i < remoteParts.length && i < currentParts.length; i++) {
-        if (remoteParts[i] > currentParts[i]) return true;
-        if (remoteParts[i] < currentParts[i]) return false;
+      for (int i = 0; i < 3; i++) {
+        final r = remoteParts.length > i ? remoteParts[i] : 0;
+        final c = currentParts.length > i ? currentParts[i] : 0;
+        if (r > c) return true;
+        if (r < c) return false;
       }
-
-      return remoteParts.length > currentParts.length;
+      return false;
     } catch (e) {
       return false;
     }

@@ -47,7 +47,8 @@ dependencies:
   xml: ^6.5.0
   provider: ^6.1.1
   intl: ^0.20.2
-  url_launcher: ^6.2.5
+  url_launcher: ^6.3.0
+  package_info_plus: ^9.0.0
 
   # Desktop Window
   window_manager: ^0.5.1
