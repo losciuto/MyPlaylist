@@ -4,6 +4,7 @@ version: 3.12.2+1
 maintainer:
   name: Massimo
   email: massimo@example.com
+architecture: amd64
 priority: optional
 section: utils
 depends:
@@ -11,3 +12,6 @@ depends:
   - libjson-cpp25
   - libsecret-1-0
   - ffmpeg
+description: |-
+  Professional video playlist manager with smart metadata synchronization (TMDB), 
+  FFmpeg integration, and remote control support.
