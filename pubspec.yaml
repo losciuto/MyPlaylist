@@ -83,6 +83,44 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.32.1
   build_runner: ^2.13.1
+  flutter_launcher_icons: ^0.13.1
+  msix: ^3.16.8
+  flutter_distributor: ^0.5.1
+
+# Flutter Launcher Icons configuration
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/logo.png"
+  windows:
+    generate: true
+    image_path: "assets/logo.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/logo.png"
+
+# Flutter Distributor configuration
+flutter_distributor:
+  output: dist/
+  artifacts:
+    - name: deb
+      target: linux
+    - name: exe
+      target: windows
+
+# MSix configuration (for metadata and modern installer option)
+msix_config:
+  display_name: MyPlaylist
+  publisher_display_name: Massimo
+  publisher: Massimo
+  identity_name: com.massimo.my_playlist
+  msix_version: 3.12.1.0
+  logo_path: assets/logo.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

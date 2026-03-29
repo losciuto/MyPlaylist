@@ -34,13 +34,21 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
-      - name: Compress Release
+      - name: Install Flutter Distributor
+        run: dart pub global activate flutter_distributor
+
+      - name: Package Linux .deb
+        run: |
+          export PATH="$PATH":"$HOME/.pub-cache/bin"
+          flutter_distributor package --listing deb --target-platform linux
+
+      - name: Compress Release (Legacy)
         run: |
           cd build/linux/x64/release/bundle
           tar -czf myplaylist-linux-x64.tar.gz *
           mv myplaylist-linux-x64.tar.gz ../../../../../
 
-      - name: Import GPG Key
+      - name: Sign Release
         if: secrets.GPG_PRIVATE_KEY != ''
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v6
@@ -61,7 +69,7 @@ jobs:
           name: myplaylist-linux-x64
           path: |
             myplaylist-linux-x64.tar.gz
-            myplaylist-linux-x64.tar.gz.asc
+            dist/*/*.deb
 
   build-windows:
     name: Build Windows
@@ -80,7 +88,12 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
-      - name: Compress Release
+      - name: Build Windows Installer (Inno Setup)
+        uses: ayu-0315/innosetup-action@v1.1
+        with:
+          filepath: windows/installer_script.iss
+
+      - name: Compress Release (Legacy)
         run: |
           cd build/windows/x64/runner/release
           Compress-Archive -Path * -DestinationPath ..\..\..\..\..\myplaylist-windows-x64.zip
@@ -89,7 +102,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: myplaylist-windows-x64
-          path: myplaylist-windows-x64.zip
+          path: |
+            myplaylist-windows-x64.zip
+            build/windows/installer/*.exe
 
   build-android:
     name: Build Android
@@ -165,8 +180,9 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
           files: |
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
-            artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz.asc
+            artifacts/myplaylist-linux-x64/*.deb
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
+            artifacts/myplaylist-windows-x64/*.exe
             artifacts/myplaylist-android/app-release.apk
             artifacts/myplaylist-macos/myplaylist-macos.zip
           fail_on_unmatched_files: false
