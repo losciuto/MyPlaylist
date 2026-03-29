@@ -44,6 +44,12 @@ jobs:
           export PATH="$PATH":"$HOME/.pub-cache/bin"
           flutter_distributor package --platform linux --targets deb
 
+      - name: Move .deb to known location
+        run: |
+          mkdir -p dist/output
+          find dist -name "*.deb" -exec cp {} dist/output/myplaylist-linux.deb \;
+          ls -la dist/output/
+
       - name: Compress Release (Legacy)
         run: |
           cd build/linux/x64/release/bundle
@@ -71,7 +77,7 @@ jobs:
           name: myplaylist-linux-x64
           path: |
             myplaylist-linux-x64.tar.gz
-            dist/*/*.deb
+            dist/output/myplaylist-linux.deb
 
   build-windows:
     name: Build Windows
@@ -182,9 +188,9 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
           files: |
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
-            artifacts/myplaylist-linux-x64/**/*.deb
+            artifacts/myplaylist-linux-x64/myplaylist-linux.deb
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
-            artifacts/myplaylist-windows-x64/**/*.exe
+            artifacts/myplaylist-windows-x64/build/windows/installer/*.exe
             artifacts/myplaylist-android/app-release.apk
             artifacts/myplaylist-macos/myplaylist-macos.zip
           fail_on_unmatched_files: false

@@ -1263,6 +1263,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
   int _skippedCount = 0;
   bool _isFinished = false;
   bool _isCancelled = false;
+  String _currentTitle = '';
 
   @override
   void initState() {
@@ -1282,6 +1283,9 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
 
       setState(() {
         _currentIndex = i + 1;
+        _currentTitle = videos[i].title.isNotEmpty
+            ? videos[i].title
+            : videos[i].path.split('/').last;
       });
 
       final result = await MetadataService().updateFileMetadata(
@@ -1331,7 +1335,20 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('File $_currentIndex di $_totalFiles'),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          if (_currentTitle.isNotEmpty)
+            Text(
+              _currentTitle,
+              style: const TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 12,
+                color: Colors.white70,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: 12),
           LinearProgressIndicator(value: progress),
           const SizedBox(height: 16),
           Text('Aggiornati: $_updatedCount\nSaltati: $_skippedCount'),

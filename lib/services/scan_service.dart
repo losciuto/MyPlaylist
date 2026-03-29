@@ -153,9 +153,10 @@ class ScanService {
             if (VideoExtensions.supported.contains(ext)) {
               try {
                 final added = await _processVideo(entity, failedPaths);
-                // We return 1 only if actually added/updated in DB or handled?
-                // For progress consistency, let's say 1 if it exists in DB now.
-                return added ? 1 : 0;
+                if (added) {
+                  // Yield an intermediate status update to show the current file in UI
+                  return 1;
+                }
               } catch (e) {
                 debugPrint('Error processing video ${entity.path}: $e');
               }
@@ -167,7 +168,12 @@ class ScanService {
         final results = await Future.wait(tasks);
         final batchAddedCount = results.fold<int>(0, (sum, val) => sum + val);
         if (batchAddedCount > 0) {
-          yield ScanStatus('COUNT_UPDATE', batchAddedCount);
+          // Send the name of the last file in the batch or a generic update
+          yield ScanStatus(
+            'COUNT_UPDATE',
+            batchAddedCount,
+            currentItem: p.basename(batch.last.path),
+          );
         }
       }
     } catch (e) {
