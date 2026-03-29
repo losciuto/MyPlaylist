@@ -10,8 +10,9 @@ import 'media_asset_service.dart';
 class ScanStatus {
   final String message;
   final int count;
+  final String? currentItem;
 
-  ScanStatus(this.message, this.count);
+  ScanStatus(this.message, this.count, {this.currentItem});
 }
 
 class ScanService {
@@ -40,11 +41,14 @@ class ScanService {
     int count = 0;
 
     try {
-      await for (final status in _scanRecursive(dir)) {
+      // Carichiamo la lista dei percorsi che sono falliti durante la rinomina
+      final failedPaths = await db.AppDatabase.instance.getAllFailedRenamePaths();
+      
+      await for (final status in _scanRecursive(dir, failedPaths)) {
         if (status.message == 'COUNT_UPDATE') {
           count += status.count;
           if (count % 5 == 0) {
-            yield ScanStatus('Processed $count items...', count);
+            yield ScanStatus('Processed $count items...', count, currentItem: status.currentItem);
           }
         } else {
           yield status;
@@ -58,7 +62,7 @@ class ScanService {
     yield ScanStatus('Scan complete. Total: $count', count);
   }
 
-  Stream<ScanStatus> _scanRecursive(Directory dir) async* {
+  Stream<ScanStatus> _scanRecursive(Directory dir, Set<String> failedPaths) async* {
     final dirName = p.basename(dir.path).toLowerCase();
 
     // 1. Explicit Series Check: tvshow.nfo detection
@@ -66,8 +70,8 @@ class ScanService {
     final tvshowNfo = File(p.join(dir.path, 'tvshow.nfo'));
     if (await tvshowNfo.exists()) {
       try {
-        await _processSeries(dir);
-        yield ScanStatus('COUNT_UPDATE', 1);
+        final added = await _processSeries(dir, failedPaths);
+        yield ScanStatus('COUNT_UPDATE', added ? 1 : 0, currentItem: p.basename(dir.path));
       } catch (e) {
         debugPrint('Error processing series ${dir.path}: $e');
       }
@@ -92,8 +96,8 @@ class ScanService {
         )) {
           if (entity is Directory) {
             // Each subdirectory is treated as a Series
-            await _processSeries(entity);
-            yield ScanStatus('COUNT_UPDATE', 1);
+            final added = await _processSeries(entity, failedPaths);
+            yield ScanStatus('COUNT_UPDATE', added ? 1 : 0, currentItem: p.basename(entity.path));
           }
         }
       } catch (e) {
@@ -122,7 +126,7 @@ class ScanService {
 
           if (entity is Directory) {
             int subCount = 0;
-            await for (final status in _scanRecursive(entity)) {
+            await for (final status in _scanRecursive(entity, failedPaths)) {
               if (status.message == 'COUNT_UPDATE') {
                 subCount += status.count;
               }
@@ -132,8 +136,10 @@ class ScanService {
             final ext = p.extension(entity.path).toLowerCase();
             if (VideoExtensions.supported.contains(ext)) {
               try {
-                await _processVideo(entity);
-                return 1;
+                final added = await _processVideo(entity, failedPaths);
+                // We return 1 only if actually added/updated in DB or handled?
+                // For progress consistency, let's say 1 if it exists in DB now.
+                return added ? 1 : 0;
               } catch (e) {
                 debugPrint('Error processing video ${entity.path}: $e');
               }
@@ -153,8 +159,22 @@ class ScanService {
     }
   }
 
-  Future<void> _processSeries(Directory seriesDir) async {
+  Future<bool> _processSeries(Directory seriesDir, Set<String> failedPaths) async {
     final path = seriesDir.path;
+
+    // 1. Check if in blacklisted failedPaths
+    if (failedPaths.contains(path)) {
+      debugPrint('SKIP [ScanService]: Series in Failed Renames: ${p.basename(path)}');
+      return false;
+    }
+
+    // 2. Check if already has Poster and Rating
+    final existing = await db.AppDatabase.instance.getVideoByPath(path);
+    if (existing != null && existing.posterPath.isNotEmpty && existing.rating > 0.0) {
+      debugPrint('SKIP [ScanService]: Series already has metadata: ${p.basename(path)}');
+      return false;
+    }
+
     final stat = await seriesDir.stat();
     final mtime = stat.modified.millisecondsSinceEpoch / 1000.0;
 
@@ -204,10 +224,25 @@ class ScanService {
     );
 
     await db.AppDatabase.instance.insertVideo(video);
+    return true;
   }
 
-  Future<void> _processVideo(File videoFile) async {
+  Future<bool> _processVideo(File videoFile, Set<String> failedPaths) async {
     final path = videoFile.path;
+
+    // 1. Check if in blacklisted failedPaths
+    if (failedPaths.contains(path)) {
+      debugPrint('SKIP [ScanService]: Video in Failed Renames: ${p.basename(path)}');
+      return false;
+    }
+
+    // 2. Check if already has Poster and Rating
+    final existing = await db.AppDatabase.instance.getVideoByPath(path);
+    if (existing != null && existing.posterPath.isNotEmpty && existing.rating > 0.0) {
+      debugPrint('SKIP [ScanService]: Video already has metadata: ${p.basename(path)}');
+      return false;
+    }
+
     final stat = await videoFile.stat();
     final mtime =
         stat.modified.millisecondsSinceEpoch / 1000.0; // Seconds as double
@@ -277,6 +312,7 @@ class ScanService {
 
     // Insert into DB (update if exists)
     await db.AppDatabase.instance.insertVideo(video);
+    return true;
   }
 
   Future<({String names, String thumbs})> _processThumbnails(

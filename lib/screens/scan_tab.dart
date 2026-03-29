@@ -25,6 +25,7 @@ class _ScanTabState extends State<ScanTab> {
   }
 
   int _count = 0;
+  String _currentItem = '';
   bool _isScanning = false;
   StreamSubscription? _scanSubscription;
 
@@ -49,6 +50,7 @@ class _ScanTabState extends State<ScanTab> {
       _isScanning = true;
       _statusMessage = AppLocalizations.of(context)!.scanStatusInit;
       _count = 0;
+      _currentItem = '';
     });
 
     _scanSubscription = ScanService.instance
@@ -59,6 +61,9 @@ class _ScanTabState extends State<ScanTab> {
               setState(() {
                 _statusMessage = status.message;
                 _count = status.count;
+                if (status.currentItem != null) {
+                  _currentItem = status.currentItem!;
+                }
               });
             }
           },
@@ -67,6 +72,7 @@ class _ScanTabState extends State<ScanTab> {
               setState(() {
                 _isScanning = false;
                 _scanSubscription = null;
+                _currentItem = '';
               });
 
               ScaffoldMessenger.of(context).showSnackBar(
@@ -104,6 +110,7 @@ class _ScanTabState extends State<ScanTab> {
       _isScanning = false;
       _scanSubscription = null;
       _statusMessage = 'Scansione interrotta dall\'utente.';
+      _currentItem = '';
     });
   }
 
@@ -210,6 +217,27 @@ class _ScanTabState extends State<ScanTab> {
                   AppLocalizations.of(context)!.videosFoundCount(_count),
                   style: const TextStyle(color: Colors.grey),
                 ),
+                if (_currentItem.isNotEmpty) ...[
+                  const SizedBox(height: 15),
+                  const Divider(),
+                  const SizedBox(height: 10),
+                  Text(
+                    'In elaborazione:',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _currentItem,
+                    style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),

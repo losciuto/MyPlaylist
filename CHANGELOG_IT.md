@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.1] - 29/03/2026
+
+### Aggiunte
+- **Progresso Scansione in Tempo Reale**: La scheda di scansione ora mostra il nome del file o della cartella attualmente in fase di elaborazione.
+
+### Modifiche
+- **Ottimizzazione Scansione Intelligente**: Notevole aumento delle prestazioni durante la ri-scansione. L'app ora salta i video che hanno già sia una locandina che un voto nel database.
+- **Sincronizzazione Migliorata**: Integrata la lista delle "Rinomine Fallite" nel processo di scansione. I file che sono stati saltati nella fase di rinomina manuale vengono ora esclusi automaticamente dagli aggiornamenti dei metadati.
+- **Sistema di Update Moderno**: Integrato `package_info_plus` per un rilevamento più preciso della versione e ridisegnato il dialogo di aggiornamento con un look Material 3 premium.
+
 ## [3.12.0] - 28/03/2026
 
 ### Aggiunte

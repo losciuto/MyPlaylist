@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.1] - 2026-03-29
+
+### Added
+- **Real-time Scan Progress**: The scanning tab now displays the name of the file or directory currently being processed.
+
+### Changed
+- **Smart Scanning Optimization**: Significant performance boost when re-scanning. The app now skips videos that already have both a poster and a rating in the database.
+- **Improved Synchronization**: Integrated the "Failed Renames" list into the scan process. Files that failed or were skipped during the manual rename phase are now automatically excluded from metadata updates to prevent redundant processing.
+- **Modern Update System**: Integrated `package_info_plus` for more accurate version detection and redesigned the update dialog with a premium Material 3 look.
+
 ## [3.12.0] - 2026-03-27
 
 ### Added
