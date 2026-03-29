@@ -325,7 +325,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirm),
-        content: Text(AppLocalizations.of(context)!.confirmClearDb),
+        content: const Text(
+          'Vuoi cancellare TUTTI i dati dal database?\n\nVerranno rimosse anche le cartelle monitorate dall\'Auto-Sync.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

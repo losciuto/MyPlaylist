@@ -197,7 +197,14 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> clearDatabase() async {
-    await delete(videos).go();
+    await transaction(() async {
+      await delete(videos).go();
+      await delete(failedRenames).go();
+    });
+  }
+
+  Future<void> clearAllData() async {
+    await clearDatabase();
   }
 
   Future<int> deleteVideo(int id) async {

@@ -171,7 +171,11 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> clearDatabase() async {
-    await _db.delete(_db.videos).go();
+    await _db.clearDatabase();
+    // Also clear watched directories and ignored duplicates to ensure a total reset
+    final settings = SettingsService();
+    await settings.setWatchedDirectories([]);
+    await settings.clearIgnoredDuplicateKeys();
     await refreshVideos();
   }
 
