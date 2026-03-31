@@ -44,8 +44,25 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   void initState() {
     super.initState();
-    final defaultSize = context.read<SettingsService>().defaultPlaylistSize;
-    _limitController.text = defaultSize.toString();
+    final settingsService = context.read<SettingsService>();
+    final last = settingsService.lastFilterSettings;
+
+    if (last != null) {
+      _selectedGenres.addAll(last.genres);
+      _excludedGenres.addAll(last.excludedGenres);
+      _selectedYears.addAll(last.years);
+      _excludedYears.addAll(last.excludedYears);
+      _selectedActors.addAll(last.actors);
+      _excludedActors.addAll(last.excludedActors);
+      _selectedDirectors.addAll(last.directors);
+      _excludedDirectors.addAll(last.excludedDirectors);
+      _selectedSagas.addAll(last.sagas);
+      _excludedSagas.addAll(last.excludedSagas);
+      _minRating = last.ratingMin;
+      _limitController.text = last.limit.toString();
+    } else {
+      _limitController.text = settingsService.defaultPlaylistSize.toString();
+    }
     _loadData();
   }
 
@@ -192,7 +209,10 @@ class _FilterDialogState extends State<FilterDialog> {
               _selectedSagas.clear();
               _excludedSagas.clear();
               _minRating = 0.0;
+              _limitController.text =
+                  context.read<SettingsService>().defaultPlaylistSize.toString();
             });
+            context.read<SettingsService>().setLastFilterSettings(null);
           },
           child: Text(
             AppLocalizations.of(context)!.resetFilters,
@@ -219,6 +239,7 @@ class _FilterDialogState extends State<FilterDialog> {
               excludedSagas: _excludedSagas,
               limit: int.tryParse(_limitController.text) ?? 20,
             );
+            context.read<SettingsService>().setLastFilterSettings(settings);
             Navigator.pop(context, settings);
           },
           child: Text(AppLocalizations.of(context)!.createPlaylist),

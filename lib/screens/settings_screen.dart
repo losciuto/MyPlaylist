@@ -467,7 +467,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             border: const OutlineInputBorder(),
             filled: true,
             fillColor: fillColor,
-            helperText: 'Optional: For better logos and backgrounds',
+            helperText: l10n.fanartApiKeyHint,
           ),
           onChanged: (val) =>
               context.read<SettingsService>().setFanartApiKey(val),
@@ -524,6 +524,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(l10n.settingsAutoSyncNfoSubtitle),
                   value: settings.autoSyncNfoOnEdit,
                   onChanged: (val) => settings.setAutoSyncNfoOnEdit(val),
+                  activeThumbColor: const Color(0xFF4CAF50),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 10),
+                SwitchListTile(
+                  title: Text(l10n.settingsFastMetadataEngine),
+                  subtitle: Text(l10n.settingsFastMetadataEngineSubtitle),
+                  value: settings.fastMetadataEngineEnabled,
+                  onChanged: (val) => settings.setFastMetadataEngineEnabled(val),
                   activeThumbColor: const Color(0xFF4CAF50),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -584,7 +593,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 35),
                 Text(
-                  'SYNC MANUALE DEL DATABASE',
+                  l10n.manualDbSyncHeader,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -602,8 +611,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           const Icon(Icons.sync_alt, color: Color(0xFF4CAF50)),
                           const SizedBox(width: 10),
-                          const Text(
-                            'Sincronizza tag file mancanti',
+                          Text(
+                            l10n.syncMissingTagsLabel,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -612,15 +621,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).',
+                      Text(
+                        l10n.syncMissingTagsDesc,
                         style: TextStyle(color: Colors.white70),
                       ),
                       const SizedBox(height: 15),
                       ElevatedButton.icon(
                         onPressed: _startBulkMetadataSync,
                         icon: const Icon(Icons.batch_prediction),
-                        label: const Text('Avvia Scansione e Sincronizzazione'),
+                        label: Text(l10n.startSyncButton),
                       ),
                     ],
                   ),
@@ -1219,9 +1228,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sincronizzazione Massiva Metadati'),
-        content: const Text(
-          'Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?',
+        title: Text(AppLocalizations.of(context)!.bulkSyncTitle),
+        content: Text(
+          AppLocalizations.of(context)!.bulkSyncDesc,
         ),
         actions: [
           TextButton(
@@ -1230,7 +1239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Inizia Sincronizzazione'),
+            child: Text(AppLocalizations.of(context)!.startSyncDialogButton),
           ),
         ],
       ),
@@ -1312,17 +1321,21 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
   Widget build(BuildContext context) {
     if (_isFinished) {
       String title = _isCancelled
-          ? 'Sincronizzazione Interrotta'
-          : 'Sincronizzazione Completata';
+          ? AppLocalizations.of(context)!.syncInterrupted
+          : AppLocalizations.of(context)!.syncCompleted;
       return AlertDialog(
         title: Text(title),
         content: Text(
-          'Operazione terminata.\n\nFile esaminati: ${(_isCancelled ? _currentIndex - 1 : _totalFiles)}\nAggiornati: $_updatedCount\nInvariati/Saltati: $_skippedCount',
+          AppLocalizations.of(context)!.syncResultMsg(
+            (_isCancelled ? _currentIndex - 1 : _totalFiles).toString(),
+            _updatedCount.toString(),
+            _skippedCount.toString(),
+          ),
         ),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Chiudi'),
+            child: Text(AppLocalizations.of(context)!.closeButton),
           ),
         ],
       );
@@ -1330,11 +1343,11 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
 
     double progress = _totalFiles > 0 ? _currentIndex / _totalFiles : 0.0;
     return AlertDialog(
-      title: const Text('Elaborazione Batch...'),
+      title: Text(AppLocalizations.of(context)!.batchProcessingTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('File $_currentIndex di $_totalFiles'),
+          Text(AppLocalizations.of(context)!.fileXofY(_currentIndex.toString(), _totalFiles.toString())),
           const SizedBox(height: 8),
           if (_currentTitle.isNotEmpty)
             Text(
@@ -1351,7 +1364,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
           const SizedBox(height: 12),
           LinearProgressIndicator(value: progress),
           const SizedBox(height: 16),
-          Text('Aggiornati: $_updatedCount\nSaltati: $_skippedCount'),
+          Text('${AppLocalizations.of(context)!.syncUpdated(_updatedCount.toString())}\n${AppLocalizations.of(context)!.syncSkipped(_skippedCount.toString())}'),
         ],
       ),
       actions: [
@@ -1361,7 +1374,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
               _isCancelled = true;
             });
           },
-          child: const Text('Interrompi', style: TextStyle(color: Colors.red)),
+          child: Text(AppLocalizations.of(context)!.stopButton, style: const TextStyle(color: Colors.red)),
         ),
       ],
     );

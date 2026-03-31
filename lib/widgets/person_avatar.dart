@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class PersonAvatar extends StatelessWidget {
   final String name;
@@ -143,7 +144,7 @@ class PersonAvatar extends StatelessWidget {
                       ).pop(); // Close details dialog if it's open
                     },
                     icon: const Icon(Icons.search),
-                    label: const Text('Filtra per questa persona'),
+                    label: Text(AppLocalizations.of(context)!.filterByPerson),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white,

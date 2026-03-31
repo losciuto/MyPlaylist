@@ -1,3 +1,4 @@
+import '../services/settings_service.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -149,6 +150,42 @@ class MetadataService {
         }
       }
 
+      final bool useFastEngine = SettingsService().fastMetadataEngineEnabled;
+      final ext = p.extension(path).toLowerCase();
+
+      debugPrint('[MetadataService] Update requested for $path');
+      debugPrint('[MetadataService] Fast Engine Setting: $useFastEngine');
+
+      if (useFastEngine) {
+        if (ext == '.mkv') {
+          final bool toolAvailable = await _isToolAvailable('mkvpropedit');
+          debugPrint('[MetadataService] mkvpropedit available: $toolAvailable');
+          if (toolAvailable) {
+            final succ = await _updateSingleFileMKVInPlace(path, video, encodedBy, preserveTitle, forcedTitle);
+            if (succ) {
+              debugPrint('[MetadataService] MKV in-place update SUCCESS');
+              return MetadataUpdateResult.updated;
+            }
+            debugPrint('[MetadataService] MKV in-place update FAILED, falling back...');
+          }
+        } else if (ext == '.mp4' || ext == '.m4v') {
+          final bool toolAvailable = await _isToolAvailable('MP4Box');
+          debugPrint('[MetadataService] MP4Box available: $toolAvailable');
+          if (toolAvailable) {
+            final succ = await _updateSingleFileMP4InPlace(path, video, encodedBy, preserveTitle, forcedTitle);
+            if (succ) {
+              debugPrint('[MetadataService] MP4 in-place update SUCCESS');
+              return MetadataUpdateResult.updated;
+            }
+            debugPrint('[MetadataService] MP4 in-place update FAILED, falling back...');
+          }
+        }
+      } else {
+        debugPrint('[MetadataService] Fast Engine disabled by user settings');
+      }
+
+      debugPrint('[MetadataService] Using FFmpeg fallback (slow)...');
+
       // 2. Now that we know we need an update, rename original to temp
       await originalFile.rename(tempPath);
 
@@ -258,6 +295,164 @@ class MetadataService {
       .toLowerCase()
       .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
       .replaceAll(RegExp(r'\s+'), ' ');
+
+  Future<bool> _isToolAvailable(String command) async {
+    try {
+      if (Platform.isWindows) {
+        final result = await Process.run('where', [command]);
+        return result.exitCode == 0;
+      } else {
+        final result = await Process.run('which', [command]);
+        return result.exitCode == 0;
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
+  String _escapeXml(String input) {
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
+  }
+
+  Future<bool> _updateSingleFileMKVInPlace(
+    String path,
+    Video video,
+    String encodedBy,
+    bool preserveTitle,
+    String? forcedTitle,
+  ) async {
+    try {
+      final String dir = p.dirname(path);
+      final String tagsPath = p.join(dir, 'temp_tags_${DateTime.now().millisecondsSinceEpoch}.xml');
+      final title = forcedTitle ?? video.title;
+
+      final xml = '''<?xml version="1.0"?>
+<!DOCTYPE Tags SYSTEM "matroskatags.dtd">
+<Tags>
+  <Tag>
+    <Targets>
+      <TargetTypeValue>50</TargetTypeValue>
+    </Targets>
+    <Simple>
+      <Name>GENRE</Name>
+      <String>${_escapeXml(video.genres)}</String>
+    </Simple>
+    <Simple>
+      <Name>ARTIST</Name>
+      <String>${_escapeXml(video.directors)}</String>
+    </Simple>
+    <Simple>
+      <Name>RATING</Name>
+      <String>${_escapeXml(video.rating.toString())}</String>
+    </Simple>
+    <Simple>
+      <Name>POSTER_URL</Name>
+      <String>${_escapeXml(video.posterPath)}</String>
+    </Simple>
+    <Simple>
+      <Name>ENCODED_BY</Name>
+      <String>${_escapeXml(encodedBy)}</String>
+    </Simple>
+    <Simple>
+      <Name>DESCRIPTION</Name>
+      <String>${_escapeXml(video.plot)}</String>
+    </Simple>
+    <Simple>
+      <Name>COMMENT</Name>
+      <String>${_escapeXml(video.plot)}</String>
+    </Simple>
+    ${preserveTitle ? '''
+    <Simple>
+      <Name>ALBUM</Name>
+      <String>${_escapeXml(video.title)}</String>
+    </Simple>
+    <Simple>
+      <Name>SHOW</Name>
+      <String>${_escapeXml(video.title)}</String>
+    </Simple>
+    ''' : ''}
+  </Tag>
+</Tags>''';
+
+      await File(tagsPath).writeAsString(xml);
+
+      final List<String> args = [
+        path,
+        '--edit', 'info',
+        '--set', 'title=$title',
+        '--set', 'date=${video.year}',
+        '--tags', 'all:$tagsPath'
+      ];
+
+      debugPrint('[MetadataService] Running mkvpropedit with args: $args');
+      final result = await Process.run('mkvpropedit', args);
+      await File(tagsPath).delete();
+
+      if (result.exitCode == 0) {
+        debugPrint('[MetadataService] mkvpropedit SUCCESS');
+        return true;
+      }
+      debugPrint('[MetadataService] mkvpropedit FAILED: ${result.stderr}');
+      await LoggerService().error('mkvpropedit failed for $path: ${result.stderr}');
+      return false;
+    } catch (e) {
+      await LoggerService().error('Error in MKV in-place update for $path', e);
+      return false;
+    }
+  }
+
+  Future<bool> _updateSingleFileMP4InPlace(
+    String path,
+    Video video,
+    String encodedBy,
+    bool preserveTitle,
+    String? forcedTitle,
+  ) async {
+    try {
+      final title = forcedTitle ?? video.title;
+      
+      // MP4Box -itags usually uses colons as separators
+      List<String> tags = [];
+      
+      String clean(String s) => s.replaceAll(':', ';').replaceAll('"', "'");
+      
+      if (title.isNotEmpty) tags.add('title=${clean(title)}');
+      if (video.directors.isNotEmpty) tags.add('artist=${clean(video.directors)}');
+      if (video.year.toString().isNotEmpty) tags.add('created=${clean(video.year.toString())}');
+      if (video.genres.isNotEmpty) tags.add('genre=${clean(video.genres)}');
+      if (video.plot.isNotEmpty) {
+        tags.add('comment=${clean(video.plot)}');
+        tags.add('sdesc=${clean(video.plot)}'); // short description
+      }
+      tags.add('tool=${clean(encodedBy)}');
+      
+      if (preserveTitle && video.title.isNotEmpty) {
+        tags.add('album=${clean(video.title)}');
+        tags.add('show=${clean(video.title)}');
+      }
+      
+      final String itagsString = tags.join(':');
+      final List<String> args = ['-itags', itagsString, path];
+
+      debugPrint('[MetadataService] Running MP4Box with args: $args');
+      final result = await Process.run('MP4Box', args);
+      if (result.exitCode == 0) {
+        debugPrint('[MetadataService] MP4Box SUCCESS');
+        return true;
+      }
+      debugPrint('[MetadataService] MP4Box FAILED: ${result.stderr}');
+      await LoggerService().error('MP4Box failed for $path: ${result.stderr}');
+      return false;
+    } catch (e) {
+      await LoggerService().error('Error in MP4 in-place update for $path', e);
+      return false;
+    }
+  }
 
   String _cleanRemainder(String input) {
     String cleaned = input;

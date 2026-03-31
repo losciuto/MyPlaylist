@@ -1,6 +1,6 @@
 display_name: MyPlaylist
 package_name: my-playlist
-version: 3.12.2+1
+version: 3.12.3+1
 maintainer:
   name: Massimo
   email: massimo@example.com
@@ -14,6 +14,8 @@ depends:
   - libjson-cpp25
   - libsecret-1-0
   - ffmpeg
+  - mkvtoolnix
+  - gpac
 description: |-
   Professional video playlist manager with smart metadata synchronization (TMDB), 
   FFmpeg integration, and remote control support.

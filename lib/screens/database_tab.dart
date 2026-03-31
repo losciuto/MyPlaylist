@@ -325,8 +325,8 @@ class _DatabaseTabState extends State<DatabaseTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirm),
-        content: const Text(
-          'Vuoi cancellare TUTTI i dati dal database?\n\nVerranno rimosse anche le cartelle monitorate dall\'Auto-Sync.',
+        content: Text(
+          AppLocalizations.of(context)!.confirmClearDbMsg,
         ),
         actions: [
           TextButton(
@@ -612,7 +612,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                       builder: (_) => const DuplicatesDialog(),
                     ).then((_) => provider.refreshVideos()),
                     icon: const Icon(Icons.copy_all),
-                    label: const Text('Doppioni'),
+                    label: Text(l10n.duplicatesButton),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange.shade800,
                       foregroundColor: Colors.white,
@@ -633,7 +633,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     },
                     icon: const Icon(Icons.list_alt_rounded),
                     label: Text(
-                      'File Ignorati/Falliti (${provider.failedRenamesCount})',
+                      l10n.failedRenamesTitle(provider.failedRenamesCount.toString()),
                     ),
                   ),
                 ],

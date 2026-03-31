@@ -4,6 +4,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:path/path.dart' as p;
 import '../models/video.dart' as model;
+import 'package:my_playlist/l10n/app_localizations.dart';
 import '../utils/video_extensions.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Errore Player: $event')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.playerError(event.toString()))));
       }
     });
   }
@@ -81,8 +82,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
         await player.open(Playlist(mediaList));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nessun file video trovato per la riproduzione.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.playerNoFile),
           ),
         );
       }

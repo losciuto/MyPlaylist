@@ -1,3 +1,4 @@
+import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../database/app_database.dart';
 import 'package:path/path.dart' as p;
@@ -32,18 +33,18 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pulisci Lista'),
-        content: const Text(
-          'Vuoi rimuovere tutti i file ignorati? L\'app proverà di nuovo a rinominarli alla prossima esecuzione.',
+        title: Text(AppLocalizations.of(context)!.clearListTitle),
+        content: Text(
+          AppLocalizations.of(context)!.clearListMsg,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Conferma'),
+            child: Text(AppLocalizations.of(context)!.confirm),
           ),
         ],
       ),
@@ -64,12 +65,12 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('File Ignorati/Falliti (${_failedItems.length})'),
+        title: Text(AppLocalizations.of(context)!.failedRenamesTitle(_failedItems.length.toString())),
         actions: [
           if (_failedItems.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_sweep),
-              tooltip: 'Pulisci Tutto',
+              tooltip: AppLocalizations.of(context)!.clearListTooltip,
               onPressed: _clearAll,
             ),
         ],
@@ -79,7 +80,7 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
           : _failedItems.isEmpty
           ? Center(
               child: Text(
-                'Nessun file fallito o ignorato.',
+                AppLocalizations.of(context)!.noFailedFiles,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             )
@@ -124,7 +125,7 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
                     trailing: IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
                       onPressed: () => _deleteItem(item),
-                      tooltip: 'Rimuovi dalla lista e ritenta',
+                      tooltip: AppLocalizations.of(context)!.removeFromListTooltip,
                     ),
                   ),
                 );

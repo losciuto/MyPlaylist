@@ -8,6 +8,7 @@ import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
 import '../services/video_processing_service.dart';
 import 'package:provider/provider.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 /// Technical info fetched via ffprobe for a single file.
 class _TechInfo {
@@ -139,7 +140,7 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
             ? 'Mono'
             : ch == 2
             ? 'Stereo'
-            : '$ch canali';
+            : ch.toString();
       }(),
       audioSampleRate: audioStream?['sample_rate'] != null
           ? '${int.tryParse(audioStream!['sample_rate'].toString()) != null ? (int.parse(audioStream['sample_rate'].toString()) / 1000).toStringAsFixed(1) : audioStream['sample_rate']} kHz'
@@ -183,19 +184,19 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Elimina da disco'),
+        title: Text(AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle),
         content: Text(
-          'Verranno eliminati permanently:\n• Il file video\n• NFO, poster, fanart e tutti i file associati\n\n${p.basename(video.path)}\n\nConfermi?',
+          AppLocalizations.of(context)!.duplicatesDeleteFromDiskMsg2(p.basename(video.path)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Elimina'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -253,7 +254,7 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Confronto doppioni',
+                          AppLocalizations.of(context)!.duplicatesCompareDialogTitle,
                           style: theme.textTheme.titleMedium,
                         ),
                         Text(
@@ -328,7 +329,7 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Scegli quale copia eliminare. "Solo DB" rimuove il record. "+ Disco" elimina anche tutti i file dalla cartella.',
+                      AppLocalizations.of(context)!.duplicatesCompareDialogFooter,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -346,7 +347,7 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                       Navigator.of(context).pop(true);
                     },
                     icon: const Icon(Icons.visibility_off_outlined, size: 16),
-                    label: const Text('Ignora'),
+                    label: Text(AppLocalizations.of(context)!.duplicateIgnoreBtn),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -354,7 +355,7 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Chiudi'),
+                    child: Text(AppLocalizations.of(context)!.closeButton),
                   ),
                 ],
               ),
@@ -441,69 +442,69 @@ class _VideoColumn extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // ---- File ----
-                        _section(context, '📁 FILE'),
+                        _section(context, AppLocalizations.of(context)!.duplicateSecFile),
                         _row(
                           context,
-                          'Dimensione',
+                          AppLocalizations.of(context)!.duplicateLblSize,
                           formatSize(info?.fileSizeBytes),
                           big: true,
                           accent: theme.colorScheme.primary,
                         ),
-                        _row(context, 'Contenitore', info?.containerFormat),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblContainer, info?.containerFormat),
                         if (!(info?.fileExists ?? true))
                           _row(
                             context,
-                            'Stato',
-                            '⚠ File non trovato',
+                            AppLocalizations.of(context)!.duplicateLblStatus,
+                            AppLocalizations.of(context)!.duplicateStatusNotFound,
                             accent: Colors.red,
                           ),
                         const SizedBox(height: 12),
 
                         // ---- Video ----
-                        _section(context, '🎬 VIDEO'),
-                        _row(context, 'Codec', info?.videoCodec),
+                        _section(context, AppLocalizations.of(context)!.duplicateSecVideo),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblCodec, info?.videoCodec),
                         _row(
                           context,
-                          'Risoluzione',
+                          AppLocalizations.of(context)!.duplicateLblResolution,
                           info?.resolution,
                           big: true,
                           accent: theme.colorScheme.primary,
                         ),
-                        _row(context, 'Frame rate', info?.frameRate),
-                        _row(context, 'Bitrate video', info?.videoBitrate),
-                        _row(context, 'Bitrate totale', info?.overallBitrate),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblFrameRate, info?.frameRate),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblBitrateVideo, info?.videoBitrate),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblBitrateTotal, info?.overallBitrate),
                         const SizedBox(height: 12),
 
                         // ---- Audio ----
-                        _section(context, '🔊 AUDIO'),
-                        _row(context, 'Codec', info?.audioCodec),
-                        _row(context, 'Canali', info?.audioChannels),
-                        _row(context, 'Sample rate', info?.audioSampleRate),
+                        _section(context, AppLocalizations.of(context)!.duplicateSecAudio),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblCodec, info?.audioCodec),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblChannels, info?.audioChannels != null ? (info!.audioChannels == 'Mono' || info!.audioChannels == 'Stereo' ? info!.audioChannels : AppLocalizations.of(context)!.duplicateChannelsVal(info!.audioChannels!)) : null),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblSampleRate, info?.audioSampleRate),
                         const SizedBox(height: 12),
 
                         // ---- Metadati DB ----
-                        _section(context, '🗂 METADATI DB'),
-                        _row(context, 'Titolo (DB)', video.title),
-                        _row(context, 'Anno', video.year),
-                        _row(context, 'Durata (DB)', video.duration),
-                        _row(context, 'Durata (file)', info?.duration),
-                        _row(context, 'Generi', video.genres),
+                        _section(context, AppLocalizations.of(context)!.duplicateSecDb),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblTitleDb, video.title),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblYear, video.year),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblDurationDb, video.duration),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblDurationFile, info?.duration),
+                        _row(context, AppLocalizations.of(context)!.duplicateLblGenres, video.genres),
                         _row(
                           context,
-                          'Voto',
+                          AppLocalizations.of(context)!.duplicateLblRating,
                           video.rating > 0
                               ? video.rating.toStringAsFixed(1)
                               : null,
                         ),
                         _row(
                           context,
-                          'Saga',
+                          AppLocalizations.of(context)!.duplicateLblSaga,
                           video.saga.isEmpty ? null : video.saga,
                         ),
                         if (video.plot.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Trama',
+                            AppLocalizations.of(context)!.duplicateLblPlot,
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -539,7 +540,7 @@ class _VideoColumn extends StatelessWidget {
                       context.read<PlaylistProvider>().playSingleVideo(video);
                     },
                     icon: const Icon(Icons.play_arrow, size: 18),
-                    label: const Text('Riproduci'),
+                    label: Text(AppLocalizations.of(context)!.duplicatePlayBtn),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
@@ -552,7 +553,7 @@ class _VideoColumn extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onDeleteDb,
                     icon: const Icon(Icons.delete_outline, size: 16),
-                    label: const Text('Elimina solo dal DB'),
+                    label: Text(AppLocalizations.of(context)!.duplicatesDbOnlyBtn),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                       side: BorderSide(
@@ -567,7 +568,7 @@ class _VideoColumn extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onDeleteDisk,
                     icon: const Icon(Icons.delete_forever, size: 16),
-                    label: const Text('Elimina DB + Disco'),
+                    label: Text(AppLocalizations.of(context)!.duplicatesPlusDiskBtn),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade700,
                     ),

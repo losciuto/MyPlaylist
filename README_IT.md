@@ -26,6 +26,12 @@ sudo apt install libmpv-dev mpv ubuntu-restricted-extras ffmpeg
 
 Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
 
+Per usufruire della **Modifica Ultra-Rapida dei Metadati** (scaricando il lavoro da FFmpeg e alterando l'header dei file Mkv e Mp4 in pochissimi millisecondi in-place), ti consigliamo caldamente di installare anche questi strumenti:
+
+```bash
+sudo apt install mkvtoolnix gpac
+```
+
 > **NOTA IMPORTANTE**: Il player interno potrebbe non riprodurre correttamente video con codec proprietari avanzati (come H.265/HEVC) anche con le librerie di sistema installate, a causa di limitazioni di licensing delle librerie bundle.
 > **Soluzione**: In questi casi, utilizzare l'opzione **Player Esterno** (es. VLC) configurabile nelle Impostazioni.
 > **VLC Features**: Se usi VLC, l'app gestirà automaticamente la chiusura delle istanze precedenti e abiliterà il controllo remoto (porta 4242) per l'uso con app esterne.
@@ -51,7 +57,7 @@ Se impieghi l'app companion **VlcRemote** (dal telefono) per controllare *MyPlay
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 30/03/2026 (v3.12.2)
+Ultimo Aggiornamento: 31/03/2026 (v3.12.3)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

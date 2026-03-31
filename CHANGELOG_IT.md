@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.3] - 31/03/2026
+
+### Aggiunte
+- **Persistenza Filtri Avanzati**: L'app ora memorizza l'ultima selezione di filtri (generi, anni, rating, ecc.) tra le sessioni, permettendo di ripetere rapidamente le ricerche preferite.
+- **Reset Filtri Esteso**: Il pulsante di reset ora pulisce anche la memoria persistente dei filtri.
+
 ## [3.12.2] - 30/03/2026
 
 ### Aggiunte

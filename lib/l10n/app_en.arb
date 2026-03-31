@@ -340,7 +340,175 @@
   "fanartApiKey": "Fanart.tv API Key",
   "settingsAutoSyncNfo": "Sync NFO on Edit",
   "settingsAutoSyncNfoSubtitle": "Automatically save metadata to .nfo file when you edit a video",
+  "settingsFastMetadataEngine": "Use ultra-fast engine for in-place metadata updates",
+  "settingsFastMetadataEngineSubtitle": "Requires mkvtoolnix and MP4Box. If unavailable, falls back to FFmpeg.",
   "resetPriorityList": "Reset Priority List",
   "resetPriorityDescription": "Resets all addition dates to the original file modification date on disk. Useful to 'clear' the priority list and start fresh.",
-  "confirmResetPriority": "Do you want to reset all addition dates?"
+  "confirmResetPriority": "Do you want to reset all addition dates?",
+  "duplicatesButton": "Duplicates",
+  "confirmClearDbMsg": "Do you want to delete ALL data from the database?\n\nWatched folders for Auto-Sync will also be removed.",
+  "manualDbSyncHeader": "MANUAL DATABASE SYNC",
+  "syncMissingTagsLabel": "Sync missing file tags",
+  "syncMissingTagsDesc": "Scans the entire library and saves to files (MP4/MKV) the database metadata that is not yet embedded, such as Posters and Ratings, making them visible on external apps (e.g. VlcRemote).",
+  "startSyncButton": "Start Scan & Sync",
+  "bulkSyncTitle": "Bulk Metadata Sync",
+  "bulkSyncDesc": "This operation will inspect all videos in the database to check if physical files have the tags. If tags (Plot, Rating, or Poster) are missing, it will use FFmpeg to insert them.\n\nThis may take a while for large libraries. Do you want to proceed?",
+  "startSyncDialogButton": "Start Sync",
+  "syncInterrupted": "Sync Interrupted",
+  "syncCompleted": "Sync Completed",
+  "syncResultMsg": "Operation finished.\n\nFiles examined: {examined}\nUpdated: {updated}\nUnchanged/Skipped: {skipped}",
+  "@syncResultMsg": {
+    "placeholders": {
+      "examined": {"type": "String"},
+      "updated": {"type": "String"},
+      "skipped": {"type": "String"}
+    }
+  },
+  "batchProcessingTitle": "Batch Processing...",
+  "fileXofY": "File {current} of {total}",
+  "@fileXofY": {
+    "placeholders": {
+      "current": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "syncUpdated": "Updated: {count}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "syncSkipped": "Skipped: {count}",
+  "@syncSkipped": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "stopButton": "Stop",
+  "closeButton": "Close",
+  "fanartApiKeyHint": "Optional: For better logos and backgrounds",
+  "failedRenamesTitle": "Ignored/Failed Files ({count})",
+  "@failedRenamesTitle": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "clearListTitle": "Clear List",
+  "clearListMsg": "Do you want to remove all ignored files? The app will try to rename them again next time.",
+  "clearListTooltip": "Clear All",
+  "noFailedFiles": "No failed or ignored files.",
+  "removeFromListTooltip": "Remove from list and retry",
+  "stopScanButton": "Stop Scan",
+  "scanStoppedByUser": "Scan stopped by user.",
+  "processingLabel": "Processing:",
+  "maintenanceHeader": "MAINTENANCE",
+  "backupRestoreSectionHeader": "BACKUP AND RESTORE",
+  "duplicatesManager": "Duplicates Manager",
+  "duplicatesFoundInfo": "{groups} groups found · {files} duplicate files",
+  "@duplicatesFoundInfo": {
+    "placeholders": {
+      "groups": {"type": "String"},
+      "files": {"type": "String"}
+    }
+  },
+  "duplicatesRemovedFromDb": "Removed from database: {title}",
+  "@duplicatesRemovedFromDb": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "duplicatesDeletedFiles": "Deleted {count} files of {title}",
+  "@duplicatesDeletedFiles": {
+    "placeholders": {
+      "count": {"type": "String"},
+      "title": {"type": "String"}
+    }
+  },
+  "duplicatesDeleteFromDiskTitle": "Delete from disk",
+  "duplicatesDeleteFromDiskMsg": "The video file and all associated files (NFO, poster, fanart, etc.) will be deleted.\n\n{file}\n\nConfirm?",
+  "@duplicatesDeleteFromDiskMsg": {
+    "placeholders": {
+      "file": {"type": "String"}
+    }
+  },
+  "duplicatesNoDuplicates": "No duplicates found!",
+  "duplicatesAllUnique": "All titles in the archive are unique.",
+  "duplicatesRestoreIgnoredBtn": "Restore {count} ignored groups",
+  "@duplicatesRestoreIgnoredBtn": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesCopies": "{title}  ·  {count} copies",
+  "@duplicatesCopies": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesCompareBtn": "Compare",
+  "duplicatesDetailsLabel": "Details",
+  "duplicatesDbOnlyBtn": "DB Only",
+  "duplicatesPlusDiskBtn": "+ Disk",
+  "duplicatesFooterInfo": "\"DB Only\" removes the database record but leaves files intact. \"+ Disk\" permanently deletes all associated files.",
+  "duplicatesResetIgnoredTooltip": "{count} ignored groups — click to restore them",
+  "@duplicatesResetIgnoredTooltip": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesResetIgnoredLabel": "Reset ignored ({count})",
+  "@duplicatesResetIgnoredLabel": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesDeleteFromDiskMsg2": "The following will be permanently deleted:\n• The video file\n• NFO, poster, fanart and all associated files\n\n{file}\n\nConfirm?",
+  "@duplicatesDeleteFromDiskMsg2": {
+    "placeholders": {
+      "file": {"type": "String"}
+    }
+  },
+  "duplicatesCompareDialogTitle": "Duplicates Comparison",
+  "duplicatesCompareDialogFooter": "Choose which copy to delete. \"DB Only\" removes the record. \"+ Disk\" also deletes all files from the folder.",
+  "duplicateIgnoreBtn": "Ignore",
+  "duplicatePlayBtn": "Play",
+  "duplicateSecFile": "📁 FILE",
+  "duplicateSecVideo": "🎬 VIDEO",
+  "duplicateSecAudio": "🔊 AUDIO",
+  "duplicateSecDb": "🗂 DB METADATA",
+  "duplicateLblSize": "Size",
+  "duplicateLblContainer": "Container",
+  "duplicateLblStatus": "Status",
+  "duplicateStatusNotFound": "⚠ File not found",
+  "duplicateLblCodec": "Codec",
+  "duplicateLblResolution": "Resolution",
+  "duplicateLblFrameRate": "Frame rate",
+  "duplicateLblBitrateVideo": "Video Bitrate",
+  "duplicateLblBitrateTotal": "Total Bitrate",
+  "duplicateLblChannels": "Channels",
+  "duplicateLblSampleRate": "Sample rate",
+  "duplicateLblTitleDb": "Title (DB)",
+  "duplicateLblYear": "Year",
+  "duplicateLblDurationDb": "Duration (DB)",
+  "duplicateLblDurationFile": "Duration (file)",
+  "duplicateLblGenres": "Genres",
+  "duplicateLblRating": "Rating",
+  "duplicateLblSaga": "Saga",
+  "duplicateLblPlot": "Plot",
+  "duplicateChannelsVal": "{count} channels",
+  "@duplicateChannelsVal": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "playerError": "Player Error: {event}",
+  "@playerError": {
+    "placeholders": {
+      "event": {"type": "String"}
+    }
+  },
+  "playerNoFile": "No video file found for playback.",
+  "filterByPerson": "Filter by this person",
+  "infoTmdbTitle": "TMDB Info"
 }

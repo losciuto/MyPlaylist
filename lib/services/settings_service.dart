@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/player_config.dart';
+import '../models/filter_settings.dart';
 
 class SettingsService with ChangeNotifier {
   static final SettingsService _instance = SettingsService._internal();
@@ -30,6 +31,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyWatchedDirectories = 'watched_directories';
   static const String _keyAutoSyncNfoOnEdit = 'auto_sync_nfo_on_edit';
   static const String _keyIgnoredDuplicateKeys = 'ignored_duplicate_keys';
+  static const String _keyFastMetadataEngineEnabled = 'fast_metadata_engine_enabled';
+  static const String _keyLastFilterSettings = 'last_filter_settings';
 
   // State
   String _playerPath = '';
@@ -48,6 +51,8 @@ class SettingsService with ChangeNotifier {
   List<String> _watchedDirectories = [];
   bool _autoSyncNfoOnEdit = false;
   Set<String> _ignoredDuplicateKeys = {};
+  bool _fastMetadataEngineEnabled = true;
+  FilterSettings? _lastFilterSettings;
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -66,6 +71,8 @@ class SettingsService with ChangeNotifier {
   bool get autoSyncNfoOnEdit => _autoSyncNfoOnEdit;
   Set<String> get ignoredDuplicateKeys =>
       Set.unmodifiable(_ignoredDuplicateKeys);
+  bool get fastMetadataEngineEnabled => _fastMetadataEngineEnabled;
+  FilterSettings? get lastFilterSettings => _lastFilterSettings;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -115,6 +122,16 @@ class SettingsService with ChangeNotifier {
     _ignoredDuplicateKeys = Set.from(
       _prefs.getStringList(_keyIgnoredDuplicateKeys) ?? [],
     );
+    _fastMetadataEngineEnabled = _prefs.getBool(_keyFastMetadataEngineEnabled) ?? true;
+
+    final filterJson = _prefs.getString(_keyLastFilterSettings);
+    if (filterJson != null) {
+      try {
+        _lastFilterSettings = FilterSettings.fromJson(json.decode(filterJson));
+      } catch (e) {
+        debugPrint('Error loading last filter settings: $e');
+      }
+    }
 
     _initialized = true;
     notifyListeners();
@@ -260,6 +277,25 @@ class SettingsService with ChangeNotifier {
   Future<void> clearIgnoredDuplicateKeys() async {
     _ignoredDuplicateKeys.clear();
     await _prefs.remove(_keyIgnoredDuplicateKeys);
+    notifyListeners();
+  }
+
+  Future<void> setFastMetadataEngineEnabled(bool enabled) async {
+    _fastMetadataEngineEnabled = enabled;
+    await _prefs.setBool(_keyFastMetadataEngineEnabled, enabled);
+    notifyListeners();
+  }
+
+  Future<void> setLastFilterSettings(FilterSettings? settings) async {
+    _lastFilterSettings = settings;
+    if (settings == null) {
+      await _prefs.remove(_keyLastFilterSettings);
+    } else {
+      await _prefs.setString(
+        _keyLastFilterSettings,
+        json.encode(settings.toJson()),
+      );
+    }
     notifyListeners();
   }
 }

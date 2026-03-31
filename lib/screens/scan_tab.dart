@@ -109,7 +109,7 @@ class _ScanTabState extends State<ScanTab> {
     setState(() {
       _isScanning = false;
       _scanSubscription = null;
-      _statusMessage = 'Scansione interrotta dall\'utente.';
+      _statusMessage = AppLocalizations.of(context)!.scanStoppedByUser;
       _currentItem = '';
     });
   }
@@ -174,9 +174,9 @@ class _ScanTabState extends State<ScanTab> {
                   TextButton.icon(
                     onPressed: _stopScan,
                     icon: const Icon(Icons.stop, color: Colors.red),
-                    label: const Text(
-                      'Ferma Scansione',
-                      style: TextStyle(color: Colors.red),
+                    label: Text(
+                      AppLocalizations.of(context)!.stopScanButton,
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
                 ],
@@ -222,7 +222,7 @@ class _ScanTabState extends State<ScanTab> {
                   const Divider(),
                   const SizedBox(height: 10),
                   Text(
-                    'In elaborazione:',
+                    AppLocalizations.of(context)!.processingLabel,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

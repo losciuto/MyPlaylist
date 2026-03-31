@@ -7,6 +7,7 @@ import '../providers/database_provider.dart';
 import '../services/settings_service.dart';
 import '../services/video_processing_service.dart';
 import 'duplicate_compare_dialog.dart';
+import 'package:my_playlist/l10n/app_localizations.dart';
 
 class DuplicatesDialog extends StatefulWidget {
   const DuplicatesDialog({super.key});
@@ -45,9 +46,10 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
   }
 
   Future<void> _deleteFromDb(Video video) async {
+    final title = AppLocalizations.of(context)!.duplicatesRemovedFromDb(video.title);
     setState(() => _isLoading = true);
     await context.read<DatabaseProvider>().deleteVideo(video);
-    _lastMessage = 'Rimosso dal database: ${video.title}';
+    _lastMessage = title;
     _refresh();
     setState(() => _isLoading = false);
   }
@@ -56,19 +58,19 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Elimina da disco'),
+        title: Text(AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle),
         content: Text(
-          'Verranno eliminati il file video e tutti i file associati (NFO, poster, fanart, ecc.).\n\n${p.basename(video.path)}\n\nConfermi?',
+          AppLocalizations.of(context)!.duplicatesDeleteFromDiskMsg(p.basename(video.path)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Elimina'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -86,7 +88,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     await dbProvider.refreshVideos();
 
     if (mounted) {
-      _lastMessage = 'Eliminati ${deleted.length} file di ${video.title}';
+      _lastMessage = AppLocalizations.of(context)!.duplicatesDeletedFiles(deleted.length.toString(), video.title);
       _refresh();
       setState(() => _isLoading = false);
     }
@@ -124,11 +126,11 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Gestione Doppioni',
+                          AppLocalizations.of(context)!.duplicatesManager,
                           style: theme.textTheme.titleLarge,
                         ),
                         Text(
-                          '${_duplicateGroups.length} gruppi trovati · $totalDuplicates file duplicati',
+                          AppLocalizations.of(context)!.duplicatesFoundInfo(_duplicateGroups.length.toString(), totalDuplicates.toString()),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -178,13 +180,13 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                             color: Colors.green.shade400,
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Nessun doppione trovato!',
-                            style: TextStyle(fontSize: 18),
+                          Text(
+                            AppLocalizations.of(context)!.duplicatesNoDuplicates,
+                            style: const TextStyle(fontSize: 18),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Tutti i titoli nell\'archivio sono unici.',
+                            AppLocalizations.of(context)!.duplicatesAllUnique,
                             style: TextStyle(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -200,9 +202,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                     .clearIgnoredDuplicateKeys();
                                 _refresh();
                               },
-                              icon: const Icon(Icons.refresh, size: 16),
+                               icon: const Icon(Icons.refresh, size: 16),
                               label: Text(
-                                'Ripristina ${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati',
+                                AppLocalizations.of(context)!.duplicatesRestoreIgnoredBtn(SettingsService().ignoredDuplicateKeys.length.toString()),
                               ),
                             ),
                           ],
@@ -253,7 +255,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        '$groupTitle  ·  ${group.length} copie',
+                                        AppLocalizations.of(context)!.duplicatesCopies(groupTitle, group.length.toString()),
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
                                               color: theme
@@ -279,9 +281,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                         Icons.compare_arrows,
                                         size: 14,
                                       ),
-                                      label: const Text(
-                                        'Confronta',
-                                        style: TextStyle(fontSize: 12),
+                                      label: Text(
+                                        AppLocalizations.of(context)!.duplicatesCompareBtn,
+                                        style: const TextStyle(fontSize: 12),
                                       ),
                                       style: TextButton.styleFrom(
                                         foregroundColor:
@@ -344,7 +346,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      '"Solo DB" rimuove il record ma lascia i file intatti. "Disco" elimina permanentemente tutti i file associati.',
+                      AppLocalizations.of(context)!.duplicatesFooterInfo,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -355,7 +357,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                   if (SettingsService().ignoredDuplicateKeys.isNotEmpty)
                     Tooltip(
                       message:
-                          '${SettingsService().ignoredDuplicateKeys.length} gruppi ignorati — clicca per ripristinarli',
+                          AppLocalizations.of(context)!.duplicatesResetIgnoredTooltip(SettingsService().ignoredDuplicateKeys.length.toString()),
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           await SettingsService().clearIgnoredDuplicateKeys();
@@ -363,7 +365,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                         },
                         icon: const Icon(Icons.visibility_outlined, size: 14),
                         label: Text(
-                          'Reset ignorati (${SettingsService().ignoredDuplicateKeys.length})',
+                          AppLocalizations.of(context)!.duplicatesResetIgnoredLabel(SettingsService().ignoredDuplicateKeys.length.toString()),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onSurfaceVariant,
@@ -377,7 +379,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Chiudi'),
+                    child: Text(AppLocalizations.of(context)!.closeButton),
                   ),
                 ],
               ),
@@ -518,7 +520,7 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                'Dettagli',
+                                AppLocalizations.of(context)!.duplicatesDetailsLabel,
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: theme.colorScheme.onPrimaryContainer,
@@ -618,9 +620,9 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                   OutlinedButton.icon(
                     onPressed: widget.onDeleteDb,
                     icon: const Icon(Icons.delete_outline, size: 14),
-                    label: const Text(
-                      'Solo DB',
-                      style: TextStyle(fontSize: 12),
+                    label: Text(
+                      AppLocalizations.of(context)!.duplicatesDbOnlyBtn,
+                      style: const TextStyle(fontSize: 12),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -635,9 +637,9 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                   FilledButton.icon(
                     onPressed: widget.onDeleteDisk,
                     icon: const Icon(Icons.delete_forever, size: 14),
-                    label: const Text(
-                      '+ Disco',
-                      style: TextStyle(fontSize: 12),
+                    label: Text(
+                      AppLocalizations.of(context)!.duplicatesPlusDiskBtn,
+                      style: const TextStyle(fontSize: 12),
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade700,

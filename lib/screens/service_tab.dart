@@ -338,10 +338,10 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'MANUTENZIONE'),
-        const Text(
-          'BACKUP E RIPRISTINO',
-          style: TextStyle(
+        SectionHeader(title: l10n.maintenanceHeader),
+        Text(
+          l10n.backupRestoreSectionHeader,
+          style: const TextStyle(
             color: Colors.white38,
             fontSize: 12,
             fontWeight: FontWeight.bold,

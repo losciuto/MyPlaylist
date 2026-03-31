@@ -1811,6 +1811,516 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Salva automaticamente i metadati nel file .nfo quando modifichi un video'**
   String get settingsAutoSyncNfoSubtitle;
+
+  /// No description provided for @settingsFastMetadataEngine.
+  ///
+  /// In it, this message translates to:
+  /// **'Usa metodi ultra-rapidi per Metadati'**
+  String get settingsFastMetadataEngine;
+
+  /// No description provided for @settingsFastMetadataEngineSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Richiede mkvtoolnix e MP4Box. Se assenti, userà FFmpeg come fallback.'**
+  String get settingsFastMetadataEngineSubtitle;
+
+  /// No description provided for @resetPriorityList.
+  ///
+  /// In it, this message translates to:
+  /// **'Reset Lista Priorità'**
+  String get resetPriorityList;
+
+  /// No description provided for @resetPriorityDescription.
+  ///
+  /// In it, this message translates to:
+  /// **'Riporta tutte le date di inserimento alla data di modifica originale del file sul disco. Utile per \'pulire\' la lista priorità e ricominciare da zero.'**
+  String get resetPriorityDescription;
+
+  /// No description provided for @confirmResetPriority.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi resettare tutte le date di inserimento?'**
+  String get confirmResetPriority;
+
+  /// No description provided for @duplicatesButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Doppioni'**
+  String get duplicatesButton;
+
+  /// No description provided for @confirmClearDbMsg.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi cancellare TUTTI i dati dal database?\n\nVerranno rimosse anche le cartelle monitorate dall\'Auto-Sync.'**
+  String get confirmClearDbMsg;
+
+  /// No description provided for @manualDbSyncHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'SYNC MANUALE DEL DATABASE'**
+  String get manualDbSyncHeader;
+
+  /// No description provided for @syncMissingTagsLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza tag file mancanti'**
+  String get syncMissingTagsLabel;
+
+  /// No description provided for @syncMissingTagsDesc.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).'**
+  String get syncMissingTagsDesc;
+
+  /// No description provided for @startSyncButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Avvia Scansione e Sincronizzazione'**
+  String get startSyncButton;
+
+  /// No description provided for @bulkSyncTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione Massiva Metadati'**
+  String get bulkSyncTitle;
+
+  /// No description provided for @bulkSyncDesc.
+  ///
+  /// In it, this message translates to:
+  /// **'Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?'**
+  String get bulkSyncDesc;
+
+  /// No description provided for @startSyncDialogButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Inizia Sincronizzazione'**
+  String get startSyncDialogButton;
+
+  /// No description provided for @syncInterrupted.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione Interrotta'**
+  String get syncInterrupted;
+
+  /// No description provided for @syncCompleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione Completata'**
+  String get syncCompleted;
+
+  /// No description provided for @syncResultMsg.
+  ///
+  /// In it, this message translates to:
+  /// **'Operazione terminata.\n\nFile esaminati: {examined}\nAggiornati: {updated}\nInvariati/Saltati: {skipped}'**
+  String syncResultMsg(String examined, String updated, String skipped);
+
+  /// No description provided for @batchProcessingTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Elaborazione Batch...'**
+  String get batchProcessingTitle;
+
+  /// No description provided for @fileXofY.
+  ///
+  /// In it, this message translates to:
+  /// **'File {current} di {total}'**
+  String fileXofY(String current, String total);
+
+  /// No description provided for @syncUpdated.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornati: {count}'**
+  String syncUpdated(String count);
+
+  /// No description provided for @syncSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'Saltati: {count}'**
+  String syncSkipped(String count);
+
+  /// No description provided for @stopButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Interrompi'**
+  String get stopButton;
+
+  /// No description provided for @closeButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Chiudi'**
+  String get closeButton;
+
+  /// No description provided for @fanartApiKeyHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Opzionale: per loghi e sfondi migliori'**
+  String get fanartApiKeyHint;
+
+  /// No description provided for @failedRenamesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'File Ignorati/Falliti ({count})'**
+  String failedRenamesTitle(String count);
+
+  /// No description provided for @clearListTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulisci Lista'**
+  String get clearListTitle;
+
+  /// No description provided for @clearListMsg.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi rimuovere tutti i file ignorati? L\'app proverà di nuovo a rinominarli alla prossima esecuzione.'**
+  String get clearListMsg;
+
+  /// No description provided for @clearListTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulisci Tutto'**
+  String get clearListTooltip;
+
+  /// No description provided for @noFailedFiles.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun file fallito o ignorato.'**
+  String get noFailedFiles;
+
+  /// No description provided for @removeFromListTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi dalla lista e ritenta'**
+  String get removeFromListTooltip;
+
+  /// No description provided for @stopScanButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Ferma Scansione'**
+  String get stopScanButton;
+
+  /// No description provided for @scanStoppedByUser.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione interrotta dall\'utente.'**
+  String get scanStoppedByUser;
+
+  /// No description provided for @processingLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'In elaborazione:'**
+  String get processingLabel;
+
+  /// No description provided for @maintenanceHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'MANUTENZIONE'**
+  String get maintenanceHeader;
+
+  /// No description provided for @backupRestoreSectionHeader.
+  ///
+  /// In it, this message translates to:
+  /// **'BACKUP E RIPRISTINO'**
+  String get backupRestoreSectionHeader;
+
+  /// No description provided for @duplicatesManager.
+  ///
+  /// In it, this message translates to:
+  /// **'Gestione Doppioni'**
+  String get duplicatesManager;
+
+  /// No description provided for @duplicatesFoundInfo.
+  ///
+  /// In it, this message translates to:
+  /// **'{groups} gruppi trovati · {files} file duplicati'**
+  String duplicatesFoundInfo(String groups, String files);
+
+  /// No description provided for @duplicatesRemovedFromDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimosso dal database: {title}'**
+  String duplicatesRemovedFromDb(String title);
+
+  /// No description provided for @duplicatesDeletedFiles.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminati {count} file di {title}'**
+  String duplicatesDeletedFiles(String count, String title);
+
+  /// No description provided for @duplicatesDeleteFromDiskTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina da disco'**
+  String get duplicatesDeleteFromDiskTitle;
+
+  /// No description provided for @duplicatesDeleteFromDiskMsg.
+  ///
+  /// In it, this message translates to:
+  /// **'Verranno eliminati il file video e tutti i file associati (NFO, poster, fanart, ecc.).\n\n{file}\n\nConfermi?'**
+  String duplicatesDeleteFromDiskMsg(String file);
+
+  /// No description provided for @duplicatesNoDuplicates.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun doppione trovato!'**
+  String get duplicatesNoDuplicates;
+
+  /// No description provided for @duplicatesAllUnique.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti i titoli nell\'archivio sono unici.'**
+  String get duplicatesAllUnique;
+
+  /// No description provided for @duplicatesRestoreIgnoredBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina {count} gruppi ignorati'**
+  String duplicatesRestoreIgnoredBtn(String count);
+
+  /// No description provided for @duplicatesCopies.
+  ///
+  /// In it, this message translates to:
+  /// **'{title}  ·  {count} copie'**
+  String duplicatesCopies(String title, String count);
+
+  /// No description provided for @duplicatesCompareBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'Confronta'**
+  String get duplicatesCompareBtn;
+
+  /// No description provided for @duplicatesDetailsLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Dettagli'**
+  String get duplicatesDetailsLabel;
+
+  /// No description provided for @duplicatesDbOnlyBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo DB'**
+  String get duplicatesDbOnlyBtn;
+
+  /// No description provided for @duplicatesPlusDiskBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'+ Disco'**
+  String get duplicatesPlusDiskBtn;
+
+  /// No description provided for @duplicatesFooterInfo.
+  ///
+  /// In it, this message translates to:
+  /// **'\"Solo DB\" rimuove il record ma lascia i file intatti. \"Disco\" elimina permanentemente tutti i file associati.'**
+  String get duplicatesFooterInfo;
+
+  /// No description provided for @duplicatesResetIgnoredTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} gruppi ignorati — clicca per ripristinarli'**
+  String duplicatesResetIgnoredTooltip(String count);
+
+  /// No description provided for @duplicatesResetIgnoredLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Reset ignorati ({count})'**
+  String duplicatesResetIgnoredLabel(String count);
+
+  /// No description provided for @duplicatesDeleteFromDiskMsg2.
+  ///
+  /// In it, this message translates to:
+  /// **'Verranno eliminati definitivamente:\n• Il file video\n• NFO, poster, fanart e tutti i file associati\n\n{file}\n\nConfermi?'**
+  String duplicatesDeleteFromDiskMsg2(String file);
+
+  /// No description provided for @duplicatesCompareDialogTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Confronto doppioni'**
+  String get duplicatesCompareDialogTitle;
+
+  /// No description provided for @duplicatesCompareDialogFooter.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli quale copia eliminare. \"Solo DB\" rimuove il record. \"+ Disco\" elimina anche tutti i file dalla cartella.'**
+  String get duplicatesCompareDialogFooter;
+
+  /// No description provided for @duplicateIgnoreBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'Ignora'**
+  String get duplicateIgnoreBtn;
+
+  /// No description provided for @duplicatePlayBtn.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduci'**
+  String get duplicatePlayBtn;
+
+  /// No description provided for @duplicateSecFile.
+  ///
+  /// In it, this message translates to:
+  /// **'📁 FILE'**
+  String get duplicateSecFile;
+
+  /// No description provided for @duplicateSecVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'🎬 VIDEO'**
+  String get duplicateSecVideo;
+
+  /// No description provided for @duplicateSecAudio.
+  ///
+  /// In it, this message translates to:
+  /// **'🔊 AUDIO'**
+  String get duplicateSecAudio;
+
+  /// No description provided for @duplicateSecDb.
+  ///
+  /// In it, this message translates to:
+  /// **'🗂 METADATI DB'**
+  String get duplicateSecDb;
+
+  /// No description provided for @duplicateLblSize.
+  ///
+  /// In it, this message translates to:
+  /// **'Dimensione'**
+  String get duplicateLblSize;
+
+  /// No description provided for @duplicateLblContainer.
+  ///
+  /// In it, this message translates to:
+  /// **'Contenitore'**
+  String get duplicateLblContainer;
+
+  /// No description provided for @duplicateLblStatus.
+  ///
+  /// In it, this message translates to:
+  /// **'Stato'**
+  String get duplicateLblStatus;
+
+  /// No description provided for @duplicateStatusNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'⚠ File non trovato'**
+  String get duplicateStatusNotFound;
+
+  /// No description provided for @duplicateLblCodec.
+  ///
+  /// In it, this message translates to:
+  /// **'Codec'**
+  String get duplicateLblCodec;
+
+  /// No description provided for @duplicateLblResolution.
+  ///
+  /// In it, this message translates to:
+  /// **'Risoluzione'**
+  String get duplicateLblResolution;
+
+  /// No description provided for @duplicateLblFrameRate.
+  ///
+  /// In it, this message translates to:
+  /// **'Frame rate'**
+  String get duplicateLblFrameRate;
+
+  /// No description provided for @duplicateLblBitrateVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'Bitrate video'**
+  String get duplicateLblBitrateVideo;
+
+  /// No description provided for @duplicateLblBitrateTotal.
+  ///
+  /// In it, this message translates to:
+  /// **'Bitrate totale'**
+  String get duplicateLblBitrateTotal;
+
+  /// No description provided for @duplicateLblChannels.
+  ///
+  /// In it, this message translates to:
+  /// **'Canali'**
+  String get duplicateLblChannels;
+
+  /// No description provided for @duplicateLblSampleRate.
+  ///
+  /// In it, this message translates to:
+  /// **'Sample rate'**
+  String get duplicateLblSampleRate;
+
+  /// No description provided for @duplicateLblTitleDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Titolo (DB)'**
+  String get duplicateLblTitleDb;
+
+  /// No description provided for @duplicateLblYear.
+  ///
+  /// In it, this message translates to:
+  /// **'Anno'**
+  String get duplicateLblYear;
+
+  /// No description provided for @duplicateLblDurationDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata (DB)'**
+  String get duplicateLblDurationDb;
+
+  /// No description provided for @duplicateLblDurationFile.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata (file)'**
+  String get duplicateLblDurationFile;
+
+  /// No description provided for @duplicateLblGenres.
+  ///
+  /// In it, this message translates to:
+  /// **'Generi'**
+  String get duplicateLblGenres;
+
+  /// No description provided for @duplicateLblRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto'**
+  String get duplicateLblRating;
+
+  /// No description provided for @duplicateLblSaga.
+  ///
+  /// In it, this message translates to:
+  /// **'Saga'**
+  String get duplicateLblSaga;
+
+  /// No description provided for @duplicateLblPlot.
+  ///
+  /// In it, this message translates to:
+  /// **'Trama'**
+  String get duplicateLblPlot;
+
+  /// No description provided for @duplicateChannelsVal.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} canali'**
+  String duplicateChannelsVal(String count);
+
+  /// No description provided for @playerError.
+  ///
+  /// In it, this message translates to:
+  /// **'Errore Player: {event}'**
+  String playerError(String event);
+
+  /// No description provided for @playerNoFile.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun file video trovato per la riproduzione.'**
+  String get playerNoFile;
+
+  /// No description provided for @filterByPerson.
+  ///
+  /// In it, this message translates to:
+  /// **'Filtra per questa persona'**
+  String get filterByPerson;
+
+  /// No description provided for @infoTmdbTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Info TMDB'**
+  String get infoTmdbTitle;
 }
 
 class _AppLocalizationsDelegate

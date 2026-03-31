@@ -340,7 +340,175 @@
   "fanartApiKey": "Fanart.tv API Key",
   "settingsAutoSyncNfo": "Sincronizza NFO su modifica",
   "settingsAutoSyncNfoSubtitle": "Salva automaticamente i metadati nel file .nfo quando modifichi un video",
+  "settingsFastMetadataEngine": "Usa metodi ultra-rapidi per Metadati",
+  "settingsFastMetadataEngineSubtitle": "Richiede mkvtoolnix e MP4Box. Se assenti, userà FFmpeg come fallback.",
   "resetPriorityList": "Reset Lista Priorità",
   "resetPriorityDescription": "Riporta tutte le date di inserimento alla data di modifica originale del file sul disco. Utile per 'pulire' la lista priorità e ricominciare da zero.",
-  "confirmResetPriority": "Vuoi resettare tutte le date di inserimento?"
+  "confirmResetPriority": "Vuoi resettare tutte le date di inserimento?",
+  "duplicatesButton": "Doppioni",
+  "confirmClearDbMsg": "Vuoi cancellare TUTTI i dati dal database?\n\nVerranno rimosse anche le cartelle monitorate dall'Auto-Sync.",
+  "manualDbSyncHeader": "SYNC MANUALE DEL DATABASE",
+  "syncMissingTagsLabel": "Sincronizza tag file mancanti",
+  "syncMissingTagsDesc": "Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).",
+  "startSyncButton": "Avvia Scansione e Sincronizzazione",
+  "bulkSyncTitle": "Sincronizzazione Massiva Metadati",
+  "bulkSyncDesc": "Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?",
+  "startSyncDialogButton": "Inizia Sincronizzazione",
+  "syncInterrupted": "Sincronizzazione Interrotta",
+  "syncCompleted": "Sincronizzazione Completata",
+  "syncResultMsg": "Operazione terminata.\n\nFile esaminati: {examined}\nAggiornati: {updated}\nInvariati/Saltati: {skipped}",
+  "@syncResultMsg": {
+    "placeholders": {
+      "examined": {"type": "String"},
+      "updated": {"type": "String"},
+      "skipped": {"type": "String"}
+    }
+  },
+  "batchProcessingTitle": "Elaborazione Batch...",
+  "fileXofY": "File {current} di {total}",
+  "@fileXofY": {
+    "placeholders": {
+      "current": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "syncUpdated": "Aggiornati: {count}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "syncSkipped": "Saltati: {count}",
+  "@syncSkipped": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "stopButton": "Interrompi",
+  "closeButton": "Chiudi",
+  "fanartApiKeyHint": "Opzionale: per loghi e sfondi migliori",
+  "failedRenamesTitle": "File Ignorati/Falliti ({count})",
+  "@failedRenamesTitle": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "clearListTitle": "Pulisci Lista",
+  "clearListMsg": "Vuoi rimuovere tutti i file ignorati? L'app proverà di nuovo a rinominarli alla prossima esecuzione.",
+  "clearListTooltip": "Pulisci Tutto",
+  "noFailedFiles": "Nessun file fallito o ignorato.",
+  "removeFromListTooltip": "Rimuovi dalla lista e ritenta",
+  "stopScanButton": "Ferma Scansione",
+  "scanStoppedByUser": "Scansione interrotta dall'utente.",
+  "processingLabel": "In elaborazione:",
+  "maintenanceHeader": "MANUTENZIONE",
+  "backupRestoreSectionHeader": "BACKUP E RIPRISTINO",
+  "duplicatesManager": "Gestione Doppioni",
+  "duplicatesFoundInfo": "{groups} gruppi trovati · {files} file duplicati",
+  "@duplicatesFoundInfo": {
+    "placeholders": {
+      "groups": {"type": "String"},
+      "files": {"type": "String"}
+    }
+  },
+  "duplicatesRemovedFromDb": "Rimosso dal database: {title}",
+  "@duplicatesRemovedFromDb": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "duplicatesDeletedFiles": "Eliminati {count} file di {title}",
+  "@duplicatesDeletedFiles": {
+    "placeholders": {
+      "count": {"type": "String"},
+      "title": {"type": "String"}
+    }
+  },
+  "duplicatesDeleteFromDiskTitle": "Elimina da disco",
+  "duplicatesDeleteFromDiskMsg": "Verranno eliminati il file video e tutti i file associati (NFO, poster, fanart, ecc.).\n\n{file}\n\nConfermi?",
+  "@duplicatesDeleteFromDiskMsg": {
+    "placeholders": {
+      "file": {"type": "String"}
+    }
+  },
+  "duplicatesNoDuplicates": "Nessun doppione trovato!",
+  "duplicatesAllUnique": "Tutti i titoli nell'archivio sono unici.",
+  "duplicatesRestoreIgnoredBtn": "Ripristina {count} gruppi ignorati",
+  "@duplicatesRestoreIgnoredBtn": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesCopies": "{title}  ·  {count} copie",
+  "@duplicatesCopies": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesCompareBtn": "Confronta",
+  "duplicatesDetailsLabel": "Dettagli",
+  "duplicatesDbOnlyBtn": "Solo DB",
+  "duplicatesPlusDiskBtn": "+ Disco",
+  "duplicatesFooterInfo": "\"Solo DB\" rimuove il record ma lascia i file intatti. \"Disco\" elimina permanentemente tutti i file associati.",
+  "duplicatesResetIgnoredTooltip": "{count} gruppi ignorati — clicca per ripristinarli",
+  "@duplicatesResetIgnoredTooltip": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesResetIgnoredLabel": "Reset ignorati ({count})",
+  "@duplicatesResetIgnoredLabel": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "duplicatesDeleteFromDiskMsg2": "Verranno eliminati definitivamente:\n• Il file video\n• NFO, poster, fanart e tutti i file associati\n\n{file}\n\nConfermi?",
+  "@duplicatesDeleteFromDiskMsg2": {
+    "placeholders": {
+      "file": {"type": "String"}
+    }
+  },
+  "duplicatesCompareDialogTitle": "Confronto doppioni",
+  "duplicatesCompareDialogFooter": "Scegli quale copia eliminare. \"Solo DB\" rimuove il record. \"+ Disco\" elimina anche tutti i file dalla cartella.",
+  "duplicateIgnoreBtn": "Ignora",
+  "duplicatePlayBtn": "Riproduci",
+  "duplicateSecFile": "📁 FILE",
+  "duplicateSecVideo": "🎬 VIDEO",
+  "duplicateSecAudio": "🔊 AUDIO",
+  "duplicateSecDb": "🗂 METADATI DB",
+  "duplicateLblSize": "Dimensione",
+  "duplicateLblContainer": "Contenitore",
+  "duplicateLblStatus": "Stato",
+  "duplicateStatusNotFound": "⚠ File non trovato",
+  "duplicateLblCodec": "Codec",
+  "duplicateLblResolution": "Risoluzione",
+  "duplicateLblFrameRate": "Frame rate",
+  "duplicateLblBitrateVideo": "Bitrate video",
+  "duplicateLblBitrateTotal": "Bitrate totale",
+  "duplicateLblChannels": "Canali",
+  "duplicateLblSampleRate": "Sample rate",
+  "duplicateLblTitleDb": "Titolo (DB)",
+  "duplicateLblYear": "Anno",
+  "duplicateLblDurationDb": "Durata (DB)",
+  "duplicateLblDurationFile": "Durata (file)",
+  "duplicateLblGenres": "Generi",
+  "duplicateLblRating": "Voto",
+  "duplicateLblSaga": "Saga",
+  "duplicateLblPlot": "Trama",
+  "duplicateChannelsVal": "{count} canali",
+  "@duplicateChannelsVal": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "playerError": "Errore Player: {event}",
+  "@playerError": {
+    "placeholders": {
+      "event": {"type": "String"}
+    }
+  },
+  "playerNoFile": "Nessun file video trovato per la riproduzione.",
+  "filterByPerson": "Filtra per questa persona",
+  "infoTmdbTitle": "Info TMDB"
 }

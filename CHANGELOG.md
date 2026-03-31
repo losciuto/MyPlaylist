@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
  
+## [3.12.3] - 2026-03-31
+
+### Added
+- **Advanced Filter Persistence**: The app now remembers the last selected filters (genres, years, rating, etc.) across sessions, allowing you to quickly repeat your favorite searches.
+- **Extended Filter Reset**: The reset button now also clears the persistent filter memory.
+
 ## [3.12.2] - 2026-03-30
 
 ### Added

@@ -1045,4 +1045,301 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get settingsAutoSyncNfoSubtitle =>
       'Salva automaticamente i metadati nel file .nfo quando modifichi un video';
+
+  @override
+  String get settingsFastMetadataEngine =>
+      'Usa metodi ultra-rapidi per Metadati';
+
+  @override
+  String get settingsFastMetadataEngineSubtitle =>
+      'Richiede mkvtoolnix e MP4Box. Se assenti, userà FFmpeg come fallback.';
+
+  @override
+  String get resetPriorityList => 'Reset Lista Priorità';
+
+  @override
+  String get resetPriorityDescription =>
+      'Riporta tutte le date di inserimento alla data di modifica originale del file sul disco. Utile per \'pulire\' la lista priorità e ricominciare da zero.';
+
+  @override
+  String get confirmResetPriority =>
+      'Vuoi resettare tutte le date di inserimento?';
+
+  @override
+  String get duplicatesButton => 'Doppioni';
+
+  @override
+  String get confirmClearDbMsg =>
+      'Vuoi cancellare TUTTI i dati dal database?\n\nVerranno rimosse anche le cartelle monitorate dall\'Auto-Sync.';
+
+  @override
+  String get manualDbSyncHeader => 'SYNC MANUALE DEL DATABASE';
+
+  @override
+  String get syncMissingTagsLabel => 'Sincronizza tag file mancanti';
+
+  @override
+  String get syncMissingTagsDesc =>
+      'Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).';
+
+  @override
+  String get startSyncButton => 'Avvia Scansione e Sincronizzazione';
+
+  @override
+  String get bulkSyncTitle => 'Sincronizzazione Massiva Metadati';
+
+  @override
+  String get bulkSyncDesc =>
+      'Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?';
+
+  @override
+  String get startSyncDialogButton => 'Inizia Sincronizzazione';
+
+  @override
+  String get syncInterrupted => 'Sincronizzazione Interrotta';
+
+  @override
+  String get syncCompleted => 'Sincronizzazione Completata';
+
+  @override
+  String syncResultMsg(String examined, String updated, String skipped) {
+    return 'Operazione terminata.\n\nFile esaminati: $examined\nAggiornati: $updated\nInvariati/Saltati: $skipped';
+  }
+
+  @override
+  String get batchProcessingTitle => 'Elaborazione Batch...';
+
+  @override
+  String fileXofY(String current, String total) {
+    return 'File $current di $total';
+  }
+
+  @override
+  String syncUpdated(String count) {
+    return 'Aggiornati: $count';
+  }
+
+  @override
+  String syncSkipped(String count) {
+    return 'Saltati: $count';
+  }
+
+  @override
+  String get stopButton => 'Interrompi';
+
+  @override
+  String get closeButton => 'Chiudi';
+
+  @override
+  String get fanartApiKeyHint => 'Opzionale: per loghi e sfondi migliori';
+
+  @override
+  String failedRenamesTitle(String count) {
+    return 'File Ignorati/Falliti ($count)';
+  }
+
+  @override
+  String get clearListTitle => 'Pulisci Lista';
+
+  @override
+  String get clearListMsg =>
+      'Vuoi rimuovere tutti i file ignorati? L\'app proverà di nuovo a rinominarli alla prossima esecuzione.';
+
+  @override
+  String get clearListTooltip => 'Pulisci Tutto';
+
+  @override
+  String get noFailedFiles => 'Nessun file fallito o ignorato.';
+
+  @override
+  String get removeFromListTooltip => 'Rimuovi dalla lista e ritenta';
+
+  @override
+  String get stopScanButton => 'Ferma Scansione';
+
+  @override
+  String get scanStoppedByUser => 'Scansione interrotta dall\'utente.';
+
+  @override
+  String get processingLabel => 'In elaborazione:';
+
+  @override
+  String get maintenanceHeader => 'MANUTENZIONE';
+
+  @override
+  String get backupRestoreSectionHeader => 'BACKUP E RIPRISTINO';
+
+  @override
+  String get duplicatesManager => 'Gestione Doppioni';
+
+  @override
+  String duplicatesFoundInfo(String groups, String files) {
+    return '$groups gruppi trovati · $files file duplicati';
+  }
+
+  @override
+  String duplicatesRemovedFromDb(String title) {
+    return 'Rimosso dal database: $title';
+  }
+
+  @override
+  String duplicatesDeletedFiles(String count, String title) {
+    return 'Eliminati $count file di $title';
+  }
+
+  @override
+  String get duplicatesDeleteFromDiskTitle => 'Elimina da disco';
+
+  @override
+  String duplicatesDeleteFromDiskMsg(String file) {
+    return 'Verranno eliminati il file video e tutti i file associati (NFO, poster, fanart, ecc.).\n\n$file\n\nConfermi?';
+  }
+
+  @override
+  String get duplicatesNoDuplicates => 'Nessun doppione trovato!';
+
+  @override
+  String get duplicatesAllUnique => 'Tutti i titoli nell\'archivio sono unici.';
+
+  @override
+  String duplicatesRestoreIgnoredBtn(String count) {
+    return 'Ripristina $count gruppi ignorati';
+  }
+
+  @override
+  String duplicatesCopies(String title, String count) {
+    return '$title  ·  $count copie';
+  }
+
+  @override
+  String get duplicatesCompareBtn => 'Confronta';
+
+  @override
+  String get duplicatesDetailsLabel => 'Dettagli';
+
+  @override
+  String get duplicatesDbOnlyBtn => 'Solo DB';
+
+  @override
+  String get duplicatesPlusDiskBtn => '+ Disco';
+
+  @override
+  String get duplicatesFooterInfo =>
+      '\"Solo DB\" rimuove il record ma lascia i file intatti. \"Disco\" elimina permanentemente tutti i file associati.';
+
+  @override
+  String duplicatesResetIgnoredTooltip(String count) {
+    return '$count gruppi ignorati — clicca per ripristinarli';
+  }
+
+  @override
+  String duplicatesResetIgnoredLabel(String count) {
+    return 'Reset ignorati ($count)';
+  }
+
+  @override
+  String duplicatesDeleteFromDiskMsg2(String file) {
+    return 'Verranno eliminati definitivamente:\n• Il file video\n• NFO, poster, fanart e tutti i file associati\n\n$file\n\nConfermi?';
+  }
+
+  @override
+  String get duplicatesCompareDialogTitle => 'Confronto doppioni';
+
+  @override
+  String get duplicatesCompareDialogFooter =>
+      'Scegli quale copia eliminare. \"Solo DB\" rimuove il record. \"+ Disco\" elimina anche tutti i file dalla cartella.';
+
+  @override
+  String get duplicateIgnoreBtn => 'Ignora';
+
+  @override
+  String get duplicatePlayBtn => 'Riproduci';
+
+  @override
+  String get duplicateSecFile => '📁 FILE';
+
+  @override
+  String get duplicateSecVideo => '🎬 VIDEO';
+
+  @override
+  String get duplicateSecAudio => '🔊 AUDIO';
+
+  @override
+  String get duplicateSecDb => '🗂 METADATI DB';
+
+  @override
+  String get duplicateLblSize => 'Dimensione';
+
+  @override
+  String get duplicateLblContainer => 'Contenitore';
+
+  @override
+  String get duplicateLblStatus => 'Stato';
+
+  @override
+  String get duplicateStatusNotFound => '⚠ File non trovato';
+
+  @override
+  String get duplicateLblCodec => 'Codec';
+
+  @override
+  String get duplicateLblResolution => 'Risoluzione';
+
+  @override
+  String get duplicateLblFrameRate => 'Frame rate';
+
+  @override
+  String get duplicateLblBitrateVideo => 'Bitrate video';
+
+  @override
+  String get duplicateLblBitrateTotal => 'Bitrate totale';
+
+  @override
+  String get duplicateLblChannels => 'Canali';
+
+  @override
+  String get duplicateLblSampleRate => 'Sample rate';
+
+  @override
+  String get duplicateLblTitleDb => 'Titolo (DB)';
+
+  @override
+  String get duplicateLblYear => 'Anno';
+
+  @override
+  String get duplicateLblDurationDb => 'Durata (DB)';
+
+  @override
+  String get duplicateLblDurationFile => 'Durata (file)';
+
+  @override
+  String get duplicateLblGenres => 'Generi';
+
+  @override
+  String get duplicateLblRating => 'Voto';
+
+  @override
+  String get duplicateLblSaga => 'Saga';
+
+  @override
+  String get duplicateLblPlot => 'Trama';
+
+  @override
+  String duplicateChannelsVal(String count) {
+    return '$count canali';
+  }
+
+  @override
+  String playerError(String event) {
+    return 'Errore Player: $event';
+  }
+
+  @override
+  String get playerNoFile => 'Nessun file video trovato per la riproduzione.';
+
+  @override
+  String get filterByPerson => 'Filtra per questa persona';
+
+  @override
+  String get infoTmdbTitle => 'Info TMDB';
 }
