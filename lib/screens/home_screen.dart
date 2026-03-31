@@ -102,6 +102,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Image.asset('assets/logo.png'),
+        ),
         title: Text(AppLocalizations.of(context)!.playlistCreator),
         backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
@@ -134,9 +138,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset('assets/logo.png', height: 80),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       Text(
                         '${AppConfig.appName} App',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Text(

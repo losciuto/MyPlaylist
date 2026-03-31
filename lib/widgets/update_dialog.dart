@@ -30,7 +30,10 @@ class UpdateDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
         children: [
-          Icon(Icons.system_update, color: theme.colorScheme.primary, size: 28),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset('assets/logo.png', width: 40, height: 40),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
