@@ -532,7 +532,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: Text(l10n.settingsFastMetadataEngine),
                   subtitle: Text(l10n.settingsFastMetadataEngineSubtitle),
                   value: settings.fastMetadataEngineEnabled,
-                  onChanged: (val) => settings.setFastMetadataEngineEnabled(val),
+                  onChanged: (val) =>
+                      settings.setFastMetadataEngineEnabled(val),
                   activeThumbColor: const Color(0xFF4CAF50),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1229,9 +1230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.bulkSyncTitle),
-        content: Text(
-          AppLocalizations.of(context)!.bulkSyncDesc,
-        ),
+        content: Text(AppLocalizations.of(context)!.bulkSyncDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1347,7 +1346,11 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(AppLocalizations.of(context)!.fileXofY(_currentIndex.toString(), _totalFiles.toString())),
+          Text(
+            AppLocalizations.of(
+              context,
+            )!.fileXofY(_currentIndex.toString(), _totalFiles.toString()),
+          ),
           const SizedBox(height: 8),
           if (_currentTitle.isNotEmpty)
             Text(
@@ -1364,7 +1367,9 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
           const SizedBox(height: 12),
           LinearProgressIndicator(value: progress),
           const SizedBox(height: 16),
-          Text('${AppLocalizations.of(context)!.syncUpdated(_updatedCount.toString())}\n${AppLocalizations.of(context)!.syncSkipped(_skippedCount.toString())}'),
+          Text(
+            '${AppLocalizations.of(context)!.syncUpdated(_updatedCount.toString())}\n${AppLocalizations.of(context)!.syncSkipped(_skippedCount.toString())}',
+          ),
         ],
       ),
       actions: [
@@ -1374,7 +1379,10 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
               _isCancelled = true;
             });
           },
-          child: Text(AppLocalizations.of(context)!.stopButton, style: const TextStyle(color: Colors.red)),
+          child: Text(
+            AppLocalizations.of(context)!.stopButton,
+            style: const TextStyle(color: Colors.red),
+          ),
         ),
       ],
     );

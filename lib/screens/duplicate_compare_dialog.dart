@@ -184,9 +184,13 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle),
+        title: Text(
+          AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle,
+        ),
         content: Text(
-          AppLocalizations.of(context)!.duplicatesDeleteFromDiskMsg2(p.basename(video.path)),
+          AppLocalizations.of(
+            context,
+          )!.duplicatesDeleteFromDiskMsg2(p.basename(video.path)),
         ),
         actions: [
           TextButton(
@@ -254,7 +258,9 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.duplicatesCompareDialogTitle,
+                          AppLocalizations.of(
+                            context,
+                          )!.duplicatesCompareDialogTitle,
                           style: theme.textTheme.titleMedium,
                         ),
                         Text(
@@ -329,7 +335,9 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.duplicatesCompareDialogFooter,
+                      AppLocalizations.of(
+                        context,
+                      )!.duplicatesCompareDialogFooter,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -347,7 +355,9 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                       Navigator.of(context).pop(true);
                     },
                     icon: const Icon(Icons.visibility_off_outlined, size: 16),
-                    label: Text(AppLocalizations.of(context)!.duplicateIgnoreBtn),
+                    label: Text(
+                      AppLocalizations.of(context)!.duplicateIgnoreBtn,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -442,7 +452,10 @@ class _VideoColumn extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // ---- File ----
-                        _section(context, AppLocalizations.of(context)!.duplicateSecFile),
+                        _section(
+                          context,
+                          AppLocalizations.of(context)!.duplicateSecFile,
+                        ),
                         _row(
                           context,
                           AppLocalizations.of(context)!.duplicateLblSize,
@@ -450,19 +463,32 @@ class _VideoColumn extends StatelessWidget {
                           big: true,
                           accent: theme.colorScheme.primary,
                         ),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblContainer, info?.containerFormat),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblContainer,
+                          info?.containerFormat,
+                        ),
                         if (!(info?.fileExists ?? true))
                           _row(
                             context,
                             AppLocalizations.of(context)!.duplicateLblStatus,
-                            AppLocalizations.of(context)!.duplicateStatusNotFound,
+                            AppLocalizations.of(
+                              context,
+                            )!.duplicateStatusNotFound,
                             accent: Colors.red,
                           ),
                         const SizedBox(height: 12),
 
                         // ---- Video ----
-                        _section(context, AppLocalizations.of(context)!.duplicateSecVideo),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblCodec, info?.videoCodec),
+                        _section(
+                          context,
+                          AppLocalizations.of(context)!.duplicateSecVideo,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblCodec,
+                          info?.videoCodec,
+                        ),
                         _row(
                           context,
                           AppLocalizations.of(context)!.duplicateLblResolution,
@@ -470,25 +496,90 @@ class _VideoColumn extends StatelessWidget {
                           big: true,
                           accent: theme.colorScheme.primary,
                         ),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblFrameRate, info?.frameRate),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblBitrateVideo, info?.videoBitrate),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblBitrateTotal, info?.overallBitrate),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblFrameRate,
+                          info?.frameRate,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(
+                            context,
+                          )!.duplicateLblBitrateVideo,
+                          info?.videoBitrate,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(
+                            context,
+                          )!.duplicateLblBitrateTotal,
+                          info?.overallBitrate,
+                        ),
                         const SizedBox(height: 12),
 
                         // ---- Audio ----
-                        _section(context, AppLocalizations.of(context)!.duplicateSecAudio),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblCodec, info?.audioCodec),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblChannels, info?.audioChannels != null ? (info!.audioChannels == 'Mono' || info!.audioChannels == 'Stereo' ? info!.audioChannels : AppLocalizations.of(context)!.duplicateChannelsVal(info!.audioChannels!)) : null),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblSampleRate, info?.audioSampleRate),
+                        _section(
+                          context,
+                          AppLocalizations.of(context)!.duplicateSecAudio,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblCodec,
+                          info?.audioCodec,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblChannels,
+                          info?.audioChannels != null
+                              ? (info!.audioChannels == 'Mono' ||
+                                        info!.audioChannels == 'Stereo'
+                                    ? info!.audioChannels
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.duplicateChannelsVal(
+                                        info!.audioChannels!,
+                                      ))
+                              : null,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblSampleRate,
+                          info?.audioSampleRate,
+                        ),
                         const SizedBox(height: 12),
 
                         // ---- Metadati DB ----
-                        _section(context, AppLocalizations.of(context)!.duplicateSecDb),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblTitleDb, video.title),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblYear, video.year),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblDurationDb, video.duration),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblDurationFile, info?.duration),
-                        _row(context, AppLocalizations.of(context)!.duplicateLblGenres, video.genres),
+                        _section(
+                          context,
+                          AppLocalizations.of(context)!.duplicateSecDb,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblTitleDb,
+                          video.title,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblYear,
+                          video.year,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblDurationDb,
+                          video.duration,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(
+                            context,
+                          )!.duplicateLblDurationFile,
+                          info?.duration,
+                        ),
+                        _row(
+                          context,
+                          AppLocalizations.of(context)!.duplicateLblGenres,
+                          video.genres,
+                        ),
                         _row(
                           context,
                           AppLocalizations.of(context)!.duplicateLblRating,
@@ -553,7 +644,9 @@ class _VideoColumn extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onDeleteDb,
                     icon: const Icon(Icons.delete_outline, size: 16),
-                    label: Text(AppLocalizations.of(context)!.duplicatesDbOnlyBtn),
+                    label: Text(
+                      AppLocalizations.of(context)!.duplicatesDbOnlyBtn,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                       side: BorderSide(
@@ -568,7 +661,9 @@ class _VideoColumn extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onDeleteDisk,
                     icon: const Icon(Icons.delete_forever, size: 16),
-                    label: Text(AppLocalizations.of(context)!.duplicatesPlusDiskBtn),
+                    label: Text(
+                      AppLocalizations.of(context)!.duplicatesPlusDiskBtn,
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade700,
                     ),

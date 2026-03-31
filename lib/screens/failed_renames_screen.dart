@@ -34,9 +34,7 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.clearListTitle),
-        content: Text(
-          AppLocalizations.of(context)!.clearListMsg,
-        ),
+        content: Text(AppLocalizations.of(context)!.clearListMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -65,7 +63,11 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.failedRenamesTitle(_failedItems.length.toString())),
+        title: Text(
+          AppLocalizations.of(
+            context,
+          )!.failedRenamesTitle(_failedItems.length.toString()),
+        ),
         actions: [
           if (_failedItems.isNotEmpty)
             IconButton(
@@ -125,7 +127,9 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
                     trailing: IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
                       onPressed: () => _deleteItem(item),
-                      tooltip: AppLocalizations.of(context)!.removeFromListTooltip,
+                      tooltip: AppLocalizations.of(
+                        context,
+                      )!.removeFromListTooltip,
                     ),
                   ),
                 );

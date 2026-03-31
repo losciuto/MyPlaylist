@@ -161,23 +161,39 @@ class MetadataService {
           final bool toolAvailable = await _isToolAvailable('mkvpropedit');
           debugPrint('[MetadataService] mkvpropedit available: $toolAvailable');
           if (toolAvailable) {
-            final succ = await _updateSingleFileMKVInPlace(path, video, encodedBy, preserveTitle, forcedTitle);
+            final succ = await _updateSingleFileMKVInPlace(
+              path,
+              video,
+              encodedBy,
+              preserveTitle,
+              forcedTitle,
+            );
             if (succ) {
               debugPrint('[MetadataService] MKV in-place update SUCCESS');
               return MetadataUpdateResult.updated;
             }
-            debugPrint('[MetadataService] MKV in-place update FAILED, falling back...');
+            debugPrint(
+              '[MetadataService] MKV in-place update FAILED, falling back...',
+            );
           }
         } else if (ext == '.mp4' || ext == '.m4v') {
           final bool toolAvailable = await _isToolAvailable('MP4Box');
           debugPrint('[MetadataService] MP4Box available: $toolAvailable');
           if (toolAvailable) {
-            final succ = await _updateSingleFileMP4InPlace(path, video, encodedBy, preserveTitle, forcedTitle);
+            final succ = await _updateSingleFileMP4InPlace(
+              path,
+              video,
+              encodedBy,
+              preserveTitle,
+              forcedTitle,
+            );
             if (succ) {
               debugPrint('[MetadataService] MP4 in-place update SUCCESS');
               return MetadataUpdateResult.updated;
             }
-            debugPrint('[MetadataService] MP4 in-place update FAILED, falling back...');
+            debugPrint(
+              '[MetadataService] MP4 in-place update FAILED, falling back...',
+            );
           }
         }
       } else {
@@ -328,10 +344,14 @@ class MetadataService {
   ) async {
     try {
       final String dir = p.dirname(path);
-      final String tagsPath = p.join(dir, 'temp_tags_${DateTime.now().millisecondsSinceEpoch}.xml');
+      final String tagsPath = p.join(
+        dir,
+        'temp_tags_${DateTime.now().millisecondsSinceEpoch}.xml',
+      );
       final title = forcedTitle ?? video.title;
 
-      final xml = '''<?xml version="1.0"?>
+      final xml =
+          '''<?xml version="1.0"?>
 <!DOCTYPE Tags SYSTEM "matroskatags.dtd">
 <Tags>
   <Tag>
@@ -383,10 +403,14 @@ class MetadataService {
 
       final List<String> args = [
         path,
-        '--edit', 'info',
-        '--set', 'title=$title',
-        '--set', 'date=${video.year}',
-        '--tags', 'all:$tagsPath'
+        '--edit',
+        'info',
+        '--set',
+        'title=$title',
+        '--set',
+        'date=${video.year}',
+        '--tags',
+        'all:$tagsPath',
       ];
 
       debugPrint('[MetadataService] Running mkvpropedit with args: $args');
@@ -398,7 +422,9 @@ class MetadataService {
         return true;
       }
       debugPrint('[MetadataService] mkvpropedit FAILED: ${result.stderr}');
-      await LoggerService().error('mkvpropedit failed for $path: ${result.stderr}');
+      await LoggerService().error(
+        'mkvpropedit failed for $path: ${result.stderr}',
+      );
       return false;
     } catch (e) {
       await LoggerService().error('Error in MKV in-place update for $path', e);
@@ -415,27 +441,29 @@ class MetadataService {
   ) async {
     try {
       final title = forcedTitle ?? video.title;
-      
+
       // MP4Box -itags usually uses colons as separators
       List<String> tags = [];
-      
+
       String clean(String s) => s.replaceAll(':', ';').replaceAll('"', "'");
-      
+
       if (title.isNotEmpty) tags.add('title=${clean(title)}');
-      if (video.directors.isNotEmpty) tags.add('artist=${clean(video.directors)}');
-      if (video.year.toString().isNotEmpty) tags.add('created=${clean(video.year.toString())}');
+      if (video.directors.isNotEmpty)
+        tags.add('artist=${clean(video.directors)}');
+      if (video.year.toString().isNotEmpty)
+        tags.add('created=${clean(video.year.toString())}');
       if (video.genres.isNotEmpty) tags.add('genre=${clean(video.genres)}');
       if (video.plot.isNotEmpty) {
         tags.add('comment=${clean(video.plot)}');
         tags.add('sdesc=${clean(video.plot)}'); // short description
       }
       tags.add('tool=${clean(encodedBy)}');
-      
+
       if (preserveTitle && video.title.isNotEmpty) {
         tags.add('album=${clean(video.title)}');
         tags.add('show=${clean(video.title)}');
       }
-      
+
       final String itagsString = tags.join(':');
       final List<String> args = ['-itags', itagsString, path];
 

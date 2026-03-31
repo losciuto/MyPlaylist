@@ -31,7 +31,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyWatchedDirectories = 'watched_directories';
   static const String _keyAutoSyncNfoOnEdit = 'auto_sync_nfo_on_edit';
   static const String _keyIgnoredDuplicateKeys = 'ignored_duplicate_keys';
-  static const String _keyFastMetadataEngineEnabled = 'fast_metadata_engine_enabled';
+  static const String _keyFastMetadataEngineEnabled =
+      'fast_metadata_engine_enabled';
   static const String _keyLastFilterSettings = 'last_filter_settings';
 
   // State
@@ -122,7 +123,8 @@ class SettingsService with ChangeNotifier {
     _ignoredDuplicateKeys = Set.from(
       _prefs.getStringList(_keyIgnoredDuplicateKeys) ?? [],
     );
-    _fastMetadataEngineEnabled = _prefs.getBool(_keyFastMetadataEngineEnabled) ?? true;
+    _fastMetadataEngineEnabled =
+        _prefs.getBool(_keyFastMetadataEngineEnabled) ?? true;
 
     final filterJson = _prefs.getString(_keyLastFilterSettings);
     if (filterJson != null) {

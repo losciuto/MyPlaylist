@@ -34,9 +34,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
     player.stream.error.listen((event) {
       debugPrint('Player Error: $event');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.playerError(event.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.playerError(event.toString()),
+            ),
+          ),
+        );
       }
     });
   }
@@ -82,9 +86,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
         await player.open(Playlist(mediaList));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.playerNoFile),
-          ),
+          SnackBar(content: Text(AppLocalizations.of(context)!.playerNoFile)),
         );
       }
 

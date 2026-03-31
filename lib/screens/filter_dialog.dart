@@ -209,8 +209,10 @@ class _FilterDialogState extends State<FilterDialog> {
               _selectedSagas.clear();
               _excludedSagas.clear();
               _minRating = 0.0;
-              _limitController.text =
-                  context.read<SettingsService>().defaultPlaylistSize.toString();
+              _limitController.text = context
+                  .read<SettingsService>()
+                  .defaultPlaylistSize
+                  .toString();
             });
             context.read<SettingsService>().setLastFilterSettings(null);
           },

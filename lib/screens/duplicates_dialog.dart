@@ -46,7 +46,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
   }
 
   Future<void> _deleteFromDb(Video video) async {
-    final title = AppLocalizations.of(context)!.duplicatesRemovedFromDb(video.title);
+    final title = AppLocalizations.of(
+      context,
+    )!.duplicatesRemovedFromDb(video.title);
     setState(() => _isLoading = true);
     await context.read<DatabaseProvider>().deleteVideo(video);
     _lastMessage = title;
@@ -58,9 +60,13 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle),
+        title: Text(
+          AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle,
+        ),
         content: Text(
-          AppLocalizations.of(context)!.duplicatesDeleteFromDiskMsg(p.basename(video.path)),
+          AppLocalizations.of(
+            context,
+          )!.duplicatesDeleteFromDiskMsg(p.basename(video.path)),
         ),
         actions: [
           TextButton(
@@ -88,7 +94,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     await dbProvider.refreshVideos();
 
     if (mounted) {
-      _lastMessage = AppLocalizations.of(context)!.duplicatesDeletedFiles(deleted.length.toString(), video.title);
+      _lastMessage = AppLocalizations.of(
+        context,
+      )!.duplicatesDeletedFiles(deleted.length.toString(), video.title);
       _refresh();
       setState(() => _isLoading = false);
     }
@@ -130,7 +138,10 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                           style: theme.textTheme.titleLarge,
                         ),
                         Text(
-                          AppLocalizations.of(context)!.duplicatesFoundInfo(_duplicateGroups.length.toString(), totalDuplicates.toString()),
+                          AppLocalizations.of(context)!.duplicatesFoundInfo(
+                            _duplicateGroups.length.toString(),
+                            totalDuplicates.toString(),
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -181,7 +192,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            AppLocalizations.of(context)!.duplicatesNoDuplicates,
+                            AppLocalizations.of(
+                              context,
+                            )!.duplicatesNoDuplicates,
                             style: const TextStyle(fontSize: 18),
                           ),
                           const SizedBox(height: 4),
@@ -202,9 +215,14 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                     .clearIgnoredDuplicateKeys();
                                 _refresh();
                               },
-                               icon: const Icon(Icons.refresh, size: 16),
+                              icon: const Icon(Icons.refresh, size: 16),
                               label: Text(
-                                AppLocalizations.of(context)!.duplicatesRestoreIgnoredBtn(SettingsService().ignoredDuplicateKeys.length.toString()),
+                                AppLocalizations.of(
+                                  context,
+                                )!.duplicatesRestoreIgnoredBtn(
+                                  SettingsService().ignoredDuplicateKeys.length
+                                      .toString(),
+                                ),
                               ),
                             ),
                           ],
@@ -255,7 +273,12 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        AppLocalizations.of(context)!.duplicatesCopies(groupTitle, group.length.toString()),
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.duplicatesCopies(
+                                          groupTitle,
+                                          group.length.toString(),
+                                        ),
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
                                               color: theme
@@ -282,7 +305,9 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                         size: 14,
                                       ),
                                       label: Text(
-                                        AppLocalizations.of(context)!.duplicatesCompareBtn,
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.duplicatesCompareBtn,
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                       style: TextButton.styleFrom(
@@ -356,8 +381,11 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                   // Reset ignored button (shown only when ignored groups exist)
                   if (SettingsService().ignoredDuplicateKeys.isNotEmpty)
                     Tooltip(
-                      message:
-                          AppLocalizations.of(context)!.duplicatesResetIgnoredTooltip(SettingsService().ignoredDuplicateKeys.length.toString()),
+                      message: AppLocalizations.of(context)!
+                          .duplicatesResetIgnoredTooltip(
+                            SettingsService().ignoredDuplicateKeys.length
+                                .toString(),
+                          ),
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           await SettingsService().clearIgnoredDuplicateKeys();
@@ -365,7 +393,12 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                         },
                         icon: const Icon(Icons.visibility_outlined, size: 14),
                         label: Text(
-                          AppLocalizations.of(context)!.duplicatesResetIgnoredLabel(SettingsService().ignoredDuplicateKeys.length.toString()),
+                          AppLocalizations.of(
+                            context,
+                          )!.duplicatesResetIgnoredLabel(
+                            SettingsService().ignoredDuplicateKeys.length
+                                .toString(),
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onSurfaceVariant,
@@ -520,7 +553,9 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                AppLocalizations.of(context)!.duplicatesDetailsLabel,
+                                AppLocalizations.of(
+                                  context,
+                                )!.duplicatesDetailsLabel,
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: theme.colorScheme.onPrimaryContainer,

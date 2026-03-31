@@ -325,9 +325,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirm),
-        content: Text(
-          AppLocalizations.of(context)!.confirmClearDbMsg,
-        ),
+        content: Text(AppLocalizations.of(context)!.confirmClearDbMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -633,7 +631,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     },
                     icon: const Icon(Icons.list_alt_rounded),
                     label: Text(
-                      l10n.failedRenamesTitle(provider.failedRenamesCount.toString()),
+                      l10n.failedRenamesTitle(
+                        provider.failedRenamesCount.toString(),
+                      ),
                     ),
                   ),
                 ],

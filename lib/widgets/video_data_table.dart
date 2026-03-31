@@ -189,7 +189,11 @@ class _VideoDataTableState extends State<VideoDataTable> {
               200,
             ),
             _buildTableCell(
-              Text(video.directors, maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(
+                video.directors,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               150,
             ),
             _buildTableCell(
