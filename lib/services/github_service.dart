@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -37,21 +38,38 @@ class GitHubService {
         // Default download URL is the release page
         String downloadUrl = data['html_url'] ?? '';
 
-        // Cerchiamo un asset specifico per Linux (.AppImage o .deb)
+        // Cerchiamo un asset specifico in base alla piattaforma
         final List<dynamic>? assets = data['assets'];
         if (assets != null && assets.isNotEmpty) {
+          String? debUrl;
+          String? appImageUrl;
+          String? tarGzUrl;
+          String? exeUrl;
+          String? msixUrl;
+          String? apkUrl;
+
           for (final asset in assets) {
             final String name = asset['name']?.toString().toLowerCase() ?? '';
             final String browserDownloadUrl =
                 asset['browser_download_url'] ?? '';
 
-            if (browserDownloadUrl.isNotEmpty &&
-                (name.endsWith('.appimage') ||
-                    name.endsWith('.deb') ||
-                    name.endsWith('.tar.gz'))) {
-              downloadUrl = browserDownloadUrl;
-              break;
-            }
+            if (browserDownloadUrl.isEmpty) continue;
+
+            if (name.endsWith('.deb')) debUrl = browserDownloadUrl;
+            if (name.endsWith('.appimage')) appImageUrl = browserDownloadUrl;
+            if (name.endsWith('.tar.gz')) tarGzUrl = browserDownloadUrl;
+            if (name.endsWith('.exe')) exeUrl = browserDownloadUrl;
+            if (name.endsWith('.msix')) msixUrl = browserDownloadUrl;
+            if (name.endsWith('.apk')) apkUrl = browserDownloadUrl;
+          }
+
+          // Priorità in base alla piattaforma
+          if (Platform.isLinux) {
+            downloadUrl = debUrl ?? appImageUrl ?? tarGzUrl ?? downloadUrl;
+          } else if (Platform.isWindows) {
+            downloadUrl = exeUrl ?? msixUrl ?? downloadUrl;
+          } else if (Platform.isAndroid) {
+            downloadUrl = apkUrl ?? downloadUrl;
           }
         }
 
