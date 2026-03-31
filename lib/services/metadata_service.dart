@@ -447,11 +447,15 @@ class MetadataService {
 
       String clean(String s) => s.replaceAll(':', ';').replaceAll('"', "'");
 
-      if (title.isNotEmpty) tags.add('title=${clean(title)}');
-      if (video.directors.isNotEmpty)
+      if (title.isNotEmpty) {
+        tags.add('title=${clean(title)}');
+      }
+      if (video.directors.isNotEmpty) {
         tags.add('artist=${clean(video.directors)}');
-      if (video.year.toString().isNotEmpty)
+      }
+      if (video.year.toString().isNotEmpty) {
         tags.add('created=${clean(video.year.toString())}');
+      }
       if (video.genres.isNotEmpty) tags.add('genre=${clean(video.genres)}');
       if (video.plot.isNotEmpty) {
         tags.add('comment=${clean(video.plot)}');
