@@ -43,12 +43,8 @@ jobs:
         run: |
           export PATH="$PATH":"$HOME/.pub-cache/bin"
           flutter_distributor package --platform linux --targets deb
-
-      - name: Move .deb to known location
-        run: |
-          mkdir -p dist/output
-          find dist -name "*.deb" -exec cp {} dist/output/myplaylist-linux.deb \;
-          ls -la dist/output/
+          # Move .deb to root for easier artifact management
+          find dist -name "*.deb" -exec cp {} ./myplaylist-linux.deb \;
 
       - name: Compress Release (Legacy)
         run: |
@@ -77,7 +73,7 @@ jobs:
           name: myplaylist-linux-x64
           path: |
             myplaylist-linux-x64.tar.gz
-            dist/output/myplaylist-linux.deb
+            myplaylist-linux.deb
 
   build-windows:
     name: Build Windows
@@ -102,9 +98,15 @@ jobs:
           path: windows/installer_script.iss
 
       - name: Compress Release (Legacy)
+        shell: pwsh
         run: |
           cd build/windows/x64/runner/release
           Compress-Archive -Path * -DestinationPath ..\..\..\..\..\myplaylist-windows-x64.zip
+
+      - name: Prepare Windows Installer for release
+        shell: pwsh
+        run: |
+          Move-Item -Path build\windows\installer\*.exe -Destination .\myplaylist-windows-setup.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -112,7 +114,7 @@ jobs:
           name: myplaylist-windows-x64
           path: |
             myplaylist-windows-x64.zip
-            build/windows/installer/*.exe
+            myplaylist-windows-setup.exe
 
   build-android:
     name: Build Android
@@ -137,11 +139,14 @@ jobs:
       - name: Build APK (Release)
         run: flutter build apk --release
 
+      - name: Prepare APK for release
+        run: cp build/app/outputs/flutter-apk/app-release.apk ./myplaylist-android.apk
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: myplaylist-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: myplaylist-android.apk
 
   build-macos:
     name: Build macOS
@@ -190,8 +195,8 @@ jobs:
             artifacts/myplaylist-linux-x64/myplaylist-linux-x64.tar.gz
             artifacts/myplaylist-linux-x64/myplaylist-linux.deb
             artifacts/myplaylist-windows-x64/myplaylist-windows-x64.zip
-            artifacts/myplaylist-windows-x64/build/windows/installer/*.exe
-            artifacts/myplaylist-android/app-release.apk
+            artifacts/myplaylist-windows-x64/myplaylist-windows-setup.exe
+            artifacts/myplaylist-android/myplaylist-android.apk
             artifacts/myplaylist-macos/myplaylist-macos.zip
           fail_on_unmatched_files: false
           generate_release_notes: true
