@@ -43,8 +43,20 @@ jobs:
         run: |
           export PATH="$PATH":"$HOME/.pub-cache/bin"
           flutter_distributor package --platform linux --targets deb
+          # Debug: List contents of dist/
+          echo "Listing dist/ contents:"
+          ls -R dist/
           # Move .deb to root for easier artifact management
-          find dist -name "*.deb" -exec cp {} ./myplaylist-linux.deb \;
+          echo "Searching for .deb file..."
+          DEB_FILE=$(find dist -name "*.deb" | head -n 1)
+          if [ -z "$DEB_FILE" ]; then
+            echo "❌ ERROR: .deb file not found in dist/"
+            exit 1
+          fi
+          echo "Found .deb file: $DEB_FILE"
+          cp "$DEB_FILE" ./myplaylist-linux.deb
+          echo "Copied to: ./myplaylist-linux.deb"
+          ls -la ./myplaylist-linux.deb
 
       - name: Compress Release (Legacy)
         run: |
