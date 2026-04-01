@@ -15,12 +15,22 @@ class VideoProcessingStatus {
   final int total;
   final String currentTitle;
   final bool isCancelled;
+  final int updatedCount;
+  final int alreadyInSyncCount;
+  final int errorCount;
+  final String? currentMethod;
+  final String? currentReason;
 
   VideoProcessingStatus({
     required this.current,
     required this.total,
     required this.currentTitle,
     this.isCancelled = false,
+    this.updatedCount = 0,
+    this.alreadyInSyncCount = 0,
+    this.errorCount = 0,
+    this.currentMethod,
+    this.currentReason,
   });
 }
 
@@ -98,6 +108,9 @@ class VideoProcessingService {
           currentTitle: video.title.isNotEmpty
               ? video.title
               : p.basename(video.path),
+          updatedCount: updated,
+          alreadyInSyncCount: alreadyInSync,
+          errorCount: errors,
         ),
       );
 
@@ -432,6 +445,9 @@ class VideoProcessingService {
           currentTitle: video.title.isNotEmpty
               ? video.title
               : p.basename(video.path),
+          updatedCount: updatedCount,
+          alreadyInSyncCount: alreadyInSyncCount,
+          errorCount: errorCount,
         ),
       );
 
@@ -559,9 +575,30 @@ class VideoProcessingService {
           await db.AppDatabase.instance.updateVideo(updatedVideo);
         }
 
-        // Chiamiamo SEMPRE updateFileMetadata per verificare l'integrità fisica
-        // e la presenza del tag 'Codificato da', anche se il titolo DB è corretto.
-        final result = await MetadataService().updateFileMetadata(updatedVideo);
+        String? currentMethod;
+        String? currentReason;
+        final response = await MetadataService().updateFileMetadata(
+          updatedVideo,
+          onMethodDecided: (m, r) {
+            currentMethod = m;
+            currentReason = r;
+            onProgress(
+              VideoProcessingStatus(
+                current: i + 1,
+                total: total,
+                currentTitle: targetTitle,
+                updatedCount: updatedCount,
+                alreadyInSyncCount: alreadyInSyncCount,
+                errorCount: errorCount,
+                currentMethod: currentMethod,
+                currentReason: currentReason,
+              ),
+            );
+          },
+        );
+        final result = response.result;
+        currentMethod = response.method;
+        currentReason = response.reason;
 
         if (result == MetadataUpdateResult.failed) {
           errorCount++;
@@ -576,11 +613,35 @@ class VideoProcessingService {
         } else if (result == MetadataUpdateResult.alreadyInSync) {
           if (!dbMismatch) {
             alreadyInSyncCount++;
+            onProgress(
+              VideoProcessingStatus(
+                current: i + 1,
+                total: total,
+                currentTitle: targetTitle,
+                updatedCount: updatedCount,
+                alreadyInSyncCount: alreadyInSyncCount,
+                errorCount: errorCount,
+                currentMethod: currentMethod,
+                currentReason: currentReason,
+              ),
+            );
             continue;
           }
         }
 
         updatedCount++;
+        onProgress(
+          VideoProcessingStatus(
+            current: i + 1,
+            total: total,
+            currentTitle: targetTitle,
+            updatedCount: updatedCount,
+            alreadyInSyncCount: alreadyInSyncCount,
+            errorCount: errorCount,
+            currentMethod: currentMethod,
+            currentReason: currentReason,
+          ),
+        );
       } catch (e) {
         errorCount++;
         debugPrint('ERROR renaming video ${video.path}: $e');

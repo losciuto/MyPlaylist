@@ -1,6 +1,31 @@
-# Changelog
-
 All notable changes to this project will be documented in this file.
+
+## [3.14.0] - 01/04/2026
+
+### Novità
+- **Feedback Dettagliato Elaborazione**: Aggiunte le motivazioni tecniche (es. "Motore Rapido Disabilitato", "Sincronizzazione Metadati") nel dialogo di Elaborazione Batch per una trasparenza totale, uniformandolo all'esperienza di Sincronizzazione.
+
+### Correzioni
+- **Stabilità Percorsi Backup**: Migliorata la logica di creazione delle directory durante il remuxing/backup per prevenire l'errore `PathNotFoundException` in caso di cartelle mancanti o percorsi personalizzati.
+- **Sicurezza Null**: Risolti i crash "Null check operator" nel tab Servizio durante gli aggiornamenti asincroni del database.
+
+## [3.13.0] - 01/04/2026
+
+### Novità
+- **Remuxing MKV Universale**: La conversione automatica in MKV supporta ora tutti i formati remuxabili (MP4, MOV, WMV, FLV, TS, ecc.) durante la rinomina o la sincronizzazione, garantendo uniformità dei metadati nell'intera libreria.
+- **Controllo Scansione**: Aggiunta una nuova impostazione per includere o escludere la cartella di backup dei video convertiti dalla scansione del database (esclusa di default per prevenire duplicati).
+- **Scelta Cartella Backup**: Aggiunto un selettore di cartelle di sistema nelle Impostazioni per scegliere dove conservare i file originali dopo la conversione.
+- **Feedback Elaborazione Potenziato**: Unificato il dialogo di progresso per Rinomina e Sincronizzazione, con statistiche in tempo reale (Aggiornati, Saltati, Errori) e indicatori colorati per lo strumento in uso (mkvpropedit, MP4Box, FFmpeg).
+- **Chiarimento UI**: Il pulsante principale di sincronizzazione è stato rinominato in **"Avvia Sincronizzazione"** per maggiore chiarezza.
+- **Nuova Documentazione Dipendenze**: Aggiunte istruzioni dettagliate per l'installazione di mkvtoolnix, gpac e ffmpeg su Windows e macOS in tutti i file README.
+
+### Modifiche
+- **Refactoring UI**: Spostato lo strumento di estrazione "Metadati da File" dal poster del video direttamente nella barra degli strumenti del dialogo "Modifica Video" per un workflow più coerente.
+- **Path di Backup Predefinito**: Rinominata la cartella di backup predefinita in `Converted_Backups` (localizzata) per riflettere la natura universale della funzione.
+
+### Correzioni
+- **Logica di Sincronizzazione**: Risolto un bug nella logica di "skip" della sincronizzazione massiva. Il motore ora identifica e salta correttamente i file già aggiornati normalizzando le chiavi dei tag.
+- **Stabilità**: Migliorata la gestione degli errori durante il remuxing per assicurare che il file originale venga sostituito solo dopo il successo della conversione.
  
 ## [3.12.3] - 31/03/2026
 

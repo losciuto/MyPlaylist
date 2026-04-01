@@ -1,6 +1,31 @@
-# Changelog
-
 All notable changes to this project will be documented in this file.
+
+## [3.14.0] - 2026-04-01
+
+### Added
+- **Processing Reason Feedback**: Added detailed technical reasons (e.g. "Fast Engine Disabled", "Metadata Sync") to the Bulk Processing dialog for better transparency, matching the Metadata Sync experience.
+
+### Fixed
+- **Backup Path Stability**: Improved directory creation logic during MKV remuxing/backup to prevent `PathNotFoundException` when using custom or missing backup folders.
+- **Null Safety**: Resolved "Null check operator" crashes in the Service Tab during background database updates.
+
+## [3.13.0] - 2026-04-01
+
+### Added
+- **Universal MKV Remuxing**: Automatic MKV conversion now supports all remuxable formats (MP4, MOV, WMV, FLV, TS, etc.) during renaming or metadata synchronization, improving metadata consistency across the entire library.
+- **Scan Control**: Added a new setting to include or exclude the converted videos backup folder from the database scan (excluded by default to prevent duplicates).
+- **Custom Backup Directory**: Added a system folder picker in Settings to choose where original files are stored after conversion.
+- **Enhanced Processing Feedback**: Unified the progress dialog for Bulk Rename and Metadata Sync with real-time statistics (Updated, Skipped, Errors) and colored indicators for the tool currently in use (mkvpropedit, MP4Box, FFmpeg).
+- **UI Clarification**: Renamed the primary synchronization button to "Start Synchronization" for better clarity.
+- **System Requirements Documentation**: Added detailed installation instructions for mkvtoolnix, gpac, and ffmpeg for Windows and macOS in all README files.
+
+### Changed
+- **UI Refactoring**: Moved the "File Metadata" extraction tool from the video poster directly into the "Edit Video" dialog toolbar for a more logical and accessible workflow.
+- **Default Backup Path**: Renamed the default backup folder to `Converted_Backups` (localized) to better reflect its universal nature.
+
+### Fixed
+- **Sync Logic Accuracy**: Fixed a bug in the bulk synchronization skip logic. The engine now correctly identifies and skips files that are already up-to-date by normalizing metadata keys and database fields.
+- **Stability**: Improved error handling during remuxing to ensure original files are only replaced if the conversion process is successful.
  
 ## [3.12.3] - 2026-03-31
 

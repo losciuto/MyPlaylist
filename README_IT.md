@@ -16,6 +16,9 @@ Creatore di Playlist Video e Gestore Database Locale.
 *   **Gestione Doppioni Avanzata**: Rilevamento automatico copie doppie, confronto side-by-side dei metadati tecnici (ffprobe) con supporto raggruppamento per serie TV. Possibilità di eliminare copie dal DB o dal Disco in modo permanente, e funzione "Ignora" per nascondere falsi positivi in modo persistente.
 *   **UI Advanced**: Tooltip sui titoli lunghi e visualizzazione del video in elaborazione durante la rinomina.
 
+> [!WARNING]
+> **Conversione Automatica in MKV**: Se l'opzione "Converti video in MKV" è attiva nelle Impostazioni, ogni operazione di **Rinomina Massa** o **Sincronizzazione Metadati** su file non-MKV (MP4, AVI, MOV, ecc.) ne comporterà il remuxing automatico in formato MKV. Il file originale verrà spostato nella cartella di backup configurata (di default `Converted_Backups` nella root del disco video).
+
 ## Requisiti di Sistema (Linux)
 Il player interno utilizza `media_kit` (basato su mpv). Per supportare tutti i codec video (es. H.265/HEVC), è necessario installare le librerie di sistema:
 
@@ -25,6 +28,23 @@ sudo apt install libmpv-dev mpv ubuntu-restricted-extras ffmpeg
 ```
 
 Se riscontri schermo nero o "Codec not found", esegui il comando sopra.
+
+## Requisiti di Sistema (Windows & macOS)
+A differenza di Linux, i pacchetti per Windows e macOS non includono automaticamente gli strumenti di sistema necessari per la gestione avanzata dei metadati e la conversione dei file.
+
+### 🪟 Windows
+Per il corretto funzionamento delle funzioni di conversione (Remuxing in MKV) e l'iniezione dei tag (Rating, Poster, Trama), è necessario installare manualmente i seguenti strumenti:
+1.  **FFmpeg**: [ffmpeg.org](https://ffmpeg.org/download.html)
+2.  **MKVToolNix**: [mkvtoolnix.download](https://mkvtoolnix.download/downloads.html) (per la conversione in MKV)
+3.  **GPAC (MP4Box)**: [gpac.wp.imt.fr](https://gpac.wp.imt.fr/downloads/) (per i metadati MP4)
+
+**Consiglio**: Installa questi strumenti tramite un gestore pacchetti (es. `choco install ffmpeg mkvtoolnix gpac`) e assicurati che siano presenti nel `PATH` di sistema.
+
+### 🍎 macOS
+Il modo più semplice per installare i requisiti è tramite **Homebrew**:
+```bash
+brew install ffmpeg mkvtoolnix gpac
+```
 
 Per usufruire della **Modifica Ultra-Rapida dei Metadati** (scaricando il lavoro da FFmpeg e alterando l'header dei file Mkv e Mp4 in pochissimi millisecondi in-place), ti consigliamo caldamente di installare anche questi strumenti:
 

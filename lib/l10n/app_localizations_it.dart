@@ -1083,7 +1083,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).';
 
   @override
-  String get startSyncButton => 'Avvia Scansione e Sincronizzazione';
+  String get startSyncButton => 'Avvia Sincronizzazione';
 
   @override
   String get bulkSyncTitle => 'Sincronizzazione Massiva Metadati';
@@ -1123,6 +1123,44 @@ class AppLocalizationsIt extends AppLocalizations {
   String syncSkipped(String count) {
     return 'Saltati: $count';
   }
+
+  @override
+  String syncMethodLabel(String method) {
+    return 'Metodo: $method';
+  }
+
+  @override
+  String syncReasonLabel(String reason) {
+    return 'Motivo: $reason';
+  }
+
+  @override
+  String get syncReasonFastDisabled => 'Motore rapido disattivato';
+
+  @override
+  String syncReasonUnsupportedFormat(String ext) {
+    return 'Formato non supportato ($ext)';
+  }
+
+  @override
+  String syncReasonToolNotFound(String tool) {
+    return '$tool non trovato';
+  }
+
+  @override
+  String syncReasonToolFailed(String tool) {
+    return 'Errore $tool (fallback)';
+  }
+
+  @override
+  String get syncReasonTimeout => 'Timeout (troppo lento)';
+
+  @override
+  String get settingsAutoConvertAvi => 'Converti video in MKV';
+
+  @override
+  String get settingsAutoConvertAviSubtitle =>
+      'In fase di rinomina o modifica, esegue il remuxing automatico in MKV per i formati non compressi (AVI, MP4, MOV, ecc.) e sposta l\'originale nella cartella di backup';
 
   @override
   String get stopButton => 'Interrompi';
@@ -1342,4 +1380,37 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get infoTmdbTitle => 'Info TMDB';
+
+  @override
+  String get viewFileMetadata => 'Vedi Meta File';
+
+  @override
+  String get fileMetadataTitle => 'Metadati Raw del File';
+
+  @override
+  String get addTag => 'Aggiungi Tag';
+
+  @override
+  String get saveToFile => 'Salva nel File';
+
+  @override
+  String get btnFileMetadata => 'Metadati da File';
+
+  @override
+  String get settingsAviBackupPath => 'Cartella backup video convertiti';
+
+  @override
+  String get settingsAviBackupPathSubtitle =>
+      'Percorso dove spostare i file originali dopo la conversione in MKV (lascia vuoto per default)';
+
+  @override
+  String get settingsExcludeConvertedBackup =>
+      'Escludi backup filmati convertiti dalla scansione';
+
+  @override
+  String get settingsExcludeConvertedBackupSubtitle =>
+      'Se attivo, la cartella dei file originali (prima del remuxing in MKV) verrà saltata durante la ricerca di nuovi video';
+
+  @override
+  String get convertingToMkv => 'Remuxing in MKV in corso...';
 }

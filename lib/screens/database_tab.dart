@@ -387,6 +387,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
         ); // Ordine decrescente (Priorità: più recenti prima)
       });
     final total = allVideos.length;
+    final l10n = AppLocalizations.of(context)!;
 
     if (total == 0) {
       if (mounted) {
@@ -407,46 +408,139 @@ class _DatabaseTabState extends State<DatabaseTab> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF3C3C3C),
         title: Text(
-          AppLocalizations.of(context)!.renaming,
+          AppLocalizations.of(context)!.batchProcessingTitle,
           style: const TextStyle(color: Colors.white),
         ),
         content: ValueListenableBuilder<VideoProcessingStatus>(
           valueListenable: progressNotifier,
           builder: (context, status, child) {
-            final percent = (status.current / total * 100).toStringAsFixed(1);
+            final double progress = total > 0 ? status.current / total : 0.0;
+            final String? method = status.currentMethod;
+            final String? reason = status.currentReason;
+
+            String getLocalizedReason(String reason) {
+              if (reason == 'fast_engine_disabled') {
+                return AppLocalizations.of(context)!.syncReasonFastDisabled;
+              }
+              if (reason.startsWith('unsupported_format:')) {
+                final ext = reason.split(':').last;
+                return AppLocalizations.of(context)!.syncReasonUnsupportedFormat(ext);
+              }
+              if (reason.startsWith('tool_not_found:')) {
+                final tool = reason.split(':').last;
+                return AppLocalizations.of(context)!.syncReasonToolNotFound(tool);
+              }
+              if (reason.startsWith('tool_failed:')) {
+                final parts = reason.split(':');
+                if (parts.length >= 3) {
+                  final tool = parts[1];
+                  String error = parts.sublist(2).join(':');
+                  if (error == 'timeout_too_slow') {
+                    error = AppLocalizations.of(context)!.syncReasonTimeout;
+                  }
+                  return '${AppLocalizations.of(context)!.syncReasonToolFailed(tool)}: $error';
+                }
+                final tool = parts.last;
+                return AppLocalizations.of(context)!.syncReasonToolFailed(tool);
+              }
+              return reason;
+            }
+
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.processing,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 12,
+                  AppLocalizations.of(context)!.fileXofY(
+                    status.current.toString(),
+                    total.toString(),
                   ),
+                  style: const TextStyle(color: Colors.white),
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  status.currentTitle,
-                  style: const TextStyle(
-                    color: Color(0xFF4CAF50),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                const SizedBox(height: 8),
+                if (status.currentTitle.isNotEmpty)
+                  Text(
+                    status.currentTitle,
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 LinearProgressIndicator(
-                  value: status.current / total,
-                  backgroundColor: Colors.white10,
+                  value: progress,
                   color: const Color(0xFF4CAF50),
+                  backgroundColor: Colors.white10,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 16),
                 Text(
-                  '${status.current} / $total ($percent%)',
-                  style: const TextStyle(color: Colors.white70),
+                  '${AppLocalizations.of(context)!.syncUpdated(status.updatedCount.toString())}\n'
+                  '${AppLocalizations.of(context)!.syncSkipped(status.alreadyInSyncCount.toString())}\n'
+                  '${l10n.bulkOpStatsDetailed("", "", "", status.errorCount.toString()).split('\n').last}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
+                if (method != null && method.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: method == 'Remuxing -> MKV' ||
+                              method == 'mkvpropedit' ||
+                              method == 'MP4Box'
+                          ? Colors.green.withValues(alpha: 0.15)
+                          : (method == 'FFmpeg'
+                              ? Colors.orange.withValues(alpha: 0.1)
+                              : Colors.blue.withValues(alpha: 0.1)),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: method == 'Remuxing -> MKV' ||
+                                method == 'mkvpropedit' ||
+                                method == 'MP4Box'
+                            ? Colors.green.withValues(alpha: 0.5)
+                            : (method == 'FFmpeg'
+                                ? Colors.orange.withValues(alpha: 0.3)
+                                : Colors.blue.withValues(alpha: 0.3)),
+                      ),
+                    ),
+                    child: Text(
+                      method == 'Remuxing -> MKV'
+                          ? AppLocalizations.of(context)!.convertingToMkv
+                          : AppLocalizations.of(context)!
+                              .syncMethodLabel(method),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: method == 'Remuxing -> MKV' ||
+                                method == 'mkvpropedit' ||
+                                method == 'MP4Box'
+                            ? Colors.greenAccent
+                            : (method == 'FFmpeg'
+                                ? Colors.orangeAccent
+                                : Colors.blueAccent),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+                if (reason != null && reason.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      getLocalizedReason(reason),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white54,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
               ],
             );
           },
@@ -458,7 +552,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
               Navigator.pop(ctx);
             },
             child: Text(
-              AppLocalizations.of(context)!.cancel,
+              AppLocalizations.of(context)!.stopButton,
               style: const TextStyle(color: Colors.redAccent),
             ),
           ),

@@ -11,6 +11,7 @@ import '../utils/nfo_generator.dart';
 import '../utils/video_extensions.dart';
 import '../widgets/movie_selection_dialog.dart';
 import 'package:path/path.dart' as p;
+import '../widgets/file_metadata_dialog.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -44,6 +45,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
   bool _isSaving = false;
   bool _isDownloading = false;
+  String? _statusMessage;
 
   @override
   void initState() {
@@ -543,7 +545,21 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         );
       }
 
-      final result = await MetadataService().updateFileMetadata(updatedVideo);
+      final response = await MetadataService().updateFileMetadata(
+        updatedVideo,
+        onMethodDecided: (method, reason) {
+          if (mounted) {
+            setState(() {
+              if (method == 'Remuxing -> MKV') {
+                _statusMessage = AppLocalizations.of(context)!.convertingToMkv;
+              } else {
+                _statusMessage = AppLocalizations.of(context)!.fileUpdateMsg;
+              }
+            });
+          }
+        },
+      );
+      final result = response.result;
 
       if (mounted) {
         if (result != MetadataUpdateResult.failed) {
@@ -597,6 +613,26 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                   else
                     Row(
                       children: [
+                        if (!widget.video.isSeries) ...[
+                          TextButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => FileMetadataDialog(
+                                  filePath: widget.video.path,
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.data_object, size: 16),
+                            label: Text(
+                              AppLocalizations.of(context)!.btnFileMetadata,
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF4CAF50),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
                         TextButton.icon(
                           onPressed: _loadFromNfo,
                           icon: const Icon(Icons.sync, size: 16),
@@ -936,13 +972,30 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                       backgroundColor: const Color(0xFF4CAF50),
                     ),
                     child: _isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              if (_statusMessage != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    _statusMessage!,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           )
                         : Text(AppLocalizations.of(context)!.saveAll),
                   ),

@@ -350,7 +350,7 @@
   "manualDbSyncHeader": "SYNC MANUALE DEL DATABASE",
   "syncMissingTagsLabel": "Sincronizza tag file mancanti",
   "syncMissingTagsDesc": "Scansiona tutta la libreria e salva nei file (MP4/MKV) i metadati del database che non sono ancora impressi, come Locandine e Valutazioni, così da renderle visibili sulle app esterne (es. VlcRemote).",
-  "startSyncButton": "Avvia Scansione e Sincronizzazione",
+  "startSyncButton": "Avvia Sincronizzazione",
   "bulkSyncTitle": "Sincronizzazione Massiva Metadati",
   "bulkSyncDesc": "Questa operazione ispezionerà tutti i video nel database per verificare se i file fisici possiedono i tag. Se i tag (Trama, Rating, o Poster) sono assenti, sfrutterà FFmpeg per inserirli.\n\nPotrebbe volerci del tempo per directory molto corpose. Vuoi procedere?",
   "startSyncDialogButton": "Inizia Sincronizzazione",
@@ -384,6 +384,40 @@
       "count": {"type": "String"}
     }
   },
+  "syncMethodLabel": "Metodo: {method}",
+  "@syncMethodLabel": {
+    "placeholders": {
+      "method": {"type": "String"}
+    }
+  },
+  "syncReasonLabel": "Motivo: {reason}",
+  "@syncReasonLabel": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "syncReasonFastDisabled": "Motore rapido disattivato",
+  "syncReasonUnsupportedFormat": "Formato non supportato ({ext})",
+  "@syncReasonUnsupportedFormat": {
+    "placeholders": {
+      "ext": {"type": "String"}
+    }
+  },
+  "syncReasonToolNotFound": "{tool} non trovato",
+  "@syncReasonToolNotFound": {
+    "placeholders": {
+      "tool": {"type": "String"}
+    }
+  },
+  "syncReasonToolFailed": "Errore {tool} (fallback)",
+  "@syncReasonToolFailed": {
+    "placeholders": {
+      "tool": {"type": "String"}
+    }
+  },
+  "syncReasonTimeout": "Timeout (troppo lento)",
+  "settingsAutoConvertAvi": "Converti video in MKV",
+  "settingsAutoConvertAviSubtitle": "In fase di rinomina o modifica, esegue il remuxing automatico in MKV per i formati non compressi (AVI, MP4, MOV, ecc.) e sposta l'originale nella cartella di backup",
   "stopButton": "Interrompi",
   "closeButton": "Chiudi",
   "fanartApiKeyHint": "Opzionale: per loghi e sfondi migliori",
@@ -510,5 +544,15 @@
   },
   "playerNoFile": "Nessun file video trovato per la riproduzione.",
   "filterByPerson": "Filtra per questa persona",
-  "infoTmdbTitle": "Info TMDB"
+  "infoTmdbTitle": "Info TMDB",
+  "viewFileMetadata": "Vedi Meta File",
+  "fileMetadataTitle": "Metadati Raw del File",
+  "addTag": "Aggiungi Tag",
+  "saveToFile": "Salva nel File",
+  "btnFileMetadata": "Metadati da File",
+  "settingsAviBackupPath": "Cartella backup video convertiti",
+  "settingsAviBackupPathSubtitle": "Percorso dove spostare i file originali dopo la conversione in MKV (lascia vuoto per default)",
+  "settingsExcludeConvertedBackup": "Escludi backup filmati convertiti dalla scansione",
+  "settingsExcludeConvertedBackupSubtitle": "Se attivo, la cartella dei file originali (prima del remuxing in MKV) verrà saltata durante la ricerca di nuovi video",
+  "convertingToMkv": "Remuxing in MKV in corso..."
 }

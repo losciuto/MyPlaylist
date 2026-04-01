@@ -31,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _serverInterfaceController;
   late TextEditingController _tmdbApiKeyController;
   late TextEditingController _fanartApiKeyController;
+  late TextEditingController _videoBackupPathController;
   bool _obscureSecret = true;
   bool _isCheckingUpdates = false;
   int _currentTab =
@@ -60,6 +61,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _fanartApiKeyController = TextEditingController(
       text: settings.fanartApiKey,
     );
+    _videoBackupPathController = TextEditingController(
+      text: settings.videoBackupPath,
+    );
   }
 
   @override
@@ -72,6 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _serverInterfaceController.dispose();
     _tmdbApiKeyController.dispose();
     _fanartApiKeyController.dispose();
+    _videoBackupPathController.dispose();
     super.dispose();
   }
 
@@ -125,6 +130,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _updateServerInterface(String value) {
     if (value.isNotEmpty) {
       context.read<SettingsService>().setServerInterface(value);
+    }
+  }
+
+  Future<void> _pickVideoBackupPath() async {
+    String? result = await FilePicker.platform.getDirectoryPath();
+
+    if (result != null) {
+      _videoBackupPathController.text = result;
+      if (mounted) {
+        context.read<SettingsService>().setVideoBackupPath(result);
+      }
     }
   }
 
@@ -534,6 +550,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: settings.fastMetadataEngineEnabled,
                   onChanged: (val) =>
                       settings.setFastMetadataEngineEnabled(val),
+                  activeThumbColor: const Color(0xFF4CAF50),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 10),
+                 SwitchListTile(
+                  title: Text(l10n.settingsAutoConvertAvi),
+                  subtitle: Text(l10n.settingsAutoConvertAviSubtitle),
+                  value: settings.autoConvertToMkv,
+                  onChanged: (val) => settings.setAutoConvertToMkv(val),
+                  activeThumbColor: const Color(0xFF4CAF50),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _videoBackupPathController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsAviBackupPath,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.folder_open),
+                      onPressed: _pickVideoBackupPath,
+                    ),
+                    filled: true,
+                    fillColor: fillColor,
+                    helperText: l10n.settingsAviBackupPathSubtitle,
+                  ),
+                  onChanged: (val) =>
+                      context.read<SettingsService>().setVideoBackupPath(val),
+                ),
+                const SizedBox(height: 10),
+                SwitchListTile(
+                  title: Text(l10n.settingsExcludeConvertedBackup),
+                  subtitle: Text(l10n.settingsExcludeConvertedBackupSubtitle),
+                  value: settings.excludeConvertedBackupFromScan,
+                  onChanged: (val) =>
+                      settings.setExcludeConvertedBackupFromScan(val),
                   activeThumbColor: const Color(0xFF4CAF50),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1272,11 +1324,41 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
   bool _isFinished = false;
   bool _isCancelled = false;
   String _currentTitle = '';
+  String _currentMethod = '';
+  String? _currentReason;
 
   @override
   void initState() {
     super.initState();
     _runSync();
+  }
+
+  String _getLocalizedReason(String reason) {
+    if (reason == 'fast_engine_disabled') {
+      return AppLocalizations.of(context)!.syncReasonFastDisabled;
+    }
+    if (reason.startsWith('unsupported_format:')) {
+      final ext = reason.split(':').last;
+      return AppLocalizations.of(context)!.syncReasonUnsupportedFormat(ext);
+    }
+    if (reason.startsWith('tool_not_found:')) {
+      final tool = reason.split(':').last;
+      return AppLocalizations.of(context)!.syncReasonToolNotFound(tool);
+    }
+    if (reason.startsWith('tool_failed:')) {
+      final parts = reason.split(':');
+      if (parts.length >= 3) {
+        final tool = parts[1];
+        String error = parts.sublist(2).join(':');
+        if (error == 'timeout_too_slow') {
+          error = AppLocalizations.of(context)!.syncReasonTimeout;
+        }
+        return '${AppLocalizations.of(context)!.syncReasonToolFailed(tool)}: $error';
+      }
+      final tool = parts.last;
+      return AppLocalizations.of(context)!.syncReasonToolFailed(tool);
+    }
+    return reason;
   }
 
   Future<void> _runSync() async {
@@ -1296,16 +1378,29 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
             : videos[i].path.split('/').last;
       });
 
-      final result = await MetadataService().updateFileMetadata(
+      final response = await MetadataService().updateFileMetadata(
         videos[i],
         enforceFullMetadata: true,
+        onMethodDecided: (method, reason) {
+          if (mounted) {
+            setState(() {
+              _currentMethod = method;
+              _currentReason = reason;
+            });
+          }
+        },
       );
 
       if (_isCancelled) break;
 
-      if (result == MetadataUpdateResult.updated) {
+      setState(() {
+        _currentMethod = response.method;
+        _currentReason = response.reason;
+      });
+
+      if (response.result == MetadataUpdateResult.updated) {
         _updatedCount++;
-      } else if (result == MetadataUpdateResult.alreadyInSync) {
+      } else if (response.result == MetadataUpdateResult.alreadyInSync) {
         _skippedCount++;
       }
     }
@@ -1369,7 +1464,62 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
           const SizedBox(height: 16),
           Text(
             '${AppLocalizations.of(context)!.syncUpdated(_updatedCount.toString())}\n${AppLocalizations.of(context)!.syncSkipped(_skippedCount.toString())}',
+            textAlign: TextAlign.center,
           ),
+          if (_currentMethod.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                    ? Colors.green.withValues(alpha: 0.15)
+                    : (_currentMethod == 'FFmpeg'
+                        ? Colors.orange.withValues(alpha: 0.1)
+                        : Colors.blue.withValues(alpha: 0.1)),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                      ? Colors.green.withValues(alpha: 0.5)
+                      : (_currentMethod == 'FFmpeg'
+                          ? Colors.orange.withValues(alpha: 0.3)
+                          : Colors.blue.withValues(alpha: 0.3)),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    _currentMethod == 'Remuxing -> MKV' 
+                        ? AppLocalizations.of(context)!.convertingToMkv
+                        : AppLocalizations.of(context)!.syncMethodLabel(_currentMethod),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                          ? Colors.greenAccent
+                          : (_currentMethod == 'FFmpeg'
+                              ? Colors.orangeAccent
+                              : Colors.blueAccent),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_currentMethod == 'FFmpeg' && _currentReason != null) ...[
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      AppLocalizations.of(context)!.syncReasonLabel(
+                        _getLocalizedReason(_currentReason!),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white60,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       ),
       actions: [

@@ -33,6 +33,10 @@ class SettingsService with ChangeNotifier {
   static const String _keyIgnoredDuplicateKeys = 'ignored_duplicate_keys';
   static const String _keyFastMetadataEngineEnabled =
       'fast_metadata_engine_enabled';
+  static const String _keyAutoConvertToMkv = 'auto_convert_to_mkv';
+  static const String _keyVideoBackupPath = 'video_backup_path';
+  static const String _keyExcludeConvertedBackupFromScan =
+      'exclude_converted_backup_from_scan';
   static const String _keyLastFilterSettings = 'last_filter_settings';
 
   // State
@@ -53,6 +57,9 @@ class SettingsService with ChangeNotifier {
   bool _autoSyncNfoOnEdit = false;
   Set<String> _ignoredDuplicateKeys = {};
   bool _fastMetadataEngineEnabled = true;
+  bool _autoConvertToMkv = false;
+  String _videoBackupPath = '';
+  bool _excludeConvertedBackupFromScan = true;
   FilterSettings? _lastFilterSettings;
 
   bool get initialized => _initialized;
@@ -73,6 +80,9 @@ class SettingsService with ChangeNotifier {
   Set<String> get ignoredDuplicateKeys =>
       Set.unmodifiable(_ignoredDuplicateKeys);
   bool get fastMetadataEngineEnabled => _fastMetadataEngineEnabled;
+  bool get autoConvertToMkv => _autoConvertToMkv;
+  String get videoBackupPath => _videoBackupPath;
+  bool get excludeConvertedBackupFromScan => _excludeConvertedBackupFromScan;
   FilterSettings? get lastFilterSettings => _lastFilterSettings;
 
   Future<void> init() async {
@@ -125,6 +135,13 @@ class SettingsService with ChangeNotifier {
     );
     _fastMetadataEngineEnabled =
         _prefs.getBool(_keyFastMetadataEngineEnabled) ?? true;
+    // Caricamento conversione MKV (con fallback per vecchia chiave AVI)
+    _autoConvertToMkv = _prefs.getBool(_keyAutoConvertToMkv) ?? 
+                         _prefs.getBool('auto_convert_avi_to_mkv') ?? false;
+    _videoBackupPath = _prefs.getString(_keyVideoBackupPath) ?? 
+                        _prefs.getString('avi_backup_path') ?? '';
+    _excludeConvertedBackupFromScan =
+        _prefs.getBool(_keyExcludeConvertedBackupFromScan) ?? true;
 
     final filterJson = _prefs.getString(_keyLastFilterSettings);
     if (filterJson != null) {
@@ -285,6 +302,24 @@ class SettingsService with ChangeNotifier {
   Future<void> setFastMetadataEngineEnabled(bool enabled) async {
     _fastMetadataEngineEnabled = enabled;
     await _prefs.setBool(_keyFastMetadataEngineEnabled, enabled);
+    notifyListeners();
+  }
+
+  Future<void> setAutoConvertToMkv(bool enabled) async {
+    _autoConvertToMkv = enabled;
+    await _prefs.setBool(_keyAutoConvertToMkv, enabled);
+    notifyListeners();
+  }
+
+  Future<void> setVideoBackupPath(String path) async {
+    _videoBackupPath = path;
+    await _prefs.setString(_keyVideoBackupPath, path);
+    notifyListeners();
+  }
+
+  Future<void> setExcludeConvertedBackupFromScan(bool value) async {
+    _excludeConvertedBackupFromScan = value;
+    await _prefs.setBool(_keyExcludeConvertedBackupFromScan, value);
     notifyListeners();
   }
 

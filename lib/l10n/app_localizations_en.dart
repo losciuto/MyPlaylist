@@ -1079,7 +1079,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Scans the entire library and saves to files (MP4/MKV) the database metadata that is not yet embedded, such as Posters and Ratings, making them visible on external apps (e.g. VlcRemote).';
 
   @override
-  String get startSyncButton => 'Start Scan & Sync';
+  String get startSyncButton => 'Start Synchronization';
 
   @override
   String get bulkSyncTitle => 'Bulk Metadata Sync';
@@ -1119,6 +1119,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncSkipped(String count) {
     return 'Skipped: $count';
   }
+
+  @override
+  String syncMethodLabel(String method) {
+    return 'Method: $method';
+  }
+
+  @override
+  String syncReasonLabel(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get syncReasonFastDisabled => 'Fast engine disabled';
+
+  @override
+  String syncReasonUnsupportedFormat(String ext) {
+    return 'Unsupported format ($ext)';
+  }
+
+  @override
+  String syncReasonToolNotFound(String tool) {
+    return 'Tool $tool not found';
+  }
+
+  @override
+  String syncReasonToolFailed(String tool) {
+    return 'Tool $tool failed (fallback)';
+  }
+
+  @override
+  String get syncReasonTimeout => 'Timeout (too slow)';
+
+  @override
+  String get settingsAutoConvertAvi => 'Convert video to MKV';
+
+  @override
+  String get settingsAutoConvertAviSubtitle =>
+      'When renaming or editing, automatically remuxes non-MKV formats (AVI, MP4, MOV, etc.) to MKV and moves the original to the backup folder';
 
   @override
   String get stopButton => 'Stop';
@@ -1338,4 +1376,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infoTmdbTitle => 'TMDB Info';
+
+  @override
+  String get viewFileMetadata => 'View File Meta';
+
+  @override
+  String get fileMetadataTitle => 'Raw File Metadata';
+
+  @override
+  String get addTag => 'Add Tag';
+
+  @override
+  String get saveToFile => 'Save to File';
+
+  @override
+  String get btnFileMetadata => 'File Metadata';
+
+  @override
+  String get settingsAviBackupPath => 'Converted video backup folder';
+
+  @override
+  String get settingsAviBackupPathSubtitle =>
+      'Path where to move original files after MKV conversion (leave empty for default)';
+
+  @override
+  String get settingsExcludeConvertedBackup =>
+      'Exclude converted backup folder from scan';
+
+  @override
+  String get settingsExcludeConvertedBackupSubtitle =>
+      'If enabled, the folder containing the original files (pre-remuxing) will be skipped when searching for new videos';
+
+  @override
+  String get convertingToMkv => 'Remuxing to MKV in progress...';
 }

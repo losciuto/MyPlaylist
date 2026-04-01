@@ -6,6 +6,7 @@ import '../models/video.dart' as model;
 import '../utils/nfo_parser.dart';
 import '../utils/video_extensions.dart';
 import 'media_asset_service.dart';
+import 'settings_service.dart';
 
 class ScanStatus {
   final String message;
@@ -71,7 +72,30 @@ class ScanService {
     Directory dir,
     Set<String> failedPaths,
   ) async* {
-    final dirName = p.basename(dir.path).toLowerCase();
+    final settings = SettingsService();
+    final String fullPath = dir.path;
+    final String dirName = p.basename(fullPath).toLowerCase();
+
+    // Check if we should skip this folder because it's a backup folder
+    if (settings.excludeConvertedBackupFromScan) {
+      bool isBackupFolder = false;
+
+      // 1. Check custom backup path
+      if (settings.videoBackupPath.isNotEmpty &&
+          p.canonicalize(fullPath) == p.canonicalize(settings.videoBackupPath)) {
+        isBackupFolder = true;
+      }
+
+      // 2. Check default names (to be extra safe if user hasn't set one yet but files exist)
+      if (dirName == 'converted_backups' || dirName == 'oldavi') {
+        isBackupFolder = true;
+      }
+
+      if (isBackupFolder) {
+        debugPrint('SKIP [ScanService]: Backup folder ignored: $fullPath');
+        return;
+      }
+    }
 
     // 1. Explicit Series Check: tvshow.nfo detection
     // If a folder has tvshow.nfo, it IS a series.

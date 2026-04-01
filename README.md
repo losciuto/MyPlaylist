@@ -11,18 +11,18 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 - [English (README_EN.md)](README_EN.md) | [Italiano (README_IT.md)](README_IT.md)
 
 ## Key Features
-- **Folder Scanning**: Import videos with automatic metadata extraction.
-- **Database Management**: Full control over your collection (Search, Edit, Bulk Rename).
-- **Smart Playlists**: Generate random or filtered playlists with session-based exclusion and inclusion/exclusion criteria.
-- **TV Series Management**: Full support for TV series folders, recursive episode metadata updates, and `tvshow.nfo` generation.
-- **VLC Integration**: Advanced support for VLC with automatic process management.
-- **Advanced Duplicate Management**: Side-by-side technical metadata comparison for duplicates. Delete permanently from Disk/DB and persistent "Ignore" function for false-positives.
 - **Modern UI**: Tooltips, real-time progress, and a clean interface.
+
+> [!WARNING]
+> **Automatic MKV Conversion**: When "Convert video to MKV" is enabled, any **Rename** or **Metadata Sync** on non-MKV files will trigger an automatic remuxing to MKV. Original files will be backed up to the configured folder.
 
 ## Quick Start
 1.  Ensure [Flutter](https://flutter.dev/get-started/) is installed.
 2.  Run `flutter pub get`.
 3.  Run `flutter run -d linux` (or windows).
+
+> [!IMPORTANT]
+> On **Windows** and **macOS**, you must manually install **FFmpeg**, **MKVToolNix**, and **GPAC** (MP4Box) for metadata and conversion features. See [README_EN.md](README_EN.md) or [README_IT.md](README_IT.md) for details.
 
 ---
 **Version**: 3.12.3  

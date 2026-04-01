@@ -45,6 +45,7 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
   }
 
   void _onProviderChange() {
+    if (!mounted) return;
     final provider = context.read<DatabaseProvider>();
     if (_innerTabController.index != provider.currentServiceTabIndex) {
       _innerTabController.animateTo(provider.currentServiceTabIndex);

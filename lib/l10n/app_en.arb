@@ -350,7 +350,7 @@
   "manualDbSyncHeader": "MANUAL DATABASE SYNC",
   "syncMissingTagsLabel": "Sync missing file tags",
   "syncMissingTagsDesc": "Scans the entire library and saves to files (MP4/MKV) the database metadata that is not yet embedded, such as Posters and Ratings, making them visible on external apps (e.g. VlcRemote).",
-  "startSyncButton": "Start Scan & Sync",
+  "startSyncButton": "Start Synchronization",
   "bulkSyncTitle": "Bulk Metadata Sync",
   "bulkSyncDesc": "This operation will inspect all videos in the database to check if physical files have the tags. If tags (Plot, Rating, or Poster) are missing, it will use FFmpeg to insert them.\n\nThis may take a while for large libraries. Do you want to proceed?",
   "startSyncDialogButton": "Start Sync",
@@ -384,6 +384,40 @@
       "count": {"type": "String"}
     }
   },
+  "syncMethodLabel": "Method: {method}",
+  "@syncMethodLabel": {
+    "placeholders": {
+      "method": {"type": "String"}
+    }
+  },
+  "syncReasonLabel": "Reason: {reason}",
+  "@syncReasonLabel": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "syncReasonFastDisabled": "Fast engine disabled",
+  "syncReasonUnsupportedFormat": "Unsupported format ({ext})",
+  "@syncReasonUnsupportedFormat": {
+    "placeholders": {
+      "ext": {"type": "String"}
+    }
+  },
+  "syncReasonToolNotFound": "Tool {tool} not found",
+  "@syncReasonToolNotFound": {
+    "placeholders": {
+      "tool": {"type": "String"}
+    }
+  },
+  "syncReasonToolFailed": "Tool {tool} failed (fallback)",
+  "@syncReasonToolFailed": {
+    "placeholders": {
+      "tool": {"type": "String"}
+    }
+  },
+  "syncReasonTimeout": "Timeout (too slow)",
+  "settingsAutoConvertAvi": "Convert video to MKV",
+  "settingsAutoConvertAviSubtitle": "When renaming or editing, automatically remuxes non-MKV formats (AVI, MP4, MOV, etc.) to MKV and moves the original to the backup folder",
   "stopButton": "Stop",
   "closeButton": "Close",
   "fanartApiKeyHint": "Optional: For better logos and backgrounds",
@@ -510,5 +544,15 @@
   },
   "playerNoFile": "No video file found for playback.",
   "filterByPerson": "Filter by this person",
-  "infoTmdbTitle": "TMDB Info"
+  "infoTmdbTitle": "TMDB Info",
+  "viewFileMetadata": "View File Meta",
+  "fileMetadataTitle": "Raw File Metadata",
+  "addTag": "Add Tag",
+  "saveToFile": "Save to File",
+  "btnFileMetadata": "File Metadata",
+  "settingsAviBackupPath": "Converted video backup folder",
+  "settingsAviBackupPathSubtitle": "Path where to move original files after MKV conversion (leave empty for default)",
+  "settingsExcludeConvertedBackup": "Exclude converted backup folder from scan",
+  "settingsExcludeConvertedBackupSubtitle": "If enabled, the folder containing the original files (pre-remuxing) will be skipped when searching for new videos",
+  "convertingToMkv": "Remuxing to MKV in progress..."
 }

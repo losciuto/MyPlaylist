@@ -7,6 +7,7 @@ import '../services/settings_service.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
+import '../widgets/file_metadata_dialog.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
   final Video video;
@@ -59,44 +60,48 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Left: Poster
-              Container(
-                width: 350,
-                height: 500,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.black,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+              Stack(
+                children: [
+                  Container(
+                    width: 350,
+                    height: 500,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.black,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: widget.video.posterPath.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: widget.video.posterPath.startsWith('http')
-                            ? Image.network(
-                                widget.video.posterPath,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                File(widget.video.posterPath),
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Center(
-                                      child: Icon(
-                                        Icons.movie,
-                                        size: 80,
-                                        color: iconColor,
-                                      ),
-                                    ),
-                              ),
-                      )
-                    : Center(
-                        child: Icon(Icons.movie, size: 80, color: iconColor),
-                      ),
+                    child: widget.video.posterPath.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: widget.video.posterPath.startsWith('http')
+                                ? Image.network(
+                                    widget.video.posterPath,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(widget.video.posterPath),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Center(
+                                          child: Icon(
+                                            Icons.movie,
+                                            size: 80,
+                                            color: iconColor,
+                                          ),
+                                        ),
+                                  ),
+                          )
+                        : Center(
+                            child: Icon(Icons.movie, size: 80, color: iconColor),
+                          ),
+                  ),
+                ],
               ),
               const SizedBox(width: 20),
               // Right: Details

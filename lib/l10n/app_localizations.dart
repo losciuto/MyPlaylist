@@ -1875,7 +1875,7 @@ abstract class AppLocalizations {
   /// No description provided for @startSyncButton.
   ///
   /// In it, this message translates to:
-  /// **'Avvia Scansione e Sincronizzazione'**
+  /// **'Avvia Sincronizzazione'**
   String get startSyncButton;
 
   /// No description provided for @bulkSyncTitle.
@@ -1937,6 +1937,60 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Saltati: {count}'**
   String syncSkipped(String count);
+
+  /// No description provided for @syncMethodLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Metodo: {method}'**
+  String syncMethodLabel(String method);
+
+  /// No description provided for @syncReasonLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Motivo: {reason}'**
+  String syncReasonLabel(String reason);
+
+  /// No description provided for @syncReasonFastDisabled.
+  ///
+  /// In it, this message translates to:
+  /// **'Motore rapido disattivato'**
+  String get syncReasonFastDisabled;
+
+  /// No description provided for @syncReasonUnsupportedFormat.
+  ///
+  /// In it, this message translates to:
+  /// **'Formato non supportato ({ext})'**
+  String syncReasonUnsupportedFormat(String ext);
+
+  /// No description provided for @syncReasonToolNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'{tool} non trovato'**
+  String syncReasonToolNotFound(String tool);
+
+  /// No description provided for @syncReasonToolFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Errore {tool} (fallback)'**
+  String syncReasonToolFailed(String tool);
+
+  /// No description provided for @syncReasonTimeout.
+  ///
+  /// In it, this message translates to:
+  /// **'Timeout (troppo lento)'**
+  String get syncReasonTimeout;
+
+  /// No description provided for @settingsAutoConvertAvi.
+  ///
+  /// In it, this message translates to:
+  /// **'Converti video in MKV'**
+  String get settingsAutoConvertAvi;
+
+  /// No description provided for @settingsAutoConvertAviSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'In fase di rinomina o modifica, esegue il remuxing automatico in MKV per i formati non compressi (AVI, MP4, MOV, ecc.) e sposta l\'originale nella cartella di backup'**
+  String get settingsAutoConvertAviSubtitle;
 
   /// No description provided for @stopButton.
   ///
@@ -2321,6 +2375,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Info TMDB'**
   String get infoTmdbTitle;
+
+  /// No description provided for @viewFileMetadata.
+  ///
+  /// In it, this message translates to:
+  /// **'Vedi Meta File'**
+  String get viewFileMetadata;
+
+  /// No description provided for @fileMetadataTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Metadati Raw del File'**
+  String get fileMetadataTitle;
+
+  /// No description provided for @addTag.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi Tag'**
+  String get addTag;
+
+  /// No description provided for @saveToFile.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva nel File'**
+  String get saveToFile;
+
+  /// No description provided for @btnFileMetadata.
+  ///
+  /// In it, this message translates to:
+  /// **'Metadati da File'**
+  String get btnFileMetadata;
+
+  /// No description provided for @settingsAviBackupPath.
+  ///
+  /// In it, this message translates to:
+  /// **'Cartella backup video convertiti'**
+  String get settingsAviBackupPath;
+
+  /// No description provided for @settingsAviBackupPathSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Percorso dove spostare i file originali dopo la conversione in MKV (lascia vuoto per default)'**
+  String get settingsAviBackupPathSubtitle;
+
+  /// No description provided for @settingsExcludeConvertedBackup.
+  ///
+  /// In it, this message translates to:
+  /// **'Escludi backup filmati convertiti dalla scansione'**
+  String get settingsExcludeConvertedBackup;
+
+  /// No description provided for @settingsExcludeConvertedBackupSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Se attivo, la cartella dei file originali (prima del remuxing in MKV) verrà saltata durante la ricerca di nuovi video'**
+  String get settingsExcludeConvertedBackupSubtitle;
+
+  /// No description provided for @convertingToMkv.
+  ///
+  /// In it, this message translates to:
+  /// **'Remuxing in MKV in corso...'**
+  String get convertingToMkv;
 }
 
 class _AppLocalizationsDelegate
