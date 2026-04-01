@@ -87,8 +87,8 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                                 : Image.file(
                                     File(widget.video.posterPath),
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        Center(
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Center(
                                           child: Icon(
                                             Icons.movie,
                                             size: 80,
@@ -98,7 +98,11 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                                   ),
                           )
                         : Center(
-                            child: Icon(Icons.movie, size: 80, color: iconColor),
+                            child: Icon(
+                              Icons.movie,
+                              size: 80,
+                              color: iconColor,
+                            ),
                           ),
                   ),
                 ],

@@ -136,10 +136,14 @@ class SettingsService with ChangeNotifier {
     _fastMetadataEngineEnabled =
         _prefs.getBool(_keyFastMetadataEngineEnabled) ?? true;
     // Caricamento conversione MKV (con fallback per vecchia chiave AVI)
-    _autoConvertToMkv = _prefs.getBool(_keyAutoConvertToMkv) ?? 
-                         _prefs.getBool('auto_convert_avi_to_mkv') ?? false;
-    _videoBackupPath = _prefs.getString(_keyVideoBackupPath) ?? 
-                        _prefs.getString('avi_backup_path') ?? '';
+    _autoConvertToMkv =
+        _prefs.getBool(_keyAutoConvertToMkv) ??
+        _prefs.getBool('auto_convert_avi_to_mkv') ??
+        false;
+    _videoBackupPath =
+        _prefs.getString(_keyVideoBackupPath) ??
+        _prefs.getString('avi_backup_path') ??
+        '';
     _excludeConvertedBackupFromScan =
         _prefs.getBool(_keyExcludeConvertedBackupFromScan) ?? true;
 

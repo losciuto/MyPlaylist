@@ -110,8 +110,10 @@ class MetadataService {
   Future<Map<String, String>> getRawFileMetadata(String filePath) async {
     try {
       final result = await Process.run('ffprobe', [
-        '-v', 'quiet',
-        '-print_format', 'json',
+        '-v',
+        'quiet',
+        '-print_format',
+        'json',
         '-show_format',
         '-show_streams',
         filePath,
@@ -210,11 +212,13 @@ class MetadataService {
     String path,
     Map<String, String> tags,
   ) async {
-    final itags = tags.entries.map((e) {
-      final k = e.key.toLowerCase();
-      final v = e.value.replaceAll(':', ';').replaceAll('"', "'");
-      return '$k=$v';
-    }).join(':');
+    final itags = tags.entries
+        .map((e) {
+          final k = e.key.toLowerCase();
+          final v = e.value.replaceAll(':', ';').replaceAll('"', "'");
+          return '$k=$v';
+        })
+        .join(':');
 
     final result = await Process.run('MP4Box', ['-itags', itags, path]);
     if (result.exitCode == 0) {
@@ -241,9 +245,12 @@ class MetadataService {
     final tempPath = p.join(dir, 'temp_meta_$filename');
 
     final List<String> args = [
-      '-i', path,
-      '-map', '0',
-      '-c', 'copy',
+      '-i',
+      path,
+      '-map',
+      '0',
+      '-c',
+      'copy',
       '-ignore_unknown',
     ];
     tags.forEach((key, value) {
@@ -324,7 +331,6 @@ class MetadataService {
 
     final String dir = p.dirname(currentPath);
 
-
     try {
       // 1. Check if update is needed BEFORE renaming to temp
       final String encodedBy =
@@ -352,25 +358,39 @@ class MetadataService {
       } else {
         // Logica per l'aggiornamento di massa (Bulk Sync):
         // Verifica se i tag necessari (quelli presenti nel DB) sono già nel file.
-        
+
         bool plotInSync = true;
         if (video.plot.isNotEmpty) {
-          plotInSync = _hasOneOf(currentMetadata, ['description', 'comment', 'sdesc']);
+          plotInSync = _hasOneOf(currentMetadata, [
+            'description',
+            'comment',
+            'sdesc',
+          ]);
         }
 
         bool ratingInSync = true;
         if (video.rating > 0) {
-          ratingInSync = _hasOneOf(currentMetadata, ['rating', 'vote', 'user_rating']);
+          ratingInSync = _hasOneOf(currentMetadata, [
+            'rating',
+            'vote',
+            'user_rating',
+          ]);
         }
 
         bool posterInSync = true;
         if (video.posterPath.isNotEmpty) {
-          posterInSync = _hasOneOf(currentMetadata, ['poster_url', 'artwork', 'cover']);
+          posterInSync = _hasOneOf(currentMetadata, [
+            'poster_url',
+            'artwork',
+            'cover',
+          ]);
         }
 
         // Se tutto quello che abbiamo nel DB è riflesso nel file, saltiamo.
         if (plotInSync && ratingInSync && posterInSync) {
-          debugPrint('Skip $currentPath (Metadata DB source already reflected in file)');
+          debugPrint(
+            'Skip $currentPath (Metadata DB source already reflected in file)',
+          );
           return MetadataUpdateResponse(MetadataUpdateResult.alreadyInSync);
         }
       }
@@ -444,7 +464,9 @@ class MetadataService {
         ffmpegReason = 'fast_engine_disabled';
       }
 
-      debugPrint('[MetadataService] Using FFmpeg fallback (slow)... Reason: $ffmpegReason');
+      debugPrint(
+        '[MetadataService] Using FFmpeg fallback (slow)... Reason: $ffmpegReason',
+      );
       onMethodDecided?.call('FFmpeg', ffmpegReason);
 
       final String filename = p.basename(currentPath);
@@ -545,12 +567,16 @@ class MetadataService {
         );
         // Restore original
         if (await File(currentPath).exists()) await File(currentPath).delete();
-        if (await File(tempPath).exists()) await File(tempPath).rename(currentPath);
+        if (await File(tempPath).exists())
+          await File(tempPath).rename(currentPath);
         return MetadataUpdateResponse(MetadataUpdateResult.failed);
       }
     } catch (e) {
-      await LoggerService().error('Error updating metadata for $currentPath', e);
-      // We don't have tempPath here, but it was set earlier. 
+      await LoggerService().error(
+        'Error updating metadata for $currentPath',
+        e,
+      );
+      // We don't have tempPath here, but it was set earlier.
       // If error happens during ffmpeg, we might need to restore.
       return MetadataUpdateResponse(MetadataUpdateResult.failed);
     }
@@ -605,8 +631,11 @@ class MetadataService {
       }
 
       debugPrint('[MetadataService] Remuxing to MKV: $currentPath');
-      final remuxResult =
-          await Process.run('mkvmerge', ['-o', newPath, currentPath]);
+      final remuxResult = await Process.run('mkvmerge', [
+        '-o',
+        newPath,
+        currentPath,
+      ]);
       if (remuxResult.exitCode != 0) {
         await LoggerService().error(
           'mkvmerge failed for $currentPath: ${remuxResult.stderr}',
@@ -617,7 +646,7 @@ class MetadataService {
       // Backup AVI
       String? mountPoint = await _getMountPoint(currentPath);
       String root = mountPoint ?? p.rootPrefix(currentPath);
-      
+
       final settings = SettingsService();
       String videoBackupDir;
       if (settings.videoBackupPath.isNotEmpty) {
@@ -629,7 +658,9 @@ class MetadataService {
       try {
         final dirObj = Directory(videoBackupDir);
         if (!await dirObj.exists()) {
-          debugPrint('[MetadataService] Creating backup folder: $videoBackupDir');
+          debugPrint(
+            '[MetadataService] Creating backup folder: $videoBackupDir',
+          );
           await dirObj.create(recursive: true);
         }
         // Verifica finale che la directory esista davvero prima di procedere
@@ -637,7 +668,9 @@ class MetadataService {
           throw Exception("Directory not created: $videoBackupDir");
         }
       } catch (e) {
-        await LoggerService().warning('Failed to create custom backup dir $videoBackupDir, falling back to local: $e');
+        await LoggerService().warning(
+          'Failed to create custom backup dir $videoBackupDir, falling back to local: $e',
+        );
         // Fallback: create Converted_Backups in the video's directory
         videoBackupDir = p.join(p.dirname(currentPath), 'Converted_Backups');
         final dirObj = Directory(videoBackupDir);
@@ -753,10 +786,7 @@ class MetadataService {
         'info',
         '--set',
         'title=$title',
-        if (dateValue.isNotEmpty) ...[
-          '--set',
-          'date=$dateValue',
-        ],
+        if (dateValue.isNotEmpty) ...['--set', 'date=$dateValue'],
         '--tags',
         'all:$tagsPath',
       ];
@@ -770,7 +800,9 @@ class MetadataService {
       final timer = Timer(timeout, () {
         timedOut = true;
         process.kill();
-        debugPrint('[MetadataService] mkvpropedit TIMEOUT after ${timeout.inSeconds}s');
+        debugPrint(
+          '[MetadataService] mkvpropedit TIMEOUT after ${timeout.inSeconds}s',
+        );
       });
 
       final exitCode = await process.exitCode;
@@ -789,19 +821,26 @@ class MetadataService {
 
       final stderr = await process.stderr.transform(utf8.decoder).join();
       final stdout = await process.stdout.transform(utf8.decoder).join();
-      String errorMsg = stderr.trim().isNotEmpty ? stderr.trim() : stdout.trim();
+      String errorMsg = stderr.trim().isNotEmpty
+          ? stderr.trim()
+          : stdout.trim();
       if (errorMsg.isEmpty) {
         errorMsg = 'Exit code: $exitCode';
       }
-      errorMsg = errorMsg.replaceAll('\n', ' ').replaceAll('\r', ' ').replaceAll(':', ';');
+      errorMsg = errorMsg
+          .replaceAll('\n', ' ')
+          .replaceAll('\r', ' ')
+          .replaceAll(':', ';');
 
       debugPrint('[MetadataService] mkvpropedit FAILED: $errorMsg');
-      await LoggerService().error(
-        'mkvpropedit failed for $path: $errorMsg',
-      );
+      await LoggerService().error('mkvpropedit failed for $path: $errorMsg');
       return errorMsg;
     } catch (e) {
-      final error = e.toString().replaceAll('\n', ' ').replaceAll('\r', ' ').replaceAll(':', ';');
+      final error = e
+          .toString()
+          .replaceAll('\n', ' ')
+          .replaceAll('\r', ' ')
+          .replaceAll(':', ';');
       await LoggerService().error('Error in MKV in-place update for $path', e);
       return error;
     }
@@ -854,7 +893,9 @@ class MetadataService {
       final timer = Timer(timeout, () {
         timedOut = true;
         process.kill();
-        debugPrint('[MetadataService] MP4Box TIMEOUT after ${timeout.inSeconds}s');
+        debugPrint(
+          '[MetadataService] MP4Box TIMEOUT after ${timeout.inSeconds}s',
+        );
       });
 
       final exitCode = await process.exitCode;
@@ -871,17 +912,26 @@ class MetadataService {
 
       final stderr = await process.stderr.transform(utf8.decoder).join();
       final stdout = await process.stdout.transform(utf8.decoder).join();
-      String errorMsg = stderr.trim().isNotEmpty ? stderr.trim() : stdout.trim();
+      String errorMsg = stderr.trim().isNotEmpty
+          ? stderr.trim()
+          : stdout.trim();
       if (errorMsg.isEmpty) {
         errorMsg = 'Exit code: $exitCode';
       }
-      errorMsg = errorMsg.replaceAll('\n', ' ').replaceAll('\r', ' ').replaceAll(':', ';');
+      errorMsg = errorMsg
+          .replaceAll('\n', ' ')
+          .replaceAll('\r', ' ')
+          .replaceAll(':', ';');
 
       debugPrint('[MetadataService] MP4Box FAILED: $errorMsg');
       await LoggerService().error('MP4Box failed for $path: $errorMsg');
       return errorMsg;
     } catch (e) {
-      final error = e.toString().replaceAll('\n', ' ').replaceAll('\r', ' ').replaceAll(':', ';');
+      final error = e
+          .toString()
+          .replaceAll('\n', ' ')
+          .replaceAll('\r', ' ')
+          .replaceAll(':', ';');
       await LoggerService().error('Error in MP4 in-place update for $path', e);
       return error;
     }

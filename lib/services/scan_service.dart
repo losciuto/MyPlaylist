@@ -82,7 +82,8 @@ class ScanService {
 
       // 1. Check custom backup path
       if (settings.videoBackupPath.isNotEmpty &&
-          p.canonicalize(fullPath) == p.canonicalize(settings.videoBackupPath)) {
+          p.canonicalize(fullPath) ==
+              p.canonicalize(settings.videoBackupPath)) {
         isBackupFolder = true;
       }
 

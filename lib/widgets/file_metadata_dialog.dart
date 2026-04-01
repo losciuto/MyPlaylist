@@ -77,9 +77,7 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
     if (response.result == MetadataUpdateResult.updated) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '${l10n.successUpdateMsg} [${response.method}]',
-          ),
+          content: Text('${l10n.successUpdateMsg} [${response.method}]'),
           backgroundColor: Colors.green,
         ),
       );
@@ -150,7 +148,11 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.data_object, color: Color(0xFF4CAF50), size: 22),
+                  const Icon(
+                    Icons.data_object,
+                    color: Color(0xFF4CAF50),
+                    size: 22,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -177,11 +179,16 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                   ),
                   // Engine badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: engineColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: engineColor.withValues(alpha: 0.4)),
+                      border: Border.all(
+                        color: engineColor.withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Text(
                       engineLabel,
@@ -212,119 +219,140 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                         children: [
                           CircularProgressIndicator(color: Color(0xFF4CAF50)),
                           SizedBox(height: 16),
-                          Text('Lettura metadati...', style: TextStyle(color: Colors.white54)),
+                          Text(
+                            'Lettura metadati...',
+                            style: TextStyle(color: Colors.white54),
+                          ),
                         ],
                       ),
                     )
                   : _error != null
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.redAccent,
+                            size: 40,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.redAccent),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                  : _entries.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Nessun tag trovato nel file.',
+                        style: TextStyle(color: Colors.white38),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      itemCount: _entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = _entries[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Colors.redAccent, size: 40),
-                              const SizedBox(height: 10),
-                              Text(
-                                _error!,
-                                style: const TextStyle(color: Colors.redAccent),
-                                textAlign: TextAlign.center,
+                              // KEY
+                              SizedBox(
+                                width: 160,
+                                child: TextField(
+                                  controller: entry.keyController,
+                                  style: const TextStyle(
+                                    color: Color(0xFF4CAF50),
+                                    fontFamily: 'monospace',
+                                    fontSize: 12,
+                                  ),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    filled: true,
+                                    fillColor: const Color(0xFF2A2A2A),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF3A3A3A),
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF3A3A3A),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                ':',
+                                style: TextStyle(color: Colors.white38),
+                              ),
+                              const SizedBox(width: 8),
+                              // VALUE
+                              Expanded(
+                                child: TextField(
+                                  controller: entry.valueController,
+                                  maxLines: null,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                  ),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    filled: true,
+                                    fillColor: const Color(0xFF252525),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF3A3A3A),
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF3A3A3A),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              // DELETE
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                ),
+                                color: Colors.redAccent.withValues(alpha: 0.7),
+                                onPressed: () => _removeTag(index),
+                                tooltip: 'Rimuovi tag',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
                               ),
                             ],
                           ),
-                        )
-                      : _entries.isEmpty
-                          ? Center(
-                              child: Text(
-                                'Nessun tag trovato nel file.',
-                                style: TextStyle(color: Colors.white38),
-                              ),
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                              itemCount: _entries.length,
-                              itemBuilder: (context, index) {
-                                final entry = _entries[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Row(
-                                    children: [
-                                      // KEY
-                                      SizedBox(
-                                        width: 160,
-                                        child: TextField(
-                                          controller: entry.keyController,
-                                          style: const TextStyle(
-                                            color: Color(0xFF4CAF50),
-                                            fontFamily: 'monospace',
-                                            fontSize: 12,
-                                          ),
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            filled: true,
-                                            fillColor: const Color(0xFF2A2A2A),
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                              borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                              borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Text(':', style: TextStyle(color: Colors.white38)),
-                                      const SizedBox(width: 8),
-                                      // VALUE
-                                      Expanded(
-                                        child: TextField(
-                                          controller: entry.valueController,
-                                          maxLines: null,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                          ),
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            filled: true,
-                                            fillColor: const Color(0xFF252525),
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                              borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                              borderSide: const BorderSide(color: Color(0xFF3A3A3A)),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      // DELETE
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline, size: 18),
-                                        color: Colors.redAccent.withValues(alpha: 0.7),
-                                        onPressed: () => _removeTag(index),
-                                        tooltip: 'Rimuovi tag',
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(
-                                          minWidth: 32,
-                                          minHeight: 32,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                        );
+                      },
+                    ),
             ),
 
             // Footer
@@ -332,7 +360,9 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
               decoration: const BoxDecoration(
                 color: Color(0xFF2A2A2A),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
               ),
               child: Row(
                 children: [
@@ -361,7 +391,10 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                       padding: const EdgeInsets.only(right: 12),
                       child: Text(
                         'Ultimo: $_toolUsed',
-                        style: const TextStyle(color: Colors.white38, fontSize: 11),
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ElevatedButton.icon(
@@ -400,8 +433,8 @@ class _TagEntry {
   final TextEditingController valueController;
 
   _TagEntry({required String key, required String initialValue})
-      : keyController = TextEditingController(text: key),
-        valueController = TextEditingController(text: initialValue);
+    : keyController = TextEditingController(text: key),
+      valueController = TextEditingController(text: initialValue);
 
   void dispose() {
     keyController.dispose();

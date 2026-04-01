@@ -424,11 +424,15 @@ class _DatabaseTabState extends State<DatabaseTab> {
               }
               if (reason.startsWith('unsupported_format:')) {
                 final ext = reason.split(':').last;
-                return AppLocalizations.of(context)!.syncReasonUnsupportedFormat(ext);
+                return AppLocalizations.of(
+                  context,
+                )!.syncReasonUnsupportedFormat(ext);
               }
               if (reason.startsWith('tool_not_found:')) {
                 final tool = reason.split(':').last;
-                return AppLocalizations.of(context)!.syncReasonToolNotFound(tool);
+                return AppLocalizations.of(
+                  context,
+                )!.syncReasonToolNotFound(tool);
               }
               if (reason.startsWith('tool_failed:')) {
                 final parts = reason.split(':');
@@ -450,10 +454,9 @@ class _DatabaseTabState extends State<DatabaseTab> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.fileXofY(
-                    status.current.toString(),
-                    total.toString(),
-                  ),
+                  AppLocalizations.of(
+                    context,
+                  )!.fileXofY(status.current.toString(), total.toString()),
                   style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 8),
@@ -487,42 +490,48 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: method == 'Remuxing -> MKV' ||
+                      color:
+                          method == 'Remuxing -> MKV' ||
                               method == 'mkvpropedit' ||
                               method == 'MP4Box'
                           ? Colors.green.withValues(alpha: 0.15)
                           : (method == 'FFmpeg'
-                              ? Colors.orange.withValues(alpha: 0.1)
-                              : Colors.blue.withValues(alpha: 0.1)),
+                                ? Colors.orange.withValues(alpha: 0.1)
+                                : Colors.blue.withValues(alpha: 0.1)),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: method == 'Remuxing -> MKV' ||
+                        color:
+                            method == 'Remuxing -> MKV' ||
                                 method == 'mkvpropedit' ||
                                 method == 'MP4Box'
                             ? Colors.green.withValues(alpha: 0.5)
                             : (method == 'FFmpeg'
-                                ? Colors.orange.withValues(alpha: 0.3)
-                                : Colors.blue.withValues(alpha: 0.3)),
+                                  ? Colors.orange.withValues(alpha: 0.3)
+                                  : Colors.blue.withValues(alpha: 0.3)),
                       ),
                     ),
                     child: Text(
                       method == 'Remuxing -> MKV'
                           ? AppLocalizations.of(context)!.convertingToMkv
-                          : AppLocalizations.of(context)!
-                              .syncMethodLabel(method),
+                          : AppLocalizations.of(
+                              context,
+                            )!.syncMethodLabel(method),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: method == 'Remuxing -> MKV' ||
+                        color:
+                            method == 'Remuxing -> MKV' ||
                                 method == 'mkvpropedit' ||
                                 method == 'MP4Box'
                             ? Colors.greenAccent
                             : (method == 'FFmpeg'
-                                ? Colors.orangeAccent
-                                : Colors.blueAccent),
+                                  ? Colors.orangeAccent
+                                  : Colors.blueAccent),
                       ),
                       textAlign: TextAlign.center,
                     ),

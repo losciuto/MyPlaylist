@@ -554,7 +554,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 10),
-                 SwitchListTile(
+                SwitchListTile(
                   title: Text(l10n.settingsAutoConvertAvi),
                   subtitle: Text(l10n.settingsAutoConvertAviSubtitle),
                   value: settings.autoConvertToMkv,
@@ -1472,43 +1472,54 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                color:
+                    _currentMethod == 'Remuxing -> MKV' ||
+                        _currentMethod == 'mkvpropedit' ||
+                        _currentMethod == 'MP4Box'
                     ? Colors.green.withValues(alpha: 0.15)
                     : (_currentMethod == 'FFmpeg'
-                        ? Colors.orange.withValues(alpha: 0.1)
-                        : Colors.blue.withValues(alpha: 0.1)),
+                          ? Colors.orange.withValues(alpha: 0.1)
+                          : Colors.blue.withValues(alpha: 0.1)),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                  color:
+                      _currentMethod == 'Remuxing -> MKV' ||
+                          _currentMethod == 'mkvpropedit' ||
+                          _currentMethod == 'MP4Box'
                       ? Colors.green.withValues(alpha: 0.5)
                       : (_currentMethod == 'FFmpeg'
-                          ? Colors.orange.withValues(alpha: 0.3)
-                          : Colors.blue.withValues(alpha: 0.3)),
+                            ? Colors.orange.withValues(alpha: 0.3)
+                            : Colors.blue.withValues(alpha: 0.3)),
                 ),
               ),
               child: Column(
                 children: [
                   Text(
-                    _currentMethod == 'Remuxing -> MKV' 
+                    _currentMethod == 'Remuxing -> MKV'
                         ? AppLocalizations.of(context)!.convertingToMkv
-                        : AppLocalizations.of(context)!.syncMethodLabel(_currentMethod),
+                        : AppLocalizations.of(
+                            context,
+                          )!.syncMethodLabel(_currentMethod),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: _currentMethod == 'Remuxing -> MKV' || _currentMethod == 'mkvpropedit' || _currentMethod == 'MP4Box'
+                      color:
+                          _currentMethod == 'Remuxing -> MKV' ||
+                              _currentMethod == 'mkvpropedit' ||
+                              _currentMethod == 'MP4Box'
                           ? Colors.greenAccent
                           : (_currentMethod == 'FFmpeg'
-                              ? Colors.orangeAccent
-                              : Colors.blueAccent),
+                                ? Colors.orangeAccent
+                                : Colors.blueAccent),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   if (_currentMethod == 'FFmpeg' && _currentReason != null) ...[
                     const SizedBox(height: 4),
                     SelectableText(
-                      AppLocalizations.of(context)!.syncReasonLabel(
-                        _getLocalizedReason(_currentReason!),
-                      ),
+                      AppLocalizations.of(
+                        context,
+                      )!.syncReasonLabel(_getLocalizedReason(_currentReason!)),
                       style: const TextStyle(
                         fontSize: 10,
                         color: Colors.white60,
