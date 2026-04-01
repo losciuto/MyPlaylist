@@ -56,6 +56,7 @@ void main() async {
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.setIcon('assets/logo.png');
       await windowManager.show();
       await windowManager.focus();
     });
