@@ -120,6 +120,14 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 6) {
+          // Ensure isSeries column exists (some legacy schemas may miss it)
+          // Note: Drift maps isSeries to is_series in SQL
+          final hasIsSeries = await customSelect(
+            "SELECT COUNT(*) FROM pragma_table_info('videos') WHERE name='is_series'",
+          ).getSingle().then((rows) => rows.read<int>('COUNT(*)') > 0);
+          if (!hasIsSeries) {
+            await m.addColumn(videos, videos.isSeries);
+          }
           // Add performance indexes for filter/playlist queries
           await m.createIndex(
             Index(
@@ -145,10 +153,10 @@ class AppDatabase extends _$AppDatabase {
               'CREATE INDEX IF NOT EXISTS videos_rating_idx ON videos (rating)',
             ),
           );
-          await m.createIndex(
+await m.createIndex(
             Index(
               'videos_isseries_idx',
-              'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (isSeries)',
+              'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (is_series)',
             ),
           );
           await m.createIndex(
