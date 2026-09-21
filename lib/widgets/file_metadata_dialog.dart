@@ -4,9 +4,9 @@ import '../services/metadata_service.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class FileMetadataDialog extends StatefulWidget {
-  final String filePath;
 
   const FileMetadataDialog({super.key, required this.filePath});
+  final String filePath;
 
   @override
   State<FileMetadataDialog> createState() => _FileMetadataDialogState();
@@ -42,7 +42,7 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
         });
         _loading = false;
       });
-    } catch (e) {
+    } on Exception catch (e) {
       if (!mounted) return;
       setState(() {
         _error = e.toString();
@@ -429,12 +429,12 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
 }
 
 class _TagEntry {
-  final TextEditingController keyController;
-  final TextEditingController valueController;
 
   _TagEntry({required String key, required String initialValue})
     : keyController = TextEditingController(text: key),
       valueController = TextEditingController(text: initialValue);
+  final TextEditingController keyController;
+  final TextEditingController valueController;
 
   void dispose() {
     keyController.dispose();

@@ -6,9 +6,6 @@ import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class PersonAvatar extends StatelessWidget {
-  final String name;
-  final String thumbUrl;
-  final double size;
 
   const PersonAvatar({
     super.key,
@@ -16,6 +13,9 @@ class PersonAvatar extends StatelessWidget {
     required this.thumbUrl,
     this.size = 60,
   });
+  final String name;
+  final String thumbUrl;
+  final double size;
 
   @override
   Widget build(BuildContext context) {

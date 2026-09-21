@@ -9,16 +9,16 @@ import 'media_asset_service.dart';
 import 'settings_service.dart';
 
 class ScanStatus {
+
+  ScanStatus(this.message, this.count, {this.currentItem});
   final String message;
   final int count;
   final String? currentItem;
-
-  ScanStatus(this.message, this.count, {this.currentItem});
 }
 
 class ScanService {
-  static final ScanService instance = ScanService._();
   ScanService._();
+  static final ScanService instance = ScanService._();
 
   final _mediaAssetService = MediaAssetService();
 
@@ -60,7 +60,7 @@ class ScanService {
           yield status;
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       yield ScanStatus('Error scanning: $e', count);
       return;
     }
@@ -109,7 +109,7 @@ class ScanService {
           added ? 1 : 0,
           currentItem: p.basename(dir.path),
         );
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error processing series ${dir.path}: $e');
       }
       return; // Stop recursion, we handled this folder as a unit
@@ -128,7 +128,6 @@ class ScanService {
     if (isSeriesContainer) {
       try {
         await for (final entity in dir.list(
-          recursive: false,
           followLinks: false,
         )) {
           if (entity is Directory) {
@@ -141,7 +140,7 @@ class ScanService {
             );
           }
         }
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error processing series container ${dir.path}: $e');
       }
       return; // Stop recursion, we've handled the contents
@@ -150,7 +149,7 @@ class ScanService {
     // 3. Normal Recursive Scan
     try {
       final entities = await dir
-          .list(recursive: false, followLinks: false)
+          .list(followLinks: false)
           .toList();
 
       // Process in batches of 5 to avoid overwhelming file handles/network
@@ -182,7 +181,7 @@ class ScanService {
                   // Yield an intermediate status update to show the current file in UI
                   return 1;
                 }
-              } catch (e) {
+              } on Exception catch (e) {
                 debugPrint('Error processing video ${entity.path}: $e');
               }
             }
@@ -201,7 +200,7 @@ class ScanService {
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error listing directory ${dir.path}: $e');
     }
   }
@@ -234,7 +233,7 @@ class ScanService {
     final stat = await seriesDir.stat();
     final mtime = stat.modified.millisecondsSinceEpoch / 1000.0;
 
-    String nfoPath = p.join(path, 'tvshow.nfo');
+    final String nfoPath = p.join(path, 'tvshow.nfo');
 
     final Map<String, dynamic>? metadata = await NfoParser.parseNfo(nfoPath);
 

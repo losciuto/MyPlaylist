@@ -12,14 +12,7 @@ void main() {
       genres: 'Sci-Fi',
       rating: 8.7,
       duration: '2h 16m',
-      isSeries: false,
       mtime: 0,
-      directors: '',
-      plot: '',
-      actors: '',
-      posterPath: '',
-      saga: '',
-      sagaIndex: 0,
     );
     final v2 = Video(
       id: 2,
@@ -29,14 +22,7 @@ void main() {
       genres: 'Crime',
       rating: 9.2,
       duration: '2h 55m',
-      isSeries: false,
       mtime: 0,
-      directors: '',
-      plot: '',
-      actors: '',
-      posterPath: '',
-      saga: '',
-      sagaIndex: 0,
     );
     final v3 = Video(
       id: 3,
@@ -46,14 +32,7 @@ void main() {
       genres: 'Comedy',
       rating: 7.6,
       duration: '1h 53m',
-      isSeries: false,
       mtime: 0,
-      directors: '',
-      plot: '',
-      actors: '',
-      posterPath: '',
-      saga: '',
-      sagaIndex: 0,
     );
 
     test('Filters by title', () {

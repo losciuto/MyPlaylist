@@ -3,12 +3,6 @@ import '../models/video.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoDataTable extends StatefulWidget {
-  final List<Video> videos;
-  final Function(Video) onEdit;
-  final Function(Video) onDelete;
-  final Function(int, bool) onSort;
-  final int? sortColumnIndex;
-  final bool isSortedAscending;
 
   const VideoDataTable({
     super.key,
@@ -19,6 +13,12 @@ class VideoDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.isSortedAscending = true,
   });
+  final List<Video> videos;
+  final Function(Video) onEdit;
+  final Function(Video) onDelete;
+  final Function(int, bool) onSort;
+  final int? sortColumnIndex;
+  final bool isSortedAscending;
 
   @override
   State<VideoDataTable> createState() => _VideoDataTableState();

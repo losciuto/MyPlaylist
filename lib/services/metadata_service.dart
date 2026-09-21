@@ -14,27 +14,27 @@ import '../database/app_database.dart';
 enum MetadataUpdateResult { updated, alreadyInSync, failed }
 
 class MetadataUpdateResponse {
+
+  MetadataUpdateResponse(this.result, {this.method = '', this.reason});
   final MetadataUpdateResult result;
   final String method;
   final String? reason;
-
-  MetadataUpdateResponse(this.result, {this.method = '', this.reason});
 }
 
 class MetadataService {
-  static final MetadataService _instance = MetadataService._internal();
 
   factory MetadataService() {
     return _instance;
   }
 
   MetadataService._internal();
+  static final MetadataService _instance = MetadataService._internal();
 
   Future<bool> checkFfmpegAvailability() async {
     try {
       final result = await Process.run('ffmpeg', ['-version']);
       return result.exitCode == 0;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('FFmpeg check failed: $e');
       return false;
     }
@@ -69,12 +69,12 @@ class MetadataService {
             return tags;
           }
         }
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('JSON parse error: $e');
       }
 
       return {};
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error reading metadata: $e');
       return {};
     }
@@ -129,7 +129,7 @@ class MetadataService {
         });
       }
       return tags;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('getRawFileMetadata error: $e');
       return {};
     }
@@ -151,7 +151,7 @@ class MetadataService {
       } else {
         return _saveGenericMetadata(path, tags);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       await LoggerService().error('Error saving metadata to $path', e);
       return MetadataUpdateResponse(MetadataUpdateResult.failed);
     }
@@ -346,7 +346,7 @@ class MetadataService {
       }
 
       final targetTitle = forcedTitle ?? video.title;
-      bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
+      final bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
 
       if (!enforceFullMetadata) {
         // Logica originale per la rinomina/aggiornamento standard:
@@ -566,12 +566,15 @@ class MetadataService {
           'FFmpeg failed for $currentPath after retry: ${result.stderr}',
         );
         // Restore original
-        if (await File(currentPath).exists()) await File(currentPath).delete();
-        if (await File(tempPath).exists())
+        if (await File(currentPath).exists()) {
+          await File(currentPath).delete();
+        }
+        if (await File(tempPath).exists()) {
           await File(tempPath).rename(currentPath);
+        }
         return MetadataUpdateResponse(MetadataUpdateResult.failed);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       await LoggerService().error(
         'Error updating metadata for $currentPath',
         e,
@@ -597,7 +600,7 @@ class MetadataService {
         final result = await Process.run('which', [command]);
         return result.exitCode == 0;
       }
-    } catch (_) {
+    } on Object catch (_) {
       return false;
     }
   }
@@ -613,7 +616,7 @@ class MetadataService {
           }
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error finding mount point: $e');
     }
     return p.rootPrefix(path);
@@ -644,8 +647,8 @@ class MetadataService {
       }
 
       // Backup AVI
-      String? mountPoint = await _getMountPoint(currentPath);
-      String root = mountPoint ?? p.rootPrefix(currentPath);
+      final String? mountPoint = await _getMountPoint(currentPath);
+      final String root = mountPoint ?? p.rootPrefix(currentPath);
 
       final settings = SettingsService();
       String videoBackupDir;
@@ -665,9 +668,9 @@ class MetadataService {
         }
         // Verifica finale che la directory esista davvero prima di procedere
         if (!await dirObj.exists()) {
-          throw Exception("Directory not created: $videoBackupDir");
+          throw Exception('Directory not created: $videoBackupDir');
         }
-      } catch (e) {
+      } on Exception catch (e) {
         await LoggerService().warning(
           'Failed to create custom backup dir $videoBackupDir, falling back to local: $e',
         );
@@ -684,14 +687,14 @@ class MetadataService {
 
       try {
         await File(currentPath).rename(backupPath);
-      } catch (e) {
+      } on Object catch (_) {
         // Cross-device link error fallback
         await File(currentPath).copy(backupPath);
         await File(currentPath).delete();
       }
 
       return newPath;
-    } catch (e) {
+    } on Exception catch (e) {
       await LoggerService().error(
         'Error during MKV remuxing for $currentPath',
         e,
@@ -835,7 +838,7 @@ class MetadataService {
       debugPrint('[MetadataService] mkvpropedit FAILED: $errorMsg');
       await LoggerService().error('mkvpropedit failed for $path: $errorMsg');
       return errorMsg;
-    } catch (e) {
+    } on Exception catch (e) {
       final error = e
           .toString()
           .replaceAll('\n', ' ')
@@ -857,7 +860,7 @@ class MetadataService {
       final title = forcedTitle ?? video.title;
 
       // MP4Box -itags usually uses colons as separators
-      List<String> tags = [];
+      final List<String> tags = [];
 
       String clean(String s) => s.replaceAll(':', ';').replaceAll('"', "'");
 
@@ -926,7 +929,7 @@ class MetadataService {
       debugPrint('[MetadataService] MP4Box FAILED: $errorMsg');
       await LoggerService().error('MP4Box failed for $path: $errorMsg');
       return errorMsg;
-    } catch (e) {
+    } on Exception catch (e) {
       final error = e
           .toString()
           .replaceAll('\n', ' ')
@@ -992,8 +995,8 @@ class MetadataService {
       final e = sxeMatch.group(2)!.padLeft(2, '0');
 
       // Extract remainder logic
-      String remainder = filename.substring(sxeMatch.end);
-      String extraTitle = _cleanRemainder(remainder);
+      final String remainder = filename.substring(sxeMatch.end);
+      final String extraTitle = _cleanRemainder(remainder);
 
       if (extraTitle.isNotEmpty) {
         return '$seriesName - S${s}E$e $extraTitle';
@@ -1008,8 +1011,8 @@ class MetadataService {
       final s = xMatch.group(1)!.padLeft(2, '0');
       final e = xMatch.group(2)!.padLeft(2, '0');
 
-      String remainder = filename.substring(xMatch.end);
-      String extraTitle = _cleanRemainder(remainder);
+      final String remainder = filename.substring(xMatch.end);
+      final String extraTitle = _cleanRemainder(remainder);
 
       if (extraTitle.isNotEmpty) {
         return '$seriesName - S${s}E$e $extraTitle';
@@ -1019,7 +1022,7 @@ class MetadataService {
     }
 
     // 3. Fallback: Clean filename completely
-    String cleaned = _cleanRemainder(filename);
+    final String cleaned = _cleanRemainder(filename);
     return '$seriesName - $cleaned';
   }
 
@@ -1073,7 +1076,7 @@ class MetadataService {
           }
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error scanning series directory: $e');
       return MetadataUpdateResponse(MetadataUpdateResult.failed);
     }
@@ -1124,13 +1127,13 @@ class MetadataService {
                 debugPrint('Original missing, restoring temp: $originalPath');
                 await entity.rename(originalPath);
               }
-            } catch (e) {
+            } on Exception catch (e) {
               debugPrint('Error cleaning temp file: $e');
             }
           }
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error listing directory for cleanup: $e');
     }
   }

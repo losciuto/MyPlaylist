@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file.
 - **Backup Path Stability**: Improved directory creation logic during MKV remuxing/backup to prevent `PathNotFoundException` when using custom or missing backup folders.
 - **Null Safety**: Resolved "Null check operator" crashes in the Service Tab during background database updates.
 
+### Maintenance
+- **Test Coverage**: Added 30 new unit tests (scan logic, database operations, video processing) bringing total to 57 passing tests.
+- **Performance**: Optimized `getValuesWithCounts` query with SQL aggregate (CTE + GROUP BY) instead of loading all rows in memory. Added 6 database indexes (genres, year, saga, rating, isSeries, dateAdded). Schema version bumped to 6.
+- **Code Quality**: Activated 19 additional lints in `analysis_options.yaml`. Resolved all 250 static analysis issues. Applied `dart format` and `dart fix` across 41 files.
+
 ## [3.13.0] - 2026-04-01
 
 ### Added

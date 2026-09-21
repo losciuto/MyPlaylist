@@ -7,18 +7,31 @@ import '../providers/playlist_provider.dart';
 import 'settings_service.dart';
 
 class RemoteCommandLog {
-  final String command;
-  final Map<String, dynamic> args;
-  final DateTime timestamp;
 
   RemoteCommandLog({
     required this.command,
     required this.args,
     required this.timestamp,
   });
+  final String command;
+  final Map<String, dynamic> args;
+  final DateTime timestamp;
 }
 
 class RemoteControlService with ChangeNotifier {
+
+  RemoteControlService({
+    required this.playlistProvider,
+    required this.settingsService,
+  }) {
+    _currentPort = settingsService.remoteServerPort;
+    _currentSecret = settingsService.remoteServerSecret;
+    _currentInterface = settingsService.serverInterface;
+    settingsService.addListener(_handleSettingsChange);
+    if (settingsService.remoteServerEnabled) {
+      start();
+    }
+  }
   final PlaylistProvider playlistProvider;
   final SettingsService settingsService;
 
@@ -33,19 +46,6 @@ class RemoteControlService with ChangeNotifier {
   List<RemoteCommandLog> get commandLogs => List.unmodifiable(_commandLogs);
 
   bool get isRunning => _isRunning;
-
-  RemoteControlService({
-    required this.playlistProvider,
-    required this.settingsService,
-  }) {
-    _currentPort = settingsService.remoteServerPort;
-    _currentSecret = settingsService.remoteServerSecret;
-    _currentInterface = settingsService.serverInterface;
-    settingsService.addListener(_handleSettingsChange);
-    if (settingsService.remoteServerEnabled) {
-      start();
-    }
-  }
 
   void _handleSettingsChange() {
     final bool shouldBeRunning = settingsService.remoteServerEnabled;
@@ -112,14 +112,14 @@ class RemoteControlService with ChangeNotifier {
         debugPrint(
           'Image Server (MyPlaylist) started on port ${settingsService.remoteServerPort + 1}',
         );
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error starting image server: $e');
       }
 
       debugPrint(
         'Remote Server started on port ${settingsService.remoteServerPort}',
       );
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error starting remote server: $e');
       _isRunning = false;
       notifyListeners();
@@ -172,7 +172,7 @@ class RemoteControlService with ChangeNotifier {
               );
               try {
                 await request.response.addStream(file.openRead());
-              } catch (e) {
+              } on Exception catch (e) {
                 debugPrint('Error sending poster stream: $e');
               }
               await request.response.close();
@@ -245,7 +245,7 @@ class RemoteControlService with ChangeNotifier {
       final responseData = await _processCommand(jsonCommand);
 
       client.write(jsonEncode(responseData));
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error processing remote command: $e');
       client.write(jsonEncode({'status': 'error', 'message': e.toString()}));
     } finally {

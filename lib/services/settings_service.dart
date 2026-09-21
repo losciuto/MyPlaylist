@@ -5,13 +5,13 @@ import '../models/player_config.dart';
 import '../models/filter_settings.dart';
 
 class SettingsService with ChangeNotifier {
-  static final SettingsService _instance = SettingsService._internal();
 
   factory SettingsService() {
     return _instance;
   }
 
   SettingsService._internal();
+  static final SettingsService _instance = SettingsService._internal();
 
   late SharedPreferences _prefs;
   bool _initialized = false;
@@ -96,7 +96,7 @@ class SettingsService with ChangeNotifier {
     if (playerConfigJson != null) {
       try {
         _playerConfig = PlayerConfig.fromJson(json.decode(playerConfigJson));
-      } catch (e) {
+      } on Object catch (_) {
         // Invalid config, will use legacy playerPath
       }
     }
@@ -151,7 +151,7 @@ class SettingsService with ChangeNotifier {
     if (filterJson != null) {
       try {
         _lastFilterSettings = FilterSettings.fromJson(json.decode(filterJson));
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error loading last filter settings: $e');
       }
     }

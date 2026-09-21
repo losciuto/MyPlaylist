@@ -3,12 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class FanartTvService {
+
+  FanartTvService(this.apiKey);
   static const String _baseUrl = 'https://webservice.fanart.tv/v3';
   // Public Personal API Key for testing or default use-case if allowed by their ToS.
   // Ideally users should provide their own.
   final String? apiKey;
-
-  FanartTvService(this.apiKey);
 
   bool get hasKey => apiKey != null && apiKey!.isNotEmpty;
 
@@ -31,7 +31,7 @@ class FanartTvService {
         debugPrint('Fanart.tv Error ${response.statusCode}: ${response.body}');
         return null;
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Fanart.tv Connection Error: $e');
       return null;
     }
@@ -61,7 +61,7 @@ class FanartTvService {
         );
         return null;
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Fanart.tv TV Connection Error: $e');
       return null;
     }

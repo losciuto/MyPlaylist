@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class MovieSelectionDialog extends StatefulWidget {
-  final String title;
-  final List<Map<String, dynamic>> results;
-  final bool isBulkMode;
 
   const MovieSelectionDialog({
     super.key,
@@ -12,6 +9,9 @@ class MovieSelectionDialog extends StatefulWidget {
     required this.results,
     this.isBulkMode = false,
   });
+  final String title;
+  final List<Map<String, dynamic>> results;
+  final bool isBulkMode;
 
   @override
   State<MovieSelectionDialog> createState() => _MovieSelectionDialogState();
@@ -173,7 +173,7 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
                   const Spacer(),
                 ],
                 TextButton(
-                  onPressed: () => Navigator.pop(context, null),
+                  onPressed: () => Navigator.pop(context),
                   child: Text(
                     widget.isBulkMode ? l10n.skipVideo : l10n.cancel,
                     style: TextStyle(

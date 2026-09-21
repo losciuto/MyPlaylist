@@ -4,9 +4,9 @@ import '../services/github_service.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class UpdateDialog extends StatelessWidget {
-  final UpdateInfo updateInfo;
 
   const UpdateDialog({super.key, required this.updateInfo});
+  final UpdateInfo updateInfo;
 
   Future<void> _launchUrl() async {
     final Uri url = Uri.parse(updateInfo.downloadUrl);

@@ -110,7 +110,7 @@ class _FilterDialogState extends State<FilterDialog> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error loading filter data: $e');
       if (mounted) {
         setState(() {
@@ -418,7 +418,6 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
             Slider(
               value: _minRating,
-              min: 0,
               max: 10,
               divisions: 20,
               label: _minRating.toString(),
@@ -479,13 +478,13 @@ class _FilterDialogState extends State<FilterDialog> {
   }
 
   Widget _buildSummary() {
-    int inclusions =
+    final int inclusions =
         _selectedGenres.length +
         _selectedYears.length +
         _selectedActors.length +
         _selectedDirectors.length +
         _selectedSagas.length;
-    int exclusions =
+    final int exclusions =
         _excludedGenres.length +
         _excludedYears.length +
         _excludedActors.length +

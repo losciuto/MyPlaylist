@@ -8,8 +8,8 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 import '../utils/video_extensions.dart';
 
 class PlayerScreen extends StatefulWidget {
-  final List<model.Video> playlist;
   const PlayerScreen({super.key, required this.playlist});
+  final List<model.Video> playlist;
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
@@ -46,7 +46,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   Future<void> _initPlaylist() async {
-    List<Media> mediaList = [];
+    final List<Media> mediaList = [];
 
     for (final video in widget.playlist) {
       if (video.isSeries) {
@@ -72,7 +72,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             );
 
             mediaList.addAll(episodes.map((e) => Media(e.path)));
-          } catch (e) {
+          } on Exception catch (e) {
             debugPrint('Error scanning series folder: $e');
           }
         }

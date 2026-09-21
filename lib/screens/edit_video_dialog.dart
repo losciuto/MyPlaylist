@@ -17,9 +17,9 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 class EditVideoDialog extends StatefulWidget {
-  final Video video;
 
   const EditVideoDialog({super.key, required this.video});
+  final Video video;
 
   @override
   State<EditVideoDialog> createState() => _EditVideoDialogState();
@@ -94,7 +94,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         }
         if (mounted) setState(() {});
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error getting file size: $e');
     }
   }
@@ -168,7 +168,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
               ? AppLocalizations.of(context)!.generalTab
               : AppLocalizations.of(context)!.selectMovieTitle,
           results: formattedResults,
-          isBulkMode: false,
         ),
       );
 
@@ -329,7 +328,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
 
           if (isSeries) {
             if (details['created_by'] != null) {
-              final creators = (details['created_by'] as List);
+              final creators = details['created_by'] as List;
               _directorsController.text = creators
                   .map((c) => c['name'])
                   .join(', ');
@@ -354,7 +353,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
           SnackBar(content: Text(AppLocalizations.of(context)!.tmdbUpdatedMsg)),
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -847,9 +846,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                                         AppLocalizations.of(
                                           context,
                                         )!.labelDateAdded,
-                                        false,
-                                        1,
-                                        null,
                                       ),
                                     ),
                                   ),
@@ -889,9 +885,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                                       child: _buildTextField(
                                         _timeController,
                                         AppLocalizations.of(context)!.labelTime,
-                                        false,
-                                        1,
-                                        null,
                                       ),
                                     ),
                                   ),
@@ -913,7 +906,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                             ),
                             Slider(
                               value: _rating,
-                              min: 0,
                               max: 10,
                               divisions: 20,
                               label: _rating.toString(),
@@ -967,7 +959,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: _isSaving ? null : () => _save(onlyDb: false),
+                    onPressed: _isSaving ? null : () => _save(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                     ),
@@ -1067,7 +1059,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       return;
     }
 
-    List<File> files = [];
+    final List<File> files = [];
     try {
       await for (final entity in dir.list(
         recursive: true,
@@ -1083,7 +1075,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       files.sort(
         (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
       );
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error loading episodes: $e');
     }
 

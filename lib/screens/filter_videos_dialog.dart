@@ -5,9 +5,6 @@ import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class FilterVideosDialog extends StatefulWidget {
-  final String title;
-  final String category;
-  final String filterValue;
 
   const FilterVideosDialog({
     super.key,
@@ -15,6 +12,9 @@ class FilterVideosDialog extends StatefulWidget {
     required this.category,
     required this.filterValue,
   });
+  final String title;
+  final String category;
+  final String filterValue;
 
   @override
   State<FilterVideosDialog> createState() => _FilterVideosDialogState();
@@ -125,7 +125,6 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                     ),
                   ),
                   Expanded(
-                    flex: 1,
                     child: Text(
                       AppLocalizations.of(context)!.labelYear,
                       style: TextStyle(
@@ -136,7 +135,6 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                     ),
                   ),
                   Expanded(
-                    flex: 1,
                     child: Text(
                       AppLocalizations.of(context)!.ratingLabel(''),
                       style: TextStyle(
@@ -203,7 +201,6 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 1,
                                     child: Text(
                                       video.year,
                                       style: const TextStyle(
@@ -213,7 +210,6 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 1,
                                     child: Row(
                                       children: [
                                         const Icon(

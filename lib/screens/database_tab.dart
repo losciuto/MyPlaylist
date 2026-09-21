@@ -255,7 +255,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     // But usually provider is stable during tab lifetime.
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error removing listener: $e');
     }
 
@@ -575,7 +575,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
       onCancelCleanup: (dir) async {
         try {
           await MetadataService().cleanupTempFiles(dir);
-        } catch (e) {
+        } on Exception catch (e) {
           debugPrint('Error cleaning temp files in $dir: $e');
         }
       },

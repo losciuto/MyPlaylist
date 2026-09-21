@@ -41,7 +41,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
       if (await f.exists()) {
         return (await f.length()) ~/ 1024;
       }
-    } catch (_) {}
+    } on Object catch (_) {}
     return null;
   }
 
@@ -426,13 +426,6 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
 
 /// A single row inside a duplicate group showing path, size, and action buttons.
 class _VideoEntryRow extends StatefulWidget {
-  final Video video;
-  final List<Video> group;
-  final Future<int?> Function(String) getFileSizeKb;
-  final VoidCallback? onDeleteDb;
-  final VoidCallback? onDeleteDisk;
-  final VoidCallback onGroupChanged;
-  final bool isLast;
 
   const _VideoEntryRow({
     required this.video,
@@ -443,6 +436,13 @@ class _VideoEntryRow extends StatefulWidget {
     required this.onGroupChanged,
     required this.isLast,
   });
+  final Video video;
+  final List<Video> group;
+  final Future<int?> Function(String) getFileSizeKb;
+  final VoidCallback? onDeleteDb;
+  final VoidCallback? onDeleteDisk;
+  final VoidCallback onGroupChanged;
+  final bool isLast;
 
   @override
   State<_VideoEntryRow> createState() => _VideoEntryRowState();

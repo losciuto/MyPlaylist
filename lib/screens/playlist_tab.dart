@@ -67,7 +67,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
           limit: settings.limit,
         );
         _checkResult(provider.playlist);
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error generating playlist: $e');
         if (mounted) {
           _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
@@ -147,7 +147,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
         _showSnack(
           AppLocalizations.of(context)!.playerStarted(p.basename(playerPath)),
         );
-      } catch (e) {
+      } on Exception catch (e) {
         _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
         debugPrint('External player error: $e');
       }
@@ -171,7 +171,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
         } else if (Platform.isWindows) {
           await Process.run('explorer', [dir]);
         }
-      } catch (e) {
+      } on Exception catch (e) {
         if (!mounted) return;
         _showSnack(AppLocalizations.of(context)!.folderOpenError(e.toString()));
       }

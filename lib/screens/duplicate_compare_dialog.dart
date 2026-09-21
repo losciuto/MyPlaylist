@@ -12,18 +12,6 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 
 /// Technical info fetched via ffprobe for a single file.
 class _TechInfo {
-  final int? fileSizeBytes;
-  final String? containerFormat;
-  final String? videoCodec;
-  final String? resolution;
-  final String? frameRate;
-  final String? videoBitrate;
-  final String? audioCodec;
-  final String? audioChannels;
-  final String? audioSampleRate;
-  final String? duration;
-  final String? overallBitrate;
-  final bool fileExists;
 
   const _TechInfo({
     this.fileSizeBytes,
@@ -39,6 +27,18 @@ class _TechInfo {
     this.overallBitrate,
     this.fileExists = true,
   });
+  final int? fileSizeBytes;
+  final String? containerFormat;
+  final String? videoCodec;
+  final String? resolution;
+  final String? frameRate;
+  final String? videoBitrate;
+  final String? audioCodec;
+  final String? audioChannels;
+  final String? audioSampleRate;
+  final String? duration;
+  final String? overallBitrate;
+  final bool fileExists;
 
   static const _TechInfo missing = _TechInfo(fileExists: false);
 }
@@ -61,7 +61,7 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
     ]);
 
     if (result.exitCode != 0) {
-      return _TechInfo(fileExists: true, fileSizeBytes: fileSizeBytes);
+      return _TechInfo(fileSizeBytes: fileSizeBytes);
     }
 
     final json = jsonDecode(result.stdout.toString()) as Map<String, dynamic>;
@@ -147,9 +147,8 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
           : null,
       duration: dur,
       overallBitrate: bitrateStr,
-      fileExists: true,
     );
-  } catch (e) {
+  } on Object catch (_) {
     return const _TechInfo();
   }
 }
@@ -157,9 +156,9 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
 /// Dialog that shows all duplicates in a group side by side with technical
 /// metadata and allows choosing which one to delete.
 class DuplicateCompareDialog extends StatefulWidget {
-  final List<Video> group;
 
   const DuplicateCompareDialog({super.key, required this.group});
+  final List<Video> group;
 
   @override
   State<DuplicateCompareDialog> createState() => _DuplicateCompareDialogState();
@@ -379,14 +378,6 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
 
 /// A single column for one video in the comparison dialog.
 class _VideoColumn extends StatelessWidget {
-  final Video video;
-  final _TechInfo? info;
-  final bool loading;
-  final String Function(int?) formatSize;
-  final VoidCallback onDeleteDb;
-  final VoidCallback onDeleteDisk;
-  final bool isFirst;
-  final ThemeData theme;
 
   const _VideoColumn({
     required this.video,
@@ -398,6 +389,14 @@ class _VideoColumn extends StatelessWidget {
     required this.isFirst,
     required this.theme,
   });
+  final Video video;
+  final _TechInfo? info;
+  final bool loading;
+  final String Function(int?) formatSize;
+  final VoidCallback onDeleteDb;
+  final VoidCallback onDeleteDisk;
+  final bool isFirst;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {

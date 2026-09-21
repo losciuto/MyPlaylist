@@ -37,6 +37,30 @@ class Videos extends Table {
       'videos_directors_idx',
       'CREATE INDEX IF NOT EXISTS videos_directors_idx ON videos (directors)',
     ),
+    Index(
+      'videos_genres_idx',
+      'CREATE INDEX IF NOT EXISTS videos_genres_idx ON videos (genres)',
+    ),
+    Index(
+      'videos_year_idx',
+      'CREATE INDEX IF NOT EXISTS videos_year_idx ON videos (year)',
+    ),
+    Index(
+      'videos_saga_idx',
+      'CREATE INDEX IF NOT EXISTS videos_saga_idx ON videos (saga)',
+    ),
+    Index(
+      'videos_rating_idx',
+      'CREATE INDEX IF NOT EXISTS videos_rating_idx ON videos (rating)',
+    ),
+    Index(
+      'videos_isseries_idx',
+      'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (isSeries)',
+    ),
+    Index(
+      'videos_dateadded_idx',
+      'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (dateAdded)',
+    ),
   ];
 }
 
@@ -50,11 +74,11 @@ class FailedRenames extends Table {
 
 @DriftDatabase(tables: [Videos, FailedRenames])
 class AppDatabase extends _$AppDatabase {
-  static final AppDatabase instance = AppDatabase();
   AppDatabase() : super(_openConnection());
+  static final AppDatabase instance = AppDatabase();
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -93,6 +117,45 @@ class AppDatabase extends _$AppDatabase {
           // Initialize date_added with mtime (converted from seconds to DateTime)
           await customStatement(
             'UPDATE videos SET date_added = CAST(mtime AS INTEGER) WHERE date_added IS NULL',
+          );
+        }
+        if (from < 6) {
+          // Add performance indexes for filter/playlist queries
+          await m.createIndex(
+            Index(
+              'videos_genres_idx',
+              'CREATE INDEX IF NOT EXISTS videos_genres_idx ON videos (genres)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_year_idx',
+              'CREATE INDEX IF NOT EXISTS videos_year_idx ON videos (year)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_saga_idx',
+              'CREATE INDEX IF NOT EXISTS videos_saga_idx ON videos (saga)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_rating_idx',
+              'CREATE INDEX IF NOT EXISTS videos_rating_idx ON videos (rating)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_isseries_idx',
+              'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (isSeries)',
+            ),
+          );
+          await m.createIndex(
+            Index(
+              'videos_dateadded_idx',
+              'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (dateAdded)',
+            ),
           );
         }
       },
@@ -267,7 +330,7 @@ class AppDatabase extends _$AppDatabase {
   Future<List<model.Video>> getAllVideos() async {
     final driftVideos =
         await (select(videos)..orderBy([
-              (t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc),
+              (t) => OrderingTerm(expression: t.title),
             ]))
             .get();
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
@@ -325,42 +388,56 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<Map<String, int>> getValuesWithCounts(String column) async {
-    final result = await select(videos).get();
+    final String sql;
+    switch (column) {
+      case 'genres':
+      case 'directors':
+      case 'actors':
+      case 'saga':
+        // Per campi comma-separated, contiamo ogni singolo valore estratto
+        sql =
+            """
+          WITH RECURSIVE split(val, remainder, rest) AS (
+            SELECT '', $column || ',', $column || ','
+            UNION ALL
+            SELECT
+              CASE WHEN instr(remainder, ',') = 0 THEN remainder
+                   ELSE substr(remainder, 1, instr(remainder, ',') - 1)
+              END,
+              CASE WHEN instr(remainder, ',') = 0 THEN ''
+                   ELSE substr(remainder, instr(remainder, ',') + 1)
+              END,
+              rest
+            FROM split
+            WHERE remainder != ''
+          )
+          SELECT trim(val) as value, COUNT(*) as cnt
+          FROM split
+          WHERE trim(val) != ''
+          GROUP BY trim(val)
+          ORDER BY cnt DESC
+        """;
+        break;
+      case 'year':
+        sql = """
+          SELECT year as value, COUNT(*) as cnt
+          FROM videos
+          WHERE year != ''
+          GROUP BY year
+          ORDER BY cnt DESC
+        """;
+        break;
+      default:
+        return {};
+    }
 
-    final Map<String, int> counts = {};
-    for (var row in result) {
-      String? val;
-      switch (column) {
-        case 'genres':
-          val = row.genres;
-          break;
-        case 'year':
-          val = row.year;
-          break;
-        case 'directors':
-          val = row.directors;
-          break;
-        case 'actors':
-          val = row.actors;
-          break;
-        case 'saga':
-          val = row.saga;
-          break;
-      }
-      if (val == null || val.isEmpty) continue;
-
-      if (val.contains(',')) {
-        val.split(',').forEach((v) {
-          final trimmed = v.trim();
-          if (trimmed.isNotEmpty) {
-            counts[trimmed] = (counts[trimmed] ?? 0) + 1;
-          }
-        });
-      } else {
-        final trimmed = val.trim();
-        if (trimmed.isNotEmpty) {
-          counts[trimmed] = (counts[trimmed] ?? 0) + 1;
-        }
+    final result = await customSelect(sql).get();
+    final counts = <String, int>{};
+    for (final row in result) {
+      final val = row.read<String>('value');
+      final cnt = row.read<int>('cnt');
+      if (val.isNotEmpty && cnt > 0) {
+        counts[val] = cnt;
       }
     }
     return counts;
@@ -511,7 +588,7 @@ class AppDatabase extends _$AppDatabase {
         break;
     }
     query.orderBy([
-      (t) => OrderingTerm(expression: t.title, mode: OrderingMode.asc),
+      (t) => OrderingTerm(expression: t.title),
     ]);
     final result = await query.get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();

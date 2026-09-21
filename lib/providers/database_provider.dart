@@ -7,7 +7,9 @@ import '../services/nfo_sync_service.dart';
 import '../services/settings_service.dart';
 import 'package:path/path.dart' as p;
 
-class DatabaseProvider extends ChangeNotifier {
+class DatabaseProvider extends ChangeNotifier { // Index for sub-tabs in 'Servizio'
+
+  DatabaseProvider(this._db);
   final AppDatabase _db;
   final NfoSyncService _syncService = NfoSyncService();
 
@@ -21,9 +23,7 @@ class DatabaseProvider extends ChangeNotifier {
   String _searchQuery = '';
   int _currentTabIndex =
       0; // Default to PlaylistTab (previously _initialIndex logic)
-  int _serviceTabIndex = 0; // Index for sub-tabs in 'Servizio'
-
-  DatabaseProvider(this._db);
+  int _serviceTabIndex = 0;
 
   List<model.Video> get videos => _videos;
   List<model.Video> get filteredVideos => _filteredVideos;
@@ -166,7 +166,7 @@ class DatabaseProvider extends ChangeNotifier {
   Future<void> refreshFromNfo(model.Video video) async {
     final refreshedVideo = await _syncService.refreshFromNfo(video);
     if (refreshedVideo != null) {
-      await updateVideo(refreshedVideo, syncNfo: false);
+      await updateVideo(refreshedVideo);
     }
   }
 

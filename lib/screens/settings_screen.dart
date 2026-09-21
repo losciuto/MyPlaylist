@@ -81,10 +81,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickPlayerPath() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    final FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
-      String? path = result.files.single.path;
+      final String? path = result.files.single.path;
       if (path != null) {
         _playerPathController.text = path;
         if (mounted) {
@@ -134,7 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickVideoBackupPath() async {
-    String? result = await FilePicker.platform.getDirectoryPath();
+    final String? result = await FilePicker.platform.getDirectoryPath();
 
     if (result != null) {
       _videoBackupPathController.text = result;
@@ -216,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SnackBar(content: Text(AppLocalizations.of(context)!.noUpdates)),
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
@@ -810,7 +810,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(width: 15),
             Expanded(
-              flex: 1,
               child: TextField(
                 controller: _remotePortController,
                 keyboardType: TextInputType.number,
@@ -1020,7 +1019,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      String? outputDir = await FilePicker.platform.getDirectoryPath(
+      final String? outputDir = await FilePicker.platform.getDirectoryPath(
         dialogTitle: l10n.selectDestinationFolder,
       );
 
@@ -1038,12 +1037,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SnackBar(
               content: Text(l10n.backupSuccessMsg(newPath)),
               backgroundColor: const Color(0xFF4CAF50),
-              duration: const Duration(seconds: 4),
             ),
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1058,9 +1056,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _importDatabase() async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
         dialogTitle: l10n.selectBackupFile,
-        type: FileType.any,
       );
 
       if (result != null && result.files.single.path != null) {
@@ -1122,7 +1119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1278,7 +1275,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _startBulkMetadataSync() async {
-    bool? confirm = await showDialog<bool>(
+    final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.bulkSyncTitle),
@@ -1414,7 +1411,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
   @override
   Widget build(BuildContext context) {
     if (_isFinished) {
-      String title = _isCancelled
+      final String title = _isCancelled
           ? AppLocalizations.of(context)!.syncInterrupted
           : AppLocalizations.of(context)!.syncCompleted;
       return AlertDialog(
@@ -1435,7 +1432,7 @@ class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
       );
     }
 
-    double progress = _totalFiles > 0 ? _currentIndex / _totalFiles : 0.0;
+    final double progress = _totalFiles > 0 ? _currentIndex / _totalFiles : 0.0;
     return AlertDialog(
       title: Text(AppLocalizations.of(context)!.batchProcessingTitle),
       content: Column(

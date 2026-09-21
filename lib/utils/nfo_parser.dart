@@ -32,7 +32,7 @@ class NfoParser {
 
       debugPrint('No suitable strategy found for NFO: $path');
       return null;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error parsing NFO ($path): $e');
       return null;
     }

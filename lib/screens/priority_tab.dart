@@ -57,7 +57,7 @@ class _PriorityTabState extends State<PriorityTab> {
   void dispose() {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error removing listener: $e');
     }
 

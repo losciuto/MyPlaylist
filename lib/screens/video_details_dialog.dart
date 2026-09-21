@@ -7,12 +7,11 @@ import '../services/settings_service.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
-import '../widgets/file_metadata_dialog.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
-  final Video video;
 
   const VideoDetailsDialog({super.key, required this.video});
+  final Video video;
 
   @override
   State<VideoDetailsDialog> createState() => _VideoDetailsDialogState();
@@ -194,7 +193,6 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                                   ),
                                   child: Slider(
                                     value: widget.video.rating,
-                                    min: 0,
                                     max: 10,
                                     divisions: 20,
                                     activeColor: Colors.amber,

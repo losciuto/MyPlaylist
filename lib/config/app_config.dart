@@ -25,7 +25,6 @@ class AppConfig {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: seedColor,
-        brightness: Brightness.light,
       ),
       useMaterial3: true,
       elevatedButtonTheme: ElevatedButtonThemeData(

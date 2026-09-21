@@ -5,15 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateInfo {
-  final String version;
-  final String body;
-  final String downloadUrl;
 
   UpdateInfo({
     required this.version,
     required this.body,
     required this.downloadUrl,
   });
+  final String version;
+  final String body;
+  final String downloadUrl;
 }
 
 class GitHubService {
@@ -85,7 +85,7 @@ class GitHubService {
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('[GitHubService] Error checking for updates: $e');
     }
     return null;
@@ -100,11 +100,11 @@ class GitHubService {
 
   bool _isNewerVersion(String remote, String current) {
     try {
-      List<int> remoteParts = remote
+      final List<int> remoteParts = remote
           .split('.')
           .map((e) => int.tryParse(e) ?? 0)
           .toList();
-      List<int> currentParts = current
+      final List<int> currentParts = current
           .split('.')
           .map((e) => int.tryParse(e) ?? 0)
           .toList();
@@ -116,7 +116,7 @@ class GitHubService {
         if (r < c) return false;
       }
       return false;
-    } catch (e) {
+    } on Object catch (_) {
       return false;
     }
   }

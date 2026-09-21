@@ -10,6 +10,11 @@ import '../services/settings_service.dart';
 import '../models/player_config.dart';
 
 class PlaylistProvider extends ChangeNotifier {
+
+  PlaylistProvider() {
+    _loadPlaylistState();
+    updateVideoCount();
+  }
   List<Video> _currentPlaylist = [];
   int _totalVideoCount = 0;
   String? _lastTempPlaylistPath;
@@ -20,11 +25,6 @@ class PlaylistProvider extends ChangeNotifier {
   int get proposedVideoCount => _proposedVideoIds.length;
   String? get lastTempPlaylistPath => _lastTempPlaylistPath;
   bool get hasPlaylist => _currentPlaylist.isNotEmpty;
-
-  PlaylistProvider() {
-    _loadPlaylistState();
-    updateVideoCount();
-  }
 
   Future<void> updateVideoCount() async {
     _totalVideoCount = await db.AppDatabase.instance.getVideoCount();
@@ -173,7 +173,7 @@ class PlaylistProvider extends ChangeNotifier {
         _currentPlaylist = videos;
         notifyListeners();
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error loading playlist state: $e');
     }
   }
@@ -183,13 +183,13 @@ class PlaylistProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final paths = _currentPlaylist.map((v) => v.path).toList();
       await prefs.setStringList('last_playlist_paths', paths);
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error saving playlist state: $e');
     }
   }
 
   Future<String?> exportPlaylist(String dialogTitle) async {
-    String? outputFile = await FilePicker.platform.saveFile(
+    final String? outputFile = await FilePicker.platform.saveFile(
       dialogTitle: dialogTitle,
       fileName: 'playlist.m3u',
       allowedExtensions: ['m3u'],
@@ -251,7 +251,7 @@ class PlaylistProvider extends ChangeNotifier {
   Future<void> stopPlayer() async {
     if (_playerProcess != null) {
       debugPrint('Stopping player process...');
-      _playerProcess!.kill(ProcessSignal.sigterm);
+      _playerProcess!.kill();
       _playerProcess = null;
     } else {
       // Fallback: prova a chiudere VLC direttamente se il riferimento è perso
@@ -261,7 +261,7 @@ class PlaylistProvider extends ChangeNotifier {
         } else if (Platform.isWindows) {
           await Process.run('taskkill', ['/IM', 'vlc.exe', '/F']);
         }
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error in stopPlayer fallback: $e');
       }
     }
@@ -291,7 +291,7 @@ class PlaylistProvider extends ChangeNotifier {
             await Process.run('taskkill', ['/IM', 'vlc.exe', '/F']);
           }
           await Future.delayed(const Duration(milliseconds: 500));
-        } catch (e) {
+        } on Exception catch (e) {
           debugPrint('Error killing existing VLC instances: $e');
         }
       }
@@ -323,7 +323,7 @@ class PlaylistProvider extends ChangeNotifier {
       _playerProcess!.exitCode.then((_) {
         _playerProcess = null;
       });
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error launching player: $e');
       rethrow;
     }

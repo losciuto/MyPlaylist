@@ -29,7 +29,7 @@ Future<void> main() async {
     }
 
     await socket.close();
-  } catch (e) {
+  } on Exception catch (e) {
     // ignore: avoid_print
     print('Error: $e');
   }

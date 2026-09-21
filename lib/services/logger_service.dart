@@ -6,13 +6,13 @@ import 'package:intl/intl.dart';
 import '../config/app_config.dart';
 
 class LoggerService {
-  static final LoggerService _instance = LoggerService._internal();
 
   factory LoggerService() {
     return _instance;
   }
 
   LoggerService._internal();
+  static final LoggerService _instance = LoggerService._internal();
 
   File? _logFile;
   bool _initialized = false;
@@ -43,7 +43,7 @@ class LoggerService {
         'LoggerService initialized. App version: ${AppConfig.appVersion}',
       );
       _initialized = true;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Failed to initialize LoggerService: $e');
     }
   }
@@ -60,7 +60,7 @@ class LoggerService {
     if (_logFile != null) {
       try {
         await _logFile!.writeAsString(line, mode: FileMode.append);
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Failed to write to log file: $e');
       }
     }

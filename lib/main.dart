@@ -46,7 +46,7 @@ void main() async {
   if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     await windowManager.ensureInitialized();
 
-    WindowOptions windowOptions = const WindowOptions(
+    final WindowOptions windowOptions = const WindowOptions(
       size: AppConfig.windowSize,
       center: true,
       backgroundColor: Colors.transparent,

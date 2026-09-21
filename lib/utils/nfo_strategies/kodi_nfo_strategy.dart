@@ -65,7 +65,7 @@ class KodiNfoStrategy implements NfoStrategy {
           directorNode.children
               .whereType<XmlText>()
               .map((e) => e.value)
-              .join(''),
+              .join(),
         );
         dThumb =
             directorNode.getAttribute('thumb') ??

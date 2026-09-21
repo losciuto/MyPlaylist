@@ -1,14 +1,6 @@
 import '../database/app_database.dart' as db;
 
 class VideoStatistics {
-  final int totalVideos;
-  final Map<String, int> genreDistribution;
-  final Map<String, int> yearDistribution;
-  final Map<String, int> sagaDistribution;
-  final double averageRating;
-  final int totalWithRating;
-  final int seriesCount;
-  final int moviesCount;
 
   VideoStatistics({
     required this.totalVideos,
@@ -20,6 +12,14 @@ class VideoStatistics {
     required this.seriesCount,
     required this.moviesCount,
   });
+  final int totalVideos;
+  final Map<String, int> genreDistribution;
+  final Map<String, int> yearDistribution;
+  final Map<String, int> sagaDistribution;
+  final double averageRating;
+  final int totalWithRating;
+  final int seriesCount;
+  final int moviesCount;
 }
 
 class StatisticsService {

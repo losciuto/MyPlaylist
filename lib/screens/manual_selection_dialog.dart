@@ -304,14 +304,12 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                         if (parentSeries.path.isNotEmpty) {
                           selectedVideos.add(
                             Video(
-                              id: null, // Virtual
                               path: epPath,
                               mtime: File(epPath)
                                   .lastModifiedSync()
                                   .millisecondsSinceEpoch
                                   .toDouble(),
                               title: p.basename(epPath),
-                              isSeries: false, // Treated as individual file
                               year: parentSeries.year,
                               genres: parentSeries.genres,
                               directors: parentSeries.directors,
@@ -321,7 +319,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                             ),
                           );
                         }
-                      } catch (e) {
+                      } on Exception catch (e) {
                         debugPrint(
                           'Error creating virtual video for $epPath: $e',
                         );

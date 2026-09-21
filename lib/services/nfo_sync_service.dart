@@ -25,7 +25,7 @@ class NfoSyncService {
         _logger.info('Saved movie NFO to $nfoPath');
       }
       return true;
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.error('Error saving NFO for ${video.title}', e);
       return false;
     }
@@ -64,7 +64,7 @@ class NfoSyncService {
         posterPath: metadata['poster'] ?? video.posterPath,
         saga: metadata['saga'] ?? video.saga,
       );
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.error('Error refreshing metadata from NFO for ${video.title}', e);
       return null;
     }

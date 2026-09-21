@@ -8,9 +8,6 @@ import '../utils/video_extensions.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
-  final Video video;
-  final Set<String>? selectedEpisodePaths;
-  final VoidCallback? onSelectionChanged;
 
   const VideoPreviewDialog({
     super.key,
@@ -18,6 +15,9 @@ class VideoPreviewDialog extends StatefulWidget {
     this.selectedEpisodePaths,
     this.onSelectionChanged,
   });
+  final Video video;
+  final Set<String>? selectedEpisodePaths;
+  final VoidCallback? onSelectionChanged;
 
   @override
   State<VideoPreviewDialog> createState() => _VideoPreviewDialogState();
@@ -46,7 +46,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       return;
     }
 
-    List<File> files = [];
+    final List<File> files = [];
     try {
       await for (final entity in dir.list(
         recursive: true,
@@ -62,7 +62,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
       files.sort(
         (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
       );
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error loading episodes: $e');
     }
 

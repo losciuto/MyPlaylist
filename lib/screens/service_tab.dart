@@ -57,7 +57,7 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
     _innerTabController.removeListener(_onTabChange);
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error removing listener: $e');
     }
     _innerTabController.dispose();
@@ -188,7 +188,7 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
         return;
       }
 
-      String? outputDir = await FilePicker.platform.getDirectoryPath(
+      final String? outputDir = await FilePicker.platform.getDirectoryPath(
         dialogTitle: l10n.selectDestinationFolder,
       );
 
@@ -206,12 +206,11 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
             SnackBar(
               content: Text(l10n.backupSuccessMsg(newPath)),
               backgroundColor: const Color(0xFF4CAF50),
-              duration: const Duration(seconds: 4),
             ),
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -226,9 +225,8 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
   Future<void> _importDatabase() async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
         dialogTitle: l10n.selectBackupFile,
-        type: FileType.any,
       );
 
       if (result != null && result.files.single.path != null) {
@@ -287,7 +285,7 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
           }
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -484,8 +482,8 @@ class _MaintenanceUIState extends State<MaintenanceUI> {
 }
 
 class SectionHeader extends StatelessWidget {
-  final String title;
   const SectionHeader({super.key, required this.title});
+  final String title;
 
   @override
   Widget build(BuildContext context) {

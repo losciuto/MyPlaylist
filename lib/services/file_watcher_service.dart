@@ -9,9 +9,9 @@ import '../utils/video_extensions.dart';
 import 'package:flutter/foundation.dart';
 
 class FileWatcherService {
-  static final FileWatcherService _instance = FileWatcherService._internal();
   factory FileWatcherService() => _instance;
   FileWatcherService._internal();
+  static final FileWatcherService _instance = FileWatcherService._internal();
 
   final Map<String, DirectoryWatcher> _watchers = {};
   final Map<String, StreamSubscription> _subscriptions = {};
@@ -39,6 +39,7 @@ class FileWatcherService {
       final watcher = DirectoryWatcher(directoryPath);
       _watchers[directoryPath] = watcher;
 
+      // ignore: cancel_subscriptions
       final subscription = watcher.events.listen(
         (event) => _handleFileEvent(event),
         onError: (error) {
@@ -49,7 +50,7 @@ class FileWatcherService {
 
       _subscriptions[directoryPath] = subscription;
       debugPrint('Started watching: $directoryPath');
-    } catch (e) {
+    } on Object catch (e) {
       debugPrint('Failed to start watching $directoryPath: $e');
     }
   }
@@ -119,7 +120,7 @@ class FileWatcherService {
         } else if (_isNfoFile(filePath)) {
           await _processNfoFile(filePath);
         }
-      } catch (e) {
+      } on Object catch (e) {
         debugPrint('Error processing file $filePath: $e');
       }
     }
@@ -145,17 +146,6 @@ class FileWatcherService {
       path: videoPath,
       mtime: stat.modified.millisecondsSinceEpoch / 1000,
       title: p.basenameWithoutExtension(videoPath),
-      genres: '',
-      year: '',
-      directors: '',
-      plot: '',
-      actors: '',
-      duration: '',
-      rating: 0.0,
-      isSeries: false,
-      posterPath: '',
-      saga: '',
-      sagaIndex: 0,
       dateAdded: DateTime.now(),
     );
 
@@ -194,7 +184,7 @@ class FileWatcherService {
         await database.updateVideo(updatedVideo);
         debugPrint('Auto-updated video from NFO: $videoPath');
       }
-    } catch (e) {
+    } on Object catch (e) {
       debugPrint('Error parsing NFO $nfoPath: $e');
     }
   }

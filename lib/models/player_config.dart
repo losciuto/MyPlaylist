@@ -3,11 +3,6 @@ import 'dart:io';
 enum PlayerPreset { vlc, mpv, mpcHc, custom }
 
 class PlayerConfig {
-  final PlayerPreset preset;
-  final String name;
-  final String? executablePath;
-  final List<String> playlistArgs;
-  final bool supportsRemoteControl;
 
   const PlayerConfig({
     required this.preset,
@@ -16,6 +11,22 @@ class PlayerConfig {
     required this.playlistArgs,
     this.supportsRemoteControl = false,
   });
+
+  factory PlayerConfig.fromJson(Map<String, dynamic> json) {
+    final preset = PlayerPreset.values[json['preset'] as int];
+    return PlayerConfig(
+      preset: preset,
+      name: json['name'] as String,
+      executablePath: json['executablePath'] as String?,
+      playlistArgs: List<String>.from(json['playlistArgs'] as List),
+      supportsRemoteControl: json['supportsRemoteControl'] as bool? ?? false,
+    );
+  }
+  final PlayerPreset preset;
+  final String name;
+  final String? executablePath;
+  final List<String> playlistArgs;
+  final bool supportsRemoteControl;
 
   // VLC preset
   static PlayerConfig vlc([String? customPath]) {
@@ -35,7 +46,6 @@ class PlayerConfig {
       name: 'mpv',
       executablePath: customPath,
       playlistArgs: ['--playlist'],
-      supportsRemoteControl: false,
     );
   }
 
@@ -46,7 +56,6 @@ class PlayerConfig {
       name: 'MPC-HC',
       executablePath: customPath,
       playlistArgs: ['/play'],
-      supportsRemoteControl: false,
     );
   }
 
@@ -57,7 +66,6 @@ class PlayerConfig {
       name: name ?? 'Custom Player',
       executablePath: path,
       playlistArgs: [],
-      supportsRemoteControl: false,
     );
   }
 
@@ -135,16 +143,5 @@ class PlayerConfig {
       'playlistArgs': playlistArgs,
       'supportsRemoteControl': supportsRemoteControl,
     };
-  }
-
-  factory PlayerConfig.fromJson(Map<String, dynamic> json) {
-    final preset = PlayerPreset.values[json['preset'] as int];
-    return PlayerConfig(
-      preset: preset,
-      name: json['name'] as String,
-      executablePath: json['executablePath'] as String?,
-      playlistArgs: List<String>.from(json['playlistArgs'] as List),
-      supportsRemoteControl: json['supportsRemoteControl'] as bool? ?? false,
-    );
   }
 }

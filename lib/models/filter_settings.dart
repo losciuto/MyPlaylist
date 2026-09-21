@@ -1,16 +1,4 @@
 class FilterSettings {
-  final List<String> genres;
-  final List<String> years;
-  final double ratingMin;
-  final List<String> actors;
-  final List<String> directors;
-  final List<String> sagas;
-  final int limit;
-  final List<String> excludedGenres;
-  final List<String> excludedYears;
-  final List<String> excludedActors;
-  final List<String> excludedDirectors;
-  final List<String> excludedSagas;
 
   FilterSettings({
     this.genres = const [],
@@ -26,21 +14,6 @@ class FilterSettings {
     this.excludedSagas = const [],
     this.limit = 20,
   });
-
-  Map<String, dynamic> toJson() => {
-    'genres': genres,
-    'years': years,
-    'ratingMin': ratingMin,
-    'actors': actors,
-    'directors': directors,
-    'sagas': sagas,
-    'excludedGenres': excludedGenres,
-    'excludedYears': excludedYears,
-    'excludedActors': excludedActors,
-    'excludedDirectors': excludedDirectors,
-    'excludedSagas': excludedSagas,
-    'limit': limit,
-  };
 
   factory FilterSettings.fromJson(Map<String, dynamic> json) {
     return FilterSettings(
@@ -58,4 +31,31 @@ class FilterSettings {
       limit: json['limit'] ?? 20,
     );
   }
+  final List<String> genres;
+  final List<String> years;
+  final double ratingMin;
+  final List<String> actors;
+  final List<String> directors;
+  final List<String> sagas;
+  final int limit;
+  final List<String> excludedGenres;
+  final List<String> excludedYears;
+  final List<String> excludedActors;
+  final List<String> excludedDirectors;
+  final List<String> excludedSagas;
+
+  Map<String, dynamic> toJson() => {
+    'genres': genres,
+    'years': years,
+    'ratingMin': ratingMin,
+    'actors': actors,
+    'directors': directors,
+    'sagas': sagas,
+    'excludedGenres': excludedGenres,
+    'excludedYears': excludedYears,
+    'excludedActors': excludedActors,
+    'excludedDirectors': excludedDirectors,
+    'excludedSagas': excludedSagas,
+    'limit': limit,
+  };
 }

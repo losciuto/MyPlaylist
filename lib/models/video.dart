@@ -1,23 +1,4 @@
 class Video {
-  final int? id;
-  final String path;
-  final double mtime;
-  final String title;
-  final String genres;
-  final String year;
-  final String directors;
-  final String directorThumbs;
-  final String plot;
-  final String actors;
-  final String actorThumbs;
-  final String duration;
-  final double rating;
-  final bool isSeries;
-  final String posterPath;
-  final String saga;
-  final int sagaIndex;
-
-  final DateTime? dateAdded;
 
   Video({
     this.id,
@@ -39,29 +20,6 @@ class Video {
     this.sagaIndex = 0,
     this.dateAdded,
   });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'path': path,
-      'mtime': mtime,
-      'title': title,
-      'genres': genres,
-      'year': year,
-      'directors': directors,
-      'directorThumbs': directorThumbs,
-      'plot': plot,
-      'actors': actors,
-      'actorThumbs': actorThumbs,
-      'duration': duration,
-      'rating': rating,
-      'isSeries': isSeries ? 1 : 0,
-      'posterPath': posterPath,
-      'saga': saga,
-      'sagaIndex': sagaIndex,
-      'date_added': dateAdded?.millisecondsSinceEpoch,
-    };
-  }
 
   factory Video.fromMap(Map<String, dynamic> map) {
     return Video(
@@ -90,6 +48,48 @@ class Video {
           ? DateTime.fromMillisecondsSinceEpoch(map['date_added'])
           : null,
     );
+  }
+  final int? id;
+  final String path;
+  final double mtime;
+  final String title;
+  final String genres;
+  final String year;
+  final String directors;
+  final String directorThumbs;
+  final String plot;
+  final String actors;
+  final String actorThumbs;
+  final String duration;
+  final double rating;
+  final bool isSeries;
+  final String posterPath;
+  final String saga;
+  final int sagaIndex;
+
+  final DateTime? dateAdded;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'path': path,
+      'mtime': mtime,
+      'title': title,
+      'genres': genres,
+      'year': year,
+      'directors': directors,
+      'directorThumbs': directorThumbs,
+      'plot': plot,
+      'actors': actors,
+      'actorThumbs': actorThumbs,
+      'duration': duration,
+      'rating': rating,
+      'isSeries': isSeries ? 1 : 0,
+      'posterPath': posterPath,
+      'saga': saga,
+      'sagaIndex': sagaIndex,
+      'date_added': dateAdded?.millisecondsSinceEpoch,
+    };
   }
 
   Video copyWith({

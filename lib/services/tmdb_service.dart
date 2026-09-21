@@ -3,10 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class TmdbService {
-  static const String _baseUrl = 'https://api.themoviedb.org/3';
-  final String apiKey;
 
   TmdbService(this.apiKey);
+  static const String _baseUrl = 'https://api.themoviedb.org/3';
+  final String apiKey;
 
   /// Search for a movie by query.
   Future<List<Map<String, dynamic>>> searchMovie(
@@ -33,7 +33,7 @@ class TmdbService {
       } else {
         throw Exception('Errore TMDB: ${response.statusCode}');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('TMDB Search Error: $e');
       rethrow;
     }
@@ -62,7 +62,7 @@ class TmdbService {
       } else {
         throw Exception('Errore TMDB Dettagli: ${response.statusCode}');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('TMDB Details Error: $e');
       rethrow;
     }
@@ -93,7 +93,7 @@ class TmdbService {
       } else {
         throw Exception('Errore TMDB Search TV: ${response.statusCode}');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('TMDB Search TV Error: $e');
       rethrow;
     }
@@ -121,7 +121,7 @@ class TmdbService {
       } else {
         throw Exception('Errore TMDB Dettagli TV: ${response.statusCode}');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('TMDB Details TV Error: $e');
       rethrow;
     }

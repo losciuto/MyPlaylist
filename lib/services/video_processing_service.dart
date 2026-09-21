@@ -11,15 +11,6 @@ import '../services/metadata_service.dart';
 import '../database/app_database.dart' as db;
 
 class VideoProcessingStatus {
-  final int current;
-  final int total;
-  final String currentTitle;
-  final bool isCancelled;
-  final int updatedCount;
-  final int alreadyInSyncCount;
-  final int errorCount;
-  final String? currentMethod;
-  final String? currentReason;
 
   VideoProcessingStatus({
     required this.current,
@@ -32,14 +23,18 @@ class VideoProcessingStatus {
     this.currentMethod,
     this.currentReason,
   });
+  final int current;
+  final int total;
+  final String currentTitle;
+  final bool isCancelled;
+  final int updatedCount;
+  final int alreadyInSyncCount;
+  final int errorCount;
+  final String? currentMethod;
+  final String? currentReason;
 }
 
 class VideoProcessingResult {
-  final int updated;
-  final int skipped; // Generic skipped (if any)
-  final int alreadyInSync;
-  final int previouslyFailed;
-  final int errors;
 
   VideoProcessingResult({
     required this.updated,
@@ -48,6 +43,11 @@ class VideoProcessingResult {
     this.previouslyFailed = 0,
     required this.errors,
   });
+  final int updated;
+  final int skipped; // Generic skipped (if any)
+  final int alreadyInSync;
+  final int previouslyFailed;
+  final int errors;
 }
 
 class VideoProcessingService {
@@ -116,7 +116,7 @@ class VideoProcessingService {
 
       try {
         // Tiered Search Logic
-        String baseQuery = p
+        final String baseQuery = p
             .basenameWithoutExtension(video.path)
             .replaceAll('.', ' ')
             .replaceAll('_', ' ')
@@ -208,7 +208,7 @@ class VideoProcessingService {
             } else {
               fanartImages = await fanart.getMovieImages(selectedMovie['id']);
             }
-          } catch (e) {
+          } on Exception catch (e) {
             debugPrint('Fanart fetch failed: $e');
           }
         }
@@ -220,7 +220,7 @@ class VideoProcessingService {
             if (resp.statusCode == 200) {
               await File(path).writeAsBytes(resp.bodyBytes);
             }
-          } catch (e) {
+          } on Exception catch (e) {
             debugPrint('Download failed ($url): $e');
           }
         }
@@ -392,7 +392,7 @@ class VideoProcessingService {
 
         await db.AppDatabase.instance.updateVideo(updatedVideo);
         updated++;
-      } catch (e) {
+      } on Exception catch (e) {
         errors++;
         debugPrint('Error TMDB processing ${video.path}: $e');
       }
@@ -484,7 +484,7 @@ class VideoProcessingService {
                     .map((e) => e.path)
                     .toList();
                 dirCache[dirPath] = dirFiles;
-              } catch (e) {
+              } on Exception catch (e) {
                 debugPrint('Error listing directory $dirPath: $e');
               }
             }
@@ -510,7 +510,7 @@ class VideoProcessingService {
           // Registra il fallimento per evitare di ritentare in futuro
           await db.AppDatabase.instance.insertFailedRename(
             video.path,
-            "File .nfo non trovato",
+            'File .nfo non trovato',
           );
           errorCount++;
           continue;
@@ -522,7 +522,7 @@ class VideoProcessingService {
             metadata['title'].toString().isEmpty) {
           await db.AppDatabase.instance.insertFailedRename(
             video.path,
-            "Titolo mancante o nfo invalido",
+            'Titolo mancante o nfo invalido',
           );
           errorCount++;
           continue;
@@ -537,12 +537,12 @@ class VideoProcessingService {
             .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
             .replaceAll(RegExp(r'\s+'), ' ');
 
-        String targetTitle = (nfoYear != null && nfoYear.isNotEmpty)
+        final String targetTitle = (nfoYear != null && nfoYear.isNotEmpty)
             ? '$nfoTitle ($nfoYear)'
             : nfoTitle;
 
         // Controllo se il DB è disallineato rispetto alla target title
-        bool dbMismatch = norm(video.title) != norm(targetTitle);
+        final bool dbMismatch = norm(video.title) != norm(targetTitle);
 
         // Usiamo un controllo completo passando sempre da MetadataService.
         // Questo garantisce che:
@@ -642,12 +642,12 @@ class VideoProcessingService {
             currentReason: currentReason,
           ),
         );
-      } catch (e) {
+      } on Exception catch (e) {
         errorCount++;
         debugPrint('ERROR renaming video ${video.path}: $e');
         await db.AppDatabase.instance.insertFailedRename(
           video.path,
-          "Eccezione durante la rinomina: ${e.toString()}",
+          'Eccezione durante la rinomina: ${e.toString()}',
         );
       }
       await Future.delayed(Duration.zero);
@@ -728,7 +728,7 @@ class VideoProcessingService {
               }
             }
           }
-        } catch (e) {
+        } on Exception catch (e) {
           debugPrint('Error scanning dir for sidecar files: $e');
         }
       }
@@ -737,7 +737,7 @@ class VideoProcessingService {
       if (video.id != null) {
         await db.AppDatabase.instance.deleteVideo(video.id!);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error deleting video with files: $e');
     }
 

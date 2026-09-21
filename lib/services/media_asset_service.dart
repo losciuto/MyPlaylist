@@ -56,7 +56,7 @@ class MediaAssetService {
           'Failed to download thumbnail for $name: ${response.statusCode}',
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.error('Error downloading thumbnail for $name', e);
     }
 

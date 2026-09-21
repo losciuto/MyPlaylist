@@ -36,7 +36,7 @@ class _ScanTabState extends State<ScanTab> {
   }
 
   void _selectFolder() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+    final String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
       lockParentWindow: true,
     );
 
