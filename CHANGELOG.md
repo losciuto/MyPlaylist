@@ -1,5 +1,11 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.1] - 2026-04-01
+
+### Changed
+- **Migration Strategy**: Fixed legacy database migration from schema 5 to 6. The `is_series` column check now uses the correct SQL column name (not camelCase). Added defensive check before attempting to add the column.
+- **Index Fix**: Corrected `videos_isseries_idx` to use `is_series` (SQL name) instead of `isSeries` (camelCase).
+
 ## [3.14.0] - 2026-04-01
 
 ### Added

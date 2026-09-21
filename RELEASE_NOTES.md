@@ -1,5 +1,13 @@
 # MyPlaylist Release Notes
 
+## Version 3.14.1 — 2026-04-01
+
+### Changed
+- **Migration Strategy**: Fixed legacy database migration from schema 5 to 6. The `is_series` column check now uses the correct SQL column name (not camelCase). Added defensive check before attempting to add the column.
+- **Index Fix**: Corrected `videos_isseries_idx` to use `is_series` (SQL name) instead of `isSeries` (camelCase).
+
+---
+
 ## Version 3.14.0 — 2026-04-01
 
 ### New Features
@@ -17,10 +25,10 @@
 ---
 
 ### Download
-- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-linux.deb)
-- **Windows**: [myplaylist-windows-x64.zip](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-windows-setup.exe)
-- **Android**: [myplaylist-android.apk](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-android.apk)
-- **macOS**: [myplaylist-macos.zip](https://github.com/Massimo/MyPlaylist/releases/download/v3.14.0/myplaylist-macos.zip)
+- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-linux.deb)
+- **Windows**: [myplaylist-windows-x64.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-windows-setup.exe)
+- **Android**: [myplaylist-android.apk](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-android.apk)
+- **macOS**: [myplaylist-macos.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-macos.zip)
 
 ### Requirements
 - **Linux**: Flutter SDK, libmpv-dev, mpv, ffmpeg, mkvtoolnix, gpac

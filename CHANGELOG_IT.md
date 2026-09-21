@@ -1,5 +1,11 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.1] - 01/04/2026
+
+### Modifiche
+- **Strategia Migration**: Corretta la migrazione dai database legacy (schema 5 a 6). Il controllo sulla colonna `is_series` ora usa il nome SQL corretto (non camelCase). Aggiunto controllo difensivo prima di tentare di aggiungere la colonna.
+- **Indice Corretto**: Corretto `videos_isseries_idx` per usare `is_series` (nome SQL) invece di `isSeries` (camelCase).
+
 ## [3.14.0] - 01/04/2026
 
 ### Novità
