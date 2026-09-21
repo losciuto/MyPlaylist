@@ -344,6 +344,30 @@ await m.createIndex(
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
+  /// Restituisce tutti i video contrassegnati come serie TV (isSeries = 1)
+  Future<List<model.Video>> getSeriesPlaylist({int? limit}) async {
+    final query = select(videos)
+      ..where((t) => t.isSeries.equals(1))
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.title),
+        (t) => OrderingTerm(expression: t.sagaIndex),
+      ]);
+    if (limit != null) {
+      query.limit(limit);
+    }
+    final driftVideos = await query.get();
+    return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
+  }
+
+  /// Restituisce i titoli delle serie TV disponibili (raggruppati per titolo)
+  Future<List<String>> getDistinctSeriesTitles() async {
+    final query = customSelect(
+      'SELECT DISTINCT title FROM videos WHERE is_series = 1 ORDER BY title ASC',
+    );
+    final rows = await query.get();
+    return rows.map((row) => row.read<String>('title')).toList();
+  }
+
   model.Video _mapDriftToModel(DriftVideo v) {
     return model.Video(
       id: v.id,

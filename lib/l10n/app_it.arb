@@ -132,6 +132,7 @@
   "btnRecent": "🕒 Più Recenti",
   "btnFiltered": "🎲 Playlist\ncon Filtri",
   "btnManual": "✏️ Selezione\nManuale",
+  "btnSeries": "📺 Serie TV\nPlaylist",
   "btnResetSession": "Resetta cronologia sessione ({count} visti)",
   "actionsTitle": "Azioni Playlist",
   "btnShowPosters": "🎨 Mostra Poster",

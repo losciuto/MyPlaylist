@@ -836,6 +836,12 @@ abstract class AppLocalizations {
   /// **'✏️ Selezione\nManuale'**
   String get btnManual;
 
+  /// No description provided for @btnSeries.
+  ///
+  /// In it, this message translates to:
+  /// **'📺 Serie TV\nPlaylist'**
+  String get btnSeries;
+
   /// No description provided for @btnResetSession.
   ///
   /// In it, this message translates to:

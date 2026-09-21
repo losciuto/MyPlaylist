@@ -422,6 +422,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get btnManual => '✏️ Selezione\nManuale';
 
   @override
+  String get btnSeries => '📺 Serie TV\nPlaylist';
+
+  @override
   String btnResetSession(Object count) {
     return 'Resetta cronologia sessione ($count visti)';
   }

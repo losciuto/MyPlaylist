@@ -2,6 +2,10 @@ All notable changes to this project will be documented in this file.
 
 ## [3.14.1] - 01/04/2026
 
+### Novità
+- **Bottone Playlist Serie TV**: Aggiunto un bottone "Serie TV" nel tab Playlist che genera una playlist con tutti i video contrassegnati come serie (`isSeries = 1`).
+- **Metodi Database**: Aggiunti `getSeriesPlaylist()` e `getDistinctSeriesTitles()` a `AppDatabase`.
+
 ### Modifiche
 - **Strategia Migration**: Corretta la migrazione dai database legacy (schema 5 a 6). Il controllo sulla colonna `is_series` ora usa il nome SQL corretto (non camelCase). Aggiunto controllo difensivo prima di tentare di aggiungere la colonna.
 - **Indice Corretto**: Corretto `videos_isseries_idx` per usare `is_series` (nome SQL) invece di `isSeries` (camelCase).

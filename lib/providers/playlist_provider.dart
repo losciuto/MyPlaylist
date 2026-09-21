@@ -97,6 +97,21 @@ class PlaylistProvider extends ChangeNotifier {
     return _currentPlaylist.map((v) => v.toMap()).toList();
   }
 
+  /// Genera una playlist con tutti i video contrassegnati come serie TV (isSeries = 1)
+  Future<List<Map<String, dynamic>>> generateSeriesPlaylist({
+    int? limit,
+    bool launchPlayer = true,
+  }) async {
+    final videos = await db.AppDatabase.instance.getSeriesPlaylist(limit: limit);
+    await setPlaylist(videos);
+
+    if (launchPlayer) {
+      await playCurrentPlaylist();
+    }
+
+    return _currentPlaylist.map((v) => v.toMap()).toList();
+  }
+
   Future<List<Map<String, dynamic>>> generateFilteredPlaylist({
     List<String>? genres,
     List<String>? years,

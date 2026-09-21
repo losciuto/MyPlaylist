@@ -419,6 +419,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get btnManual => '✏️ Manual\nSelection';
 
   @override
+  String get btnSeries => '📺 Series\nPlaylist';
+
+  @override
   String btnResetSession(Object count) {
     return 'Reset session history ($count watched)';
   }
