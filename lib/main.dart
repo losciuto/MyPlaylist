@@ -17,9 +17,10 @@ import 'services/logger_service.dart';
 import 'services/file_watcher_service.dart';
 
 void main() async {
+  // Initialize Flutter binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize MediaKit for video playback
+  // Initialize MediaKit for video playback (after binding is ready)
   MediaKit.ensureInitialized();
 
   // Initialize Settings
@@ -107,7 +108,7 @@ void main() async {
     }
   });
 
-  final database = AppDatabase();
+  final database = AppDatabase.instance;
 
   runApp(
     MultiProvider(

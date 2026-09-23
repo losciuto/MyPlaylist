@@ -55,11 +55,11 @@ class Videos extends Table {
     ),
     Index(
       'videos_isseries_idx',
-      'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (isSeries)',
+      'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (is_series)',
     ),
     Index(
       'videos_dateadded_idx',
-      'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (dateAdded)',
+      'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (date_added)',
     ),
   ];
 }
@@ -153,7 +153,7 @@ class AppDatabase extends _$AppDatabase {
               'CREATE INDEX IF NOT EXISTS videos_rating_idx ON videos (rating)',
             ),
           );
-await m.createIndex(
+          await m.createIndex(
             Index(
               'videos_isseries_idx',
               'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (is_series)',
@@ -162,7 +162,7 @@ await m.createIndex(
           await m.createIndex(
             Index(
               'videos_dateadded_idx',
-              'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (dateAdded)',
+              'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (date_added)',
             ),
           );
         }
@@ -336,11 +336,9 @@ await m.createIndex(
   }
 
   Future<List<model.Video>> getAllVideos() async {
-    final driftVideos =
-        await (select(videos)..orderBy([
-              (t) => OrderingTerm(expression: t.title),
-            ]))
-            .get();
+    final driftVideos = await (select(
+      videos,
+    )..orderBy([(t) => OrderingTerm(expression: t.title)])).get();
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
@@ -619,9 +617,7 @@ await m.createIndex(
         query.where((t) => t.saga.like('%$value%'));
         break;
     }
-    query.orderBy([
-      (t) => OrderingTerm(expression: t.title),
-    ]);
+    query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     final result = await query.get();
     return result.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }

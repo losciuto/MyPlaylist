@@ -75,21 +75,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadVideos() async {
-    final count = await db.AppDatabase.instance.getVideoCount();
-    if (mounted) {
+    try {
+      final count = await db.AppDatabase.instance.getVideoCount();
+      if (!mounted) return;
       setState(() {
         if (count > 0) {
-          _tabController.index = 0; // Index of 'Playlist'
+          _tabController.index = 0;
           context.read<DatabaseProvider>().setTabIndex(0);
         } else {
-          _tabController.index = 1; // Index of 'Servizio'
+          _tabController.index = 1;
           context.read<DatabaseProvider>().setTabIndex(1);
           context.read<DatabaseProvider>().setServiceTabIndex(
-            0,
-          ); // Index of 'Scansione' inside Servizio
+                0,
+              );
         }
-        _isLoading = false;
       });
+    } on Object catch (e, stackTrace) {
+      debugPrint('Error loading database count: $e\n$stackTrace');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
