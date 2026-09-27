@@ -1,5 +1,20 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.2] - 27/09/2026
+
+### Novità
+- **Aggiornamento In-App**: Il tab Servizio ora verifica su GitHub se esiste una release più recente e propone di installarla. Su tutte le piattaforme tranne Android l'app rimanda alla pagina della release; su Android l'APK viene scaricato, il suo SHA-256 viene confrontato con il digest pubblicato nel corpo della release, e il file viene sostituito con una rinomina atomica: un download troncato o manomesso non viene mai eseguito.
+
+### Correzioni
+- **Le icone del launcher erano sbagliate su tre piattaforme**: `assets/logo.png` era un JPEG con estensione `.png`, che il `.deb` installava poi in `/usr/share/icons` come se fosse un PNG, e le sezioni `macos` e `windows` mancavano da `flutter_launcher_icons`, quindi quelle icone non venivano mai rigenerate. Tutte le icone piattaforma sono ora rigenerate da un PNG RGBA vero.
+- **Nessuna icona dell'applicazione su Linux**: non c'era un desktop entry né un'icona installabile, quindi una copia installata non aveva una voce nel launcher e mostrava l'icona generica. `linux/share` contiene ora il desktop entry e un set hicolor a otto taglie, installati da `linux/CMakeLists.txt`.
+- **Icona della finestra su Linux**: `gtk_window_set_icon_from_file` segnalava un file mancante attraverso un parametro che nessuno guardava, quindi la finestra restava senza icona e senza alcun segnale del motivo. Ora il pixbuf viene caricato e assegnato direttamente, e un risultato nullo semplicemente non imposta l'icona.
+- **Icona del pacchetto Debian**: il `.deb` puntava alla sorgente 1024x1024 e installava lo stesso file sia in `128x128` sia in `256x256`; ora punta alla variante da 256 pixel.
+
+### Rimosso
+- Il target `web/`, che non ha mai avuto un `index.html` e aveva un `manifest.json` vuoto: il generatore di icone ci falliva con una `FormatException`, e l'app non e' compilabile per il web (27 file Dart su 55 importano `dart:io`, e Drift usa la libreria nativa `sqlite3`).
+- I file `ic_launcher.png` di default di Flutter, che nessun manifest referenziava.
+
 ## [3.14.1] - 01/04/2026
 
 ### Novità

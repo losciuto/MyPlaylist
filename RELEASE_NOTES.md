@@ -1,5 +1,19 @@
 # MyPlaylist Release Notes
 
+## Version 3.14.2 — 2026-09-27
+
+### New Features
+- **In-App Updater**: The Service tab checks GitHub for a newer release and offers to install it. On Android the APK is downloaded and its SHA-256 verified before being swapped in; everywhere else the app sends you to the release page.
+
+### Bug Fixes
+- **Launcher icons**: the app shipped the wrong icon on macOS and none at all on Linux. All platform icons are regenerated from a real RGBA PNG, the Linux build now installs a desktop entry and a full hicolor icon set, and the `.deb` no longer installs a 1024x1024 file into a 128x128 slot.
+- **Linux window icon**: the icon is now set reliably, and a missing asset no longer fails silently.
+
+### Maintenance
+- Dropped the unused `web/` target, which could not be built and broke the icon generator.
+
+---
+
 ## Version 3.14.1 — 2026-04-01
 
 ### Changed
@@ -25,10 +39,10 @@
 ---
 
 ### Download
-- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-linux.deb)
-- **Windows**: [myplaylist-windows-x64.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-windows-setup.exe)
-- **Android**: [myplaylist-android.apk](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-android.apk)
-- **macOS**: [myplaylist-macos.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.1/myplaylist-macos.zip)
+- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-linux.deb)
+- **Windows**: [myplaylist-windows-x64.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-windows-setup.exe)
+- **Android**: [myplaylist-android.apk](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-android.apk)
+- **macOS**: [myplaylist-macos.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-macos.zip)
 
 ### Requirements
 - **Linux**: Flutter SDK, libmpv-dev, mpv, ffmpeg, mkvtoolnix, gpac

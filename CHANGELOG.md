@@ -1,5 +1,20 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.2] - 2026-09-27
+
+### Added
+- **In-App Updater**: The Service tab now checks GitHub for a newer release and offers to install it. On every platform but Android the app sends you to the release page; on Android the APK is downloaded, its SHA-256 is verified against the digest published in the release body, and the file is swapped in with an atomic rename, so a truncated or tampered download is never executed.
+
+### Fixed
+- **Launcher icons were the wrong ones on three platforms**: `assets/logo.png` was a JPEG with a `.png` extension, which the `.deb` then installed into `/usr/share/icons` as a PNG, and the `macos` and `windows` sections were missing from `flutter_launcher_icons` so those icons were never regenerated. All platform icons are regenerated from a real RGBA PNG.
+- **No application icon on Linux**: there was no `.desktop` entry and no installable icon, so an installed copy had no launcher entry and showed a generic icon. `linux/share` now ships the desktop entry and an eight-size hicolor set, installed by `linux/CMakeLists.txt`.
+- **Linux window icon**: `gtk_window_set_icon_from_file` reported a missing file through a parameter nobody checked, so the window stayed iconless with no sign of why. The pixbuf is now loaded and assigned directly, and a null result simply leaves the icon unset.
+- **Debian package icon**: the `.deb` pointed at the 1024x1024 source and installed the same file into both `128x128` and `256x256`; it now points at the 256px variant.
+
+### Removed
+- The `web/` target, which never had an `index.html` and carried an empty `manifest.json`; the icon generator failed on it with a `FormatException`, and the app cannot be compiled for the web (27 of 55 Dart files import `dart:io`, and Drift uses the native `sqlite3` library).
+- The stock Flutter `ic_launcher.png` files, which no manifest referenced.
+
 ## [3.14.1] - 2026-04-01
 
 ### Added
