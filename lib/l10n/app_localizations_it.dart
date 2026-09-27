@@ -422,7 +422,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get btnManual => '✏️ Selezione\nManuale';
 
   @override
-  String get btnSeries => '📺 Serie TV\nPlaylist';
+  String get seriesFilterLabel => 'Mostra:';
+
+  @override
+  String get seriesFilterAll => 'Tutti';
+
+  @override
+  String get seriesFilterSeriesOnly => 'Solo Serie TV';
+
+  @override
+  String get seriesFilterNonSeriesOnly => 'Solo Film';
 
   @override
   String btnResetSession(Object count) {

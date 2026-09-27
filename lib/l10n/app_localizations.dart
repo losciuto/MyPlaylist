@@ -836,11 +836,29 @@ abstract class AppLocalizations {
   /// **'✏️ Selezione\nManuale'**
   String get btnManual;
 
-  /// No description provided for @btnSeries.
+  /// No description provided for @seriesFilterLabel.
   ///
   /// In it, this message translates to:
-  /// **'📺 Serie TV\nPlaylist'**
-  String get btnSeries;
+  /// **'Mostra:'**
+  String get seriesFilterLabel;
+
+  /// No description provided for @seriesFilterAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti'**
+  String get seriesFilterAll;
+
+  /// No description provided for @seriesFilterSeriesOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo Serie TV'**
+  String get seriesFilterSeriesOnly;
+
+  /// No description provided for @seriesFilterNonSeriesOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo Film'**
+  String get seriesFilterNonSeriesOnly;
 
   /// No description provided for @btnResetSession.
   ///

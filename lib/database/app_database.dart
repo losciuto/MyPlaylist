@@ -342,21 +342,6 @@ class AppDatabase extends _$AppDatabase {
     return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
   }
 
-  /// Restituisce tutti i video contrassegnati come serie TV (isSeries = 1)
-  Future<List<model.Video>> getSeriesPlaylist({int? limit}) async {
-    final query = select(videos)
-      ..where((t) => t.isSeries.equals(1))
-      ..orderBy([
-        (t) => OrderingTerm(expression: t.title),
-        (t) => OrderingTerm(expression: t.sagaIndex),
-      ]);
-    if (limit != null) {
-      query.limit(limit);
-    }
-    final driftVideos = await query.get();
-    return driftVideos.map<model.Video>((v) => _mapDriftToModel(v)).toList();
-  }
-
   /// Restituisce i titoli delle serie TV disponibili (raggruppati per titolo)
   Future<List<String>> getDistinctSeriesTitles() async {
     final query = customSelect(

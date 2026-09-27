@@ -44,20 +44,6 @@ class _PlaylistTabState extends State<PlaylistTab> {
     _checkResult(provider.playlist);
   }
 
-  Future<void> _generateSeries(PlaylistProvider provider) async {
-    final count = await _inputCount();
-    if (count == null) return;
-    try {
-      await provider.generateSeriesPlaylist(limit: count);
-      _checkResult(provider.playlist);
-    } on Exception catch (e) {
-      debugPrint('Error generating series playlist: $e');
-      if (mounted) {
-        _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
-      }
-    }
-  }
-
   Future<void> _generateFiltered(PlaylistProvider provider) async {
     final settings = await showDialog(
       context: context,
@@ -354,11 +340,6 @@ class _PlaylistTabState extends State<PlaylistTab> {
                     AppLocalizations.of(context)!.btnManual,
                     Colors.blueGrey,
                     () => _generateManual(provider),
-                  ),
-                  _buildBtn(
-                    AppLocalizations.of(context)!.btnSeries,
-                    Colors.teal,
-                    () => _generateSeries(provider),
                   ),
                 ],
               ),

@@ -6,6 +6,12 @@ import '../database/app_database.dart' as db;
 import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
+/// Quali video mostra la lista della selezione manuale.
+///
+/// `all` e' il default perche' il filtro non deve cambiare nulla finche'
+/// nessuno lo tocca: e' un filtro di vista, non una selezione.
+enum _SeriesFilter { all, seriesOnly, nonSeriesOnly }
+
 class ManualSelectionDialog extends StatefulWidget {
   const ManualSelectionDialog({super.key});
 
@@ -20,6 +26,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   final Set<String> _selectedEpisodePaths = {};
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
+  _SeriesFilter _seriesFilter = _SeriesFilter.all;
 
   @override
   void initState() {
@@ -38,16 +45,42 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
     }
   }
 
-  void _filterVideos(String query) {
-    final lowerQuery = query.toLowerCase();
+  void _onFilterChanged() => setState(_applyFilters);
+
+  void _setSeriesFilter(_SeriesFilter filter) {
+    if (_seriesFilter == filter) return;
     setState(() {
-      _filteredVideos = _allVideos.where((v) {
-        return v.title.toLowerCase().contains(lowerQuery) ||
-            v.year.contains(lowerQuery) ||
-            v.genres.toLowerCase().contains(lowerQuery) ||
-            v.directors.toLowerCase().contains(lowerQuery);
-      }).toList();
+      _seriesFilter = filter;
+      _applyFilters();
     });
+  }
+
+  /// Ricostruisce [_filteredVideos] da testo cercato e filtro serie insieme.
+  ///
+  /// Sono due condizioni AND: il filtro dice *quali* video sono in lista, la
+  /// ricerca dice *quali* di quelli si vedono. Ricalcolare tutto ogni volta,
+  /// invece di filtrare il risultato precedente, evita che togliere il testo
+  /// lasci la lista ristretta dal filtro e viceversa.
+  ///
+  /// Il filtro non tocca [_selectedIds]: e' un filtro di *vista*, come la
+  /// ricerca. Un video scelto e poi nascosto da un filtro resta scelto, e
+  /// entra nella playlist. E' il comportamento che gia' aveva la ricerca, e
+  /// azzerare la selezione a ogni cambio sarebbe una scelta peggiore: il
+  /// pulsante "Seleziona Tutti Visibili" agisce su [_filteredVideos] e
+  /// diventerebbe casuale.
+  void _applyFilters() {
+    final lowerQuery = _searchController.text.toLowerCase();
+    final onlySeries = _seriesFilter == _SeriesFilter.seriesOnly;
+    final excludeSeries = _seriesFilter == _SeriesFilter.nonSeriesOnly;
+    _filteredVideos = _allVideos.where((v) {
+      if (onlySeries && !v.isSeries) return false;
+      if (excludeSeries && v.isSeries) return false;
+      if (lowerQuery.isEmpty) return true;
+      return v.title.toLowerCase().contains(lowerQuery) ||
+          v.year.contains(lowerQuery) ||
+          v.genres.toLowerCase().contains(lowerQuery) ||
+          v.directors.toLowerCase().contains(lowerQuery);
+    }).toList();
   }
 
   void _showPreview(Video video) {
@@ -139,7 +172,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    onChanged: _filterVideos,
+                    onChanged: (_) => _onFilterChanged(),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -162,6 +195,48 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Filtro serie: era un bottone a se' nella tab Playlist, che
+            // generava una playlist di serie per conto suo. Qui sceglie
+            // quali video vedere nella lista, e la scelta resta di chi
+            // seleziona.
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.seriesFilterLabel,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(width: 12),
+                ..._SeriesFilter.values.map(
+                  (f) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(switch (f) {
+                        _SeriesFilter.all => AppLocalizations.of(
+                          context,
+                        )!.seriesFilterAll,
+                        _SeriesFilter.seriesOnly => AppLocalizations.of(
+                          context,
+                        )!.seriesFilterSeriesOnly,
+                        _SeriesFilter.nonSeriesOnly => AppLocalizations.of(
+                          context,
+                        )!.seriesFilterNonSeriesOnly,
+                      }),
+                      selected: _seriesFilter == f,
+                      onSelected: (_) => _setSeriesFilter(f),
+                      selectedColor: const Color(0xFF4CAF50),
+                      backgroundColor: const Color(0xFF3C3C3C),
+                      labelStyle: TextStyle(
+                        color: _seriesFilter == f ? Colors.black : Colors.white,
+                        fontSize: 12,
+                      ),
+                      showCheckmark: false,
+                    ),
+                  ),
                 ),
               ],
             ),
