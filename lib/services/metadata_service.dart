@@ -142,12 +142,12 @@ class MetadataService {
     final ext = p.extension(path).toLowerCase();
     try {
       if (ext == '.mkv' && await _isToolAvailable('mkvpropedit')) {
-        return _saveMKVMetadata(path, tags);
+        return await _saveMKVMetadata(path, tags);
       } else if ((ext == '.mp4' || ext == '.m4v') &&
           await _isToolAvailable('MP4Box')) {
-        return _saveMP4Metadata(path, tags);
+        return await _saveMP4Metadata(path, tags);
       } else {
-        return _saveGenericMetadata(path, tags);
+        return await _saveGenericMetadata(path, tags);
       }
     } on Exception catch (e) {
       await LoggerService().error('Error saving metadata to $path', e);
