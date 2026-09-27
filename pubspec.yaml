@@ -1,5 +1,5 @@
 name: my_playlist
-description: "A new Flutter project."
+description: "Video Playlist Creator and Local Database Manager."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -93,9 +93,6 @@ flutter_launcher_icons:
   ios: false
   image_path: "assets/logo.png"
   min_sdk_android: 21
-  web:
-    generate: true
-    image_path: "assets/logo.png"
   windows:
     generate: true
     image_path: "assets/logo.png"

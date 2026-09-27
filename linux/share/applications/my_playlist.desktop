@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MyPlaylist
+Comment=Video Playlist Creator and Local Database Manager
+Icon=my_playlist
+Exec=my_playlist %U
+Terminal=false
+Categories=AudioVideo;Video;Player;
+StartupNotify=true
+StartupWMClass=com.antigravity.myplaylist.my_playlist
