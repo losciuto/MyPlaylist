@@ -1,7 +1,6 @@
 import '../database/app_database.dart' as db;
 
 class VideoStatistics {
-
   VideoStatistics({
     required this.totalVideos,
     required this.genreDistribution,

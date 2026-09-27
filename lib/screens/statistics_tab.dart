@@ -186,12 +186,8 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(
-                      
-                    ),
-                    rightTitles: const AxisTitles(
-                      
-                    ),
+                    topTitles: const AxisTitles(),
+                    rightTitles: const AxisTitles(),
                   ),
                 ),
               ),
@@ -263,12 +259,8 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(
-                      
-                    ),
-                    rightTitles: const AxisTitles(
-                      
-                    ),
+                    topTitles: const AxisTitles(),
+                    rightTitles: const AxisTitles(),
                   ),
                 ),
               ),

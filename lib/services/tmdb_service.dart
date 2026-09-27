@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class TmdbService {
-
   TmdbService(this.apiKey);
   static const String _baseUrl = 'https://api.themoviedb.org/3';
   final String apiKey;

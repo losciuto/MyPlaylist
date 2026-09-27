@@ -1,5 +1,4 @@
 class Video {
-
   Video({
     this.id,
     required this.path,

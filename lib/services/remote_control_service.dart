@@ -7,7 +7,6 @@ import '../providers/playlist_provider.dart';
 import 'settings_service.dart';
 
 class RemoteCommandLog {
-
   RemoteCommandLog({
     required this.command,
     required this.args,
@@ -19,7 +18,6 @@ class RemoteCommandLog {
 }
 
 class RemoteControlService with ChangeNotifier {
-
   RemoteControlService({
     required this.playlistProvider,
     required this.settingsService,

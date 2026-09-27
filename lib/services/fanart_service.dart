@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class FanartTvService {
-
   FanartTvService(this.apiKey);
   static const String _baseUrl = 'https://webservice.fanart.tv/v3';
   // Public Personal API Key for testing or default use-case if allowed by their ToS.

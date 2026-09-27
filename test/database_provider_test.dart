@@ -29,10 +29,7 @@ void main() {
     });
 
     test('duplicateKey handles empty title and year', () {
-      final video = model.Video(
-        path: '/movies/unknown.mkv',
-        mtime: 0,
-      );
+      final video = model.Video(path: '/movies/unknown.mkv', mtime: 0);
       final key = DatabaseProvider.duplicateKey(video);
       expect(key, '|');
     });

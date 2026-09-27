@@ -5,7 +5,6 @@ import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class FilterVideosDialog extends StatefulWidget {
-
   const FilterVideosDialog({
     super.key,
     required this.title,

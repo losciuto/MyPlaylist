@@ -85,9 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         } else {
           _tabController.index = 1;
           context.read<DatabaseProvider>().setTabIndex(1);
-          context.read<DatabaseProvider>().setServiceTabIndex(
-                0,
-              );
+          context.read<DatabaseProvider>().setServiceTabIndex(0);
         }
       });
     } on Object catch (e, stackTrace) {

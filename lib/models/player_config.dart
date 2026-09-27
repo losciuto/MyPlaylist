@@ -3,7 +3,6 @@ import 'dart:io';
 enum PlayerPreset { vlc, mpv, mpcHc, custom }
 
 class PlayerConfig {
-
   const PlayerConfig({
     required this.preset,
     required this.name,

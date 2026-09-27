@@ -7,7 +7,8 @@ import '../services/nfo_sync_service.dart';
 import '../services/settings_service.dart';
 import 'package:path/path.dart' as p;
 
-class DatabaseProvider extends ChangeNotifier { // Index for sub-tabs in 'Servizio'
+class DatabaseProvider extends ChangeNotifier {
+  // Index for sub-tabs in 'Servizio'
 
   DatabaseProvider(this._db);
   final AppDatabase _db;

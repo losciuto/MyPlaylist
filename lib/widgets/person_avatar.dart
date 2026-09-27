@@ -6,7 +6,6 @@ import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class PersonAvatar extends StatelessWidget {
-
   const PersonAvatar({
     super.key,
     required this.name,

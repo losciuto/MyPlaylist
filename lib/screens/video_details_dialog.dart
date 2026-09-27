@@ -9,7 +9,6 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
-
   const VideoDetailsDialog({super.key, required this.video});
   final Video video;
 

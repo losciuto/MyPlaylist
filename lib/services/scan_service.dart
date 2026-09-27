@@ -9,7 +9,6 @@ import 'media_asset_service.dart';
 import 'settings_service.dart';
 
 class ScanStatus {
-
   ScanStatus(this.message, this.count, {this.currentItem});
   final String message;
   final int count;
@@ -127,9 +126,7 @@ class ScanService {
 
     if (isSeriesContainer) {
       try {
-        await for (final entity in dir.list(
-          followLinks: false,
-        )) {
+        await for (final entity in dir.list(followLinks: false)) {
           if (entity is Directory) {
             // Each subdirectory is treated as a Series
             final added = await _processSeries(entity, failedPaths);
@@ -148,9 +145,7 @@ class ScanService {
 
     // 3. Normal Recursive Scan
     try {
-      final entities = await dir
-          .list(followLinks: false)
-          .toList();
+      final entities = await dir.list(followLinks: false).toList();
 
       // Process in batches of 5 to avoid overwhelming file handles/network
       const batchSize = 5;

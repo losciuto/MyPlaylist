@@ -1,5 +1,4 @@
 class FilterSettings {
-
   FilterSettings({
     this.genres = const [],
     this.years = const [],

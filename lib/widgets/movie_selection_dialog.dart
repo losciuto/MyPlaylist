@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class MovieSelectionDialog extends StatefulWidget {
-
   const MovieSelectionDialog({
     super.key,
     required this.title,

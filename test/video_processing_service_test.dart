@@ -63,12 +63,7 @@ void main() {
       'bulkGenerateNfo skips existing NFO when onlyMissingNfo is true',
       () async {
         // Questo test richiede un file system reale, ma possiamo testare il comportamento base
-        final videos = [
-          model.Video(
-            path: '/nonexistent/movie.mkv',
-            mtime: 0,
-          ),
-        ];
+        final videos = [model.Video(path: '/nonexistent/movie.mkv', mtime: 0)];
 
         final result = await service.bulkGenerateNfo(
           videos: videos,

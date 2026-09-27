@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../config/app_config.dart';
 
 class LoggerService {
-
   factory LoggerService() {
     return _instance;
   }

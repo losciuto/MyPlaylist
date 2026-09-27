@@ -10,7 +10,6 @@ import '../services/settings_service.dart';
 import '../models/player_config.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-
   PlaylistProvider() {
     _loadPlaylistState();
     updateVideoCount();
@@ -102,7 +101,9 @@ class PlaylistProvider extends ChangeNotifier {
     int? limit,
     bool launchPlayer = true,
   }) async {
-    final videos = await db.AppDatabase.instance.getSeriesPlaylist(limit: limit);
+    final videos = await db.AppDatabase.instance.getSeriesPlaylist(
+      limit: limit,
+    );
     await setPlaylist(videos);
 
     if (launchPlayer) {

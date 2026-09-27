@@ -8,7 +8,6 @@ import '../utils/video_extensions.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
-
   const VideoPreviewDialog({
     super.key,
     required this.video,

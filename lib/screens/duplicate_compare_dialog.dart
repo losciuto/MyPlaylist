@@ -12,7 +12,6 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 
 /// Technical info fetched via ffprobe for a single file.
 class _TechInfo {
-
   const _TechInfo({
     this.fileSizeBytes,
     this.containerFormat,
@@ -156,7 +155,6 @@ Future<_TechInfo> _fetchTechInfo(String path) async {
 /// Dialog that shows all duplicates in a group side by side with technical
 /// metadata and allows choosing which one to delete.
 class DuplicateCompareDialog extends StatefulWidget {
-
   const DuplicateCompareDialog({super.key, required this.group});
   final List<Video> group;
 
@@ -378,7 +376,6 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
 
 /// A single column for one video in the comparison dialog.
 class _VideoColumn extends StatelessWidget {
-
   const _VideoColumn({
     required this.video,
     required this.info,

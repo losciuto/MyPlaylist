@@ -5,7 +5,6 @@ import '../models/player_config.dart';
 import '../models/filter_settings.dart';
 
 class SettingsService with ChangeNotifier {
-
   factory SettingsService() {
     return _instance;
   }

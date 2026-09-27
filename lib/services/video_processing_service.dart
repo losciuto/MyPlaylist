@@ -11,7 +11,6 @@ import '../services/metadata_service.dart';
 import '../database/app_database.dart' as db;
 
 class VideoProcessingStatus {
-
   VideoProcessingStatus({
     required this.current,
     required this.total,
@@ -35,7 +34,6 @@ class VideoProcessingStatus {
 }
 
 class VideoProcessingResult {
-
   VideoProcessingResult({
     required this.updated,
     required this.skipped,

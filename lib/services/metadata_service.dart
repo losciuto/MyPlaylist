@@ -14,7 +14,6 @@ import '../database/app_database.dart';
 enum MetadataUpdateResult { updated, alreadyInSync, failed }
 
 class MetadataUpdateResponse {
-
   MetadataUpdateResponse(this.result, {this.method = '', this.reason});
   final MetadataUpdateResult result;
   final String method;
@@ -22,7 +21,6 @@ class MetadataUpdateResponse {
 }
 
 class MetadataService {
-
   factory MetadataService() {
     return _instance;
   }
@@ -346,7 +344,8 @@ class MetadataService {
       }
 
       final targetTitle = forcedTitle ?? video.title;
-      final bool titleMatch = norm(currentMetadata['title']) == norm(targetTitle);
+      final bool titleMatch =
+          norm(currentMetadata['title']) == norm(targetTitle);
 
       if (!enforceFullMetadata) {
         // Logica originale per la rinomina/aggiornamento standard:

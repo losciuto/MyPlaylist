@@ -3,7 +3,6 @@ import '../models/video.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 
 class VideoDataTable extends StatefulWidget {
-
   const VideoDataTable({
     super.key,
     required this.videos,

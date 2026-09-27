@@ -426,7 +426,6 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
 
 /// A single row inside a duplicate group showing path, size, and action buttons.
 class _VideoEntryRow extends StatefulWidget {
-
   const _VideoEntryRow({
     required this.video,
     required this.group,
