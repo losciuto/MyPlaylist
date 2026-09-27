@@ -1,5 +1,17 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.3] - 2026-09-27
+
+### Changed
+- **"Serie TV" is a filter of the manual selection, not a button of its own**: the Playlist tab had five generation buttons, and one of them, "Series Playlist", asked for a count and built a series playlist on its own. It is now a filter inside the "Manual Selection" dialog — "All", "Series only", "Films only" — so the list shows only the wanted videos and the choice of what goes in stays with whoever selects. The tab keeps four buttons.
+
+### Removed
+- `PlaylistProvider.generateSeriesPlaylist` and `AppDatabase.getSeriesPlaylist`, which the button was the only caller of. The remote control server never used them. The `is_series` column and the "SERIE" badge in the selection list are untouched: the flag is what the filter reads.
+
+### Notes
+- The filter combines with the search box, and both are AND: "Series only" plus a title shows the series matching that title.
+- The filter is a view filter, like the search was already: switching it does not clear the selection, and a video chosen and then hidden still goes into the playlist. "Select All Visible" applies to the visible ones, so a reset on every filter change would have made that button unpredictable.
+
 ## [3.14.2] - 2026-09-27
 
 ### Added

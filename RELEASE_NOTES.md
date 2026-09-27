@@ -1,5 +1,15 @@
 # MyPlaylist Release Notes
 
+## Version 3.14.3 — 2026-09-27
+
+### Changes
+- **"Series" is now a filter of the manual selection**: the Playlist tab had a "Series Playlist" button that asked for a count and built a series playlist on its own. It is now a filter inside the "Manual Selection" dialog — All / Series only / Films only — so you see only the wanted videos and decide yourself what goes in. The tab keeps four buttons.
+
+### Removed
+- The automatic series playlist generation. Nothing else used it; the `SERIE` badge in the selection list is unchanged.
+
+---
+
 ## Version 3.14.2 — 2026-09-27
 
 ### New Features

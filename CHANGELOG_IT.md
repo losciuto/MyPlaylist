@@ -1,5 +1,17 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.3] - 27/09/2026
+
+### Modifiche
+- **"Serie TV" è un filtro della selezione manuale, non più un bottone**: la tab Playlist aveva cinque bottoni di generazione e uno di essi, "Serie TV Playlist", chiedeva un numero e costruiva da solo una playlist di serie. Ora è un filtro dentro il dialogo "Selezione Manuale" — "Tutti", "Solo Serie TV", "Solo Film" — così la lista mostra solo i video voluti e la scelta di cosa metterci resta di chi seleziona. La tab resta con quattro bottoni.
+
+### Rimosso
+- `PlaylistProvider.generateSeriesPlaylist` e `AppDatabase.getSeriesPlaylist`, di cui il bottone era l'unico chiamante. Il server di controllo remoto non li usava. La colonna `is_series` e il badge "SERIE" nella lista di selezione restano: e' il flag che il filtro legge.
+
+### Note
+- Il filtro si combina con la casella di ricerca, e le due condizioni sono AND: "Solo Serie TV" piu' un titolo mostra le serie che contengono quel titolo.
+- Il filtro è un filtro di vista, come la ricerca era gia': cambiarlo non azzera la selezione, e un video scelto e poi nascosto entra comunque nella playlist. "Seleziona Tutti Visibili" agisce sui visibili, quindi un azzeramento a ogni cambio avrebbe reso quel bottone imprevedibile.
+
 ## [3.14.2] - 27/09/2026
 
 ### Novità
