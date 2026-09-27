@@ -5,15 +5,18 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateInfo {
-
   UpdateInfo({
     required this.version,
     required this.body,
     required this.downloadUrl,
+    this.assetName,
+    this.fileExtension,
   });
   final String version;
   final String body;
   final String downloadUrl;
+  final String? assetName;
+  final String? fileExtension;
 }
 
 class GitHubService {
@@ -37,6 +40,8 @@ class GitHubService {
 
         // Default download URL is the release page
         String downloadUrl = data['html_url'] ?? '';
+        String? assetName;
+        String? fileExtension;
 
         // Cerchiamo un asset specifico in base alla piattaforma
         final List<dynamic>? assets = data['assets'];
@@ -71,6 +76,18 @@ class GitHubService {
           } else if (Platform.isAndroid) {
             downloadUrl = apkUrl ?? downloadUrl;
           }
+
+          // Determina il nome asset e l'estensione per il download in-app
+          for (final asset in assets) {
+            final name = asset['name']?.toString() ?? '';
+            final url = asset['browser_download_url'] ?? '';
+            if (url == downloadUrl) {
+              assetName = name;
+              final dotIndex = name.lastIndexOf('.');
+              fileExtension = dotIndex >= 0 ? name.substring(dotIndex) : null;
+              break;
+            }
+          }
         }
 
         // Estrae il numero di versione (puro) dal tag (es: v3.12.0 -> 3.12.0)
@@ -82,6 +99,8 @@ class GitHubService {
             version: tagName,
             body: body,
             downloadUrl: downloadUrl,
+            assetName: assetName,
+            fileExtension: fileExtension,
           );
         }
       }
