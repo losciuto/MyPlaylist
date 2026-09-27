@@ -7,5 +7,7 @@
 			"path": "../VlcRemote"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
 }
