@@ -52,14 +52,21 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "my_playlist");
   }
 
-  // Set window icon
+  // Icona della finestra, presa dagli asset dell'applicazione.
+  //
+  // Si legge dal disco e non dal bundle di risorse: su Linux gli asset stanno
+  // in `data/flutter_assets` accanto all'eseguibile e non sono registrati come
+  // GResource, quindi un percorso tipo
+  // `/data/flutter_assets/assets/logo.png` non esiste e l'icona non verrebbe
+  // mai impostata, senza alcun errore in segno.
   g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
-  if (exe_path) {
-    g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
-    g_autofree gchar* icon_path = g_build_filename(
-        exe_dir, "data", "flutter_assets", "assets", "logo.png", nullptr);
-    if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
-      gtk_window_set_icon_from_file(window, icon_path, nullptr);
+  if (exe_path != nullptr) {
+    g_autofree gchar* icon_path =
+        g_build_filename(exe_path, "data", "flutter_assets", "assets", "logo.png",
+                         nullptr);
+    g_autoptr(GdkPixbuf) icon = gdk_pixbuf_new_from_file(icon_path, nullptr);
+    if (icon != nullptr) {
+      gtk_window_set_icon(GTK_WINDOW(window), icon);
     }
   }
 
