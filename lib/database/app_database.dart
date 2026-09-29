@@ -414,6 +414,7 @@ class AppDatabase extends _$AppDatabase {
             """
           WITH RECURSIVE split(val, remainder, rest) AS (
             SELECT '', $column || ',', $column || ','
+            FROM videos
             UNION ALL
             SELECT
               CASE WHEN instr(remainder, ',') = 0 THEN remainder

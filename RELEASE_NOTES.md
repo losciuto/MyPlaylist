@@ -1,5 +1,12 @@
 # MyPlaylist Release Notes
 
+## Version 3.14.4 — 2026-09-29
+
+### Bug Fixes
+- **Filtered playlist SQL**: Fixed the recursive query used to load filter values. The "Playlist with filters" dialog now opens and lists genres, years, actors, directors and sagas correctly.
+
+---
+
 ## Version 3.14.3 — 2026-09-27
 
 ### Changes
@@ -49,10 +56,10 @@
 ---
 
 ### Download
-- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-linux.deb)
-- **Windows**: [myplaylist-windows-x64.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-windows-setup.exe)
-- **Android**: [myplaylist-android.apk](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-android.apk)
-- **macOS**: [myplaylist-macos.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.2/myplaylist-macos.zip)
+- **Linux**: [myplaylist-linux-x64.tar.gz](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-linux-x64.tar.gz) | [myplaylist-linux.deb](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-linux.deb)
+- **Windows**: [myplaylist-windows-x64.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-windows-x64.zip) | [myplaylist-windows-setup.exe](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-windows-setup.exe)
+- **Android**: [myplaylist-android.apk](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-android.apk)
+- **macOS**: [myplaylist-macos.zip](https://github.com/losciuto/MyPlaylist/releases/download/v3.14.4/myplaylist-macos.zip)
 
 ### Requirements
 - **Linux**: Flutter SDK, libmpv-dev, mpv, ffmpeg, mkvtoolnix, gpac

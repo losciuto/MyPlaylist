@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.4] - 2026-09-29
+
+### Fixed
+- **Filtered playlist SQL**: Fixed the recursive filter query in `getValuesWithCounts` by adding the missing `FROM videos` clause. The "Playlist with filters" dialog now loads genres, years, actors, directors and sagas correctly.
+
 ## [3.14.3] - 2026-09-27
 
 ### Changed

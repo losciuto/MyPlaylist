@@ -1,6 +1,6 @@
 ; -- Script per Inno Setup per MyPlaylist --
 #define AppName "MyPlaylist"
-#define AppVersion "3.14.3"
+#define AppVersion "3.14.4"
 #define AppPublisher "Massimo"
 #define AppURL "https://github.com/losciuto/MyPlaylist"
 #define AppExeName "my_playlist.exe"

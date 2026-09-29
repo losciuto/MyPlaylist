@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## [3.14.4] - 29/09/2026
+
+### Correzioni
+- **SQL della playlist filtrata**: Corretta la query ricorsiva di `getValuesWithCounts` aggiungendo la clausola mancante `FROM videos`. Il dialogo "Playlist con filtri" carica ora correttamente generi, anni, attori, registi e saghe.
+
 ## [3.14.3] - 27/09/2026
 
 ### Modifiche
