@@ -156,7 +156,11 @@ class MetadataService {
       }
     } on Exception catch (e) {
       await LoggerService().error('Error saving metadata to $path', e);
-      return MetadataUpdateResponse(MetadataUpdateResult.failed);
+      // Il motivo travels con la risposta: senza, l'utente vede solo "fallito".
+      return MetadataUpdateResponse(
+        MetadataUpdateResult.failed,
+        reason: e.toString(),
+      );
     }
   }
 

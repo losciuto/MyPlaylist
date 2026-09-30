@@ -81,9 +81,15 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
         ),
       );
     } else {
+      // Con il motivo si capisce cosa manca, per esempio un tool non installato.
+      final reason = response.reason?.trim();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.errorUpdateMsg),
+          content: Text(
+            reason == null || reason.isEmpty
+                ? l10n.errorUpdateMsg
+                : '${l10n.errorUpdateMsg}: $reason',
+          ),
           backgroundColor: Colors.red,
         ),
       );
