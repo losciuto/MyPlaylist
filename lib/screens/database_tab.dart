@@ -11,6 +11,8 @@ import '../widgets/video_data_table.dart';
 import '../services/video_processing_service.dart';
 import 'failed_renames_screen.dart';
 import 'duplicates_dialog.dart';
+import '../widgets/confirm_dialog.dart';
+import '../services/logger_service.dart';
 
 class DatabaseTab extends StatefulWidget {
   const DatabaseTab({super.key});
@@ -256,7 +258,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
     } on Exception catch (e) {
-      debugPrint('Error removing listener: $e');
+      LoggerService().debug('Error removing listener: $e');
     }
 
     _searchController.dispose();
@@ -290,87 +292,55 @@ class _DatabaseTabState extends State<DatabaseTab> {
   }
 
   Future<void> _deleteVideo(Video video) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.confirmDeleteTitle),
-        content: Text(
-          AppLocalizations.of(context)!.confirmDeleteMsg(video.title),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.delete),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.confirmDeleteTitle,
+      message: l10n.confirmDeleteMsg(video.title),
+      confirmLabel: l10n.delete,
+      destructive: true,
     );
 
-    if (confirm == true && mounted) {
+    if (confirmed && mounted) {
       await context.read<DatabaseProvider>().deleteVideo(video);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.videoDeleted)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.videoDeleted)));
     }
   }
 
   Future<void> _clearDatabase() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.confirm),
-        content: Text(AppLocalizations.of(context)!.confirmClearDbMsg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.no),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              AppLocalizations.of(context)!.yesDelete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.confirm,
+      message: l10n.confirmClearDbMsg,
+      confirmLabel: l10n.yesDelete,
+      cancelLabel: l10n.no,
+      style: ConfirmStyle.text,
+      destructive: true,
     );
 
-    if (confirm == true && mounted) {
+    if (confirmed && mounted) {
       await context.read<DatabaseProvider>().clearDatabase();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.dbCleared)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.dbCleared)));
     }
   }
 
   Future<void> _bulkRenameTitles() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.bulkRenameTitle),
-        content: Text(AppLocalizations.of(context)!.bulkRenameMsg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppLocalizations.of(context)!.start),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.bulkRenameTitle,
+      message: l10n.bulkRenameMsg,
+      confirmLabel: l10n.start,
     );
 
-    if (confirm != true) return;
+    if (!confirmed) return;
     if (!mounted) return;
 
     final provider = context.read<DatabaseProvider>();
@@ -387,7 +357,6 @@ class _DatabaseTabState extends State<DatabaseTab> {
         ); // Ordine decrescente (Priorità: più recenti prima)
       });
     final total = allVideos.length;
-    final l10n = AppLocalizations.of(context)!;
 
     if (total == 0) {
       if (mounted) {
@@ -576,7 +545,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
         try {
           await MetadataService().cleanupTempFiles(dir);
         } on Exception catch (e) {
-          debugPrint('Error cleaning temp files in $dir: $e');
+          LoggerService().debug('Error cleaning temp files in $dir: $e');
         }
       },
     );
@@ -660,6 +629,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 20),
+                        tooltip: l10n.clearSearch,
                         onPressed: () {
                           _searchController.clear();
                           _filterVideos('');

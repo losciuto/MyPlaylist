@@ -2,16 +2,21 @@ import 'dart:async';
 import 'dart:io';
 import 'package:watcher/watcher.dart';
 import 'package:path/path.dart' as p;
-import '../database/app_database.dart' as db;
+import '../repositories/video_repository.dart';
 import '../utils/nfo_parser.dart';
 import '../models/video.dart';
 import '../utils/video_extensions.dart';
-import 'package:flutter/foundation.dart';
+import './logger_service.dart';
 
 class FileWatcherService {
-  factory FileWatcherService() => _instance;
+  factory FileWatcherService([VideoRepository? repository]) {
+    if (repository != null) _repository = repository;
+    return _instance;
+  }
   FileWatcherService._internal();
   static final FileWatcherService _instance = FileWatcherService._internal();
+
+  static VideoRepository _repository = videoRepository;
 
   final Map<String, DirectoryWatcher> _watchers = {};
   final Map<String, StreamSubscription> _subscriptions = {};
@@ -25,33 +30,35 @@ class FileWatcherService {
 
   Future<void> startWatching(String directoryPath) async {
     if (_watchers.containsKey(directoryPath)) {
-      debugPrint('Already watching: $directoryPath');
+      LoggerService().debug('Already watching: $directoryPath');
       return;
     }
 
     try {
       final dir = Directory(directoryPath);
       if (!await dir.exists()) {
-        debugPrint('Directory does not exist: $directoryPath');
+        LoggerService().debug('Directory does not exist: $directoryPath');
         return;
       }
 
       final watcher = DirectoryWatcher(directoryPath);
       _watchers[directoryPath] = watcher;
 
+      // La subscription è conservata in _subscriptions e cancellata
+      // da stopWatching/stopAll: il lint non può verificarlo.
       // ignore: cancel_subscriptions
       final subscription = watcher.events.listen(
         (event) => _handleFileEvent(event),
         onError: (error) {
-          debugPrint('Watcher error for $directoryPath: $error');
+          LoggerService().error('Watcher error for $directoryPath', error);
           stopWatching(directoryPath);
         },
       );
 
       _subscriptions[directoryPath] = subscription;
-      debugPrint('Started watching: $directoryPath');
+      LoggerService().debug('Started watching: $directoryPath');
     } on Object catch (e) {
-      debugPrint('Failed to start watching $directoryPath: $e');
+      await LoggerService().error('Failed to start watching $directoryPath', e);
     }
   }
 
@@ -59,7 +66,7 @@ class FileWatcherService {
     await _subscriptions[directoryPath]?.cancel();
     _subscriptions.remove(directoryPath);
     _watchers.remove(directoryPath);
-    debugPrint('Stopped watching: $directoryPath');
+    LoggerService().debug('Stopped watching: $directoryPath');
   }
 
   Future<void> stopAll() async {
@@ -67,6 +74,7 @@ class FileWatcherService {
       await stopWatching(path);
     }
     _debounceTimer?.cancel();
+    _debounceTimer = null;
     _pendingFiles.clear();
   }
 
@@ -121,7 +129,7 @@ class FileWatcherService {
           await _processNfoFile(filePath);
         }
       } on Object catch (e) {
-        debugPrint('Error processing file $filePath: $e');
+        await LoggerService().error('Error processing file $filePath', e);
       }
     }
   }
@@ -130,12 +138,12 @@ class FileWatcherService {
     final file = File(videoPath);
     if (!await file.exists()) return;
 
-    final database = db.AppDatabase.instance;
+    final database = _repository;
 
     // Check if video already exists
     final existing = await database.getVideoByPath(videoPath);
     if (existing != null) {
-      debugPrint('Video already in database: $videoPath');
+      LoggerService().debug('Video already in database: $videoPath');
       return;
     }
 
@@ -150,7 +158,7 @@ class FileWatcherService {
     );
 
     await database.insertVideo(video);
-    debugPrint('Auto-added video: $videoPath');
+    LoggerService().debug('Auto-added video: $videoPath');
 
     // Check for NFO file
     final nfoPath = '${p.withoutExtension(videoPath)}.nfo';
@@ -164,7 +172,7 @@ class FileWatcherService {
         '${p.withoutExtension(nfoPath)}${_findVideoExtension(nfoPath)}';
     if (videoPath.isEmpty) return;
 
-    final database = db.AppDatabase.instance;
+    final database = _repository;
     final existing = await database.getVideoByPath(videoPath);
     if (existing == null) return;
 
@@ -182,10 +190,10 @@ class FileWatcherService {
         );
 
         await database.updateVideo(updatedVideo);
-        debugPrint('Auto-updated video from NFO: $videoPath');
+        LoggerService().debug('Auto-updated video from NFO: $videoPath');
       }
     } on Object catch (e) {
-      debugPrint('Error parsing NFO $nfoPath: $e');
+      await LoggerService().error('Error parsing NFO $nfoPath', e);
     }
   }
 
@@ -202,11 +210,11 @@ class FileWatcherService {
   Future<void> _handleFileRemoval(String filePath) async {
     if (!_isVideoFile(filePath)) return;
 
-    final database = db.AppDatabase.instance;
+    final database = _repository;
     final existing = await database.getVideoByPath(filePath);
     if (existing != null) {
       await database.deleteVideo(existing.id!);
-      debugPrint('Auto-removed video: $filePath');
+      LoggerService().debug('Auto-removed video: $filePath');
     }
   }
 }

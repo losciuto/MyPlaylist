@@ -7,10 +7,9 @@ import 'priority_tab.dart';
 import 'statistics_tab.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../config/app_config.dart';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
-import '../database/app_database.dart' as db;
-import 'package:path/path.dart' as p;
+import '../widgets/database_backup_actions.dart';
+import '../widgets/confirm_dialog.dart';
+import '../services/logger_service.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -58,7 +57,7 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
     } on Exception catch (e) {
-      debugPrint('Error removing listener: $e');
+      LoggerService().debug('Error removing listener: $e');
     }
     _innerTabController.dispose();
     super.dispose();
@@ -173,152 +172,21 @@ class MaintenanceUI extends StatefulWidget {
 }
 
 class _MaintenanceUIState extends State<MaintenanceUI> {
-  Future<void> _exportDatabase() async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final dbPath = await db.AppDatabase.instance.getDatabasePath();
-      final dbFile = File(dbPath);
+  Future<void> _exportDatabase() => exportDatabaseFlow(context);
 
-      if (!await dbFile.exists()) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.dbNotFoundMsg)));
-        }
-        return;
-      }
-
-      final String? outputDir = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: l10n.selectDestinationFolder,
-      );
-
-      if (outputDir != null) {
-        final timestamp = DateTime.now()
-            .toIso8601String()
-            .replaceAll(':', '-')
-            .split('.')
-            .first;
-        final newPath = p.join(outputDir, 'myplaylist_backup_$timestamp.db');
-        await dbFile.copy(newPath);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.backupSuccessMsg(newPath)),
-              backgroundColor: const Color(0xFF4CAF50),
-            ),
-          );
-        }
-      }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.backupErrorMsg(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _importDatabase() async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.selectBackupFile,
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final backupPath = result.files.single.path!;
-
-        if (!backupPath.endsWith('.db')) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.invalidDbMsg),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-          return;
-        }
-
-        if (!mounted) return;
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.confirmRestoreTitle),
-            content: Text(l10n.confirmRestoreMsg),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AppLocalizations.of(context)!.confirm),
-              ),
-            ],
-          ),
-        );
-
-        if (confirm == true) {
-          await db.AppDatabase.instance.close();
-
-          final dbPath = await db.AppDatabase.instance.getDatabasePath();
-          final sourceFile = File(backupPath);
-          await sourceFile.copy(dbPath);
-
-          if (mounted) {
-            await context.read<DatabaseProvider>().refreshVideos();
-            if (!mounted) return;
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.dbRestoredMsg),
-                  backgroundColor: const Color(0xFF4CAF50),
-                ),
-              );
-            }
-          }
-        }
-      }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.restoreErrorMsg(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
+  Future<void> _importDatabase() => importDatabaseFlow(context);
 
   Future<void> _resetPriorityList() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.resetPriorityList),
-        content: Text(l10n.confirmResetPriority),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.resetPriorityList,
+      message: l10n.confirmResetPriority,
+      confirmLabel: l10n.confirm,
+      confirmColor: Colors.blueAccent,
     );
 
-    if (confirm == true && mounted) {
+    if (confirmed && mounted) {
       await context.read<DatabaseProvider>().syncDatesWithMtime();
       if (mounted) {
         ScaffoldMessenger.of(

@@ -2,14 +2,15 @@ import '../services/settings_service.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import '../models/video.dart';
 import 'logger_service.dart';
+import 'process_runner.dart';
 import '../utils/video_extensions.dart';
 import '../config/app_config.dart';
 import 'package:intl/intl.dart';
 import '../database/app_database.dart';
+import 'error_reporter_service.dart';
 
 enum MetadataUpdateResult { updated, alreadyInSync, failed }
 
@@ -33,7 +34,7 @@ class MetadataService {
       final result = await Process.run('ffmpeg', ['-version']);
       return result.exitCode == 0;
     } on Exception catch (e) {
-      debugPrint('FFmpeg check failed: $e');
+      LoggerService().debug('FFmpeg check failed: $e');
       return false;
     }
   }
@@ -50,7 +51,7 @@ class MetadataService {
       ]);
 
       if (result.exitCode != 0) {
-        debugPrint('ffprobe failed for $filePath');
+        LoggerService().debug('ffprobe failed for $filePath');
         return {};
       }
 
@@ -68,12 +69,16 @@ class MetadataService {
           }
         }
       } on Exception catch (e) {
-        debugPrint('JSON parse error: $e');
+        LoggerService().debug('JSON parse error: $e');
       }
 
       return {};
     } on Exception catch (e) {
-      debugPrint('Error reading metadata: $e');
+      errorReporter.report(
+        'Lettura metadati non riuscita',
+        e,
+        source: 'MetadataService',
+      );
       return {};
     }
   }
@@ -99,7 +104,7 @@ class MetadataService {
         onMethodDecided: onMethodDecided,
       );
     } else {
-      debugPrint('Path not found or invalid: ${video.path}');
+      LoggerService().debug('Path not found or invalid: ${video.path}');
       return MetadataUpdateResponse(MetadataUpdateResult.failed);
     }
   }
@@ -128,7 +133,7 @@ class MetadataService {
       }
       return tags;
     } on Exception catch (e) {
-      debugPrint('getRawFileMetadata error: $e');
+      LoggerService().debug('getRawFileMetadata error: $e');
       return {};
     }
   }
@@ -351,7 +356,9 @@ class MetadataService {
         // Logica originale per la rinomina/aggiornamento standard:
         // Controlla il titolo. Se combacia, salta (già in sync). Se NON combacia, aggiorna tutto.
         if (titleMatch) {
-          debugPrint('Skip $currentPath (Metadata title already in sync)');
+          LoggerService().debug(
+            'Skip $currentPath (Metadata title already in sync)',
+          );
           return MetadataUpdateResponse(MetadataUpdateResult.alreadyInSync);
         }
       } else {
@@ -387,7 +394,7 @@ class MetadataService {
 
         // Se tutto quello che abbiamo nel DB è riflesso nel file, saltiamo.
         if (plotInSync && ratingInSync && posterInSync) {
-          debugPrint(
+          LoggerService().debug(
             'Skip $currentPath (Metadata DB source already reflected in file)',
           );
           return MetadataUpdateResponse(MetadataUpdateResult.alreadyInSync);
@@ -397,15 +404,21 @@ class MetadataService {
       final bool useFastEngine = SettingsService().fastMetadataEngineEnabled;
       final ext = p.extension(currentPath).toLowerCase();
 
-      debugPrint('[MetadataService] Update requested for $currentPath');
-      debugPrint('[MetadataService] Fast Engine Setting: $useFastEngine');
+      LoggerService().debug(
+        '[MetadataService] Update requested for $currentPath',
+      );
+      LoggerService().debug(
+        '[MetadataService] Fast Engine Setting: $useFastEngine',
+      );
 
       String? ffmpegReason;
 
       if (useFastEngine) {
         if (ext == '.mkv') {
           final bool toolAvailable = await _isToolAvailable('mkvpropedit');
-          debugPrint('[MetadataService] mkvpropedit available: $toolAvailable');
+          LoggerService().debug(
+            '[MetadataService] mkvpropedit available: $toolAvailable',
+          );
           if (toolAvailable) {
             onMethodDecided?.call('mkvpropedit', null);
             final error = await _updateSingleFileMKVInPlace(
@@ -416,13 +429,15 @@ class MetadataService {
               forcedTitle,
             );
             if (error == null) {
-              debugPrint('[MetadataService] MKV in-place update SUCCESS');
+              LoggerService().debug(
+                '[MetadataService] MKV in-place update SUCCESS',
+              );
               return MetadataUpdateResponse(
                 MetadataUpdateResult.updated,
                 method: 'mkvpropedit',
               );
             }
-            debugPrint(
+            LoggerService().debug(
               '[MetadataService] MKV in-place update FAILED: $error, falling back...',
             );
             ffmpegReason = 'tool_failed:mkvpropedit:$error';
@@ -431,7 +446,9 @@ class MetadataService {
           }
         } else if (ext == '.mp4' || ext == '.m4v') {
           final bool toolAvailable = await _isToolAvailable('MP4Box');
-          debugPrint('[MetadataService] MP4Box available: $toolAvailable');
+          LoggerService().debug(
+            '[MetadataService] MP4Box available: $toolAvailable',
+          );
           if (toolAvailable) {
             onMethodDecided?.call('MP4Box', null);
             final error = await _updateSingleFileMP4InPlace(
@@ -442,13 +459,15 @@ class MetadataService {
               forcedTitle,
             );
             if (error == null) {
-              debugPrint('[MetadataService] MP4 in-place update SUCCESS');
+              LoggerService().debug(
+                '[MetadataService] MP4 in-place update SUCCESS',
+              );
               return MetadataUpdateResponse(
                 MetadataUpdateResult.updated,
                 method: 'MP4Box',
               );
             }
-            debugPrint(
+            LoggerService().debug(
               '[MetadataService] MP4 in-place update FAILED: $error, falling back...',
             );
             ffmpegReason = 'tool_failed:MP4Box:$error';
@@ -459,11 +478,13 @@ class MetadataService {
           ffmpegReason = 'unsupported_format:$ext';
         }
       } else {
-        debugPrint('[MetadataService] Fast Engine disabled by user settings');
+        LoggerService().debug(
+          '[MetadataService] Fast Engine disabled by user settings',
+        );
         ffmpegReason = 'fast_engine_disabled';
       }
 
-      debugPrint(
+      LoggerService().debug(
         '[MetadataService] Using FFmpeg fallback (slow)... Reason: $ffmpegReason',
       );
       onMethodDecided?.call('FFmpeg', ffmpegReason);
@@ -616,7 +637,7 @@ class MetadataService {
         }
       }
     } on Exception catch (e) {
-      debugPrint('Error finding mount point: $e');
+      LoggerService().debug('Error finding mount point: $e');
     }
     return p.rootPrefix(path);
   }
@@ -632,7 +653,7 @@ class MetadataService {
         return null;
       }
 
-      debugPrint('[MetadataService] Remuxing to MKV: $currentPath');
+      LoggerService().debug('[MetadataService] Remuxing to MKV: $currentPath');
       final remuxResult = await Process.run('mkvmerge', [
         '-o',
         newPath,
@@ -660,7 +681,7 @@ class MetadataService {
       try {
         final dirObj = Directory(videoBackupDir);
         if (!await dirObj.exists()) {
-          debugPrint(
+          LoggerService().debug(
             '[MetadataService] Creating backup folder: $videoBackupDir',
           );
           await dirObj.create(recursive: true);
@@ -682,7 +703,9 @@ class MetadataService {
       }
 
       final backupPath = p.join(videoBackupDir, p.basename(currentPath));
-      debugPrint('[MetadataService] Moving original file to $backupPath');
+      LoggerService().debug(
+        '[MetadataService] Moving original file to $backupPath',
+      );
 
       try {
         await File(currentPath).rename(backupPath);
@@ -699,6 +722,20 @@ class MetadataService {
         e,
       );
       return null;
+    }
+  }
+
+  /// Elimina un file temporaneo senza far fallire il flusso principale.
+  static Future<void> _deleteQuietly(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } on FileSystemException catch (e) {
+      LoggerService().debug(
+        '[MetadataService] Could not delete temp file $path: $e',
+      );
     }
   }
 
@@ -793,56 +830,33 @@ class MetadataService {
         'all:$tagsPath',
       ];
 
-      debugPrint('[MetadataService] Running mkvpropedit with args: $args');
-      final process = await Process.start('mkvpropedit', args);
+      LoggerService().debug(
+        '[MetadataService] Running mkvpropedit with args: $args',
+      );
+      final outcome = await ProcessRunner.runWithTimeout(
+        'mkvpropedit',
+        args,
+        onFinished: () => _deleteQuietly(tagsPath),
+      );
 
-      // Simple timeout implementation for Process
-      bool timedOut = false;
-      final timeout = const Duration(seconds: 30);
-      final timer = Timer(timeout, () {
-        timedOut = true;
-        process.kill();
-        debugPrint(
-          '[MetadataService] mkvpropedit TIMEOUT after ${timeout.inSeconds}s',
+      if (outcome.timedOut) {
+        LoggerService().debug(
+          '[MetadataService] mkvpropedit TIMEOUT after 30s',
         );
-      });
+        return ProcessRunner.timeoutMarker;
+      }
 
-      final exitCode = await process.exitCode;
-      timer.cancel();
-
-      await File(tagsPath).delete();
-
-      if (exitCode == 0 && !timedOut) {
-        debugPrint('[MetadataService] mkvpropedit SUCCESS');
+      if (outcome.succeeded) {
+        LoggerService().debug('[MetadataService] mkvpropedit SUCCESS');
         return null;
       }
 
-      if (timedOut) {
-        return 'timeout_too_slow';
-      }
-
-      final stderr = await process.stderr.transform(utf8.decoder).join();
-      final stdout = await process.stdout.transform(utf8.decoder).join();
-      String errorMsg = stderr.trim().isNotEmpty
-          ? stderr.trim()
-          : stdout.trim();
-      if (errorMsg.isEmpty) {
-        errorMsg = 'Exit code: $exitCode';
-      }
-      errorMsg = errorMsg
-          .replaceAll('\n', ' ')
-          .replaceAll('\r', ' ')
-          .replaceAll(':', ';');
-
-      debugPrint('[MetadataService] mkvpropedit FAILED: $errorMsg');
+      final errorMsg = outcome.errorMessage;
+      LoggerService().debug('[MetadataService] mkvpropedit FAILED: $errorMsg');
       await LoggerService().error('mkvpropedit failed for $path: $errorMsg');
       return errorMsg;
     } on Exception catch (e) {
-      final error = e
-          .toString()
-          .replaceAll('\n', ' ')
-          .replaceAll('\r', ' ')
-          .replaceAll(':', ';');
+      final error = ProcessRunner.sanitize(e.toString());
       await LoggerService().error('Error in MKV in-place update for $path', e);
       return error;
     }
@@ -887,53 +901,27 @@ class MetadataService {
       final String itagsString = tags.join(':');
       final List<String> args = ['-itags', itagsString, path];
 
-      debugPrint('[MetadataService] Running MP4Box with args: $args');
-      final process = await Process.start('MP4Box', args);
+      LoggerService().debug(
+        '[MetadataService] Running MP4Box with args: $args',
+      );
+      final outcome = await ProcessRunner.runWithTimeout('MP4Box', args);
 
-      bool timedOut = false;
-      final timeout = const Duration(seconds: 30);
-      final timer = Timer(timeout, () {
-        timedOut = true;
-        process.kill();
-        debugPrint(
-          '[MetadataService] MP4Box TIMEOUT after ${timeout.inSeconds}s',
-        );
-      });
+      if (outcome.timedOut) {
+        LoggerService().debug('[MetadataService] MP4Box TIMEOUT after 30s');
+        return ProcessRunner.timeoutMarker;
+      }
 
-      final exitCode = await process.exitCode;
-      timer.cancel();
-
-      if (exitCode == 0 && !timedOut) {
-        debugPrint('[MetadataService] MP4Box SUCCESS');
+      if (outcome.succeeded) {
+        LoggerService().debug('[MetadataService] MP4Box SUCCESS');
         return null;
       }
 
-      if (timedOut) {
-        return 'timeout_too_slow';
-      }
-
-      final stderr = await process.stderr.transform(utf8.decoder).join();
-      final stdout = await process.stdout.transform(utf8.decoder).join();
-      String errorMsg = stderr.trim().isNotEmpty
-          ? stderr.trim()
-          : stdout.trim();
-      if (errorMsg.isEmpty) {
-        errorMsg = 'Exit code: $exitCode';
-      }
-      errorMsg = errorMsg
-          .replaceAll('\n', ' ')
-          .replaceAll('\r', ' ')
-          .replaceAll(':', ';');
-
-      debugPrint('[MetadataService] MP4Box FAILED: $errorMsg');
+      final errorMsg = outcome.errorMessage;
+      LoggerService().debug('[MetadataService] MP4Box FAILED: $errorMsg');
       await LoggerService().error('MP4Box failed for $path: $errorMsg');
       return errorMsg;
     } on Exception catch (e) {
-      final error = e
-          .toString()
-          .replaceAll('\n', ' ')
-          .replaceAll('\r', ' ')
-          .replaceAll(':', ';');
+      final error = ProcessRunner.sanitize(e.toString());
       await LoggerService().error('Error in MP4 in-place update for $path', e);
       return error;
     }
@@ -1049,7 +1037,7 @@ class MetadataService {
           final basename = p.basenameWithoutExtension(entity.path);
 
           if (VideoExtensions.supported.contains(ext)) {
-            debugPrint(
+            LoggerService().debug(
               'Checking/Updating metadata for episode: ${entity.path}',
             );
 
@@ -1076,7 +1064,7 @@ class MetadataService {
         }
       }
     } on Exception catch (e) {
-      debugPrint('Error scanning series directory: $e');
+      LoggerService().debug('Error scanning series directory: $e');
       return MetadataUpdateResponse(MetadataUpdateResult.failed);
     }
 
@@ -1108,7 +1096,9 @@ class MetadataService {
         for (final entity in entities) {
           if (entity is File && p.basename(entity.path).startsWith('temp_')) {
             try {
-              debugPrint('Cleaning up orphan temp file: ${entity.path}');
+              LoggerService().debug(
+                'Cleaning up orphan temp file: ${entity.path}',
+              );
               // If original doesn't exist, restore temp to original?
               // Or just delete temp if original exists?
               // Safer strategy: Only delete temp if original exists.
@@ -1123,17 +1113,19 @@ class MetadataService {
                 await entity.delete();
               } else {
                 // Potentially restore?
-                debugPrint('Original missing, restoring temp: $originalPath');
+                LoggerService().debug(
+                  'Original missing, restoring temp: $originalPath',
+                );
                 await entity.rename(originalPath);
               }
             } on Exception catch (e) {
-              debugPrint('Error cleaning temp file: $e');
+              LoggerService().debug('Error cleaning temp file: $e');
             }
           }
         }
       }
     } on Exception catch (e) {
-      debugPrint('Error listing directory for cleanup: $e');
+      LoggerService().debug('Error listing directory for cleanup: $e');
     }
   }
 }

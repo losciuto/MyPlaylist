@@ -6,6 +6,7 @@ import '../models/video.dart';
 import '../providers/playlist_provider.dart';
 import '../utils/video_extensions.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../services/logger_service.dart';
 
 class VideoPreviewDialog extends StatefulWidget {
   const VideoPreviewDialog({
@@ -62,7 +63,7 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
         (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
       );
     } on Exception catch (e) {
-      debugPrint('Error loading episodes: $e');
+      LoggerService().debug('Error loading episodes: $e');
     }
 
     if (mounted) {

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import './logger_service.dart';
 
 class UpdateInfo {
   UpdateInfo({
@@ -105,7 +105,7 @@ class GitHubService {
         }
       }
     } on Exception catch (e) {
-      debugPrint('[GitHubService] Error checking for updates: $e');
+      LoggerService().debug('[GitHubService] Error checking for updates: $e');
     }
     return null;
   }

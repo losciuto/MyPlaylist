@@ -4,29 +4,34 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../database/app_database.dart' as db;
+import '../repositories/video_repository.dart';
 import '../models/video.dart';
 import '../services/settings_service.dart';
 import '../models/player_config.dart';
+import '../services/logger_service.dart';
+import '../services/error_reporter_service.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-  PlaylistProvider() {
+  PlaylistProvider([VideoRepository? repository])
+    : _repository = repository ?? videoRepository {
     _loadPlaylistState();
     updateVideoCount();
   }
+
+  final VideoRepository _repository;
   List<Video> _currentPlaylist = [];
   int _totalVideoCount = 0;
   String? _lastTempPlaylistPath;
   final Set<int> _proposedVideoIds = {};
 
-  List<Video> get playlist => _currentPlaylist;
+  List<Video> get playlist => List<Video>.unmodifiable(_currentPlaylist);
   int get totalVideoCount => _totalVideoCount;
   int get proposedVideoCount => _proposedVideoIds.length;
   String? get lastTempPlaylistPath => _lastTempPlaylistPath;
   bool get hasPlaylist => _currentPlaylist.isNotEmpty;
 
   Future<void> updateVideoCount() async {
-    _totalVideoCount = await db.AppDatabase.instance.getVideoCount();
+    _totalVideoCount = await _repository.getVideoCount();
     notifyListeners();
   }
 
@@ -57,7 +62,7 @@ class PlaylistProvider extends ChangeNotifier {
       _proposedVideoIds.clear();
     }
 
-    final videos = await db.AppDatabase.instance.getRandomPlaylist(
+    final videos = await _repository.getRandomPlaylist(
       limit,
       excludeIds: _proposedVideoIds.toList(),
     );
@@ -66,9 +71,7 @@ class PlaylistProvider extends ChangeNotifier {
     // and we have proposed IDs, clear and try once more.
     if (videos.isEmpty && _proposedVideoIds.isNotEmpty) {
       _proposedVideoIds.clear();
-      final retryVideos = await db.AppDatabase.instance.getRandomPlaylist(
-        limit,
-      );
+      final retryVideos = await _repository.getRandomPlaylist(limit);
       await setPlaylist(retryVideos);
     } else {
       await setPlaylist(videos);
@@ -86,7 +89,7 @@ class PlaylistProvider extends ChangeNotifier {
     bool launchPlayer = true,
   }) async {
     final limit = count ?? 20; // Default to 20 if count is not provided
-    final videos = await db.AppDatabase.instance.getRecentPlaylist(limit);
+    final videos = await _repository.getRecentPlaylist(limit);
     await setPlaylist(videos);
 
     if (launchPlayer) {
@@ -114,7 +117,7 @@ class PlaylistProvider extends ChangeNotifier {
     // For filtered, if the pool is too small, we might want to reset proposed IDs too?
     // Let's implement it similar to random but specifically for filtered results.
 
-    final videos = await db.AppDatabase.instance.getFilteredPlaylist(
+    final videos = await _repository.getFilteredPlaylist(
       genres: genres,
       years: years,
       minRating: minRating,
@@ -135,7 +138,7 @@ class PlaylistProvider extends ChangeNotifier {
       // We don't clear everything because other filters might still have unproposed videos,
       // but for this specific filter set, we might need a workaround.
       // For simplicity, if we get nothing, we try again without exclusion.
-      final retryVideos = await db.AppDatabase.instance.getFilteredPlaylist(
+      final retryVideos = await _repository.getFilteredPlaylist(
         genres: genres,
         years: years,
         minRating: minRating,
@@ -168,12 +171,16 @@ class PlaylistProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final paths = prefs.getStringList('last_playlist_paths');
       if (paths != null && paths.isNotEmpty) {
-        final videos = await db.AppDatabase.instance.getVideosByPaths(paths);
+        final videos = await _repository.getVideosByPaths(paths);
         _currentPlaylist = videos;
         notifyListeners();
       }
     } on Exception catch (e) {
-      debugPrint('Error loading playlist state: $e');
+      errorReporter.report(
+        'Playlist non caricata',
+        e,
+        source: 'PlaylistProvider',
+      );
     }
   }
 
@@ -183,7 +190,11 @@ class PlaylistProvider extends ChangeNotifier {
       final paths = _currentPlaylist.map((v) => v.path).toList();
       await prefs.setStringList('last_playlist_paths', paths);
     } on Exception catch (e) {
-      debugPrint('Error saving playlist state: $e');
+      errorReporter.report(
+        'Stato della playlist non salvato',
+        e,
+        source: 'PlaylistProvider',
+      );
     }
   }
 
@@ -249,7 +260,7 @@ class PlaylistProvider extends ChangeNotifier {
 
   Future<void> stopPlayer() async {
     if (_playerProcess != null) {
-      debugPrint('Stopping player process...');
+      LoggerService().debug('Stopping player process...');
       _playerProcess!.kill();
       _playerProcess = null;
     } else {
@@ -261,7 +272,7 @@ class PlaylistProvider extends ChangeNotifier {
           await Process.run('taskkill', ['/IM', 'vlc.exe', '/F']);
         }
       } on Exception catch (e) {
-        debugPrint('Error in stopPlayer fallback: $e');
+        LoggerService().debug('Error in stopPlayer fallback: $e');
       }
     }
     // Small delay to allow OS to release port if needed (VLC RC port)
@@ -291,7 +302,7 @@ class PlaylistProvider extends ChangeNotifier {
           }
           await Future.delayed(const Duration(milliseconds: 500));
         } on Exception catch (e) {
-          debugPrint('Error killing existing VLC instances: $e');
+          LoggerService().debug('Error killing existing VLC instances: $e');
         }
       }
 
@@ -314,7 +325,7 @@ class PlaylistProvider extends ChangeNotifier {
         }
       }
 
-      debugPrint(
+      LoggerService().debug(
         'Starting player: ${config.name} ($execPath) with args: $args',
       );
       _playerProcess = await Process.start(execPath, args);
@@ -323,7 +334,11 @@ class PlaylistProvider extends ChangeNotifier {
         _playerProcess = null;
       });
     } on Exception catch (e) {
-      debugPrint('Error launching player: $e');
+      errorReporter.report(
+        'Avvio del player non riuscito',
+        e,
+        source: 'PlaylistProvider',
+      );
       rethrow;
     }
   }

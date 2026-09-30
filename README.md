@@ -25,8 +25,8 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 > On **Windows** and **macOS**, you must manually install **FFmpeg**, **MKVToolNix**, and **GPAC** (MP4Box) for metadata and conversion features. See [README_EN.md](README_EN.md) or [README_IT.md](README_IT.md) for details.
 
 ---
-**Version**: 3.14.4
-**Last Update**: 29/09/2026
+**Version**: 3.15.0
+**Last Update**: 30/09/2026
 
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

@@ -2459,6 +2459,162 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Remuxing in MKV in corso...'**
   String get convertingToMkv;
+
+  /// No description provided for @updateInstalledRestart.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento installato. Riavvia l\'applicazione.'**
+  String get updateInstalledRestart;
+
+  /// No description provided for @updateCompletedFallback.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento completato.'**
+  String get updateCompletedFallback;
+
+  /// No description provided for @updateInstallError.
+  ///
+  /// In it, this message translates to:
+  /// **'Errore durante l\'installazione: {message}'**
+  String updateInstallError(String message);
+
+  /// No description provided for @updateWhatsNewLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'COSA C\'È DI NUOVO:'**
+  String get updateWhatsNewLabel;
+
+  /// No description provided for @updateNoReleaseNotes.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna nota di rilascio fornita.'**
+  String get updateNoReleaseNotes;
+
+  /// No description provided for @updateDownloadProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricamento... {percent}%'**
+  String updateDownloadProgress(int percent);
+
+  /// No description provided for @updateDownloadPrompt.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi scaricare e installare la nuova versione ora?'**
+  String get updateDownloadPrompt;
+
+  /// No description provided for @readingMetadata.
+  ///
+  /// In it, this message translates to:
+  /// **'Lettura metadati...'**
+  String get readingMetadata;
+
+  /// No description provided for @noTagsFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun tag trovato nel file.'**
+  String get noTagsFound;
+
+  /// No description provided for @removeTag.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi tag'**
+  String get removeTag;
+
+  /// No description provided for @reloadButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricarica'**
+  String get reloadButton;
+
+  /// No description provided for @lastToolUsed.
+  ///
+  /// In it, this message translates to:
+  /// **'Ultimo: {tool}'**
+  String lastToolUsed(String tool);
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Cancella ricerca'**
+  String get clearSearch;
+
+  /// No description provided for @goBack.
+  ///
+  /// In it, this message translates to:
+  /// **'Torna indietro'**
+  String get goBack;
+
+  /// No description provided for @videoPreview.
+  ///
+  /// In it, this message translates to:
+  /// **'Anteprima'**
+  String get videoPreview;
+
+  /// No description provided for @videoListTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra i video'**
+  String get videoListTooltip;
+
+  /// No description provided for @recentErrors.
+  ///
+  /// In it, this message translates to:
+  /// **'Errori recenti'**
+  String get recentErrors;
+
+  /// No description provided for @clearErrors.
+  ///
+  /// In it, this message translates to:
+  /// **'Cancella gli errori recenti'**
+  String get clearErrors;
+
+  /// No description provided for @noRecentErrors.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun errore registrato in questa sessione.'**
+  String get noRecentErrors;
+
+  /// No description provided for @loadDataFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non e\' stato possibile caricare i dati'**
+  String get loadDataFailed;
+
+  /// No description provided for @retryButton.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova'**
+  String get retryButton;
+
+  /// Messaggio mostrato quando la cartella da scansionare non esiste
+  ///
+  /// In it, this message translates to:
+  /// **'La cartella non esiste.'**
+  String get scanFolderMissing;
+
+  /// Messaggio di avvio della scansione, con il percorso della cartella
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione di {folder} in corso...'**
+  String scanStarted(Object folder);
+
+  /// Avanzamento della scansione, con il numero di elementi elaborati
+  ///
+  /// In it, this message translates to:
+  /// **'Elaborati {count} elementi...'**
+  String scanProgress(Object count);
+
+  /// Errore durante la scansione, con il dettaglio
+  ///
+  /// In it, this message translates to:
+  /// **'Errore durante la scansione: {error}'**
+  String scanFailed(Object error);
+
+  /// Messaggio finale della scansione, con il totale degli elementi
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione completata. Totale: {count}'**
+  String scanCompleted(Object count);
 }
 
 class _AppLocalizationsDelegate

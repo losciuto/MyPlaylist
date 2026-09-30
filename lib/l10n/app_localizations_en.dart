@@ -1421,4 +1421,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get convertingToMkv => 'Remuxing to MKV in progress...';
+
+  @override
+  String get updateInstalledRestart =>
+      'Update installed. Restart the application.';
+
+  @override
+  String get updateCompletedFallback => 'Update completed.';
+
+  @override
+  String updateInstallError(String message) {
+    return 'Error during installation: $message';
+  }
+
+  @override
+  String get updateWhatsNewLabel => 'WHAT\'S NEW:';
+
+  @override
+  String get updateNoReleaseNotes => 'No release notes provided.';
+
+  @override
+  String updateDownloadProgress(int percent) {
+    return 'Downloading... $percent%';
+  }
+
+  @override
+  String get updateDownloadPrompt =>
+      'Do you want to download and install the new version now?';
+
+  @override
+  String get readingMetadata => 'Reading metadata...';
+
+  @override
+  String get noTagsFound => 'No tags found in the file.';
+
+  @override
+  String get removeTag => 'Remove tag';
+
+  @override
+  String get reloadButton => 'Reload';
+
+  @override
+  String lastToolUsed(String tool) {
+    return 'Last: $tool';
+  }
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get goBack => 'Go back';
+
+  @override
+  String get videoPreview => 'Preview';
+
+  @override
+  String get videoListTooltip => 'Show videos';
+
+  @override
+  String get recentErrors => 'Recent errors';
+
+  @override
+  String get clearErrors => 'Clear recent errors';
+
+  @override
+  String get noRecentErrors => 'No error recorded in this session.';
+
+  @override
+  String get loadDataFailed => 'Could not load the data';
+
+  @override
+  String get retryButton => 'Retry';
+
+  @override
+  String get scanFolderMissing => 'Folder does not exist.';
+
+  @override
+  String scanStarted(Object folder) {
+    return 'Scanning $folder...';
+  }
+
+  @override
+  String scanProgress(Object count) {
+    return 'Processed $count items...';
+  }
+
+  @override
+  String scanFailed(Object error) {
+    return 'Scan error: $error';
+  }
+
+  @override
+  String scanCompleted(Object count) {
+    return 'Scan complete. Total: $count';
+  }
 }

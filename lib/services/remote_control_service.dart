@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import '../database/app_database.dart';
 import '../providers/playlist_provider.dart';
 import 'settings_service.dart';
+import './logger_service.dart';
+import 'error_reporter_service.dart';
 
 class RemoteCommandLog {
   RemoteCommandLog({
@@ -57,7 +59,7 @@ class RemoteControlService with ChangeNotifier {
       if (newPort != _currentPort ||
           newSecret != _currentSecret ||
           newInterface != _currentInterface) {
-        debugPrint(
+        LoggerService().debug(
           'Remote Server settings changed (Port: $_currentPort -> $newPort, Interface: $_currentInterface -> $newInterface, Secret: [REDACTED]). Restarting...',
         );
         needsRestart = true;
@@ -107,18 +109,22 @@ class RemoteControlService with ChangeNotifier {
           settingsService.remoteServerPort + 1,
         );
         _imageServer!.listen(_handleHttpRequest);
-        debugPrint(
+        LoggerService().debug(
           'Image Server (MyPlaylist) started on port ${settingsService.remoteServerPort + 1}',
         );
       } on Exception catch (e) {
-        debugPrint('Error starting image server: $e');
+        LoggerService().debug('Error starting image server: $e');
       }
 
-      debugPrint(
+      LoggerService().debug(
         'Remote Server started on port ${settingsService.remoteServerPort}',
       );
     } on Exception catch (e) {
-      debugPrint('Error starting remote server: $e');
+      errorReporter.report(
+        'Avvio del server remoto non riuscito',
+        e,
+        source: 'RemoteControl',
+      );
       _isRunning = false;
       notifyListeners();
     }
@@ -171,7 +177,7 @@ class RemoteControlService with ChangeNotifier {
               try {
                 await request.response.addStream(file.openRead());
               } on Exception catch (e) {
-                debugPrint('Error sending poster stream: $e');
+                LoggerService().debug('Error sending poster stream: $e');
               }
               await request.response.close();
               return;
@@ -195,11 +201,13 @@ class RemoteControlService with ChangeNotifier {
     _imageServer = null;
     _isRunning = false;
     notifyListeners();
-    debugPrint('Remote Server and Image Server stopped');
+    LoggerService().debug('Remote Server and Image Server stopped');
   }
 
   void _handleClient(Socket client) async {
-    debugPrint('Remote Client connected: ${client.remoteAddress.address}');
+    LoggerService().debug(
+      'Remote Client connected: ${client.remoteAddress.address}',
+    );
 
     final List<int> data = [];
     int? expectedLength;
@@ -213,7 +221,7 @@ class RemoteControlService with ChangeNotifier {
         if (expectedLength == null && data.length >= 4) {
           final header = Uint8List.fromList(data.sublist(0, 4));
           expectedLength = ByteData.view(header.buffer).getUint32(0);
-          debugPrint('Expecting $expectedLength bytes of payload');
+          LoggerService().debug('Expecting $expectedLength bytes of payload');
         }
 
         // Se abbiamo letto tutto il messaggio (4 byte header + payload), usciamo
@@ -244,7 +252,11 @@ class RemoteControlService with ChangeNotifier {
 
       client.write(jsonEncode(responseData));
     } on Exception catch (e) {
-      debugPrint('Error processing remote command: $e');
+      errorReporter.report(
+        'Comando remoto non riuscito',
+        e,
+        source: 'RemoteControl',
+      );
       client.write(jsonEncode({'status': 'error', 'message': e.toString()}));
     } finally {
       await client.close();
@@ -275,7 +287,9 @@ class RemoteControlService with ChangeNotifier {
     final command = json['command'] as String?;
     final args = json['args'] as Map<String, dynamic>? ?? {};
 
-    debugPrint('Executing remote command: $command with args: $args');
+    LoggerService().debug(
+      'Executing remote command: $command with args: $args',
+    );
 
     // Log the command
     _commandLogs.insert(

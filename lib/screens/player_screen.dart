@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
@@ -6,6 +7,8 @@ import 'package:path/path.dart' as p;
 import '../models/video.dart' as model;
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../utils/video_extensions.dart';
+import '../services/logger_service.dart';
+import '../services/error_reporter_service.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key, required this.playlist});
@@ -18,6 +21,7 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   late final Player player;
   late final VideoController controller;
+  StreamSubscription<String>? _errorSubscription;
   bool _isLoading = true;
 
   @override
@@ -31,8 +35,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
     _initPlaylist();
 
     // Listen for errors
-    player.stream.error.listen((event) {
-      debugPrint('Player Error: $event');
+    _errorSubscription = player.stream.error.listen((event) {
+      LoggerService().debug('Player Error: $event');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -73,7 +77,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
             mediaList.addAll(episodes.map((e) => Media(e.path)));
           } on Exception catch (e) {
-            debugPrint('Error scanning series folder: $e');
+            errorReporter.report(
+              'Scansione della cartella serie non riuscita',
+              e,
+              source: 'PlayerScreen',
+            );
           }
         }
       } else {
@@ -98,6 +106,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   void dispose() {
+    _errorSubscription?.cancel();
+    _errorSubscription = null;
     player.dispose();
     super.dispose();
   }
@@ -118,6 +128,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             left: 20,
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
+              tooltip: AppLocalizations.of(context)!.goBack,
               onPressed: () => Navigator.pop(context),
             ),
           ),

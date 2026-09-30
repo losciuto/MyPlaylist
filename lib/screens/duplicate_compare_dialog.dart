@@ -6,9 +6,10 @@ import '../models/video.dart';
 import '../providers/database_provider.dart';
 import '../providers/playlist_provider.dart';
 import '../services/settings_service.dart';
-import '../services/video_processing_service.dart';
 import 'package:provider/provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../utils/file_size.dart';
+import 'duplicates/duplicate_delete_controller.dart';
 
 /// Technical info fetched via ffprobe for a single file.
 class _TechInfo {
@@ -163,7 +164,7 @@ class DuplicateCompareDialog extends StatefulWidget {
 }
 
 class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
-  final VideoProcessingService _svc = VideoProcessingService();
+  final DuplicateDeleteController _deleter = DuplicateDeleteController();
   late List<Future<_TechInfo>> _futures;
 
   @override
@@ -173,54 +174,18 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
   }
 
   Future<void> _deleteFromDb(Video video) async {
-    await context.read<DatabaseProvider>().deleteVideo(video);
+    await _deleter.deleteFromDb(context, video);
     if (mounted) Navigator.pop(context, true);
   }
 
   Future<void> _deleteFromDbAndDisk(Video video) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle,
-        ),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!.duplicatesDeleteFromDiskMsg2(p.basename(video.path)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.delete),
-          ),
-        ],
-      ),
+    final result = await _deleter.deleteFromDbAndDisk(
+      context,
+      video,
+      includeFileName: false,
     );
-    if (confirm != true || !mounted) return;
-
-    // Extract provider before async gap
-    final dbProvider = context.read<DatabaseProvider>();
-
-    await _svc.deleteVideoWithFiles(video);
-    await dbProvider.refreshVideos();
-    if (mounted) Navigator.pop(context, true);
-  }
-
-  String _formatSize(int? bytes) {
-    if (bytes == null) return '?';
-    if (bytes > 1000000000) {
-      return '${(bytes / 1000000000).toStringAsFixed(2)} GB';
-    }
-    if (bytes > 1000000) {
-      return '${(bytes / 1000000).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / 1024).toStringAsFixed(0)} KB';
+    if (result.cancelled || !mounted) return;
+    Navigator.pop(context, true);
   }
 
   @override
@@ -273,6 +238,7 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
+                    tooltip: AppLocalizations.of(context)!.closeButton,
                   ),
                 ],
               ),
@@ -297,7 +263,6 @@ class _DuplicateCompareDialogState extends State<DuplicateCompareDialog> {
                           video: video,
                           info: info,
                           loading: loading,
-                          formatSize: _formatSize,
                           onDeleteDb: () => _deleteFromDb(video),
                           onDeleteDisk: () => _deleteFromDbAndDisk(video),
                           isFirst: idx == 0,
@@ -380,7 +345,6 @@ class _VideoColumn extends StatelessWidget {
     required this.video,
     required this.info,
     required this.loading,
-    required this.formatSize,
     required this.onDeleteDb,
     required this.onDeleteDisk,
     required this.isFirst,
@@ -389,7 +353,6 @@ class _VideoColumn extends StatelessWidget {
   final Video video;
   final _TechInfo? info;
   final bool loading;
-  final String Function(int?) formatSize;
   final VoidCallback onDeleteDb;
   final VoidCallback onDeleteDisk;
   final bool isFirst;
@@ -455,7 +418,7 @@ class _VideoColumn extends StatelessWidget {
                         _row(
                           context,
                           AppLocalizations.of(context)!.duplicateLblSize,
-                          formatSize(info?.fileSizeBytes),
+                          formatFileSize(info?.fileSizeBytes),
                           big: true,
                           accent: theme.colorScheme.primary,
                         ),

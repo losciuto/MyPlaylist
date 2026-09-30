@@ -56,11 +56,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
           case DownloadProgress():
             setState(() => _downloadProgress = event.value);
           case UpdateFinished():
+            final fallback = AppLocalizations.of(
+              context,
+            )!.updateInstalledRestart;
             setState(() {
               _isDownloading = false;
-              _result =
-                  event.message ??
-                  'Aggiornamento installato. Riavvia l\'applicazione.';
+              _result = event.message ?? fallback;
             });
           case UpdateNeedsManualAction():
             setState(() {
@@ -75,7 +76,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
         // la barra resterebbe in movimento per sempre.
         setState(() {
           _isDownloading = false;
-          _result = 'Aggiornamento completato.';
+          _result = AppLocalizations.of(context)!.updateCompletedFallback;
         });
       }
     } on UpdateFailure catch (e) {
@@ -90,7 +91,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _result = 'Errore durante l\'installazione: ${e.message}';
+          _result = AppLocalizations.of(context)!.updateInstallError(e.message);
         });
       }
     }
@@ -140,9 +141,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'COSA C\'È DI NUOVO:',
-              style: TextStyle(
+            Text(
+              l10n.updateWhatsNewLabel,
+              style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.1,
@@ -167,7 +168,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   child: Text(
                     widget.updateInfo.body.isNotEmpty
                         ? widget.updateInfo.body
-                        : 'Nessuna nota di rilascio fornita.',
+                        : l10n.updateNoReleaseNotes,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       height: 1.5,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -203,14 +204,11 @@ class _UpdateDialogState extends State<UpdateDialog> {
               LinearProgressIndicator(value: _downloadProgress),
               const SizedBox(height: 8),
               Text(
-                'Scaricamento... ${(_downloadProgress * 100).toInt()}%',
+                l10n.updateDownloadProgress((_downloadProgress * 100).toInt()),
                 style: theme.textTheme.bodySmall,
               ),
             ] else ...[
-              Text(
-                'Vuoi scaricare e installare la nuova versione ora?',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(l10n.updateDownloadPrompt, style: theme.textTheme.bodySmall),
             ],
           ],
         ),

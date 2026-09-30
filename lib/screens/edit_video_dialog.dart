@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'edit/video_info_column.dart';
+import 'edit/episodes_section.dart';
 import 'package:http/http.dart' as http;
 import '../models/video.dart';
 import '../services/metadata_service.dart';
@@ -15,6 +17,7 @@ import '../widgets/file_metadata_dialog.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import '../services/logger_service.dart';
 
 class EditVideoDialog extends StatefulWidget {
   const EditVideoDialog({super.key, required this.video});
@@ -94,7 +97,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         if (mounted) setState(() {});
       }
     } on Exception catch (e) {
-      debugPrint('Error getting file size: $e');
+      LoggerService().debug('Error getting file size: $e');
     }
   }
 
@@ -366,6 +369,16 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     }
   }
 
+  /// La colonna sinistra notifica la nuova data: i controller vanno
+  /// aggiornati insieme allo stato.
+  void _onDateAddedChanged(DateTime value) {
+    setState(() {
+      _dateAdded = value;
+      _dateAddedController.text = formatDateAdded(value);
+      _timeController.text = formatTimeAdded(value);
+    });
+  }
+
   String _cleanQuery(String input) {
     // 1. Remove file extensions and replace dots/underscores/hyphens with space
     String cleaned = p
@@ -513,7 +526,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         dateAdded: _dateAdded,
       );
 
-      // debugPrint(
+      // LoggerService().debug(
       //   'DEBUG: Saving video. ID=${updatedVideo.id}, Title=${updatedVideo.title}, OnlyDB=$onlyDb',
       // );
 
@@ -722,210 +735,44 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                     style: const TextStyle(color: Colors.grey, fontSize: 11),
                   ),
                 ),
-              _buildEpisodesSection(), // Add this line
+              buildEpisodesSection(
+                context: context,
+                isSeries: widget.video.isSeries,
+                episodes: _episodes,
+                isLoading: _isLoadingEpisodes,
+                onLoad: _loadEpisodes,
+              ),
               const SizedBox(height: 15),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Left Column
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildTextField(
-                              _titleController,
-                              AppLocalizations.of(context)!.labelTitle,
-                              true,
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    _yearController,
-                                    AppLocalizations.of(context)!.labelYear,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildTextField(
-                                    _durationController,
-                                    AppLocalizations.of(context)!.labelDuration,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            _buildTextField(
-                              _genresController,
-                              AppLocalizations.of(context)!.labelGenres,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildTextField(
-                              _directorsController,
-                              AppLocalizations.of(context)!.labelDirectors,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildTextField(
-                              _actorsController,
-                              AppLocalizations.of(context)!.labelActors,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildTextField(
-                              _posterPathController,
-                              AppLocalizations.of(context)!.labelPoster,
-                            ),
-                            const SizedBox(height: 10),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    _sagaController,
-                                    AppLocalizations.of(context)!.labelSaga,
-                                    false,
-                                    1,
-                                    AppLocalizations.of(context)!.sagaTooltip,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildTextField(
-                                    _sagaIndexController,
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.labelSagaIndex,
-                                    false,
-                                    1,
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.sagaIndexTooltip,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () async {
-                                      final pickedDate = await showDatePicker(
-                                        context: context,
-                                        initialDate:
-                                            _dateAdded ?? DateTime.now(),
-                                        firstDate: DateTime(1900),
-                                        lastDate: DateTime(2100),
-                                      );
-                                      if (pickedDate != null) {
-                                        setState(() {
-                                          final current =
-                                              _dateAdded ?? DateTime.now();
-                                          _dateAdded = DateTime(
-                                            pickedDate.year,
-                                            pickedDate.month,
-                                            pickedDate.day,
-                                            current.hour,
-                                            current.minute,
-                                          );
-                                          _dateAddedController.text =
-                                              DateFormat(
-                                                'yyyy-MM-dd',
-                                              ).format(_dateAdded!);
-                                          _timeController.text = DateFormat(
-                                            'HH:mm',
-                                          ).format(_dateAdded!);
-                                        });
-                                      }
-                                    },
-                                    child: AbsorbPointer(
-                                      child: _buildTextField(
-                                        _dateAddedController,
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.labelDateAdded,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () async {
-                                      final pickedTime = await showTimePicker(
-                                        context: context,
-                                        initialTime: TimeOfDay.fromDateTime(
-                                          _dateAdded ?? DateTime.now(),
-                                        ),
-                                      );
-                                      if (pickedTime != null) {
-                                        setState(() {
-                                          final current =
-                                              _dateAdded ?? DateTime.now();
-                                          _dateAdded = DateTime(
-                                            current.year,
-                                            current.month,
-                                            current.day,
-                                            pickedTime.hour,
-                                            pickedTime.minute,
-                                          );
-                                          _dateAddedController.text =
-                                              DateFormat(
-                                                'yyyy-MM-dd',
-                                              ).format(_dateAdded!);
-                                          _timeController.text = DateFormat(
-                                            'HH:mm',
-                                          ).format(_dateAdded!);
-                                        });
-                                      }
-                                    },
-                                    child: AbsorbPointer(
-                                      child: _buildTextField(
-                                        _timeController,
-                                        AppLocalizations.of(context)!.labelTime,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      child: buildVideoInfoColumn(
+                        context: context,
+                        titleController: _titleController,
+                        yearController: _yearController,
+                        durationController: _durationController,
+                        genresController: _genresController,
+                        directorsController: _directorsController,
+                        actorsController: _actorsController,
+                        posterPathController: _posterPathController,
+                        sagaController: _sagaController,
+                        sagaIndexController: _sagaIndexController,
+                        dateAddedController: _dateAddedController,
+                        timeController: _timeController,
+                        dateAdded: _dateAdded,
+                        onDateChanged: _onDateAddedChanged,
                       ),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.colRating,
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                            Slider(
-                              value: _rating,
-                              max: 10,
-                              divisions: 20,
-                              label: _rating.toString(),
-                              activeColor: const Color(0xFF4CAF50),
-                              onChanged: (val) => setState(() => _rating = val),
-                            ),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.ratingLabel(_rating.toStringAsFixed(1)),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(height: 20),
-                            _buildTextField(
-                              _plotController,
-                              AppLocalizations.of(context)!.labelPlot,
-                              false,
-                              15,
-                            ),
-                          ],
-                        ),
+                      child: buildVideoRatingColumn(
+                        context: context,
+                        rating: _rating,
+                        plotController: _plotController,
+                        onRatingChanged: (value) =>
+                            setState(() => _rating = value),
                       ),
                     ),
                   ],
@@ -999,48 +846,6 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, [
-    bool required = false,
-    int maxLines = 1,
-    String? tooltip,
-  ]) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      style: const TextStyle(color: Colors.white),
-      validator: required
-          ? (val) => val == null || val.isEmpty
-                ? AppLocalizations.of(context)!.requiredField
-                : null
-          : null,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        border: const OutlineInputBorder(),
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white24),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF4CAF50)),
-        ),
-        filled: true,
-        fillColor: const Color(0xFF3C3C3C),
-        suffixIcon: tooltip != null
-            ? Tooltip(
-                message: tooltip,
-                child: const Icon(
-                  Icons.info_outline,
-                  color: Colors.blueAccent,
-                  size: 18,
-                ),
-              )
-            : null,
-      ),
-    );
-  }
-
   // Series Episode List Methods
   List<File>? _episodes;
   bool _isLoadingEpisodes = false;
@@ -1075,7 +880,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         (a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()),
       );
     } on Exception catch (e) {
-      debugPrint('Error loading episodes: $e');
+      LoggerService().debug('Error loading episodes: $e');
     }
 
     if (mounted) {
@@ -1084,58 +889,5 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         _isLoadingEpisodes = false;
       });
     }
-  }
-
-  Widget _buildEpisodesSection() {
-    if (!widget.video.isSeries) return const SizedBox.shrink();
-
-    return ExpansionTile(
-      title: Text(
-        AppLocalizations.of(context)!.sectionEpisodes,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      onExpansionChanged: (expanded) {
-        if (expanded) _loadEpisodes();
-      },
-      children: [
-        if (_isLoadingEpisodes)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(),
-          )
-        else if (_episodes == null || _episodes!.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              AppLocalizations.of(context)!.noEpisodesFound,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          )
-        else
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              itemCount: _episodes!.length,
-              itemBuilder: (ctx, i) {
-                return ListTile(
-                  dense: true,
-                  title: Text(
-                    p.basename(_episodes![i].path),
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  leading: const Icon(
-                    Icons.movie,
-                    size: 16,
-                    color: Colors.blueGrey,
-                  ),
-                );
-              },
-            ),
-          ),
-      ],
-    );
   }
 }

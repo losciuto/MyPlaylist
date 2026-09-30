@@ -5,15 +5,17 @@ import '../services/github_service.dart';
 import '../widgets/update_dialog.dart';
 import 'package:provider/provider.dart';
 import '../services/settings_service.dart';
-import '../services/logger_service.dart';
-import 'package:flutter/services.dart';
-import '../database/app_database.dart' as db;
 import '../providers/database_provider.dart';
-import 'dart:io';
-// ignore: depend_on_referenced_packages
-import 'package:path/path.dart' as p;
-import '../config/app_config.dart';
-import '../services/metadata_service.dart';
+import '../widgets/database_backup_actions.dart';
+import '../widgets/confirm_dialog.dart';
+import 'settings/common.dart';
+import 'settings/general_tab.dart';
+import 'settings/metadata_tab.dart';
+import 'settings/player_tab.dart';
+import 'settings/remote_tab.dart';
+import 'settings/maintenance_tab.dart';
+import 'settings/debug_tab.dart';
+import 'settings/bulk_sync_progress_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -103,6 +105,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  void _refreshCurrentTab() => setState(() {});
+
+  void _toggleSecretVisibility() =>
+      setState(() => _obscureSecret = !_obscureSecret);
+
   void _updateRemotePort(String value) {
     if (value.isNotEmpty) {
       final int? port = int.tryParse(value);
@@ -170,13 +177,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             child: ListView(
               children: [
-                _buildSidebarItem(0, 'Generale', Icons.settings),
-                _buildSidebarItem(1, 'Metadati', Icons.data_usage),
-                _buildSidebarItem(2, 'Player', Icons.play_circle_outline),
-                _buildSidebarItem(3, 'Remote Control', Icons.settings_remote),
+                _sidebarItem(0, Icons.settings),
+                _sidebarItem(1, Icons.data_usage),
+                _sidebarItem(2, Icons.play_circle_outline),
+                _sidebarItem(3, Icons.settings_remote),
                 const Divider(color: Colors.white10),
-                _buildSidebarItem(4, 'Manutenzione', Icons.build),
-                _buildSidebarItem(5, 'Debug Log', Icons.bug_report),
+                _sidebarItem(4, Icons.build),
+                _sidebarItem(5, Icons.bug_report),
               ],
             ),
           ),
@@ -195,6 +202,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _sidebarItem(int index, IconData icon) {
+    return buildSettingsSidebarItem(
+      context: context,
+      index: index,
+      currentTab: _currentTab,
+      fallbackLabel: '',
+      icon: icon,
+      onTap: () => setState(() => _currentTab = index),
     );
   }
 
@@ -231,928 +249,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _buildSidebarItem(int index, String label, IconData icon) {
-    final l10n = AppLocalizations.of(context)!;
-    final isSelected = _currentTab == index;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Map index to localized label
-    String localizedLabel;
-    switch (index) {
-      case 0:
-        localizedLabel = l10n.generalTab;
-        break;
-      case 1:
-        localizedLabel = l10n.metadataTab;
-        break;
-      case 2:
-        localizedLabel = l10n.playerTab;
-        break;
-      case 3:
-        localizedLabel = l10n.remoteTab;
-        break;
-      case 4:
-        localizedLabel = l10n.maintenanceTab;
-        break;
-      case 5:
-        localizedLabel = l10n.debugTab;
-        break;
-      default:
-        localizedLabel = label;
-    }
-
-    return ListTile(
-      selected: isSelected,
-      leading: Icon(
-        icon,
-        color: isSelected
-            ? const Color(0xFF4CAF50)
-            : (isDark ? Colors.white70 : Colors.black87),
-        size: 22,
-      ),
-      title: Text(
-        localizedLabel,
-        style: TextStyle(
-          color: isSelected
-              ? const Color(0xFF4CAF50)
-              : (isDark ? Colors.white70 : Colors.black87),
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 15,
-        ),
-      ),
-      onTap: () => setState(() => _currentTab = index),
-      tileColor: isSelected
-          ? (isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.black.withValues(alpha: 0.05))
-          : null,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-    );
-  }
-
   Widget _buildTabContent() {
     switch (_currentTab) {
       case 0:
-        return _buildGeneraleTab();
+        return buildGeneralTab(
+          context: context,
+          defaultSizeController: _defaultSizeController,
+          isCheckingUpdates: _isCheckingUpdates,
+          onDefaultSizeChanged: _updateDefaultSize,
+          onCheckForUpdates: _checkForUpdates,
+        );
       case 1:
-        return _buildMetadatiTab();
+        return buildMetadataTab(
+          context: context,
+          tmdbApiKeyController: _tmdbApiKeyController,
+          fanartApiKeyController: _fanartApiKeyController,
+          videoBackupPathController: _videoBackupPathController,
+          onPickVideoBackupPath: _pickVideoBackupPath,
+          onStartBulkMetadataSync: _startBulkMetadataSync,
+        );
       case 2:
-        return _buildPlayerTab();
+        return buildPlayerTab(
+          context: context,
+          playerPathController: _playerPathController,
+          vlcPortController: _vlcPortController,
+          onPickPlayerPath: _pickPlayerPath,
+          onVlcPortChanged: _updateVlcPort,
+        );
       case 3:
-        return _buildRemoteTab();
+        return buildRemoteTab(
+          context: context,
+          remotePortController: _remotePortController,
+          remoteSecretController: _remoteSecretController,
+          serverInterfaceController: _serverInterfaceController,
+          obscureSecret: _obscureSecret,
+          onRemotePortChanged: _updateRemotePort,
+          onRemoteSecretChanged: _updateRemoteSecret,
+          onServerInterfaceChanged: _updateServerInterface,
+          onToggleSecretVisibility: _toggleSecretVisibility,
+        );
       case 4:
-        return _buildManutenzioneTab();
+        return buildMaintenanceTab(
+          context: context,
+          onExportDatabase: _exportDatabase,
+          onImportDatabase: _importDatabase,
+          onResetPriorityList: _resetPriorityList,
+          onStartBulkMetadataSync: _startBulkMetadataSync,
+        );
       case 5:
-        return _buildDebugTab();
+        return buildDebugTab(context: context, onRefresh: _refreshCurrentTab);
       default:
         return const SizedBox.shrink();
     }
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF4CAF50),
-          ),
-        ),
-        const SizedBox(height: 5),
-        const Divider(color: Color(0xFF4CAF50)),
-        const SizedBox(height: 25),
-      ],
-    );
-  }
+  Future<void> _exportDatabase() => exportDatabaseFlow(context);
 
-  Widget _buildGeneraleTab() {
-    final settings = Provider.of<SettingsService>(context);
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.generalTab),
-        Text(
-          l10n.appearanceHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        // Language Selector
-        ListTile(
-          title: Text(l10n.language),
-          trailing: DropdownButton<Locale>(
-            value: settings.locale,
-            onChanged: (Locale? newLocale) {
-              if (newLocale != null) {
-                settings.setLocale(newLocale);
-              }
-            },
-            items: [
-              DropdownMenuItem(value: Locale('it'), child: Text(l10n.langIt)),
-              DropdownMenuItem(value: Locale('en'), child: Text(l10n.langEn)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Consumer<SettingsService>(
-          builder: (context, settings, child) {
-            return DropdownButtonFormField<ThemeMode>(
-              decoration: InputDecoration(
-                labelText: l10n.themeMode,
-                border: const OutlineInputBorder(),
-                filled: true,
-                fillColor: fillColor,
-              ),
-              initialValue: settings.themeMode,
-              items: [
-                DropdownMenuItem(
-                  value: ThemeMode.system,
-                  child: Text(l10n.systemTheme),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.light,
-                  child: Text(l10n.lightTheme),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.dark,
-                  child: Text(l10n.darkTheme),
-                ),
-              ],
-              onChanged: (ThemeMode? newValue) {
-                if (newValue != null) settings.setThemeMode(newValue);
-              },
-            );
-          },
-        ),
-        const SizedBox(height: 35),
-        Text(
-          l10n.playlistHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _defaultSizeController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: l10n.videosPerPage,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: fillColor,
-            helperText: l10n.defaultPlaylistSizeHelp,
-          ),
-          onChanged: _updateDefaultSize,
-        ),
-        const SizedBox(height: 35),
-        Text(
-          l10n.updates,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        ListTile(
-          title: Text(l10n.checkForUpdates),
-          subtitle: Text(l10n.currentVersion(AppConfig.appVersion)),
-          trailing: _isCheckingUpdates
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : ElevatedButton(
-                  onPressed: _checkForUpdates,
-                  child: Text(l10n.checkButton),
-                ),
-          contentPadding: EdgeInsets.zero,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetadatiTab() {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.metadataTab),
-        Text(
-          l10n.tmdbHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _tmdbApiKeyController,
-          decoration: InputDecoration(
-            labelText: l10n.tmdbApiKey,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: fillColor,
-            helperText: l10n.tmdbApiKeyHint,
-          ),
-          onChanged: (val) =>
-              context.read<SettingsService>().setTmdbApiKey(val),
-        ),
-        const SizedBox(height: 15),
-        TextField(
-          controller: _fanartApiKeyController,
-          decoration: InputDecoration(
-            labelText: l10n.fanartApiKey,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: fillColor,
-            helperText: l10n.fanartApiKeyHint,
-          ),
-          onChanged: (val) =>
-              context.read<SettingsService>().setFanartApiKey(val),
-        ),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.blueAccent),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Text(
-                  l10n.tmdbInfo,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 35),
-
-        // Auto-Sync Section
-        Text(
-          l10n.settingsAutoSync,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Consumer<SettingsService>(
-          builder: (context, settings, child) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SwitchListTile(
-                  title: Text(l10n.settingsAutoSync),
-                  subtitle: Text(l10n.settingsAutoSyncSubtitle),
-                  value: settings.autoSyncEnabled,
-                  onChanged: (val) => settings.setAutoSyncEnabled(val),
-                  activeThumbColor: const Color(0xFF4CAF50),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 10),
-                SwitchListTile(
-                  title: Text(l10n.settingsAutoSyncNfo),
-                  subtitle: Text(l10n.settingsAutoSyncNfoSubtitle),
-                  value: settings.autoSyncNfoOnEdit,
-                  onChanged: (val) => settings.setAutoSyncNfoOnEdit(val),
-                  activeThumbColor: const Color(0xFF4CAF50),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 10),
-                SwitchListTile(
-                  title: Text(l10n.settingsFastMetadataEngine),
-                  subtitle: Text(l10n.settingsFastMetadataEngineSubtitle),
-                  value: settings.fastMetadataEngineEnabled,
-                  onChanged: (val) =>
-                      settings.setFastMetadataEngineEnabled(val),
-                  activeThumbColor: const Color(0xFF4CAF50),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 10),
-                SwitchListTile(
-                  title: Text(l10n.settingsAutoConvertAvi),
-                  subtitle: Text(l10n.settingsAutoConvertAviSubtitle),
-                  value: settings.autoConvertToMkv,
-                  onChanged: (val) => settings.setAutoConvertToMkv(val),
-                  activeThumbColor: const Color(0xFF4CAF50),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _videoBackupPathController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settingsAviBackupPath,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.folder_open),
-                      onPressed: _pickVideoBackupPath,
-                    ),
-                    filled: true,
-                    fillColor: fillColor,
-                    helperText: l10n.settingsAviBackupPathSubtitle,
-                  ),
-                  onChanged: (val) =>
-                      context.read<SettingsService>().setVideoBackupPath(val),
-                ),
-                const SizedBox(height: 10),
-                SwitchListTile(
-                  title: Text(l10n.settingsExcludeConvertedBackup),
-                  subtitle: Text(l10n.settingsExcludeConvertedBackupSubtitle),
-                  value: settings.excludeConvertedBackupFromScan,
-                  onChanged: (val) =>
-                      settings.setExcludeConvertedBackupFromScan(val),
-                  activeThumbColor: const Color(0xFF4CAF50),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  l10n.settingsWatchedFolders,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: fillColor,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: settings.watchedDirectories.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Center(
-                            child: Text(
-                              l10n.settingsNoWatchedFolders,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: settings.watchedDirectories.length,
-                          separatorBuilder: (ctx, i) =>
-                              const Divider(height: 1),
-                          itemBuilder: (ctx, i) {
-                            final dir = settings.watchedDirectories[i];
-                            return ListTile(
-                              title: Text(
-                                p.basename(dir),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              subtitle: Text(
-                                dir,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.redAccent,
-                                  size: 20,
-                                ),
-                                onPressed: () =>
-                                    settings.removeWatchedDirectory(dir),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                const SizedBox(height: 35),
-                Text(
-                  l10n.manualDbSyncHeader,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: fillColor,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.sync_alt, color: Color(0xFF4CAF50)),
-                          const SizedBox(width: 10),
-                          Text(
-                            l10n.syncMissingTagsLabel,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        l10n.syncMissingTagsDesc,
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 15),
-                      ElevatedButton.icon(
-                        onPressed: _startBulkMetadataSync,
-                        icon: const Icon(Icons.batch_prediction),
-                        label: Text(l10n.startSyncButton),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlayerTab() {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.playerTab),
-        Text(
-          l10n.executableHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _playerPathController,
-          decoration: InputDecoration(
-            labelText: l10n.playerPath,
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.folder_open),
-              onPressed: _pickPlayerPath,
-            ),
-            filled: true,
-            fillColor: fillColor,
-          ),
-          onChanged: (val) =>
-              context.read<SettingsService>().setPlayerPath(val),
-        ),
-        const SizedBox(height: 35),
-        Text(
-          l10n.vlcRemoteHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _vlcPortController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: l10n.vlcPort,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: fillColor,
-          ),
-          onChanged: _updateVlcPort,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRemoteTab() {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.remoteTab),
-        Text(
-          l10n.serverStatusHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Consumer<SettingsService>(
-          builder: (context, settings, child) {
-            return SwitchListTile(
-              title: Text(l10n.serverEnabled),
-              subtitle: Text(l10n.remoteControlSubtitle),
-              value: settings.remoteServerEnabled,
-              onChanged: (val) => settings.setRemoteServerEnabled(val),
-              activeThumbColor: const Color(0xFF4CAF50),
-              contentPadding: EdgeInsets.zero,
-            );
-          },
-        ),
-        const SizedBox(height: 25),
-        Text(
-          l10n.networkHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: _serverInterfaceController,
-                decoration: InputDecoration(
-                  labelText: l10n.listenInterface,
-                  border: const OutlineInputBorder(),
-                  filled: true,
-                  fillColor: fillColor,
-                ),
-                onChanged: _updateServerInterface,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: TextField(
-                controller: _remotePortController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.serverPort,
-                  border: const OutlineInputBorder(),
-                  filled: true,
-                  fillColor: fillColor,
-                ),
-                onChanged: _updateRemotePort,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 25),
-        Text(
-          l10n.securityHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _remoteSecretController,
-          decoration: InputDecoration(
-            labelText: l10n.securityKey,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: fillColor,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureSecret ? Icons.visibility : Icons.visibility_off,
-              ),
-              onPressed: () => setState(() => _obscureSecret = !_obscureSecret),
-            ),
-          ),
-          onChanged: _updateRemoteSecret,
-          obscureText: _obscureSecret,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildManutenzioneTab() {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF3C3C3C) : Colors.grey[200];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.maintenanceTab),
-        Text(
-          l10n.backupRestoreHeader,
-          style: const TextStyle(
-            color: Colors.white38,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: fillColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.save_alt, color: Color(0xFF4CAF50)),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.backupDatabase,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.backupDescription,
-                style: const TextStyle(color: Colors.white70),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton.icon(
-                onPressed: _exportDatabase,
-                icon: const Icon(Icons.download),
-                label: Text(l10n.exportButton),
-              ),
-            ],
-          ),
-        ),
-
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.restore, color: Colors.orangeAccent),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.restoreDatabase,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.orangeAccent,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.restoreDescription,
-                style: const TextStyle(color: Colors.white70),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton.icon(
-                onPressed: _importDatabase,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[800],
-                ),
-                icon: const Icon(Icons.upload),
-                label: Text(l10n.importButton),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 30),
-
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.blueAccent.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.history_toggle_off,
-                    color: Colors.blueAccent,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.resetPriorityList,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.resetPriorityDescription,
-                style: const TextStyle(color: Colors.white70),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton.icon(
-                onPressed: _resetPriorityList,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent[700],
-                ),
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n.resetPriorityList),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _exportDatabase() async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final dbPath = await db.AppDatabase.instance.getDatabasePath();
-      final dbFile = File(dbPath);
-
-      if (!await dbFile.exists()) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.dbNotFoundMsg)));
-        }
-        return;
-      }
-
-      final String? outputDir = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: l10n.selectDestinationFolder,
-      );
-
-      if (outputDir != null) {
-        final timestamp = DateTime.now()
-            .toIso8601String()
-            .replaceAll(':', '-')
-            .split('.')
-            .first;
-        final newPath = p.join(outputDir, 'myplaylist_backup_$timestamp.db');
-        await dbFile.copy(newPath);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.backupSuccessMsg(newPath)),
-              backgroundColor: const Color(0xFF4CAF50),
-            ),
-          );
-        }
-      }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.backupErrorMsg(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _importDatabase() async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.selectBackupFile,
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final backupPath = result.files.single.path!;
-
-        if (!backupPath.endsWith('.db')) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.invalidDbMsg),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-          return;
-        }
-
-        if (!mounted) return;
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.confirmRestoreTitle),
-            content: Text(l10n.confirmRestoreMsg),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AppLocalizations.of(context)!.confirm),
-              ),
-            ],
-          ),
-        );
-
-        if (confirm == true) {
-          // Close connection
-          await db.AppDatabase.instance.close();
-
-          final dbPath = await db.AppDatabase.instance.getDatabasePath();
-          final sourceFile = File(backupPath);
-          await sourceFile.copy(dbPath);
-
-          // Refresh provider
-          if (mounted) {
-            await context.read<DatabaseProvider>().refreshVideos();
-            if (!mounted) return;
-            if (mounted) {
-              final l10n = AppLocalizations.of(context)!;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.dbRestoredMsg),
-                  backgroundColor: const Color(0xFF4CAF50),
-                ),
-              );
-            }
-          }
-        }
-      }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.restoreErrorMsg(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
+  Future<void> _importDatabase() => importDatabaseFlow(context);
 
   Future<void> _resetPriorityList() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.resetPriorityList),
-        content: Text(l10n.confirmResetPriority),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.resetPriorityList,
+      message: l10n.confirmResetPriority,
+      confirmLabel: l10n.confirm,
+      confirmColor: Colors.blueAccent,
     );
 
-    if (confirm == true && mounted) {
+    if (confirmed && mounted) {
       await context.read<DatabaseProvider>().syncDatesWithMtime();
       if (mounted) {
         ScaffoldMessenger.of(
@@ -1162,387 +327,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _buildDebugTab() {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? const Color(0xFF1E1E1E) : Colors.grey[100];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(l10n.debugTab),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.eventLog,
-              style: const TextStyle(
-                color: Colors.white38,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () => setState(() {}),
-                  tooltip: l10n.refreshLog,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy),
-                  onPressed: () async {
-                    final logs = await LoggerService().getLogs();
-                    await Clipboard.setData(ClipboardData(text: logs));
-                    if (mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.logCopied)));
-                    }
-                  },
-                  tooltip: l10n.copyLog,
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_forever,
-                    color: Colors.redAccent,
-                  ),
-                  onPressed: () async {
-                    await LoggerService().clearLogs();
-                    setState(() {});
-                    if (mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.logCleared)));
-                    }
-                  },
-                  tooltip: l10n.clearLog,
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-
-        Container(
-          height: 400,
-          width: double.infinity,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: fillColor,
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: FutureBuilder<String>(
-            future: LoggerService().getLogs(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (snapshot.hasError) {
-                return Text(
-                  l10n.logError(snapshot.error.toString()),
-                  style: const TextStyle(color: Colors.red),
-                );
-              }
-
-              return SingleChildScrollView(
-                child: SelectableText(
-                  snapshot.data ?? l10n.noLogs,
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        FutureBuilder<String?>(
-          future: LoggerService().getLogFilePath(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Text(
-                l10n.logFile(snapshot.data!),
-                style: const TextStyle(color: Colors.white24, fontSize: 10),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-      ],
-    );
-  }
-
   Future<void> _startBulkMetadataSync() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.bulkSyncTitle),
-        content: Text(AppLocalizations.of(context)!.bulkSyncDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context)!.startSyncDialogButton),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.bulkSyncTitle,
+      message: l10n.bulkSyncDesc,
+      confirmLabel: l10n.startSyncDialogButton,
     );
 
-    if (confirm != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     // Show persistent progress dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        return const _BulkSyncProgressDialog();
+        return const BulkSyncProgressDialog();
       },
-    );
-  }
-}
-
-class _BulkSyncProgressDialog extends StatefulWidget {
-  const _BulkSyncProgressDialog();
-
-  @override
-  _BulkSyncProgressDialogState createState() => _BulkSyncProgressDialogState();
-}
-
-class _BulkSyncProgressDialogState extends State<_BulkSyncProgressDialog> {
-  int _totalFiles = 0;
-  int _currentIndex = 0;
-  int _updatedCount = 0;
-  int _skippedCount = 0;
-  bool _isFinished = false;
-  bool _isCancelled = false;
-  String _currentTitle = '';
-  String _currentMethod = '';
-  String? _currentReason;
-
-  @override
-  void initState() {
-    super.initState();
-    _runSync();
-  }
-
-  String _getLocalizedReason(String reason) {
-    if (reason == 'fast_engine_disabled') {
-      return AppLocalizations.of(context)!.syncReasonFastDisabled;
-    }
-    if (reason.startsWith('unsupported_format:')) {
-      final ext = reason.split(':').last;
-      return AppLocalizations.of(context)!.syncReasonUnsupportedFormat(ext);
-    }
-    if (reason.startsWith('tool_not_found:')) {
-      final tool = reason.split(':').last;
-      return AppLocalizations.of(context)!.syncReasonToolNotFound(tool);
-    }
-    if (reason.startsWith('tool_failed:')) {
-      final parts = reason.split(':');
-      if (parts.length >= 3) {
-        final tool = parts[1];
-        String error = parts.sublist(2).join(':');
-        if (error == 'timeout_too_slow') {
-          error = AppLocalizations.of(context)!.syncReasonTimeout;
-        }
-        return '${AppLocalizations.of(context)!.syncReasonToolFailed(tool)}: $error';
-      }
-      final tool = parts.last;
-      return AppLocalizations.of(context)!.syncReasonToolFailed(tool);
-    }
-    return reason;
-  }
-
-  Future<void> _runSync() async {
-    final videos = await db.AppDatabase.instance.getAllVideos();
-    if (!mounted) return;
-    setState(() {
-      _totalFiles = videos.length;
-    });
-
-    for (int i = 0; i < videos.length; i++) {
-      if (!mounted || _isCancelled) break;
-
-      setState(() {
-        _currentIndex = i + 1;
-        _currentTitle = videos[i].title.isNotEmpty
-            ? videos[i].title
-            : videos[i].path.split('/').last;
-      });
-
-      final response = await MetadataService().updateFileMetadata(
-        videos[i],
-        enforceFullMetadata: true,
-        onMethodDecided: (method, reason) {
-          if (mounted) {
-            setState(() {
-              _currentMethod = method;
-              _currentReason = reason;
-            });
-          }
-        },
-      );
-
-      if (_isCancelled) break;
-
-      setState(() {
-        _currentMethod = response.method;
-        _currentReason = response.reason;
-      });
-
-      if (response.result == MetadataUpdateResult.updated) {
-        _updatedCount++;
-      } else if (response.result == MetadataUpdateResult.alreadyInSync) {
-        _skippedCount++;
-      }
-    }
-
-    if (!mounted) return;
-    setState(() {
-      _isFinished = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isFinished) {
-      final String title = _isCancelled
-          ? AppLocalizations.of(context)!.syncInterrupted
-          : AppLocalizations.of(context)!.syncCompleted;
-      return AlertDialog(
-        title: Text(title),
-        content: Text(
-          AppLocalizations.of(context)!.syncResultMsg(
-            (_isCancelled ? _currentIndex - 1 : _totalFiles).toString(),
-            _updatedCount.toString(),
-            _skippedCount.toString(),
-          ),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.closeButton),
-          ),
-        ],
-      );
-    }
-
-    final double progress = _totalFiles > 0 ? _currentIndex / _totalFiles : 0.0;
-    return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.batchProcessingTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            AppLocalizations.of(
-              context,
-            )!.fileXofY(_currentIndex.toString(), _totalFiles.toString()),
-          ),
-          const SizedBox(height: 8),
-          if (_currentTitle.isNotEmpty)
-            Text(
-              _currentTitle,
-              style: const TextStyle(
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
-                color: Colors.white70,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          const SizedBox(height: 12),
-          LinearProgressIndicator(value: progress),
-          const SizedBox(height: 16),
-          Text(
-            '${AppLocalizations.of(context)!.syncUpdated(_updatedCount.toString())}\n${AppLocalizations.of(context)!.syncSkipped(_skippedCount.toString())}',
-            textAlign: TextAlign.center,
-          ),
-          if (_currentMethod.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color:
-                    _currentMethod == 'Remuxing -> MKV' ||
-                        _currentMethod == 'mkvpropedit' ||
-                        _currentMethod == 'MP4Box'
-                    ? Colors.green.withValues(alpha: 0.15)
-                    : (_currentMethod == 'FFmpeg'
-                          ? Colors.orange.withValues(alpha: 0.1)
-                          : Colors.blue.withValues(alpha: 0.1)),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color:
-                      _currentMethod == 'Remuxing -> MKV' ||
-                          _currentMethod == 'mkvpropedit' ||
-                          _currentMethod == 'MP4Box'
-                      ? Colors.green.withValues(alpha: 0.5)
-                      : (_currentMethod == 'FFmpeg'
-                            ? Colors.orange.withValues(alpha: 0.3)
-                            : Colors.blue.withValues(alpha: 0.3)),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    _currentMethod == 'Remuxing -> MKV'
-                        ? AppLocalizations.of(context)!.convertingToMkv
-                        : AppLocalizations.of(
-                            context,
-                          )!.syncMethodLabel(_currentMethod),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          _currentMethod == 'Remuxing -> MKV' ||
-                              _currentMethod == 'mkvpropedit' ||
-                              _currentMethod == 'MP4Box'
-                          ? Colors.greenAccent
-                          : (_currentMethod == 'FFmpeg'
-                                ? Colors.orangeAccent
-                                : Colors.blueAccent),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_currentMethod == 'FFmpeg' && _currentReason != null) ...[
-                    const SizedBox(height: 4),
-                    SelectableText(
-                      AppLocalizations.of(
-                        context,
-                      )!.syncReasonLabel(_getLocalizedReason(_currentReason!)),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white60,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _isCancelled = true;
-            });
-          },
-          child: Text(
-            AppLocalizations.of(context)!.stopButton,
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      ],
     );
   }
 }

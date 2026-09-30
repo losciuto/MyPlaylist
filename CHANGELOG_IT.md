@@ -1,5 +1,26 @@
 All notable changes to this project will be documented in this file.
 
+## [3.15.0] - 30/09/2026
+
+### Aggiunto
+- **Pannello "Errori recenti"**: gli errori che finivano solo in console ora vengono raccolti e mostrati nell'app. Un badge sulla barra principale li conta, il pannello e' disponibile anche in Impostazioni > Debug, e i percorsi di playlist, home, filtri, metadati, controllo remoto, elaborazione video e parsing NFO lo alimentano tutti.
+- **Riprova in caso di errore**: i dialog di filtro playlist e selezione manuale mostrano l'errore e un bottone "Riprova" invece di chiudersi in silenzio, con il campo di ricerca di nuovo focalizzato.
+
+### Correzioni
+- **Dimensioni dei duplicati sbagliate**: il gestore dei duplicati mostrava un file da 500 MB come "500.0 GB". Ora un unico formattatore gestisce byte, KB, MB e GB, usato sia dal gestore duplicati sia dal dialog di confronto.
+- **Messaggi della scansione non tradotti**: i testi di avanzamento e di risultato della scansione erano solo in inglese e arrivavano a schermo non tradotti. Lo stato di scansione e' ora tipizzato (`ScanStatusType`) e il testo viene risolto con la lingua corrente, in italiano e in inglese.
+
+### Modifiche
+- **Dialog metadati e aggiornamento localizzati**: le stringhe scritte a mano nei dialog di aggiornamento e metadati sono ora chiavi localizzate vere e proprie.
+- **Tooltip sui bottoni a icona**: i 13 bottoni a icona che non avevano un tooltip ora descrivono cosa fanno.
+- **Logging**: le 119 chiamate `debugPrint` sparse ora passano da `LoggerService`, e gli errori dei watcher finiscono nel file di log.
+
+### Manutenzione
+- L'accesso al database passa da un `VideoRepository` iniettato invece che dal singleton `AppDatabase`: servizi, provider e server remoto non usano piu' il database direttamente.
+- Backup/import, dialog di conferma, rimozione database dei duplicati ed esecuzione dei processi esterni (mkvpropedit, MP4Box con timeout) sono implementati una volta sola e condivisi.
+- La schermata Impostazioni e il dialog di modifica video sono stati smontati in widget dedicati.
+- I test sono passati da 109 a 172, coprendo repository, server di controllo remoto, servizio metadati, process runner, backup, servizio di scansione, pannello errori, dialog di conferma e flusso di eliminazione dei duplicati.
+
 ## [3.14.4] - 29/09/2026
 
 ### Correzioni

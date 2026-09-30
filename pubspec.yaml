@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.14.4+1
+version: 3.15.0+2
 
 environment:
   sdk: ^3.10.3
@@ -58,8 +58,7 @@ dependencies:
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.4
 
-  # Icons
-  cupertino_icons: ^1.0.9
+  # Preferenze
   shared_preferences: ^2.5.5
 
   # Encryption & Network
@@ -67,6 +66,8 @@ dependencies:
   cryptography: ^2.7.0
   fl_chart: ^1.2.0
   cached_network_image: ^3.4.1
+  # Allineamento necessario: cached_network_image e flutter_distributor (dev)
+  # richiedono versioni diverse di flutter_cache_manager.
   flutter_cache_manager: ^3.4.1
   watcher: ^1.2.1
 
@@ -116,15 +117,18 @@ msix_config:
   publisher_display_name: Massimo
   publisher: Massimo
   identity_name: com.massimo.my_playlist
-  msix_version: 3.14.4.0
+  msix_version: 3.15.0.0
   logo_path: assets/logo.png
+
+# Dependency Overrides to resolve conflicts
+# uuid non e' importato dal codice applicativo, ma senza questo override la
+# risoluzione fallisce: flutter_distributor (dev) e i pacchetti transitivi
+# vogliono versioni diverse di uuid.
+dependency_overrides:
+  uuid: ^4.4.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
-# Dependency Overrides to resolve conflicts
-dependency_overrides:
-  uuid: ^4.4.2
 
 # The following section is specific to Flutter packages.
 flutter:

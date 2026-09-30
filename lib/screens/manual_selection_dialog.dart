@@ -5,6 +5,8 @@ import '../models/video.dart';
 import '../database/app_database.dart' as db;
 import 'video_preview_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../services/logger_service.dart';
+import '../services/error_reporter_service.dart';
 
 /// Quali video mostra la lista della selezione manuale.
 ///
@@ -25,6 +27,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
   final Set<int> _selectedIds = {};
   final Set<String> _selectedEpisodePaths = {};
   bool _isLoading = true;
+  String? _loadError;
   final TextEditingController _searchController = TextEditingController();
   _SeriesFilter _seriesFilter = _SeriesFilter.all;
 
@@ -34,15 +37,75 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
     _loadVideos();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadVideos() async {
-    final videos = await db.AppDatabase.instance.getAllVideos();
-    if (mounted) {
-      setState(() {
-        _allVideos = videos;
-        _filteredVideos = videos;
-        _isLoading = false;
-      });
+    try {
+      final videos = await db.AppDatabase.instance.getAllVideos();
+      if (mounted) {
+        setState(() {
+          _allVideos = videos;
+          _filteredVideos = videos;
+          _isLoading = false;
+          _loadError = null;
+        });
+      }
+    } on Object catch (e) {
+      errorReporter.report(
+        'Video non caricati nella selezione manuale',
+        e,
+        source: 'ManualSelectionDialog',
+      );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _loadError = e.toString();
+        });
+      }
     }
+  }
+
+  /// Stato di errore con ritento: senza, un caricamento fallito mostrava
+  /// semplicemente una lista vuota senza spiegare il motivo.
+  Widget _buildLoadError() {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.loadDataFailed,
+            style: const TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SelectableText(
+              _loadError!,
+              style: const TextStyle(color: Colors.white38, fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _isLoading = true;
+                _loadError = null;
+              });
+              _loadVideos();
+            },
+            icon: const Icon(Icons.refresh, size: 16),
+            label: Text(l10n.retryButton),
+            style: OutlinedButton.styleFrom(foregroundColor: Colors.white60),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onFilterChanged() => setState(_applyFilters);
@@ -145,6 +208,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
+                  tooltip: AppLocalizations.of(context)!.closeButton,
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -157,6 +221,8 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
+                    autofocus: true,
+                    textInputAction: TextInputAction.search,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.searchHint,
@@ -265,6 +331,8 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
+                  : _loadError != null
+                  ? _buildLoadError()
                   : Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF3C3C3C),
@@ -331,6 +399,9 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                             ),
                             trailing: video.posterPath.isNotEmpty
                                 ? IconButton(
+                                    tooltip: AppLocalizations.of(
+                                      context,
+                                    )!.videoPreview,
                                     icon: const Icon(
                                       Icons.image,
                                       color: Colors.white24,
@@ -395,7 +466,7 @@ class _ManualSelectionDialogState extends State<ManualSelectionDialog> {
                           );
                         }
                       } on Exception catch (e) {
-                        debugPrint(
+                        LoggerService().debug(
                           'Error creating virtual video for $epPath: $e',
                         );
                       }

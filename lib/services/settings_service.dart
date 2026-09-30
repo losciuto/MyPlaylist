@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/player_config.dart';
 import '../models/filter_settings.dart';
+import './logger_service.dart';
 
 class SettingsService with ChangeNotifier {
   factory SettingsService() {
@@ -151,7 +152,7 @@ class SettingsService with ChangeNotifier {
       try {
         _lastFilterSettings = FilterSettings.fromJson(json.decode(filterJson));
       } on Exception catch (e) {
-        debugPrint('Error loading last filter settings: $e');
+        LoggerService().debug('Error loading last filter settings: $e');
       }
     }
 

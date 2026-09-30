@@ -1,5 +1,27 @@
 # MyPlaylist Release Notes
 
+## Version 3.15.0 — 2026-09-30
+
+### New Features
+- **Recent Errors panel**: errors that used to disappear into the console are now collected and shown in the app. A badge on the main bar counts them, and the panel is also available under Settings > Debug.
+- **Retry on failure**: the playlist filter and manual selection dialogs show the error and a "Retry" button instead of closing silently.
+
+### Bug Fixes
+- **Duplicate sizes were wrong**: the duplicates manager formatted a 500 MB file as "500.0 GB". A single shared formatter now handles bytes, KB, MB and GB for both the duplicates manager and the compare dialog.
+- **Scan messages were not translated**: scan progress and result texts were English-only. The scan state is now typed and the text is resolved with the current locale.
+- **Leaks and silent failures**: listeners, controllers, subscriptions and process timers are now released on the affected screens, and the remaining silent catches were reviewed one by one (the ones left are intentional existence probes and fallbacks).
+
+### Changes
+- Metadata and update dialogs use real localized keys; 13 icon buttons gained a tooltip; 119 scattered `debugPrint` calls now go through `LoggerService`.
+- The Settings screen and the video edit dialog are split into focused widgets.
+
+### Maintenance
+- Database access goes through an injected `VideoRepository` instead of the `AppDatabase` singleton.
+- Backup/import, confirmation dialogs, duplicate removal and external process execution (mkvpropedit, MP4Box with timeout) are implemented once and shared.
+- Tests grew from 109 to 172, and the project still passes `dart format`, `flutter analyze` and a Linux release build.
+
+---
+
 ## Version 3.14.4 — 2026-09-29
 
 ### Bug Fixes

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../database/app_database.dart';
+import '../repositories/video_repository.dart';
 import '../models/video.dart' as model;
-import 'package:drift/drift.dart';
 import '../utils/filter_utils.dart';
 import '../services/nfo_sync_service.dart';
 import '../services/settings_service.dart';
@@ -10,8 +9,9 @@ import 'package:path/path.dart' as p;
 class DatabaseProvider extends ChangeNotifier {
   // Index for sub-tabs in 'Servizio'
 
-  DatabaseProvider(this._db);
-  final AppDatabase _db;
+  DatabaseProvider([VideoRepository? repository])
+    : _repository = repository ?? videoRepository;
+  final VideoRepository _repository;
   final NfoSyncService _syncService = NfoSyncService();
 
   List<model.Video> _videos = [];
@@ -51,37 +51,12 @@ class DatabaseProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _videos = (await _db.select(_db.videos).get())
-        .map((v) => _mapDriftToModel(v))
-        .toList();
-    _failedRenamesCount = await _db.getFailedRenamesCount();
+    _videos = await _repository.getAllVideos();
+    _failedRenamesCount = await _repository.getFailedRenamesCount();
     _applyFilterAndSort();
 
     _isLoading = false;
     notifyListeners();
-  }
-
-  model.Video _mapDriftToModel(DriftVideo v) {
-    return model.Video(
-      id: v.id,
-      path: v.path,
-      mtime: v.mtime,
-      title: v.title,
-      genres: v.genres,
-      year: v.year,
-      directors: v.directors,
-      plot: v.plot,
-      actors: v.actors,
-      duration: v.duration,
-      rating: v.rating,
-      isSeries: v.isSeries == 1,
-      posterPath: v.posterPath,
-      saga: v.saga,
-      sagaIndex: v.sagaIndex,
-      actorThumbs: v.actorThumbs,
-      directorThumbs: v.directorThumbs,
-      dateAdded: v.dateAdded,
-    );
   }
 
   void _applyFilterAndSort() {
@@ -124,32 +99,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> updateVideo(model.Video video, {bool syncNfo = false}) async {
-    await _db
-        .update(_db.videos)
-        .replace(
-          VideosCompanion(
-            id: Value(video.id!),
-            path: Value(video.path),
-            mtime: Value(video.mtime),
-            title: Value(video.title),
-            genres: Value(video.genres),
-            year: Value(video.year),
-            directors: Value(video.directors),
-            plot: Value(video.plot),
-            actors: Value(video.actors),
-            duration: Value(video.duration),
-            rating: Value(video.rating),
-            isSeries: Value(video.isSeries ? 1 : 0),
-            posterPath: Value(video.posterPath),
-            saga: Value(video.saga),
-            sagaIndex: Value(video.sagaIndex),
-            actorThumbs: Value(video.actorThumbs),
-            directorThumbs: Value(video.directorThumbs),
-            dateAdded: video.dateAdded != null
-                ? Value(video.dateAdded)
-                : const Value.absent(),
-          ),
-        );
+    await _repository.updateVideo(video);
 
     if (syncNfo) {
       await _syncService.saveNfo(video);
@@ -172,7 +122,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> clearDatabase() async {
-    await _db.clearDatabase();
+    await _repository.clearAll();
     // Also clear watched directories and ignored duplicates to ensure a total reset
     final settings = SettingsService();
     await settings.setWatchedDirectories([]);
@@ -182,13 +132,13 @@ class DatabaseProvider extends ChangeNotifier {
 
   Future<void> deleteVideo(model.Video video) async {
     if (video.id != null) {
-      await (_db.delete(_db.videos)..where((t) => t.id.equals(video.id!))).go();
+      await _repository.deleteVideo(video.id!);
       await refreshVideos();
     }
   }
 
   Future<void> syncDatesWithMtime() async {
-    await _db.syncDatesWithMtime();
+    await _repository.syncDatesWithMtime();
     await refreshVideos();
   }
 
@@ -198,7 +148,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> refreshFailedRenamesCount() async {
-    _failedRenamesCount = await _db.getFailedRenamesCount();
+    _failedRenamesCount = await _repository.getFailedRenamesCount();
     notifyListeners();
   }
 

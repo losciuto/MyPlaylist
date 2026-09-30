@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import './logger_service.dart';
 
 class TmdbService {
   TmdbService(this.apiKey);
@@ -33,7 +33,7 @@ class TmdbService {
         throw Exception('Errore TMDB: ${response.statusCode}');
       }
     } on Exception catch (e) {
-      debugPrint('TMDB Search Error: $e');
+      LoggerService().debug('TMDB Search Error: $e');
       rethrow;
     }
   }
@@ -62,7 +62,7 @@ class TmdbService {
         throw Exception('Errore TMDB Dettagli: ${response.statusCode}');
       }
     } on Exception catch (e) {
-      debugPrint('TMDB Details Error: $e');
+      LoggerService().debug('TMDB Details Error: $e');
       rethrow;
     }
   }
@@ -93,7 +93,7 @@ class TmdbService {
         throw Exception('Errore TMDB Search TV: ${response.statusCode}');
       }
     } on Exception catch (e) {
-      debugPrint('TMDB Search TV Error: $e');
+      LoggerService().debug('TMDB Search TV Error: $e');
       rethrow;
     }
   }
@@ -121,7 +121,7 @@ class TmdbService {
         throw Exception('Errore TMDB Dettagli TV: ${response.statusCode}');
       }
     } on Exception catch (e) {
-      debugPrint('TMDB Details TV Error: $e');
+      LoggerService().debug('TMDB Details TV Error: $e');
       rethrow;
     }
   }

@@ -7,8 +7,11 @@ import '../widgets/update_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../config/app_config.dart';
 import 'settings_screen.dart';
+import '../widgets/recent_errors_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
+import '../services/logger_service.dart';
+import '../services/error_reporter_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _tabController;
+  DatabaseProvider? _databaseProvider;
   bool _isLoading = true;
 
   @override
@@ -29,7 +33,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Listen for tab changes from provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final provider = context.read<DatabaseProvider>();
+      _databaseProvider = provider;
       _tabController.index = provider.currentTabIndex;
 
       provider.addListener(_onProviderChange);
@@ -38,30 +44,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Check for updates after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _checkForUpdates();
     });
   }
 
   void _onProviderChange() {
-    final provider = context.read<DatabaseProvider>();
+    if (!mounted) return;
+    final provider = _databaseProvider;
+    if (provider == null) return;
     if (_tabController.index != provider.currentTabIndex) {
       _tabController.animateTo(provider.currentTabIndex);
     }
   }
 
   void _onTabControllerChange() {
-    if (!_tabController.indexIsChanging) {
-      context.read<DatabaseProvider>().setTabIndex(_tabController.index);
-    }
+    if (_tabController.indexIsChanging) return;
+    final provider = _databaseProvider;
+    if (!mounted || provider == null) return;
+    provider.setTabIndex(_tabController.index);
   }
 
   @override
   void dispose() {
+    _databaseProvider?.removeListener(_onProviderChange);
+    _databaseProvider = null;
     _tabController.removeListener(_onTabControllerChange);
-    // Note: provider listener will be handled by provider lifecycle usually,
-    // but here we joined them. Better to ignore for now or use a proper lifecycle.
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _openRecentErrors() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const RecentErrorsScreen()));
   }
 
   Future<void> _checkForUpdates() async {
@@ -78,18 +94,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     try {
       final count = await db.AppDatabase.instance.getVideoCount();
       if (!mounted) return;
+      final provider = _databaseProvider ?? context.read<DatabaseProvider>();
+      _databaseProvider = provider;
+      final targetIndex = count > 0 ? 0 : 1;
       setState(() {
-        if (count > 0) {
-          _tabController.index = 0;
-          context.read<DatabaseProvider>().setTabIndex(0);
-        } else {
-          _tabController.index = 1;
-          context.read<DatabaseProvider>().setTabIndex(1);
-          context.read<DatabaseProvider>().setServiceTabIndex(0);
-        }
+        _tabController.index = targetIndex;
       });
+      provider.setTabIndex(targetIndex);
+      if (count == 0) {
+        provider.setServiceTabIndex(0);
+      }
     } on Object catch (e, stackTrace) {
-      debugPrint('Error loading database count: $e\n$stackTrace');
+      errorReporter.report(
+        'Lettura del database non riuscita',
+        e,
+        source: 'HomeScreen',
+      );
+      LoggerService().debug('Error loading database count: $e\n$stackTrace');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -131,6 +152,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           indicatorSize: TabBarIndicatorSize.tab,
         ),
         actions: [
+          // Errori recenti: il badge porta al pannello senza aprire i log.
+          // Resta nascosto finche' non si verifica nessun errore.
+          AnimatedBuilder(
+            animation: errorReporter,
+            builder: (context, _) {
+              if (errorReporter.isEmpty) return const SizedBox.shrink();
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.error_outline),
+                    tooltip: AppLocalizations.of(context)!.recentErrors,
+                    onPressed: _openRecentErrors,
+                  ),
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${errorReporter.count}',
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () {
@@ -183,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: AppLocalizations.of(context)!.settingsTitle,
             onPressed: () {
               Navigator.push(
                 context,

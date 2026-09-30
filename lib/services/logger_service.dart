@@ -65,6 +65,14 @@ class LoggerService {
     }
   }
 
+  /// Log di tracciamento: resta in console e non finisce nel file di log.
+  /// Sostituisce i debugPrint sparsi nel codice.
+  void debug(String message) {
+    if (kDebugMode) {
+      debugPrint(message);
+    }
+  }
+
   Future<void> info(String message) async {
     await _writeLine('INFO', message);
   }

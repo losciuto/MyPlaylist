@@ -116,7 +116,7 @@ void main() async {
         Provider.value(value: database),
         ChangeNotifierProvider.value(value: settingsService),
         ChangeNotifierProvider(
-          create: (_) => DatabaseProvider(database)..refreshVideos(),
+          create: (_) => DatabaseProvider()..refreshVideos(),
         ),
         ChangeNotifierProvider(create: (context) => PlaylistProvider()),
         ChangeNotifierProxyProvider2<

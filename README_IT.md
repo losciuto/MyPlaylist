@@ -77,7 +77,7 @@ Se impieghi l'app companion **VlcRemote** (dal telefono) per controllare *MyPlay
 ## Crediti
 Sviluppato con Flutter.
 Autore: Massimo
-Ultimo Aggiornamento: 29/09/2026 (v3.14.4)
+Ultimo Aggiornamento: 30/09/2026 (v3.15.0)
 
 ## Licenza
 Questo progetto è distribuito sotto licenza GNU General Public License v3.0 - vedi il file [LICENSE](LICENSE) per i dettagli.

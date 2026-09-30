@@ -1,4 +1,4 @@
-import '../database/app_database.dart' as db;
+import '../repositories/video_repository.dart';
 
 class VideoStatistics {
   VideoStatistics({
@@ -22,8 +22,10 @@ class VideoStatistics {
 }
 
 class StatisticsService {
-  static Future<VideoStatistics> calculateStatistics() async {
-    final database = db.AppDatabase.instance;
+  static Future<VideoStatistics> calculateStatistics({
+    VideoRepository? repository,
+  }) async {
+    final database = repository ?? videoRepository;
     final videos = await database.getAllVideos();
 
     // Genre distribution

@@ -1,5 +1,26 @@
 All notable changes to this project will be documented in this file.
 
+## [3.15.0] - 2026-09-30
+
+### Added
+- **Recent Errors panel**: errors that used to disappear into the console are now collected and shown in the app. A badge on the main bar counts them, the panel is also available under Settings > Debug, and the playlist, home, filters, metadata, remote control, video processing and NFO parsing paths all report to it.
+- **Retry on failure**: the playlist filter and manual selection dialogs now show the error and a "Retry" button instead of closing silently, with the search field focused again.
+
+### Fixed
+- **Duplicate sizes were wrong**: the duplicates manager formatted a 500 MB file as "500.0 GB". One shared formatter now handles bytes, KB, MB and GB, used by both the duplicates manager and the compare dialog.
+- **Scan messages were not translated**: the scan progress and result texts were English-only and reached the UI untranslated. The scan state is now typed (`ScanStatusType`) and the text is resolved with the current locale, in Italian and English.
+
+### Changed
+- **Localized metadata and update dialogs**: the hardcoded strings in the update and metadata dialogs are now real localized keys.
+- **Tooltips on icon buttons**: the 13 icon buttons that had no tooltip now describe what they do.
+- **Logging**: the 119 scattered `debugPrint` calls now go through `LoggerService`, and watcher errors are written to the log file.
+
+### Maintenance
+- Database access goes through an injected `VideoRepository` instead of the `AppDatabase` singleton; services, providers and the remote server no longer reach for the database directly.
+- Backup/import, confirmation dialogs, database duplicate removal and external process execution (mkvpropedit, MP4Box with timeout) are implemented once and shared.
+- The Settings screen and the video edit dialog are split into focused widgets.
+- Tests grew from 109 to 172, covering the repository, the remote control server, the metadata service, the process runner, backups, the scan service, the recent errors panel, the confirmation dialogs and the duplicate delete flow.
+
 ## [3.14.4] - 2026-09-29
 
 ### Fixed

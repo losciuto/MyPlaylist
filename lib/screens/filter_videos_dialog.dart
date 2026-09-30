@@ -84,6 +84,7 @@ class _FilterVideosDialogState extends State<FilterVideosDialog> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
+                  tooltip: AppLocalizations.of(context)!.closeButton,
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

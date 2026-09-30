@@ -2,6 +2,7 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../database/app_database.dart';
 import 'package:path/path.dart' as p;
+import '../widgets/confirm_dialog.dart';
 
 class FailedRenamesScreen extends StatefulWidget {
   const FailedRenamesScreen({super.key});
@@ -30,25 +31,16 @@ class _FailedRenamesScreenState extends State<FailedRenamesScreen> {
   }
 
   Future<void> _clearAll() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.clearListTitle),
-        content: Text(AppLocalizations.of(context)!.clearListMsg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppLocalizations.of(context)!.confirm),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.clearListTitle,
+      message: l10n.clearListMsg,
+      confirmLabel: l10n.confirm,
+      style: ConfirmStyle.filled,
     );
 
-    if (confirm == true) {
+    if (confirmed) {
       await AppDatabase.instance.clearFailedRenames();
       _loadData();
     }

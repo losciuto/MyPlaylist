@@ -1,24 +1,99 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
-import '../database/app_database.dart' as db;
+import '../repositories/video_repository.dart';
 import '../models/video.dart' as model;
 import '../utils/nfo_parser.dart';
 import '../utils/video_extensions.dart';
 import 'media_asset_service.dart';
 import 'settings_service.dart';
+import './logger_service.dart';
 
+/// Tipo di aggiornamento emesso durante la scansione.
+enum ScanStatusType {
+  /// La cartella scelta non esiste.
+  folderMissing,
+
+  /// Avvio della scansione.
+  started,
+
+  /// Numero di elementi elaborati (aggiornamento interno, non mostrato).
+  countUpdate,
+
+  /// Avanzamento della scansione.
+  progress,
+
+  /// La scansione si è interrotta per un errore.
+  failed,
+
+  /// Scansione conclusa.
+  completed,
+}
+
+/// Stato della scansione: i messaggi sono risolti dalla UI con i testi
+/// localizzati, il servizio non contiene stringhe visibili.
 class ScanStatus {
-  ScanStatus(this.message, this.count, {this.currentItem});
-  final String message;
+  const ScanStatus({
+    required this.type,
+    required this.count,
+    this.currentItem,
+    this.path,
+    this.error,
+  });
+
+  const ScanStatus.folderMissing()
+    : type = ScanStatusType.folderMissing,
+      count = 0,
+      currentItem = null,
+      path = null,
+      error = null;
+
+  const ScanStatus.started(this.path)
+    : type = ScanStatusType.started,
+      count = 0,
+      currentItem = null,
+      error = null;
+
+  const ScanStatus.countUpdate(this.count, {this.currentItem})
+    : type = ScanStatusType.countUpdate,
+      path = null,
+      error = null;
+
+  const ScanStatus.progress(this.count, {this.currentItem})
+    : type = ScanStatusType.progress,
+      path = null,
+      error = null;
+
+  const ScanStatus.failed(this.count, this.error)
+    : type = ScanStatusType.failed,
+      currentItem = null,
+      path = null;
+
+  const ScanStatus.completed(this.count)
+    : type = ScanStatusType.completed,
+      currentItem = null,
+      path = null,
+      error = null;
+
+  final ScanStatusType type;
   final int count;
   final String? currentItem;
+
+  /// Cartella coinvolta nell'evento (avvio o cartella mancante).
+  final String? path;
+
+  /// Dettaglio dell'errore, se presente.
+  final Object? error;
 }
 
 class ScanService {
-  ScanService._();
-  static final ScanService instance = ScanService._();
+  /// Il [repository] è opzionale: in produzione si usa il repository globale,
+  /// nei test se ne può iniettare uno finto.
+  ScanService([VideoRepository? repository])
+    : _repository = repository ?? videoRepository;
 
+  static final ScanService instance = ScanService();
+
+  final VideoRepository _repository;
   final _mediaAssetService = MediaAssetService();
 
   final List<String> seriesKeywords = [
@@ -32,39 +107,35 @@ class ScanService {
   Stream<ScanStatus> scanFolder(String folderPath) async* {
     final dir = Directory(folderPath);
     if (!await dir.exists()) {
-      yield ScanStatus('Folder does not exist.', 0);
+      yield ScanStatus.folderMissing();
       return;
     }
 
-    yield ScanStatus('Starting scan in $folderPath...', 0);
+    yield ScanStatus.started(folderPath);
 
     int count = 0;
 
     try {
       // Carichiamo la lista dei percorsi che sono falliti durante la rinomina
-      final failedPaths = await db.AppDatabase.instance
-          .getAllFailedRenamePaths();
+      final failedPaths = await _repository.getAllFailedRenamePaths();
 
       await for (final status in _scanRecursive(dir, failedPaths)) {
-        if (status.message == 'COUNT_UPDATE') {
+        if (status.type == ScanStatusType.countUpdate) {
           count += status.count;
           if (count % 5 == 0) {
-            yield ScanStatus(
-              'Processed $count items...',
-              count,
-              currentItem: status.currentItem,
-            );
+            yield ScanStatus.progress(count, currentItem: status.currentItem);
           }
         } else {
           yield status;
         }
       }
     } on Exception catch (e) {
-      yield ScanStatus('Error scanning: $e', count);
+      LoggerService().error('Errore durante la scansione', e);
+      yield ScanStatus.failed(count, e);
       return;
     }
 
-    yield ScanStatus('Scan complete. Total: $count', count);
+    yield ScanStatus.completed(count);
   }
 
   Stream<ScanStatus> _scanRecursive(
@@ -92,7 +163,9 @@ class ScanService {
       }
 
       if (isBackupFolder) {
-        debugPrint('SKIP [ScanService]: Backup folder ignored: $fullPath');
+        LoggerService().debug(
+          'SKIP [ScanService]: Backup folder ignored: $fullPath',
+        );
         return;
       }
     }
@@ -103,13 +176,12 @@ class ScanService {
     if (await tvshowNfo.exists()) {
       try {
         final added = await _processSeries(dir, failedPaths);
-        yield ScanStatus(
-          'COUNT_UPDATE',
+        yield ScanStatus.countUpdate(
           added ? 1 : 0,
           currentItem: p.basename(dir.path),
         );
       } on Exception catch (e) {
-        debugPrint('Error processing series ${dir.path}: $e');
+        LoggerService().debug('Error processing series ${dir.path}: $e');
       }
       return; // Stop recursion, we handled this folder as a unit
     }
@@ -130,15 +202,16 @@ class ScanService {
           if (entity is Directory) {
             // Each subdirectory is treated as a Series
             final added = await _processSeries(entity, failedPaths);
-            yield ScanStatus(
-              'COUNT_UPDATE',
+            yield ScanStatus.countUpdate(
               added ? 1 : 0,
               currentItem: p.basename(entity.path),
             );
           }
         }
       } on Exception catch (e) {
-        debugPrint('Error processing series container ${dir.path}: $e');
+        LoggerService().debug(
+          'Error processing series container ${dir.path}: $e',
+        );
       }
       return; // Stop recursion, we've handled the contents
     }
@@ -162,7 +235,7 @@ class ScanService {
           if (entity is Directory) {
             int subCount = 0;
             await for (final status in _scanRecursive(entity, failedPaths)) {
-              if (status.message == 'COUNT_UPDATE') {
+              if (status.type == ScanStatusType.countUpdate) {
                 subCount += status.count;
               }
             }
@@ -177,7 +250,9 @@ class ScanService {
                   return 1;
                 }
               } on Exception catch (e) {
-                debugPrint('Error processing video ${entity.path}: $e');
+                LoggerService().debug(
+                  'Error processing video ${entity.path}: $e',
+                );
               }
             }
           }
@@ -188,15 +263,14 @@ class ScanService {
         final batchAddedCount = results.fold<int>(0, (sum, val) => sum + val);
         if (batchAddedCount > 0) {
           // Send the name of the last file in the batch or a generic update
-          yield ScanStatus(
-            'COUNT_UPDATE',
+          yield ScanStatus.countUpdate(
             batchAddedCount,
             currentItem: p.basename(batch.last.path),
           );
         }
       }
     } on Exception catch (e) {
-      debugPrint('Error listing directory ${dir.path}: $e');
+      LoggerService().debug('Error listing directory ${dir.path}: $e');
     }
   }
 
@@ -208,18 +282,18 @@ class ScanService {
 
     // 1. Check if in blacklisted failedPaths
     if (failedPaths.contains(path)) {
-      debugPrint(
+      LoggerService().debug(
         'SKIP [ScanService]: Series in Failed Renames: ${p.basename(path)}',
       );
       return false;
     }
 
     // 2. Check if already has Poster and Rating
-    final existing = await db.AppDatabase.instance.getVideoByPath(path);
+    final existing = await _repository.getVideoByPath(path);
     if (existing != null &&
         existing.posterPath.isNotEmpty &&
         existing.rating > 0.0) {
-      debugPrint(
+      LoggerService().debug(
         'SKIP [ScanService]: Series already has metadata: ${p.basename(path)}',
       );
       return false;
@@ -273,7 +347,7 @@ class ScanService {
       dateAdded: stat.modified,
     );
 
-    await db.AppDatabase.instance.insertVideo(video);
+    await _repository.insertVideo(video);
     return true;
   }
 
@@ -282,18 +356,18 @@ class ScanService {
 
     // 1. Check if in blacklisted failedPaths
     if (failedPaths.contains(path)) {
-      debugPrint(
+      LoggerService().debug(
         'SKIP [ScanService]: Video in Failed Renames: ${p.basename(path)}',
       );
       return false;
     }
 
     // 2. Check if already has Poster and Rating
-    final existing = await db.AppDatabase.instance.getVideoByPath(path);
+    final existing = await _repository.getVideoByPath(path);
     if (existing != null &&
         existing.posterPath.isNotEmpty &&
         existing.rating > 0.0) {
-      debugPrint(
+      LoggerService().debug(
         'SKIP [ScanService]: Video already has metadata: ${p.basename(path)}',
       );
       return false;
@@ -318,7 +392,7 @@ class ScanService {
       }
     }
 
-    debugPrint(
+    LoggerService().debug(
       'DEBUG [ScanService]: model.Video: ${p.basename(path)}, NFO found: $nfoExists at $nfoPath',
     );
 
@@ -367,7 +441,7 @@ class ScanService {
     );
 
     // Insert into DB (update if exists)
-    await db.AppDatabase.instance.insertVideo(video);
+    await _repository.insertVideo(video);
     return true;
   }
 

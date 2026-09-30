@@ -5,6 +5,7 @@ import '../models/video.dart';
 import 'edit_video_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import '../services/logger_service.dart';
 
 class PriorityTab extends StatefulWidget {
   const PriorityTab({super.key});
@@ -58,7 +59,7 @@ class _PriorityTabState extends State<PriorityTab> {
     try {
       context.read<DatabaseProvider>().removeListener(_onProviderChange);
     } on Exception catch (e) {
-      debugPrint('Error removing listener: $e');
+      LoggerService().debug('Error removing listener: $e');
     }
 
     _scrollController.dispose();
@@ -123,6 +124,7 @@ class _PriorityTabState extends State<PriorityTab> {
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 20),
+                        tooltip: l10n.clearSearch,
                         onPressed: () {
                           _searchController.clear();
                           _filterVideos('');

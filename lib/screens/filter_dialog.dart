@@ -5,6 +5,7 @@ import '../models/filter_settings.dart';
 import '../services/settings_service.dart';
 import 'filter_videos_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../services/error_reporter_service.dart';
 
 class FilterDialog extends StatefulWidget {
   const FilterDialog({super.key});
@@ -40,6 +41,7 @@ class _FilterDialogState extends State<FilterDialog> {
       0; // 0: Generale, 1: Generi, 2: Anni, 3: Registi, 4: Attori, 5: Saghe
 
   bool _isLoading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -64,6 +66,42 @@ class _FilterDialogState extends State<FilterDialog> {
       _limitController.text = settingsService.defaultPlaylistSize.toString();
     }
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _limitController.dispose();
+    super.dispose();
+  }
+
+  /// Stato di errore con azione di ritento: prima il dialog restava vuoto e
+  /// l'unica traccia era una snackbar che spariva subito.
+  Widget _buildLoadError() {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      backgroundColor: const Color(0xFF2B2B2B),
+      title: Text(l10n.loadDataFailed),
+      content: SelectableText(
+        _loadError!,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _isLoading = true;
+              _loadError = null;
+            });
+            _loadData();
+          },
+          child: Text(l10n.retryButton),
+        ),
+      ],
+    );
   }
 
   Future<void> _loadData() async {
@@ -110,19 +148,17 @@ class _FilterDialogState extends State<FilterDialog> {
           _isLoading = false;
         });
       }
-    } on Exception catch (e) {
-      debugPrint('Error loading filter data: $e');
+    } on Object catch (e) {
+      errorReporter.report(
+        'Dati dei filtri non caricati',
+        e,
+        source: 'FilterDialog',
+      );
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _loadError = e.toString();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)!.genericError('')} $e',
-            ),
-          ),
-        );
       }
     }
   }
@@ -131,6 +167,10 @@ class _FilterDialogState extends State<FilterDialog> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_loadError != null) {
+      return _buildLoadError();
     }
 
     return AlertDialog(
@@ -343,6 +383,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                   ),
                   trailing: IconButton(
+                    tooltip: AppLocalizations.of(context)!.videoListTooltip,
                     icon: const Icon(
                       Icons.list,
                       color: Colors.white24,

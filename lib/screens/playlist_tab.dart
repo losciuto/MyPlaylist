@@ -12,6 +12,8 @@ import 'video_details_dialog.dart';
 import 'manual_selection_dialog.dart';
 import '../services/remote_control_service.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../services/logger_service.dart';
+import '../services/error_reporter_service.dart';
 
 class PlaylistTab extends StatefulWidget {
   const PlaylistTab({super.key});
@@ -68,7 +70,11 @@ class _PlaylistTabState extends State<PlaylistTab> {
         );
         _checkResult(provider.playlist);
       } on Exception catch (e) {
-        debugPrint('Error generating playlist: $e');
+        errorReporter.report(
+          'Generazione playlist non riuscita',
+          e,
+          source: 'PlaylistTab',
+        );
         if (mounted) {
           _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
         }
@@ -100,7 +106,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
   Future<int?> _inputCount() async {
     final defaultSize = context.read<SettingsService>().defaultPlaylistSize;
     final controller = TextEditingController(text: defaultSize.toString());
-    return showDialog<int?>(
+    final result = await showDialog<int?>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.inputCountTitle),
@@ -123,6 +129,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
         ],
       ),
     );
+    controller.dispose();
+    return result;
   }
 
   void _showSnack(String msg) {
@@ -149,7 +157,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
         );
       } on Exception catch (e) {
         _showSnack('${AppLocalizations.of(context)!.genericError('')} $e');
-        debugPrint('External player error: $e');
+        LoggerService().debug('External player error: $e');
       }
     } else {
       // Use internal player

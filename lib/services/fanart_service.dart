@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import './logger_service.dart';
 
 class FanartTvService {
   FanartTvService(this.apiKey);
@@ -27,11 +27,13 @@ class FanartTvService {
         // Not found on Fanart.tv
         return null;
       } else {
-        debugPrint('Fanart.tv Error ${response.statusCode}: ${response.body}');
+        LoggerService().debug(
+          'Fanart.tv Error ${response.statusCode}: ${response.body}',
+        );
         return null;
       }
     } on Exception catch (e) {
-      debugPrint('Fanart.tv Connection Error: $e');
+      LoggerService().debug('Fanart.tv Connection Error: $e');
       return null;
     }
   }
@@ -55,13 +57,13 @@ class FanartTvService {
       } else if (response.statusCode == 404) {
         return null;
       } else {
-        debugPrint(
+        LoggerService().debug(
           'Fanart.tv TV Error ${response.statusCode}: ${response.body}',
         );
         return null;
       }
     } on Exception catch (e) {
-      debugPrint('Fanart.tv TV Connection Error: $e');
+      LoggerService().debug('Fanart.tv TV Connection Error: $e');
       return null;
     }
   }

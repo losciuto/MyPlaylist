@@ -1,13 +1,13 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import '../models/video.dart';
 import '../providers/database_provider.dart';
 import '../services/settings_service.dart';
-import '../services/video_processing_service.dart';
 import 'duplicate_compare_dialog.dart';
+import 'duplicates/duplicate_delete_controller.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
+import '../utils/file_size.dart';
 
 class DuplicatesDialog extends StatefulWidget {
   const DuplicatesDialog({super.key});
@@ -17,7 +17,7 @@ class DuplicatesDialog extends StatefulWidget {
 }
 
 class _DuplicatesDialogState extends State<DuplicatesDialog> {
-  final VideoProcessingService _processingService = VideoProcessingService();
+  final DuplicateDeleteController _deleter = DuplicateDeleteController();
   late List<List<Video>> _duplicateGroups;
   bool _isLoading = false;
   String? _lastMessage;
@@ -35,71 +35,25 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
     });
   }
 
-  Future<int?> _getFileSizeKb(String path) async {
-    try {
-      final f = File(path);
-      if (await f.exists()) {
-        return (await f.length()) ~/ 1024;
-      }
-    } on Object catch (_) {}
-    return null;
-  }
-
   Future<void> _deleteFromDb(Video video) async {
-    final title = AppLocalizations.of(
-      context,
-    )!.duplicatesRemovedFromDb(video.title);
     setState(() => _isLoading = true);
-    await context.read<DatabaseProvider>().deleteVideo(video);
-    _lastMessage = title;
+    final result = await _deleter.deleteFromDb(context, video);
+    if (!mounted) return;
+    _lastMessage = result.title;
     _refresh();
     setState(() => _isLoading = false);
   }
 
   Future<void> _deleteFromDbAndDisk(Video video) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          AppLocalizations.of(context)!.duplicatesDeleteFromDiskTitle,
-        ),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!.duplicatesDeleteFromDiskMsg(p.basename(video.path)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-    if (!mounted) return;
-
     setState(() => _isLoading = true);
-
-    // Extract provider before async gap
-    final dbProvider = context.read<DatabaseProvider>();
-
-    final deleted = await _processingService.deleteVideoWithFiles(video);
-    await dbProvider.refreshVideos();
-
-    if (mounted) {
-      _lastMessage = AppLocalizations.of(
-        context,
-      )!.duplicatesDeletedFiles(deleted.length.toString(), video.title);
-      _refresh();
-      setState(() => _isLoading = false);
+    final result = await _deleter.deleteFromDbAndDisk(context, video);
+    if (!mounted || result.cancelled) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
+    _lastMessage = result.title;
+    _refresh();
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -152,6 +106,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
+                    tooltip: AppLocalizations.of(context)!.closeButton,
                   ),
                 ],
               ),
@@ -331,7 +286,7 @@ class _DuplicatesDialogState extends State<DuplicatesDialog> {
                                 return _VideoEntryRow(
                                   video: video,
                                   group: group,
-                                  getFileSizeKb: _getFileSizeKb,
+                                  readFileSize: readFileSizeBytes,
                                   onDeleteDb: _isLoading
                                       ? null
                                       : () => _deleteFromDb(video),
@@ -429,7 +384,7 @@ class _VideoEntryRow extends StatefulWidget {
   const _VideoEntryRow({
     required this.video,
     required this.group,
-    required this.getFileSizeKb,
+    required this.readFileSize,
     required this.onDeleteDb,
     required this.onDeleteDisk,
     required this.onGroupChanged,
@@ -437,7 +392,7 @@ class _VideoEntryRow extends StatefulWidget {
   });
   final Video video;
   final List<Video> group;
-  final Future<int?> Function(String) getFileSizeKb;
+  final Future<int?> Function(String) readFileSize;
   final VoidCallback? onDeleteDb;
   final VoidCallback? onDeleteDisk;
   final VoidCallback onGroupChanged;
@@ -448,7 +403,7 @@ class _VideoEntryRow extends StatefulWidget {
 }
 
 class _VideoEntryRowState extends State<_VideoEntryRow> {
-  int? _sizeKb;
+  int? _sizeBytes;
   bool _sizeLoaded = false;
 
   @override
@@ -458,20 +413,13 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
   }
 
   Future<void> _loadSize() async {
-    final size = await widget.getFileSizeKb(widget.video.path);
+    final size = await widget.readFileSize(widget.video.path);
     if (mounted) {
       setState(() {
-        _sizeKb = size;
+        _sizeBytes = size;
         _sizeLoaded = true;
       });
     }
-  }
-
-  String _formatSize(int? kb) {
-    if (kb == null) return '?';
-    if (kb > 1024 * 1024) return '${(kb / 1024 / 1024).toStringAsFixed(1)} GB';
-    if (kb > 1024) return '${(kb / 1024).toStringAsFixed(1)} GB';
-    return '$kb MB';
   }
 
   @override
@@ -615,7 +563,7 @@ class _VideoEntryRowState extends State<_VideoEntryRow> {
                         const SizedBox(width: 3),
                         _sizeLoaded
                             ? Text(
-                                _formatSize(_sizeKb),
+                                formatFileSize(_sizeBytes),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),

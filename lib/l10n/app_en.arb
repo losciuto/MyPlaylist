@@ -24,7 +24,9 @@
   "playerDetected": "Player detected: {name}",
   "@playerDetected": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "playerNotFound": "No player found. Please configure manually.",
@@ -123,7 +125,9 @@
   "videosFoundCount": "{count, plural, =0{No videos found} =1{1 video found} other{{count} videos found}}",
   "@videosFoundCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "scanSupportedExt": "Supported extensions: .mp4, .avi, .mkv, .mov, ...",
@@ -148,13 +152,17 @@
   "videosCount": "{count, plural, =0{No videos} =1{1 video} other{{count} videos}}",
   "@videosCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "currentPlaylist": "Current playlist: {count, plural, =0{no videos} =1{1 video} other{{count} videos}}",
   "@currentPlaylist": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "playlistExported": "Playlist exported to {path}",
@@ -165,7 +173,9 @@
   "videoCreated": "Generated playlist of {count, plural, =0{no videos} =1{1 video} other{{count} videos}}.",
   "@videoCreated": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noVideoFound": "No videos found!",
@@ -181,17 +191,21 @@
   "maxVideos": "Maximum number of videos:",
   "minRating": "Minimum Rating:",
   "filterByRating": "Filter by rating ≥ {rating}",
-  "summary": "SUMMARY",
+  "summary": "Summary",
   "includedItemsCount": "{count, plural, =0{None included} =1{1 included} other{{count} included}}",
   "@includedItemsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "excludedItemsCount": "{count, plural, =0{None excluded} =1{1 excluded} other{{count} excluded}}",
   "@excludedItemsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noActiveFilters": "No active filters",
@@ -199,7 +213,9 @@
   "foundVideos": "Found: {count, plural, =0{no videos} =1{1 video} other{{count} videos}}",
   "@foundVideos": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "manualSelectionTitle": "Manual Video Selection",
@@ -207,13 +223,17 @@
   "selectedItemsCount": "{count, plural, =0{None selected} =1{1 selected} other{{count} selected}}",
   "@selectedItemsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "visibleCount": "Total visible: {count, plural, =0{none} =1{1} other{{count}}}",
   "@visibleCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "selectAllVisible": "Select All Visible",
@@ -273,7 +293,6 @@
   "nfoErrorMsg": "Error parsing .nfo file.",
   "tmdbUpdatedMsg": "Data updated from TMDB (NFO and assets created)",
   "seriesLabel": "SERIES",
-  "noEpisodesFound": "No episodes found.",
   "ok": "OK",
   "no": "No",
   "noCommandsMsg": "No commands found.",
@@ -290,7 +309,6 @@
   "buildDate": "Build Date",
   "scanInProgress": "Scan in progress...",
   "selectFolderToScan": "Select folder to scan",
-  "summary": "Summary",
   "included": "Included: {inclusions}",
   "excluded": "Excluded: {exclusions}",
   "scanFinishedMsg": "Scan finished. Found {count} new videos.",
@@ -312,7 +330,9 @@
   "videosInDatabase": "🎬 {count, plural, =0{No videos} =1{1 video} other{{count} videos}} in database",
   "@videosInDatabase": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "searchVideosPlaceholder": "Search videos...",
@@ -363,60 +383,84 @@
   "syncResultMsg": "Operation finished.\n\nFiles examined: {examined}\nUpdated: {updated}\nUnchanged/Skipped: {skipped}",
   "@syncResultMsg": {
     "placeholders": {
-      "examined": {"type": "String"},
-      "updated": {"type": "String"},
-      "skipped": {"type": "String"}
+      "examined": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      },
+      "skipped": {
+        "type": "String"
+      }
     }
   },
   "batchProcessingTitle": "Batch Processing...",
   "fileXofY": "File {current} of {total}",
   "@fileXofY": {
     "placeholders": {
-      "current": {"type": "String"},
-      "total": {"type": "String"}
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "syncUpdated": "Updated: {count}",
   "@syncUpdated": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "syncSkipped": "Skipped: {count}",
   "@syncSkipped": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "syncMethodLabel": "Method: {method}",
   "@syncMethodLabel": {
     "placeholders": {
-      "method": {"type": "String"}
+      "method": {
+        "type": "String"
+      }
     }
   },
   "syncReasonLabel": "Reason: {reason}",
   "@syncReasonLabel": {
     "placeholders": {
-      "reason": {"type": "String"}
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "syncReasonFastDisabled": "Fast engine disabled",
   "syncReasonUnsupportedFormat": "Unsupported format ({ext})",
   "@syncReasonUnsupportedFormat": {
     "placeholders": {
-      "ext": {"type": "String"}
+      "ext": {
+        "type": "String"
+      }
     }
   },
   "syncReasonToolNotFound": "Tool {tool} not found",
   "@syncReasonToolNotFound": {
     "placeholders": {
-      "tool": {"type": "String"}
+      "tool": {
+        "type": "String"
+      }
     }
   },
   "syncReasonToolFailed": "Tool {tool} failed (fallback)",
   "@syncReasonToolFailed": {
     "placeholders": {
-      "tool": {"type": "String"}
+      "tool": {
+        "type": "String"
+      }
     }
   },
   "syncReasonTimeout": "Timeout (too slow)",
@@ -428,7 +472,9 @@
   "failedRenamesTitle": "Ignored/Failed Files ({count})",
   "@failedRenamesTitle": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "clearListTitle": "Clear List",
@@ -445,28 +491,40 @@
   "duplicatesFoundInfo": "{groups} groups found · {files} duplicate files",
   "@duplicatesFoundInfo": {
     "placeholders": {
-      "groups": {"type": "String"},
-      "files": {"type": "String"}
+      "groups": {
+        "type": "String"
+      },
+      "files": {
+        "type": "String"
+      }
     }
   },
   "duplicatesRemovedFromDb": "Removed from database: {title}",
   "@duplicatesRemovedFromDb": {
     "placeholders": {
-      "title": {"type": "String"}
+      "title": {
+        "type": "String"
+      }
     }
   },
   "duplicatesDeletedFiles": "Deleted {count} files of {title}",
   "@duplicatesDeletedFiles": {
     "placeholders": {
-      "count": {"type": "String"},
-      "title": {"type": "String"}
+      "count": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
     }
   },
   "duplicatesDeleteFromDiskTitle": "Delete from disk",
   "duplicatesDeleteFromDiskMsg": "The video file and all associated files (NFO, poster, fanart, etc.) will be deleted.\n\n{file}\n\nConfirm?",
   "@duplicatesDeleteFromDiskMsg": {
     "placeholders": {
-      "file": {"type": "String"}
+      "file": {
+        "type": "String"
+      }
     }
   },
   "duplicatesNoDuplicates": "No duplicates found!",
@@ -474,14 +532,20 @@
   "duplicatesRestoreIgnoredBtn": "Restore {count} ignored groups",
   "@duplicatesRestoreIgnoredBtn": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "duplicatesCopies": "{title}  ·  {count} copies",
   "@duplicatesCopies": {
     "placeholders": {
-      "title": {"type": "String"},
-      "count": {"type": "String"}
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
     }
   },
   "duplicatesCompareBtn": "Compare",
@@ -492,19 +556,25 @@
   "duplicatesResetIgnoredTooltip": "{count} ignored groups — click to restore them",
   "@duplicatesResetIgnoredTooltip": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "duplicatesResetIgnoredLabel": "Reset ignored ({count})",
   "@duplicatesResetIgnoredLabel": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "duplicatesDeleteFromDiskMsg2": "The following will be permanently deleted:\n• The video file\n• NFO, poster, fanart and all associated files\n\n{file}\n\nConfirm?",
   "@duplicatesDeleteFromDiskMsg2": {
     "placeholders": {
-      "file": {"type": "String"}
+      "file": {
+        "type": "String"
+      }
     }
   },
   "duplicatesCompareDialogTitle": "Duplicates Comparison",
@@ -537,13 +607,17 @@
   "duplicateChannelsVal": "{count} channels",
   "@duplicateChannelsVal": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "playerError": "Player Error: {event}",
   "@playerError": {
     "placeholders": {
-      "event": {"type": "String"}
+      "event": {
+        "type": "String"
+      }
     }
   },
   "playerNoFile": "No video file found for playback.",
@@ -558,5 +632,67 @@
   "settingsAviBackupPathSubtitle": "Path where to move original files after MKV conversion (leave empty for default)",
   "settingsExcludeConvertedBackup": "Exclude converted backup folder from scan",
   "settingsExcludeConvertedBackupSubtitle": "If enabled, the folder containing the original files (pre-remuxing) will be skipped when searching for new videos",
-  "convertingToMkv": "Remuxing to MKV in progress..."
+  "convertingToMkv": "Remuxing to MKV in progress...",
+  "updateInstalledRestart": "Update installed. Restart the application.",
+  "updateCompletedFallback": "Update completed.",
+  "updateInstallError": "Error during installation: {message}",
+  "@updateInstallError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "updateWhatsNewLabel": "WHAT'S NEW:",
+  "updateNoReleaseNotes": "No release notes provided.",
+  "updateDownloadProgress": "Downloading... {percent}%",
+  "@updateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "updateDownloadPrompt": "Do you want to download and install the new version now?",
+  "readingMetadata": "Reading metadata...",
+  "noTagsFound": "No tags found in the file.",
+  "removeTag": "Remove tag",
+  "reloadButton": "Reload",
+  "lastToolUsed": "Last: {tool}",
+  "@lastToolUsed": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "clearSearch": "Clear search",
+  "goBack": "Go back",
+  "videoPreview": "Preview",
+  "videoListTooltip": "Show videos",
+  "recentErrors": "Recent errors",
+  "clearErrors": "Clear recent errors",
+  "noRecentErrors": "No error recorded in this session.",
+  "loadDataFailed": "Could not load the data",
+  "retryButton": "Retry",
+  "scanFolderMissing": "Folder does not exist.",
+  "@scanFolderMissing": {
+    "description": "Messaggio mostrato quando la cartella da scansionare non esiste"
+  },
+  "scanStarted": "Scanning {folder}...",
+  "@scanStarted": {
+    "description": "Messaggio di avvio della scansione, con il percorso della cartella"
+  },
+  "scanProgress": "Processed {count} items...",
+  "@scanProgress": {
+    "description": "Avanzamento della scansione, con il numero di elementi elaborati"
+  },
+  "scanFailed": "Scan error: {error}",
+  "@scanFailed": {
+    "description": "Errore durante la scansione, con il dettaglio"
+  },
+  "scanCompleted": "Scan complete. Total: {count}",
+  "@scanCompleted": {
+    "description": "Messaggio finale della scansione, con il totale degli elementi"
+  }
 }

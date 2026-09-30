@@ -212,15 +212,17 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
             // Body
             Expanded(
               child: _loading
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(color: Color(0xFF4CAF50)),
-                          SizedBox(height: 16),
+                          const CircularProgressIndicator(
+                            color: Color(0xFF4CAF50),
+                          ),
+                          const SizedBox(height: 16),
                           Text(
-                            'Lettura metadati...',
-                            style: TextStyle(color: Colors.white54),
+                            l10n.readingMetadata,
+                            style: const TextStyle(color: Colors.white54),
                           ),
                         ],
                       ),
@@ -247,8 +249,8 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                   : _entries.isEmpty
                   ? Center(
                       child: Text(
-                        'Nessun tag trovato nel file.',
-                        style: TextStyle(color: Colors.white38),
+                        l10n.noTagsFound,
+                        style: const TextStyle(color: Colors.white38),
                       ),
                     )
                   : ListView.builder(
@@ -340,7 +342,7 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                                 ),
                                 color: Colors.redAccent.withValues(alpha: 0.7),
                                 onPressed: () => _removeTag(index),
-                                tooltip: 'Rimuovi tag',
+                                tooltip: l10n.removeTag,
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(
                                   minWidth: 32,
@@ -378,7 +380,7 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                   OutlinedButton.icon(
                     onPressed: _loading || _saving ? null : _loadMetadata,
                     icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('Ricarica'),
+                    label: Text(l10n.reloadButton),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white60,
                       side: const BorderSide(color: Colors.white24),
@@ -389,7 +391,7 @@ class _FileMetadataDialogState extends State<FileMetadataDialog> {
                     Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: Text(
-                        'Ultimo: $_toolUsed',
+                        l10n.lastToolUsed(_toolUsed),
                         style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 11,

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import '../models/video.dart' as model;
@@ -8,7 +7,9 @@ import '../services/fanart_service.dart';
 import '../utils/nfo_generator.dart';
 import '../utils/nfo_parser.dart';
 import '../services/metadata_service.dart';
-import '../database/app_database.dart' as db;
+import '../repositories/video_repository.dart';
+import './logger_service.dart';
+import 'error_reporter_service.dart';
 
 class VideoProcessingStatus {
   VideoProcessingStatus({
@@ -49,6 +50,11 @@ class VideoProcessingResult {
 }
 
 class VideoProcessingService {
+  VideoProcessingService([VideoRepository? repository])
+    : _repository = repository ?? videoRepository;
+
+  final VideoRepository _repository;
+
   bool _isCancelled = false;
   bool get isCancelled => _isCancelled;
 
@@ -207,7 +213,7 @@ class VideoProcessingService {
               fanartImages = await fanart.getMovieImages(selectedMovie['id']);
             }
           } on Exception catch (e) {
-            debugPrint('Fanart fetch failed: $e');
+            LoggerService().debug('Fanart fetch failed: $e');
           }
         }
 
@@ -219,7 +225,7 @@ class VideoProcessingService {
               await File(path).writeAsBytes(resp.bodyBytes);
             }
           } on Exception catch (e) {
-            debugPrint('Download failed ($url): $e');
+            LoggerService().debug('Download failed ($url): $e');
           }
         }
 
@@ -388,11 +394,15 @@ class VideoProcessingService {
               : video.saga,
         );
 
-        await db.AppDatabase.instance.updateVideo(updatedVideo);
+        await _repository.updateVideo(updatedVideo);
         updated++;
       } on Exception catch (e) {
         errors++;
-        debugPrint('Error TMDB processing ${video.path}: $e');
+        errorReporter.report(
+          'Metadati TMDB non disponibili',
+          e,
+          source: 'VideoProcessing',
+        );
       }
       await Future.delayed(const Duration(milliseconds: 50));
     }
@@ -422,7 +432,7 @@ class VideoProcessingService {
     final Map<String, List<String>> dirCache = {};
 
     // 1. Leggi tutti i path precedentemente falliti per ignorarli
-    final failedPaths = await db.AppDatabase.instance.getAllFailedRenamePaths();
+    final failedPaths = await _repository.getAllFailedRenamePaths();
 
     for (int i = 0; i < total; i++) {
       if (_isCancelled) break;
@@ -431,7 +441,9 @@ class VideoProcessingService {
 
       // Se il file era già marcato come fallito/ignorato, saltalo subito
       if (failedPaths.contains(video.path)) {
-        debugPrint('DEBUG: Skipping previously failed file: ${video.path}');
+        LoggerService().debug(
+          'DEBUG: Skipping previously failed file: ${video.path}',
+        );
         previouslyFailedCount++;
         continue;
       }
@@ -463,10 +475,10 @@ class VideoProcessingService {
           List<String>? dirFiles;
 
           if (dirCache.containsKey(dirPath)) {
-            debugPrint('DEBUG: Cache hit for directory: $dirPath');
+            LoggerService().debug('DEBUG: Cache hit for directory: $dirPath');
             dirFiles = dirCache[dirPath];
           } else {
-            debugPrint(
+            LoggerService().debug(
               'DEBUG: Cache miss for directory: $dirPath, scanning...',
             );
             final parentDir = Directory(dirPath);
@@ -483,7 +495,7 @@ class VideoProcessingService {
                     .toList();
                 dirCache[dirPath] = dirFiles;
               } on Exception catch (e) {
-                debugPrint('Error listing directory $dirPath: $e');
+                LoggerService().debug('Error listing directory $dirPath: $e');
               }
             }
           }
@@ -506,7 +518,7 @@ class VideoProcessingService {
 
         if (!nfoFound) {
           // Registra il fallimento per evitare di ritentare in futuro
-          await db.AppDatabase.instance.insertFailedRename(
+          await _repository.insertFailedRename(
             video.path,
             'File .nfo non trovato',
           );
@@ -518,7 +530,7 @@ class VideoProcessingService {
         if (metadata == null ||
             metadata['title'] == null ||
             metadata['title'].toString().isEmpty) {
-          await db.AppDatabase.instance.insertFailedRename(
+          await _repository.insertFailedRename(
             video.path,
             'Titolo mancante o nfo invalido',
           );
@@ -570,7 +582,7 @@ class VideoProcessingService {
         );
 
         if (dbMismatch) {
-          await db.AppDatabase.instance.updateVideo(updatedVideo);
+          await _repository.updateVideo(updatedVideo);
         }
 
         String? currentMethod;
@@ -602,11 +614,10 @@ class VideoProcessingService {
           errorCount++;
           final errorMsg =
               "Errore durante l'aggiornamento dei metadati (FFmpeg rimosso o file corrotto)";
-          debugPrint('ERROR updating metadata for ${video.path}: $errorMsg');
-          await db.AppDatabase.instance.insertFailedRename(
-            video.path,
-            errorMsg,
+          LoggerService().debug(
+            'ERROR updating metadata for ${video.path}: $errorMsg',
           );
+          await _repository.insertFailedRename(video.path, errorMsg);
           continue;
         } else if (result == MetadataUpdateResult.alreadyInSync) {
           if (!dbMismatch) {
@@ -642,8 +653,8 @@ class VideoProcessingService {
         );
       } on Exception catch (e) {
         errorCount++;
-        debugPrint('ERROR renaming video ${video.path}: $e');
-        await db.AppDatabase.instance.insertFailedRename(
+        LoggerService().debug('ERROR renaming video ${video.path}: $e');
+        await _repository.insertFailedRename(
           video.path,
           'Eccezione durante la rinomina: ${e.toString()}',
         );
@@ -727,16 +738,20 @@ class VideoProcessingService {
             }
           }
         } on Exception catch (e) {
-          debugPrint('Error scanning dir for sidecar files: $e');
+          LoggerService().debug('Error scanning dir for sidecar files: $e');
         }
       }
 
       // Delete from DB
       if (video.id != null) {
-        await db.AppDatabase.instance.deleteVideo(video.id!);
+        await _repository.deleteVideo(video.id!);
       }
     } on Exception catch (e) {
-      debugPrint('Error deleting video with files: $e');
+      errorReporter.report(
+        'Eliminazione del video non riuscita',
+        e,
+        source: 'VideoProcessing',
+      );
     }
 
     return deleted;

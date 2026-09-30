@@ -58,7 +58,7 @@ class _ScanTabState extends State<ScanTab> {
           (status) {
             if (mounted) {
               setState(() {
-                _statusMessage = status.message;
+                _statusMessage = _localizeStatus(status);
                 _count = status.count;
                 if (status.currentItem != null) {
                   _currentItem = status.currentItem!;
@@ -101,6 +101,25 @@ class _ScanTabState extends State<ScanTab> {
           },
           cancelOnError: true,
         );
+  }
+
+  /// Risolve il testo localizzato per uno stato della scansione.
+  String _localizeStatus(ScanStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status.type) {
+      case ScanStatusType.folderMissing:
+        return l10n.scanFolderMissing;
+      case ScanStatusType.started:
+        return l10n.scanStarted(status.path ?? '');
+      case ScanStatusType.progress:
+        return l10n.scanProgress(status.count.toString());
+      case ScanStatusType.failed:
+        return l10n.scanFailed(status.error.toString());
+      case ScanStatusType.completed:
+        return l10n.scanCompleted(status.count.toString());
+      case ScanStatusType.countUpdate:
+        return l10n.scanProgress(status.count.toString());
+    }
   }
 
   void _stopScan() {
