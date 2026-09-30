@@ -231,3 +231,22 @@ jobs:
             artifacts/myplaylist-macos/myplaylist-macos.zip
           fail_on_unmatched_files: false
           generate_release_notes: true
+
+      # L'aggiornatore integrato rifiuta di installare un binario di cui non
+      # puo' verificare l'origine: senza questi file l'update su Android
+      # fallisce. GitHub non le calcola, quindi le calcoliamo qui.
+      - name: Calcola le impronte SHA-256
+        run: |
+          cd artifacts
+          find . -type f ! -name "*.sha256" -print0 | while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+            sha256sum "$base" > "$base.sha256"
+          done
+          find . -name "*.sha256" | sort
+
+      - name: Allega le impronte alla release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd artifacts
+          find . -name "*.sha256" -print0 | xargs -0 gh release upload "${{ steps.tag.outputs.tag }}" --clobber
