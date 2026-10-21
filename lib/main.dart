@@ -9,6 +9,7 @@ import 'services/settings_service.dart';
 import 'providers/database_provider.dart';
 import 'providers/playlist_provider.dart';
 import 'services/remote_control_service.dart';
+import 'services/voice/voice_command_service.dart';
 import 'config/app_config.dart';
 import 'database/app_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -126,6 +127,18 @@ void main() async {
         >(
           lazy: false,
           create: (context) => RemoteControlService(
+            settingsService: context.read<SettingsService>(),
+            playlistProvider: context.read<PlaylistProvider>(),
+          ),
+          update: (context, settings, playlist, previous) => previous!,
+        ),
+        ChangeNotifierProxyProvider2<
+          SettingsService,
+          PlaylistProvider,
+          VoiceCommandService
+        >(
+          lazy: false,
+          create: (context) => VoiceCommandService(
             settingsService: context.read<SettingsService>(),
             playlistProvider: context.read<PlaylistProvider>(),
           ),

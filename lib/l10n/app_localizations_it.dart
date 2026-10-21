@@ -1519,4 +1519,185 @@ class AppLocalizationsIt extends AppLocalizations {
   String scanCompleted(Object count) {
     return 'Scansione completata. Totale: $count';
   }
+
+  @override
+  String get navVoice => 'Comandi vocali';
+
+  @override
+  String get voiceTitle => 'Comandi vocali';
+
+  @override
+  String get voiceSubtitle =>
+      'Riconoscimento offline: la voce viene trascritta sul computer, senza inviare nulla online.';
+
+  @override
+  String get voiceLanguage => 'Lingua del riconoscimento';
+
+  @override
+  String get voiceLanguageIt => 'Italiano';
+
+  @override
+  String get voiceLanguageEn => 'Inglese';
+
+  @override
+  String get voiceModelTitle => 'Modello di riconoscimento';
+
+  @override
+  String get voiceModelMissing => 'Modello non installato';
+
+  @override
+  String voiceModelMissingHint(String size) {
+    return 'Il modello viene scaricato una volta sola (circa $size) e tenuto sul disco. Serve una connessione per il primo download.';
+  }
+
+  @override
+  String get voiceModelDownload => 'Scarica il modello';
+
+  @override
+  String get voiceModelDownloading => 'Download del modello in corso...';
+
+  @override
+  String get voiceModelReady => 'Modello pronto';
+
+  @override
+  String voiceModelSize(String size) {
+    return 'Dimensione: $size';
+  }
+
+  @override
+  String get voiceListen => 'Ascolta';
+
+  @override
+  String get voiceStopListening => 'Ferma';
+
+  @override
+  String get voiceMicrophone => 'Microfono';
+
+  @override
+  String get voiceMicrophoneDefault => 'Predefinito di sistema';
+
+  @override
+  String get voiceMicrophoneRefresh => 'Aggiorna l\'elenco dei microfoni';
+
+  @override
+  String get voiceInputLevel => 'Livello microfono';
+
+  @override
+  String get voiceListening => 'In ascolto';
+
+  @override
+  String get voiceWaiting => 'Pronto';
+
+  @override
+  String voicePartialTranscript(String text) {
+    return 'Trascrizione: $text';
+  }
+
+  @override
+  String get voiceHistoryTitle => 'Comandi riconosciuti';
+
+  @override
+  String get voiceHistoryEmpty => 'Nessun comando ancora riconosciuto.';
+
+  @override
+  String get voiceClearHistory => 'Svuota la cronologia';
+
+  @override
+  String get voiceHelpTitle => 'Comandi disponibili';
+
+  @override
+  String get voiceHelpPlaylist =>
+      'playlist casuale / playlist recenti / riproduci la playlist';
+
+  @override
+  String get voiceHelpPause => 'pausa / riprendi';
+
+  @override
+  String get voiceHelpNext => 'traccia successiva / traccia precedente';
+
+  @override
+  String get voiceHelpVolume =>
+      'alza il volume / abbassa il volume / volume 50';
+
+  @override
+  String get voiceHelpSeek => 'avanti 30 secondi / indietro 30 secondi';
+
+  @override
+  String get voiceHelpStop => 'ferma';
+
+  @override
+  String get voiceErrorUnsupportedPlatform =>
+      'I comandi vocali non sono supportati su questa piattaforma.';
+
+  @override
+  String get voiceErrorNativeLibrary =>
+      'Libreria nativa Vosk non trovata: esegui l\'installazione nativa e ricompila l\'applicazione.';
+
+  @override
+  String voiceErrorModelLoad(String error) {
+    return 'Modello di riconoscimento non disponibile: $error';
+  }
+
+  @override
+  String get voiceErrorMicDenied => 'Accesso al microfono negato.';
+
+  @override
+  String voiceErrorRecorder(String error) {
+    return 'Acquisizione audio non disponibile: $error';
+  }
+
+  @override
+  String voiceFeedbackPlaylistRandom(int count) {
+    return 'Playlist casuale generata ($count video)';
+  }
+
+  @override
+  String voiceFeedbackPlaylistRecent(int count) {
+    return 'Playlist dei video recenti generata ($count video)';
+  }
+
+  @override
+  String get voiceFeedbackPlaylistPlay => 'Riproduzione avviata';
+
+  @override
+  String get voiceFeedbackStopped => 'Riproduzione fermata';
+
+  @override
+  String get voiceFeedbackPaused => 'Riproduzione in pausa';
+
+  @override
+  String get voiceFeedbackResumed => 'Riproduzione ripresa';
+
+  @override
+  String get voiceFeedbackNext => 'Traccia successiva';
+
+  @override
+  String get voiceFeedbackPrevious => 'Traccia precedente';
+
+  @override
+  String get voiceFeedbackVolumeUp => 'Volume aumentato';
+
+  @override
+  String get voiceFeedbackVolumeDown => 'Volume abbassato';
+
+  @override
+  String voiceFeedbackVolumeSet(int percent) {
+    return 'Volume impostato al $percent%';
+  }
+
+  @override
+  String voiceFeedbackSeekForward(int seconds) {
+    return 'Avanzamento di $seconds secondi';
+  }
+
+  @override
+  String voiceFeedbackSeekBackward(int seconds) {
+    return 'Ritorno di $seconds secondi';
+  }
+
+  @override
+  String get voiceFeedbackNotRecognized => 'Comando non riconosciuto';
+
+  @override
+  String get voiceFeedbackVlcError => 'VLC non raggiungibile';
 }

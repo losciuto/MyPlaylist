@@ -1,5 +1,31 @@
 All notable changes to this project will be documented in this file.
 
+## [3.16.0] - 21/10/2026
+
+### Aggiunto
+- **Comandi vocali offline**: la scheda "Voce" controlla la riproduzione con
+  la voce. Il riconoscimento avviene **sul dispositivo** (Vosk): l'audio del
+  microfono non lascia mai il dispositivo, e l'unica rete usata e' il download
+  del modello, al primo uso. Il pannello mostra lo stato del motore, il
+  modello, la lingua, il microfono, il livello audio in ingresso e la
+  cronologia dei comandi. I comandi riconosciuti sono play, pausa, stop,
+  traccia successiva e precedente, volume (su, giu, valore numerico),
+  spostamento nella traccia in avanti e indietro di N secondi, e le azioni
+  sulle playlist (genera casuale, genera recenti, avvia la playlist corrente).
+  La stessa funzionalita' e' stata portata in VlcRemote, dove vive nel
+  pannello aperto dall'AppBar; la progettazione e' in
+  `docs/VOICE_COMMANDS.md`.
+- **Stringhe vocali localizzate**: tutta la scheda "Voce" e' tradotta in
+  italiano e inglese, compresi l'elenco dei comandi e i messaggi d'errore.
+
+### Note
+- Il permesso `RECORD_AUDIO` su Android e' **facoltativo**: l'app resta
+  installabile su dispositivi senza microfono.
+- **macOS non e' supportato** per i comandi vocali: il plugin Vosk non espone
+  l'interfaccia nativa.
+- Il protocollo di controllo remoto non cambia: stessi pacchetti, stessi
+  comandi, stessa chiave.
+
 ## [3.15.0] - 30/09/2026
 
 ### Aggiunto

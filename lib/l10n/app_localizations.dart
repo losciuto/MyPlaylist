@@ -2615,6 +2615,318 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Scansione completata. Totale: {count}'**
   String scanCompleted(Object count);
+
+  /// No description provided for @navVoice.
+  ///
+  /// In it, this message translates to:
+  /// **'Comandi vocali'**
+  String get navVoice;
+
+  /// No description provided for @voiceTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Comandi vocali'**
+  String get voiceTitle;
+
+  /// No description provided for @voiceSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Riconoscimento offline: la voce viene trascritta sul computer, senza inviare nulla online.'**
+  String get voiceSubtitle;
+
+  /// No description provided for @voiceLanguage.
+  ///
+  /// In it, this message translates to:
+  /// **'Lingua del riconoscimento'**
+  String get voiceLanguage;
+
+  /// No description provided for @voiceLanguageIt.
+  ///
+  /// In it, this message translates to:
+  /// **'Italiano'**
+  String get voiceLanguageIt;
+
+  /// No description provided for @voiceLanguageEn.
+  ///
+  /// In it, this message translates to:
+  /// **'Inglese'**
+  String get voiceLanguageEn;
+
+  /// No description provided for @voiceModelTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Modello di riconoscimento'**
+  String get voiceModelTitle;
+
+  /// No description provided for @voiceModelMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'Modello non installato'**
+  String get voiceModelMissing;
+
+  /// No description provided for @voiceModelMissingHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Il modello viene scaricato una volta sola (circa {size}) e tenuto sul disco. Serve una connessione per il primo download.'**
+  String voiceModelMissingHint(String size);
+
+  /// No description provided for @voiceModelDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica il modello'**
+  String get voiceModelDownload;
+
+  /// No description provided for @voiceModelDownloading.
+  ///
+  /// In it, this message translates to:
+  /// **'Download del modello in corso...'**
+  String get voiceModelDownloading;
+
+  /// No description provided for @voiceModelReady.
+  ///
+  /// In it, this message translates to:
+  /// **'Modello pronto'**
+  String get voiceModelReady;
+
+  /// No description provided for @voiceModelSize.
+  ///
+  /// In it, this message translates to:
+  /// **'Dimensione: {size}'**
+  String voiceModelSize(String size);
+
+  /// No description provided for @voiceListen.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascolta'**
+  String get voiceListen;
+
+  /// No description provided for @voiceStopListening.
+  ///
+  /// In it, this message translates to:
+  /// **'Ferma'**
+  String get voiceStopListening;
+
+  /// No description provided for @voiceMicrophone.
+  ///
+  /// In it, this message translates to:
+  /// **'Microfono'**
+  String get voiceMicrophone;
+
+  /// No description provided for @voiceMicrophoneDefault.
+  ///
+  /// In it, this message translates to:
+  /// **'Predefinito di sistema'**
+  String get voiceMicrophoneDefault;
+
+  /// No description provided for @voiceMicrophoneRefresh.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna l\'elenco dei microfoni'**
+  String get voiceMicrophoneRefresh;
+
+  /// No description provided for @voiceInputLevel.
+  ///
+  /// In it, this message translates to:
+  /// **'Livello microfono'**
+  String get voiceInputLevel;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In it, this message translates to:
+  /// **'In ascolto'**
+  String get voiceListening;
+
+  /// No description provided for @voiceWaiting.
+  ///
+  /// In it, this message translates to:
+  /// **'Pronto'**
+  String get voiceWaiting;
+
+  /// No description provided for @voicePartialTranscript.
+  ///
+  /// In it, this message translates to:
+  /// **'Trascrizione: {text}'**
+  String voicePartialTranscript(String text);
+
+  /// No description provided for @voiceHistoryTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Comandi riconosciuti'**
+  String get voiceHistoryTitle;
+
+  /// No description provided for @voiceHistoryEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun comando ancora riconosciuto.'**
+  String get voiceHistoryEmpty;
+
+  /// No description provided for @voiceClearHistory.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota la cronologia'**
+  String get voiceClearHistory;
+
+  /// No description provided for @voiceHelpTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Comandi disponibili'**
+  String get voiceHelpTitle;
+
+  /// No description provided for @voiceHelpPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'playlist casuale / playlist recenti / riproduci la playlist'**
+  String get voiceHelpPlaylist;
+
+  /// No description provided for @voiceHelpPause.
+  ///
+  /// In it, this message translates to:
+  /// **'pausa / riprendi'**
+  String get voiceHelpPause;
+
+  /// No description provided for @voiceHelpNext.
+  ///
+  /// In it, this message translates to:
+  /// **'traccia successiva / traccia precedente'**
+  String get voiceHelpNext;
+
+  /// No description provided for @voiceHelpVolume.
+  ///
+  /// In it, this message translates to:
+  /// **'alza il volume / abbassa il volume / volume 50'**
+  String get voiceHelpVolume;
+
+  /// No description provided for @voiceHelpSeek.
+  ///
+  /// In it, this message translates to:
+  /// **'avanti 30 secondi / indietro 30 secondi'**
+  String get voiceHelpSeek;
+
+  /// No description provided for @voiceHelpStop.
+  ///
+  /// In it, this message translates to:
+  /// **'ferma'**
+  String get voiceHelpStop;
+
+  /// No description provided for @voiceErrorUnsupportedPlatform.
+  ///
+  /// In it, this message translates to:
+  /// **'I comandi vocali non sono supportati su questa piattaforma.'**
+  String get voiceErrorUnsupportedPlatform;
+
+  /// No description provided for @voiceErrorNativeLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Libreria nativa Vosk non trovata: esegui l\'installazione nativa e ricompila l\'applicazione.'**
+  String get voiceErrorNativeLibrary;
+
+  /// No description provided for @voiceErrorModelLoad.
+  ///
+  /// In it, this message translates to:
+  /// **'Modello di riconoscimento non disponibile: {error}'**
+  String voiceErrorModelLoad(String error);
+
+  /// No description provided for @voiceErrorMicDenied.
+  ///
+  /// In it, this message translates to:
+  /// **'Accesso al microfono negato.'**
+  String get voiceErrorMicDenied;
+
+  /// No description provided for @voiceErrorRecorder.
+  ///
+  /// In it, this message translates to:
+  /// **'Acquisizione audio non disponibile: {error}'**
+  String voiceErrorRecorder(String error);
+
+  /// No description provided for @voiceFeedbackPlaylistRandom.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist casuale generata ({count} video)'**
+  String voiceFeedbackPlaylistRandom(int count);
+
+  /// No description provided for @voiceFeedbackPlaylistRecent.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist dei video recenti generata ({count} video)'**
+  String voiceFeedbackPlaylistRecent(int count);
+
+  /// No description provided for @voiceFeedbackPlaylistPlay.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione avviata'**
+  String get voiceFeedbackPlaylistPlay;
+
+  /// No description provided for @voiceFeedbackStopped.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione fermata'**
+  String get voiceFeedbackStopped;
+
+  /// No description provided for @voiceFeedbackPaused.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione in pausa'**
+  String get voiceFeedbackPaused;
+
+  /// No description provided for @voiceFeedbackResumed.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione ripresa'**
+  String get voiceFeedbackResumed;
+
+  /// No description provided for @voiceFeedbackNext.
+  ///
+  /// In it, this message translates to:
+  /// **'Traccia successiva'**
+  String get voiceFeedbackNext;
+
+  /// No description provided for @voiceFeedbackPrevious.
+  ///
+  /// In it, this message translates to:
+  /// **'Traccia precedente'**
+  String get voiceFeedbackPrevious;
+
+  /// No description provided for @voiceFeedbackVolumeUp.
+  ///
+  /// In it, this message translates to:
+  /// **'Volume aumentato'**
+  String get voiceFeedbackVolumeUp;
+
+  /// No description provided for @voiceFeedbackVolumeDown.
+  ///
+  /// In it, this message translates to:
+  /// **'Volume abbassato'**
+  String get voiceFeedbackVolumeDown;
+
+  /// No description provided for @voiceFeedbackVolumeSet.
+  ///
+  /// In it, this message translates to:
+  /// **'Volume impostato al {percent}%'**
+  String voiceFeedbackVolumeSet(int percent);
+
+  /// No description provided for @voiceFeedbackSeekForward.
+  ///
+  /// In it, this message translates to:
+  /// **'Avanzamento di {seconds} secondi'**
+  String voiceFeedbackSeekForward(int seconds);
+
+  /// No description provided for @voiceFeedbackSeekBackward.
+  ///
+  /// In it, this message translates to:
+  /// **'Ritorno di {seconds} secondi'**
+  String voiceFeedbackSeekBackward(int seconds);
+
+  /// No description provided for @voiceFeedbackNotRecognized.
+  ///
+  /// In it, this message translates to:
+  /// **'Comando non riconosciuto'**
+  String get voiceFeedbackNotRecognized;
+
+  /// No description provided for @voiceFeedbackVlcError.
+  ///
+  /// In it, this message translates to:
+  /// **'VLC non raggiungibile'**
+  String get voiceFeedbackVlcError;
 }
 
 class _AppLocalizationsDelegate

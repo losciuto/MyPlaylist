@@ -1,5 +1,29 @@
 All notable changes to this project will be documented in this file.
 
+## [3.16.0] - 21/10/2026
+
+### Added
+- **Offline voice commands**: the "Voce" tab controls playback with the voice.
+  Recognition runs **on-device** (Vosk): the microphone audio never leaves the
+  device, and the only network access is the model download, on first use. The
+  panel shows the engine state, the model, the language, the microphone, the
+  input audio level and the command history. The recognized commands are play,
+  pause, stop, next and previous track, volume (up, down, numeric value),
+  seeking forward and backward by N seconds, and the playlist actions (random
+  list, recent list, play the current list). The same feature has been ported
+  to VlcRemote, where it lives in the app bar panel; the design is in
+  `docs/VOICE_COMMANDS.md`.
+- **Voice strings localized**: the whole "Voce" tab is translated into Italian
+  and English, including the command list and the error messages.
+
+### Notes
+- The `RECORD_AUDIO` permission on Android is **optional**: the app stays
+  installable on devices without a microphone.
+- **macOS is not supported** for voice commands: the Vosk plugin does not
+  expose the native interface.
+- The remote control protocol is unchanged: same packets, same commands, same
+  key.
+
 ## [3.15.0] - 2026-09-30
 
 ### Added

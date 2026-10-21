@@ -40,3 +40,32 @@ Per migliorare l'esperienza di scoperta, abbiamo introdotto la `Set<int> _propos
 - **Persistenza in memoria**: Gli ID dei video aggiunti a una playlist vengono memorizzati per l'intera durata dell'esecuzione del programma.
 - **Iniezione SQL**: Le query di `DatabaseHelper` (getRandom e getFiltered) accettano ora un parametro `excludeIds` che viene iniettato come clausola `NOT IN (...)` nella query SQL, garantendo che i video già visti non vengano riproposti fino al riavvio o all'esaurimento del pool.
 - **Auto-Reset**: Se il numero di video proposti eguaglia o supera il numero totale di video nel database, la memoria viene azzerata per permettere un nuovo ciclo di visione completo.
+
+## 6. Comandi Vocali Offline (Vosk)
+
+La scheda "Voce" permette di controllare la riproduzione con la voce. Il
+riconoscimento e' **in locale** (Vosk): l'audio del microfono non lascia mai il
+dispositivo, e l'unica rete usata e' il download del modello, al primo uso.
+
+- **Motore**: `lib/services/voice/voice_command_service.dart` gestisce modello,
+  cattura audio e riconoscimento; il modello Vosk "small" (italiano o inglese)
+  viene scaricato una volta sola e conservato nella cartella dati.
+- **Parser**: `lib/services/voice/voice_command_parser.dart` traduce la frase
+  trascritta in un comando, con parole chiave e sinonimi, in italiano e
+  inglese. I numeri si leggono come cifre o come parole.
+- **Esecuzione**: `lib/services/voice/vlc_rc_client.dart` parla il protocollo
+  RC di VLC via socket, con timeout ed errori tipizzati; le azioni sulle
+  playlist restano locali.
+- **UI**: `lib/screens/voice_tab.dart` mostra stato del motore, modello,
+  lingua, microfono, livello audio in ingresso e cronologia dei comandi. Le
+  stringhe sono localizzate in italiano e inglese.
+- **Integrazione nativa**: su Linux il percorso di `libvosk.so` viene
+  indicato al plugin prima che parta la VM Dart; su Android il permesso
+  `RECORD_AUDIO` e' dichiarato come facoltativo, cosi' l'app resta
+  installabile su dispositivi senza microfono.
+
+La stessa funzionalita' e' stata portata in **VlcRemote**, dove vive il
+telecomando: li il pannello e' aperto dall'AppBar e l'esecuzione passa dal
+`VlcProvider` invece che da un client RC proprio. La progettazione completa,
+con catalogo dei comandi, limiti e rollback, e' in `docs/VOICE_COMMANDS.md` e
+in `VlcRemote/docs/VOICE_COMMANDS.md`.

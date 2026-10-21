@@ -694,5 +694,127 @@
   "scanCompleted": "Scan complete. Total: {count}",
   "@scanCompleted": {
     "description": "Messaggio finale della scansione, con il totale degli elementi"
-  }
+  },
+  "navVoice": "Voice commands",
+  "voiceTitle": "Voice commands",
+  "voiceSubtitle": "Offline recognition: the voice is transcribed on the computer, nothing is sent online.",
+  "voiceLanguage": "Recognition language",
+  "voiceLanguageIt": "Italian",
+  "voiceLanguageEn": "English",
+  "voiceModelTitle": "Recognition model",
+  "voiceModelMissing": "Model not installed",
+  "voiceModelMissingHint": "The model is downloaded once (about {size}) and kept on disk. The first download needs a connection.",
+  "@voiceModelMissingHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceModelDownload": "Download the model",
+  "voiceModelDownloading": "Downloading the model...",
+  "voiceModelReady": "Model ready",
+  "voiceModelSize": "Size: {size}",
+  "@voiceModelSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceListen": "Listen",
+  "voiceStopListening": "Stop",
+  "voiceMicrophone": "Microphone",
+  "voiceMicrophoneDefault": "System default",
+  "voiceMicrophoneRefresh": "Refresh the list of microphones",
+  "voiceInputLevel": "Microphone level",
+  "voiceListening": "Listening",
+  "voiceWaiting": "Ready",
+  "voicePartialTranscript": "Transcript: {text}",
+  "@voicePartialTranscript": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceHistoryTitle": "Recognized commands",
+  "voiceHistoryEmpty": "No command recognized yet.",
+  "voiceClearHistory": "Clear the history",
+  "voiceHelpTitle": "Available commands",
+  "voiceHelpPlaylist": "random playlist / recent playlist / play the playlist",
+  "voiceHelpPause": "pause / resume",
+  "voiceHelpNext": "next track / previous track",
+  "voiceHelpVolume": "volume up / volume down / volume 50",
+  "voiceHelpSeek": "forward 30 seconds / backward 30 seconds",
+  "voiceHelpStop": "stop",
+  "voiceErrorUnsupportedPlatform": "Voice commands are not supported on this platform.",
+  "voiceErrorNativeLibrary": "Vosk native library not found: run the native installation and rebuild the application.",
+  "voiceErrorModelLoad": "Recognition model not available: {error}",
+  "@voiceErrorModelLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceErrorMicDenied": "Microphone access denied.",
+  "voiceErrorRecorder": "Audio capture not available: {error}",
+  "@voiceErrorRecorder": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistRandom": "Random playlist generated ({count} videos)",
+  "@voiceFeedbackPlaylistRandom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistRecent": "Recent videos playlist generated ({count} videos)",
+  "@voiceFeedbackPlaylistRecent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistPlay": "Playback started",
+  "voiceFeedbackStopped": "Playback stopped",
+  "voiceFeedbackPaused": "Playback paused",
+  "voiceFeedbackResumed": "Playback resumed",
+  "voiceFeedbackNext": "Next track",
+  "voiceFeedbackPrevious": "Previous track",
+  "voiceFeedbackVolumeUp": "Volume raised",
+  "voiceFeedbackVolumeDown": "Volume lowered",
+  "voiceFeedbackVolumeSet": "Volume set to {percent}%",
+  "@voiceFeedbackVolumeSet": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackSeekForward": "Skipped forward {seconds} seconds",
+  "@voiceFeedbackSeekForward": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackSeekBackward": "Skipped back {seconds} seconds",
+  "@voiceFeedbackSeekBackward": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackNotRecognized": "Command not recognized",
+  "voiceFeedbackVlcError": "VLC unreachable"
 }

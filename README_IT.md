@@ -10,6 +10,7 @@ Creatore di Playlist Video e Gestore Database Locale.
 *   **Filtri Avanzati**: Possibilità di includere o escludere generi, anni, attori e registi mediante selezione tri-state (Includi/Escludi/Nessuno).
 *   **Player**: Player interno (mpv) e supporto player esterno (VLC, ecc.).
 *   **VLC Control**: Supporto avanzato per VLC (kill automatico processi precedenti, avvio con controllo remoto).
+*   **Comandi Vocali Offline**: Scheda "Voce" con riconoscimento **in locale** (Vosk): l'audio del microfono non lascia mai il dispositivo. Comandi per play, pausa, stop, traccia successiva e precedente, volume, spostamento nella traccia e azioni sulle playlist.
 *   **Remote Protocol**: Server TCP AES-GCM per il controllo remoto dal client VLC Remote, con supporto anteprima playlist.
 *   **Persistenza**: Salva l'ultima playlist generata tra le sessioni.
 *   **Esclusione Sessione**: Le playlist casuali non ripetono video già proposti nella stessa sessione.

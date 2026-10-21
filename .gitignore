@@ -50,3 +50,6 @@ reference_repo/
 *.db-shm
 *.db-wal
 videos_drift.db
+
+# Modelli di riconoscimento vocale scaricati in locale
+/models/
