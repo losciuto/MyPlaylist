@@ -1,5 +1,18 @@
 # MyPlaylist Release Notes
 
+## Version 3.16.0 — 2026-10-21
+
+### New Features
+- **Offline voice commands**: a new "Voce" tab controls playback by voice. Recognition runs on-device (Vosk): microphone audio never leaves the device, and the only network access is the model download on first use. The panel shows the engine state, model, language, microphone, input audio level and command history. Recognized commands: play, pause, stop, next/previous track, volume (up, down, numeric), seek forward/backward by N seconds, and playlist actions (random list, recent list, play the current list). The same feature was ported to VlcRemote, where it lives in the app bar panel; design in `docs/VOICE_COMMANDS.md`.
+- **Voice strings localized**: the whole "Voce" tab is translated into Italian and English, including the command list and error messages.
+
+### Notes
+- The `RECORD_AUDIO` permission on Android is **optional**: the app stays installable on devices without a microphone.
+- **macOS is not supported** for voice commands: the Vosk plugin does not expose the native interface.
+- The remote control protocol is unchanged: same packets, same commands, same key.
+
+---
+
 ## Version 3.15.0 — 2026-09-30
 
 ### New Features
