@@ -10,6 +10,13 @@ set(BINARY_NAME "my_playlist")
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)
 
+# I plugin di terza parte (es. permission_handler_windows) usano ancora
+# <experimental/coroutine>: con MSVC 14.51 (VS 2026) e' un hard error C2338
+# (STL1011). La definizione si propaga ai sottoprogetti generati da Flutter.
+if(MSVC)
+  add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+endif()
+
 # Define build configuration option.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(IS_MULTICONFIG)
