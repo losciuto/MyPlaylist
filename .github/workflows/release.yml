@@ -163,8 +163,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-name: myplaylist-android
-           path: myplaylist-android.apk
+          name: myplaylist-android
+          path: myplaylist-android.apk
 
   # macOS escluso dal workflow di release: il plugin Vosk (vosk_flutter_fixed)
   # non fornisce un podspec per macOS, quindi `flutter build macos` fallisce su
