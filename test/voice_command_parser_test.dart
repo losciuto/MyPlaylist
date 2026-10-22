@@ -29,17 +29,11 @@ void main() {
     });
 
     test('playlist recenti', () {
-      expect(
-        parseIt('recenti')?.type,
-        VoiceCommandType.playlistRecent,
-      );
+      expect(parseIt('recenti')?.type, VoiceCommandType.playlistRecent);
     });
 
     test('avvia la playlist e\' distinta da riprendi', () {
-      expect(
-        parseIt('avvia la playlist')?.type,
-        VoiceCommandType.playlistPlay,
-      );
+      expect(parseIt('avvia la playlist')?.type, VoiceCommandType.playlistPlay);
       expect(parseIt('riproduci'), isNull);
       expect(parseIt('continua')?.type, VoiceCommandType.vlcResume);
       expect(parseIt('riprendi')?.type, VoiceCommandType.vlcResume);
@@ -54,10 +48,7 @@ void main() {
 
     test('volume', () {
       expect(parseIt('alza')?.type, VoiceCommandType.vlcVolumeUp);
-      expect(
-        parseIt('abbassa')?.type,
-        VoiceCommandType.vlcVolumeDown,
-      );
+      expect(parseIt('abbassa')?.type, VoiceCommandType.vlcVolumeDown);
       expect(parseIt('volume 50')?.number, 50);
       expect(parseIt('volume 50')?.type, VoiceCommandType.vlcVolumeSet);
     });

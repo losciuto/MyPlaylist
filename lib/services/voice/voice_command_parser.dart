@@ -219,14 +219,8 @@ class VoiceCommandParser {
         'diminuisci',
       ],
     ),
-    _Rule(
-      type: VoiceCommandType.vlcVolumeUp,
-      triggers: <String>['alza'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcVolumeDown,
-      triggers: <String>['abbassa'],
-    ),
+    _Rule(type: VoiceCommandType.vlcVolumeUp, triggers: <String>['alza']),
+    _Rule(type: VoiceCommandType.vlcVolumeDown, triggers: <String>['abbassa']),
     _Rule(
       type: VoiceCommandType.playlistRandom,
       triggers: <String>['casuale'],
@@ -237,18 +231,9 @@ class VoiceCommandParser {
       triggers: <String>['recenti'],
       numberMode: _NumberMode.optional,
     ),
-    _Rule(
-      type: VoiceCommandType.playlistPlay,
-      triggers: <String>['avvia'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcNext,
-      triggers: <String>['successiva'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcPrevious,
-      triggers: <String>['precedente'],
-    ),
+    _Rule(type: VoiceCommandType.playlistPlay, triggers: <String>['avvia']),
+    _Rule(type: VoiceCommandType.vlcNext, triggers: <String>['successiva']),
+    _Rule(type: VoiceCommandType.vlcPrevious, triggers: <String>['precedente']),
     _Rule(
       type: VoiceCommandType.vlcSeekForward,
       triggers: <String>['avanti'],
@@ -261,18 +246,12 @@ class VoiceCommandParser {
       numberMode: _NumberMode.optional,
       defaultNumber: 30,
     ),
-    _Rule(
-      type: VoiceCommandType.vlcPause,
-      triggers: <String>['pausa'],
-    ),
+    _Rule(type: VoiceCommandType.vlcPause, triggers: <String>['pausa']),
     _Rule(
       type: VoiceCommandType.vlcResume,
       triggers: <String>['continua', 'riprendi'],
     ),
-    _Rule(
-      type: VoiceCommandType.playerStop,
-      triggers: <String>['stop'],
-    ),
+    _Rule(type: VoiceCommandType.playerStop, triggers: <String>['stop']),
   ];
 
   static const List<_Rule> _englishRules = <_Rule>[
@@ -291,14 +270,8 @@ class VoiceCommandParser {
         'quieter',
       ],
     ),
-    _Rule(
-      type: VoiceCommandType.vlcVolumeUp,
-      triggers: <String>['up'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcVolumeDown,
-      triggers: <String>['down'],
-    ),
+    _Rule(type: VoiceCommandType.vlcVolumeUp, triggers: <String>['up']),
+    _Rule(type: VoiceCommandType.vlcVolumeDown, triggers: <String>['down']),
     _Rule(
       type: VoiceCommandType.playlistRandom,
       triggers: <String>['random', 'shuffle'],
@@ -309,18 +282,9 @@ class VoiceCommandParser {
       triggers: <String>['recent', 'latest'],
       numberMode: _NumberMode.optional,
     ),
-    _Rule(
-      type: VoiceCommandType.playlistPlay,
-      triggers: <String>['start'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcNext,
-      triggers: <String>['next'],
-    ),
-    _Rule(
-      type: VoiceCommandType.vlcPrevious,
-      triggers: <String>['previous'],
-    ),
+    _Rule(type: VoiceCommandType.playlistPlay, triggers: <String>['start']),
+    _Rule(type: VoiceCommandType.vlcNext, triggers: <String>['next']),
+    _Rule(type: VoiceCommandType.vlcPrevious, triggers: <String>['previous']),
     _Rule(
       type: VoiceCommandType.vlcSeekForward,
       triggers: <String>['forward'],
