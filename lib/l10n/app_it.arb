@@ -694,5 +694,127 @@
   "scanCompleted": "Scansione completata. Totale: {count}",
   "@scanCompleted": {
     "description": "Messaggio finale della scansione, con il totale degli elementi"
-  }
+  },
+  "navVoice": "Comandi vocali",
+  "voiceTitle": "Comandi vocali",
+  "voiceSubtitle": "Riconoscimento offline: la voce viene trascritta sul computer, senza inviare nulla online.",
+  "voiceLanguage": "Lingua del riconoscimento",
+  "voiceLanguageIt": "Italiano",
+  "voiceLanguageEn": "Inglese",
+  "voiceModelTitle": "Modello di riconoscimento",
+  "voiceModelMissing": "Modello non installato",
+  "voiceModelMissingHint": "Il modello viene scaricato una volta sola (circa {size}) e tenuto sul disco. Serve una connessione per il primo download.",
+  "@voiceModelMissingHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceModelDownload": "Scarica il modello",
+  "voiceModelDownloading": "Download del modello in corso...",
+  "voiceModelReady": "Modello pronto",
+  "voiceModelSize": "Dimensione: {size}",
+  "@voiceModelSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceListen": "Ascolta",
+  "voiceStopListening": "Ferma",
+  "voiceMicrophone": "Microfono",
+  "voiceMicrophoneDefault": "Predefinito di sistema",
+  "voiceMicrophoneRefresh": "Aggiorna l'elenco dei microfoni",
+  "voiceInputLevel": "Livello microfono",
+  "voiceListening": "In ascolto",
+  "voiceWaiting": "Pronto",
+  "voicePartialTranscript": "Trascrizione: {text}",
+  "@voicePartialTranscript": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceHistoryTitle": "Comandi riconosciuti",
+  "voiceHistoryEmpty": "Nessun comando ancora riconosciuto.",
+  "voiceClearHistory": "Svuota la cronologia",
+  "voiceHelpTitle": "Comandi disponibili",
+  "voiceHelpPlaylist": "playlist casuale / playlist recenti / riproduci la playlist",
+  "voiceHelpPause": "pausa / riprendi",
+  "voiceHelpNext": "traccia successiva / traccia precedente",
+  "voiceHelpVolume": "alza il volume / abbassa il volume / volume 50",
+  "voiceHelpSeek": "avanti 30 secondi / indietro 30 secondi",
+  "voiceHelpStop": "ferma",
+  "voiceErrorUnsupportedPlatform": "I comandi vocali non sono supportati su questa piattaforma.",
+  "voiceErrorNativeLibrary": "Libreria nativa Vosk non trovata: esegui l'installazione nativa e ricompila l'applicazione.",
+  "voiceErrorModelLoad": "Modello di riconoscimento non disponibile: {error}",
+  "@voiceErrorModelLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceErrorMicDenied": "Accesso al microfono negato.",
+  "voiceErrorRecorder": "Acquisizione audio non disponibile: {error}",
+  "@voiceErrorRecorder": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistRandom": "Playlist casuale generata ({count} video)",
+  "@voiceFeedbackPlaylistRandom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistRecent": "Playlist dei video recenti generata ({count} video)",
+  "@voiceFeedbackPlaylistRecent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackPlaylistPlay": "Riproduzione avviata",
+  "voiceFeedbackStopped": "Riproduzione fermata",
+  "voiceFeedbackPaused": "Riproduzione in pausa",
+  "voiceFeedbackResumed": "Riproduzione ripresa",
+  "voiceFeedbackNext": "Traccia successiva",
+  "voiceFeedbackPrevious": "Traccia precedente",
+  "voiceFeedbackVolumeUp": "Volume aumentato",
+  "voiceFeedbackVolumeDown": "Volume abbassato",
+  "voiceFeedbackVolumeSet": "Volume impostato al {percent}%",
+  "@voiceFeedbackVolumeSet": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackSeekForward": "Avanzamento di {seconds} secondi",
+  "@voiceFeedbackSeekForward": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackSeekBackward": "Ritorno di {seconds} secondi",
+  "@voiceFeedbackSeekBackward": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceFeedbackNotRecognized": "Comando non riconosciuto",
+  "voiceFeedbackVlcError": "VLC non raggiungibile"
 }

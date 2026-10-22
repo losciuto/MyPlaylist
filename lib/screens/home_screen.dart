@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database/app_database.dart' as db;
 import 'playlist_tab.dart';
 import 'service_tab.dart';
+import 'voice_tab.dart';
 import '../services/github_service.dart';
 import '../widgets/update_dialog.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _loadVideos();
 
     // Listen for tab changes from provider
@@ -145,6 +146,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: const Icon(Icons.grid_view_rounded),
               text: AppLocalizations.of(context)!.navService,
             ),
+            Tab(
+              icon: const Icon(Icons.mic_none),
+              text: AppLocalizations.of(context)!.navVoice,
+            ),
           ],
           indicatorColor: AppConfig.seedColor,
           labelColor: AppConfig.seedColor,
@@ -255,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [PlaylistTab(), ServiceTab()],
+        children: const [PlaylistTab(), ServiceTab(), VoiceTab()],
       ),
     );
   }

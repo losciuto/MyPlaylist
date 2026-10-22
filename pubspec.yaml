@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.15.0+2
+version: 3.16.0+3
 
 environment:
   sdk: ^3.10.3
@@ -61,6 +61,14 @@ dependencies:
   # Preferenze
   shared_preferences: ^2.5.5
 
+  # Comandi vocali
+  # Riconoscimento offline (Vosk) e cattura audio dal microfono.
+  # vosk_flutter_fixed e' il pacchetto con il build Linux/Windows
+  # corretto: vosk_flutter_service 0.1.2 usa ancora il vecchio nome del
+  # pacchetto nel CMake e la build fallisce.
+  vosk_flutter_fixed: ^0.1.4
+  record: ^6.2.1
+
   # Encryption & Network
   http: ^1.2.0
   cryptography: ^2.7.0
@@ -86,7 +94,6 @@ dev_dependencies:
   build_runner: ^2.13.1
   flutter_launcher_icons: ^0.13.1
   msix: ^3.16.8
-  flutter_distributor: ^0.5.1
 
 # Flutter Launcher Icons configuration
 flutter_launcher_icons:
@@ -122,8 +129,7 @@ msix_config:
 
 # Dependency Overrides to resolve conflicts
 # uuid non e' importato dal codice applicativo, ma senza questo override la
-# risoluzione fallisce: flutter_distributor (dev) e i pacchetti transitivi
-# vogliono versioni diverse di uuid.
+# risoluzione fallisce: i pacchetti transitivi vogliono versioni diverse di uuid.
 dependency_overrides:
   uuid: ^4.4.2
 

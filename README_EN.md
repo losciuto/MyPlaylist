@@ -10,6 +10,7 @@ Video Playlist Creator and Local Database Manager.
 *   **Advanced Filters**: Ability to include or exclude genres, years, actors and directors via tri-state selection (Include/Exclude/None).
 *   **Player**: Internal player (mpv) and external player support (VLC, etc.).
 *   **VLC Control**: Advanced VLC support (auto-kill previous instances, remote control launch).
+*   **Offline Voice Commands**: "Voce" tab with **on-device** recognition (Vosk): the microphone audio never leaves the device. Commands for play, pause, stop, next and previous track, volume, seeking and playlist actions.
 *   **Persistence**: Saves the last generated playlist between sessions.
 *   **Session Exclusion**: Random playlists do not repeat videos already proposed in the current session.
 *   **Advanced Duplicate Management**: Automatic detection of duplicates with a side-by-side technical metadata comparison (using ffprobe) and TV series grouping support. Manage your storage by deleting copies permanently from DB and Disk, and hide false-positives with a persistent "Ignore" function.

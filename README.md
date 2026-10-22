@@ -9,9 +9,11 @@ MyPlaylist is a desktop application designed to manage your local video collecti
 - [English (CHANGELOG.md)](CHANGELOG.md) | [Italiano (CHANGELOG_IT.md)](CHANGELOG_IT.md)
 - [English (REFACTORING.md)](REFACTORING.md) | [Italiano (REFACTORING_IT.md)](REFACTORING_IT.md)
 - [English (README_EN.md)](README_EN.md) | [Italiano (README_IT.md)](README_IT.md)
+- [Offline voice commands (VOICE_COMMANDS.md)](docs/VOICE_COMMANDS.md)
 
 ## Key Features
 - **Modern UI**: Tooltips, real-time progress, and a clean interface.
+- **Offline voice commands**: the "Voce" tab recognizes speech on-device (Vosk); the microphone audio never leaves the device.
 
 > [!WARNING]
 > **Automatic MKV Conversion**: When "Convert video to MKV" is enabled, any **Rename** or **Metadata Sync** on non-MKV files will trigger an automatic remuxing to MKV. Original files will be backed up to the configured folder.

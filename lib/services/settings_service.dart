@@ -38,6 +38,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyExcludeConvertedBackupFromScan =
       'exclude_converted_backup_from_scan';
   static const String _keyLastFilterSettings = 'last_filter_settings';
+  static const String _keyVoiceLanguage = 'voice_language';
+  static const String _keyVoiceInputDevice = 'voice_input_device';
 
   // State
   String _playerPath = '';
@@ -61,6 +63,8 @@ class SettingsService with ChangeNotifier {
   String _videoBackupPath = '';
   bool _excludeConvertedBackupFromScan = true;
   FilterSettings? _lastFilterSettings;
+  String _voiceLanguage = 'it';
+  String? _voiceInputDevice;
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -84,6 +88,10 @@ class SettingsService with ChangeNotifier {
   String get videoBackupPath => _videoBackupPath;
   bool get excludeConvertedBackupFromScan => _excludeConvertedBackupFromScan;
   FilterSettings? get lastFilterSettings => _lastFilterSettings;
+  String get voiceLanguage => _voiceLanguage;
+
+  /// Id del microfono scelto per i comandi vocali, null per il predefinito.
+  String? get voiceInputDevice => _voiceInputDevice;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -126,6 +134,9 @@ class SettingsService with ChangeNotifier {
 
     final languageCode = _prefs.getString('language_code') ?? 'it';
     _locale = Locale(languageCode);
+
+    _voiceLanguage = _prefs.getString(_keyVoiceLanguage) ?? 'it';
+    _voiceInputDevice = _prefs.getString(_keyVoiceInputDevice);
 
     _autoSyncEnabled = _prefs.getBool(_keyAutoSyncEnabled) ?? false;
     _watchedDirectories = _prefs.getStringList(_keyWatchedDirectories) ?? [];
@@ -226,6 +237,26 @@ class SettingsService with ChangeNotifier {
     if (_locale == cx) return;
     _locale = cx;
     await _prefs.setString('language_code', cx.languageCode);
+    notifyListeners();
+  }
+
+  /// Lingua usata dal riconoscimento vocale ('it' o 'en').
+  Future<void> setVoiceLanguage(String language) async {
+    if (_voiceLanguage == language) return;
+    _voiceLanguage = language;
+    await _prefs.setString(_keyVoiceLanguage, language);
+    notifyListeners();
+  }
+
+  /// Microfono usato dai comandi vocali, null per quello predefinito.
+  Future<void> setVoiceInputDevice(String? deviceId) async {
+    if (_voiceInputDevice == deviceId) return;
+    _voiceInputDevice = deviceId;
+    if (deviceId == null) {
+      await _prefs.remove(_keyVoiceInputDevice);
+    } else {
+      await _prefs.setString(_keyVoiceInputDevice, deviceId);
+    }
     notifyListeners();
   }
 
