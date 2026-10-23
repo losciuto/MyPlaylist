@@ -54,3 +54,4 @@ videos_drift.db
 
 # Modelli di riconoscimento vocale scaricati in locale
 /models/
+AGENTS.md
