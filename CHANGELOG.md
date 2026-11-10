@@ -1,5 +1,13 @@
 All notable changes to this project will be documented in this file.
 
+## [3.17.1] - 10/11/2026
+
+### Fixed
+- **Database tab**: fixed the blank screen in `Service → Database` caused by an unconstrained layout of the video table.
+- **Edit video dialog**: initialized the personal rating in the edit dialog, preventing the `LateInitializationError: _personalRating` crash on open.
+- **Service tab stability**: fixed provider listener removal during dispose/tab changes to avoid `Null check operator used on a null value`.
+- **Playlist filters**: Tag and Personal rating filters are now correctly applied when generating a filtered playlist.
+
 ## [3.17.0] - 10/11/2026
 
 ### Added

@@ -58,6 +58,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
           genres: settings.genres,
           years: settings.years,
           minRating: settings.ratingMin,
+          personalRatingMin: settings.personalRatingMin,
           actors: settings.actors,
           directors: settings.directors,
           excludedGenres: settings.excludedGenres,
@@ -66,6 +67,8 @@ class _PlaylistTabState extends State<PlaylistTab> {
           excludedDirectors: settings.excludedDirectors,
           sagas: settings.sagas,
           excludedSagas: settings.excludedSagas,
+          tags: settings.tags,
+          excludedTags: settings.excludedTags,
           limit: settings.limit,
         );
         _checkResult(provider.playlist);

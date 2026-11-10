@@ -1,5 +1,13 @@
 All notable changes to this project will be documented in this file.
 
+## [3.17.1] - 10/11/2026
+
+### Corretto
+- **Scheda Database**: risolta la schermata bianca in `Servizio → Database` causata da un layout non vincolato della tabella video.
+- **Modifica video**: inizializzato il voto personale nel dialog di modifica, evitando il crash `LateInitializationError: _personalRating` all'apertura.
+- **Stabilità scheda Servizio**: corretta la rimozione del listener del provider in dispose/cambio tab per evitare `Null check operator used on a null value`.
+- **Filtri playlist**: i filtri per Tag e Voto personale vengono ora applicati correttamente alla generazione della playlist filtrata.
+
 ## [3.17.0] - 10/11/2026
 
 ### Aggiunto

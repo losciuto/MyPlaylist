@@ -46,37 +46,48 @@ class _VideoDataTableState extends State<VideoDataTable> {
     // Total width calculation: 250+80+100+80+150+200+150+60 = 1070
     const double totalTableWidth = 1070;
 
-    return Scrollbar(
-      controller: _horizontalController,
-      thumbVisibility: true,
-      trackVisibility: true,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: _horizontalController,
-        child: SizedBox(
-          width: totalTableWidth,
-          child: Column(
-            children: [
-              _buildTableHeader(context),
-              Expanded(
-                child: Scrollbar(
-                  controller: _verticalController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  child: ListView.builder(
-                    controller: _verticalController,
-                    itemCount: widget.videos.length,
-                    itemExtent:
-                        50, // Fixed height for performance if rows are uniform
-                    itemBuilder: (context, index) =>
-                        _buildTableRow(context, widget.videos[index], index),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double tableHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 400;
+
+        return Scrollbar(
+          controller: _horizontalController,
+          thumbVisibility: true,
+          trackVisibility: true,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _horizontalController,
+            child: SizedBox(
+              width: totalTableWidth,
+              height: tableHeight,
+              child: Column(
+                children: [
+                  _buildTableHeader(context),
+                  Expanded(
+                    child: Scrollbar(
+                      controller: _verticalController,
+                      thumbVisibility: true,
+                      trackVisibility: true,
+                      child: ListView.builder(
+                        controller: _verticalController,
+                        itemCount: widget.videos.length,
+                        itemExtent: 50,
+                        itemBuilder: (context, index) => _buildTableRow(
+                          context,
+                          widget.videos[index],
+                          index,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

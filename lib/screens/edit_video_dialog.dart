@@ -79,6 +79,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
       text: _dateAdded != null ? DateFormat('HH:mm').format(_dateAdded!) : '',
     );
     _rating = widget.video.rating;
+    _personalRating = widget.video.personalRating;
     _loadFileSize();
   }
 

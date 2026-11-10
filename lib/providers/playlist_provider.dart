@@ -103,6 +103,7 @@ class PlaylistProvider extends ChangeNotifier {
     List<String>? genres,
     List<String>? years,
     double? minRating,
+    double? personalRatingMin,
     List<String>? actors,
     List<String>? directors,
     List<String>? excludedGenres,
@@ -111,6 +112,8 @@ class PlaylistProvider extends ChangeNotifier {
     List<String>? excludedDirectors,
     List<String>? sagas,
     List<String>? excludedSagas,
+    List<String>? tags,
+    List<String>? excludedTags,
     int? limit,
     bool launchPlayer = true,
   }) async {
@@ -121,6 +124,7 @@ class PlaylistProvider extends ChangeNotifier {
       genres: genres,
       years: years,
       minRating: minRating,
+      personalRatingMin: personalRatingMin,
       actors: actors,
       directors: directors,
       excludedGenres: excludedGenres,
@@ -129,6 +133,8 @@ class PlaylistProvider extends ChangeNotifier {
       excludedDirectors: excludedDirectors,
       sagas: sagas,
       excludedSagas: excludedSagas,
+      tags: tags,
+      excludedTags: excludedTags,
       limit: limit ?? 20,
       excludeIds: _proposedVideoIds.toList(),
     );
@@ -142,6 +148,7 @@ class PlaylistProvider extends ChangeNotifier {
         genres: genres,
         years: years,
         minRating: minRating,
+        personalRatingMin: personalRatingMin,
         actors: actors,
         directors: directors,
         excludedGenres: excludedGenres,
@@ -150,6 +157,8 @@ class PlaylistProvider extends ChangeNotifier {
         excludedDirectors: excludedDirectors,
         sagas: sagas,
         excludedSagas: excludedSagas,
+        tags: tags,
+        excludedTags: excludedTags,
         limit: limit ?? 20,
       );
       await setPlaylist(retryVideos);

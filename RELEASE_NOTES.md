@@ -1,5 +1,15 @@
 # MyPlaylist Release Notes
 
+## Version 3.17.1 — 2026-11-10
+
+### Bug Fixes
+- **Database tab**: fixed the blank screen in `Service → Database` caused by an unconstrained layout of the video table.
+- **Edit video dialog**: initialized the personal rating field to prevent a `LateInitializationError` crash when opening the dialog.
+- **Service tab stability**: fixed provider listener handling on dispose/tab change to avoid null-check crashes.
+- **Playlist filters**: Tag and Personal rating filters are now correctly forwarded and applied to filtered playlist generation.
+
+---
+
 ## Version 3.17.0 — 2026-11-10
 
 ### New Features

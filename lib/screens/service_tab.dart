@@ -9,7 +9,6 @@ import 'package:my_playlist/l10n/app_localizations.dart';
 import '../config/app_config.dart';
 import '../widgets/database_backup_actions.dart';
 import '../widgets/confirm_dialog.dart';
-import '../services/logger_service.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -20,11 +19,13 @@ class ServiceTab extends StatefulWidget {
 
 class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
   late TabController _innerTabController;
+  DatabaseProvider? _databaseProvider;
 
   @override
   void initState() {
     super.initState();
     final provider = context.read<DatabaseProvider>();
+    _databaseProvider = provider;
     _innerTabController = TabController(
       length: 5,
       vsync: this,
@@ -37,15 +38,14 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
 
   void _onTabChange() {
     if (!_innerTabController.indexIsChanging) {
-      context.read<DatabaseProvider>().setServiceTabIndex(
-        _innerTabController.index,
-      );
+      _databaseProvider?.setServiceTabIndex(_innerTabController.index);
     }
   }
 
   void _onProviderChange() {
     if (!mounted) return;
-    final provider = context.read<DatabaseProvider>();
+    final provider = _databaseProvider;
+    if (provider == null) return;
     if (_innerTabController.index != provider.currentServiceTabIndex) {
       _innerTabController.animateTo(provider.currentServiceTabIndex);
     }
@@ -54,11 +54,8 @@ class _ServiceTabState extends State<ServiceTab> with TickerProviderStateMixin {
   @override
   void dispose() {
     _innerTabController.removeListener(_onTabChange);
-    try {
-      context.read<DatabaseProvider>().removeListener(_onProviderChange);
-    } on Exception catch (e) {
-      LoggerService().debug('Error removing listener: $e');
-    }
+    _databaseProvider?.removeListener(_onProviderChange);
+    _databaseProvider = null;
     _innerTabController.dispose();
     super.dispose();
   }
