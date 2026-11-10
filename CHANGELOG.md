@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **In-app updater**: fixed SHA-256 verification of the downloaded file (correct hex encoding), which prevented automatic updates from completing even with a valid checksum.
 
+### Known issue
+- Installations on 3.17.1 (and earlier versions affected by the SHA-256 verification bug) cannot auto-update: a one-time manual update is required by downloading the installer from the [3.17.2 release](https://github.com/losciuto/MyPlaylist/releases/tag/v3.17.2). Subsequent versions will update automatically.
+
 ## [3.17.1] - 10/11/2026
 
 ### Fixed

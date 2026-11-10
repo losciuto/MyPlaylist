@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Corretto
 - **Aggiornamento in-app**: corretta la verifica dell'impronta SHA-256 del file scaricato (conversione corretta in esadecimale), che impediva il completamento dell'aggiornamento automatico anche con checksum valido.
 
+### Bug noto
+- Le installazioni su 3.17.1 (e versioni precedenti affette dal bug di verifica SHA-256) non possono auto-aggiornarsi: è necessario un aggiornamento manuale una tantum scaricando l'installatore dalla [release 3.17.2](https://github.com/losciuto/MyPlaylist/releases/tag/v3.17.2). Le versioni successive si aggiorneranno correttamente in automatico.
+
 ## [3.17.1] - 10/11/2026
 
 ### Corretto
