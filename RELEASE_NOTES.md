@@ -1,5 +1,12 @@
 # MyPlaylist Release Notes
 
+## Version 3.17.2 — 2026-11-10
+
+### Bug Fixes
+- **In-app updater**: fixed SHA-256 checksum verification (hash bytes are now compared as hex), resolving update failures when the published checksum was valid.
+
+---
+
 ## Version 3.17.1 — 2026-11-10
 
 ### Bug Fixes

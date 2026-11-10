@@ -319,7 +319,8 @@ class UpdateService {
       sink.add(chunk);
     }
     sink.close();
-    return (await sink.hash()).toString();
+    final hash = await sink.hash();
+    return hash.bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 
   Future<void> _deleteQuietly(File file) async {

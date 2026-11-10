@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## [3.17.2] - 10/11/2026
+
+### Corretto
+- **Aggiornamento in-app**: corretta la verifica dell'impronta SHA-256 del file scaricato (conversione corretta in esadecimale), che impediva il completamento dell'aggiornamento automatico anche con checksum valido.
+
 ## [3.17.1] - 10/11/2026
 
 ### Corretto

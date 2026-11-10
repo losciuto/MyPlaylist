@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## [3.17.2] - 10/11/2026
+
+### Fixed
+- **In-app updater**: fixed SHA-256 verification of the downloaded file (correct hex encoding), which prevented automatic updates from completing even with a valid checksum.
+
 ## [3.17.1] - 10/11/2026
 
 ### Fixed
