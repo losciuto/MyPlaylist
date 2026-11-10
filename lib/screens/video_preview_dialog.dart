@@ -179,8 +179,15 @@ class _VideoPreviewDialogState extends State<VideoPreviewDialog> {
                     '★ ${widget.video.rating.toStringAsFixed(1)}',
                     Colors.orange,
                   ),
+                  if (widget.video.personalRating > 0)
+                    _buildChip(
+                      '❤ ${widget.video.personalRating.toStringAsFixed(1)}',
+                      Colors.red,
+                    ),
                   if (widget.video.directors.isNotEmpty)
                     _buildChip('Regia: ${widget.video.directors}', Colors.teal),
+                  if (widget.video.tags.isNotEmpty)
+                    _buildChip('Tag: ${widget.video.tags}', Colors.deepPurple),
                 ],
               ),
               const SizedBox(height: 24),

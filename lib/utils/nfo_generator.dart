@@ -99,6 +99,24 @@ class NfoGenerator {
             },
           );
         }
+
+        // Personal Rating
+        if (video.personalRating > 0) {
+          builder.element(
+            'personalrating',
+            nest: video.personalRating.toString(),
+          );
+        }
+
+        // Tags
+        if (video.tags.isNotEmpty) {
+          for (final tag in video.tags.split(',')) {
+            final cleanTag = tag.trim();
+            if (cleanTag.isNotEmpty) {
+              builder.element('tag', nest: cleanTag);
+            }
+          }
+        }
       },
     );
 
@@ -333,6 +351,24 @@ class NfoGenerator {
             attributes: {'aspect': 'poster'},
             nest: video.posterPath,
           );
+        }
+
+        // Personal Rating
+        if (video.personalRating > 0) {
+          builder.element(
+            'personalrating',
+            nest: video.personalRating.toString(),
+          );
+        }
+
+        // Tags
+        if (video.tags.isNotEmpty) {
+          for (final tag in video.tags.split(',')) {
+            final cleanTag = tag.trim();
+            if (cleanTag.isNotEmpty) {
+              builder.element('tag', nest: cleanTag);
+            }
+          }
         }
       },
     );

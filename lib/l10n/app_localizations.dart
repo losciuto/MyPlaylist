@@ -512,6 +512,12 @@ abstract class AppLocalizations {
   /// **'Rating'**
   String get colRating;
 
+  /// No description provided for @colPersonalRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto Personale'**
+  String get colPersonalRating;
+
   /// No description provided for @colSaga.
   ///
   /// In it, this message translates to:
@@ -709,6 +715,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'GENERI'**
   String get sectionGenres;
+
+  /// No description provided for @sectionTags.
+  ///
+  /// In it, this message translates to:
+  /// **'TAG'**
+  String get sectionTags;
+
+  /// No description provided for @sectionPersonalRating.
+  ///
+  /// In it, this message translates to:
+  /// **'VOTO PERSONALE'**
+  String get sectionPersonalRating;
 
   /// No description provided for @sectionCast.
   ///
@@ -1016,6 +1034,12 @@ abstract class AppLocalizations {
   /// **'Saghe'**
   String get tabSagas;
 
+  /// No description provided for @tabTags.
+  ///
+  /// In it, this message translates to:
+  /// **'Tag'**
+  String get tabTags;
+
   /// No description provided for @generalSettings.
   ///
   /// In it, this message translates to:
@@ -1039,6 +1063,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Filtra per rating ≥ {rating}'**
   String filterByRating(Object rating);
+
+  /// No description provided for @minPersonalRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto Personale Minimo:'**
+  String get minPersonalRating;
+
+  /// No description provided for @filterByPersonalRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Filtra per voto personale ≥ {rating}'**
+  String filterByPersonalRating(Object rating);
 
   /// No description provided for @summary.
   ///
@@ -1327,6 +1363,18 @@ abstract class AppLocalizations {
   /// **'Generi (separati da virgola)'**
   String get labelGenres;
 
+  /// No description provided for @labelTags.
+  ///
+  /// In it, this message translates to:
+  /// **'Tag (separati da virgola)'**
+  String get labelTags;
+
+  /// No description provided for @labelPersonalRating.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto Personale (0-10)'**
+  String get labelPersonalRating;
+
   /// No description provided for @labelDirectors.
   ///
   /// In it, this message translates to:
@@ -1368,6 +1416,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Voto: {rating}'**
   String ratingLabel(Object rating);
+
+  /// No description provided for @personalRatingLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Voto Personale: {rating}'**
+  String personalRatingLabel(Object rating);
 
   /// No description provided for @updateDbOnly.
   ///
@@ -2808,6 +2862,18 @@ abstract class AppLocalizations {
   /// **'ferma'**
   String get voiceHelpStop;
 
+  /// No description provided for @voiceHelpPoster.
+  ///
+  /// In it, this message translates to:
+  /// **'locandina'**
+  String get voiceHelpPoster;
+
+  /// No description provided for @voiceHelpClosePoster.
+  ///
+  /// In it, this message translates to:
+  /// **'chiudi locandina'**
+  String get voiceHelpClosePoster;
+
   /// No description provided for @voiceErrorUnsupportedPlatform.
   ///
   /// In it, this message translates to:
@@ -2916,6 +2982,24 @@ abstract class AppLocalizations {
   /// **'Ritorno di {seconds} secondi'**
   String voiceFeedbackSeekBackward(int seconds);
 
+  /// No description provided for @voiceFeedbackShowPoster.
+  ///
+  /// In it, this message translates to:
+  /// **'Locandina visualizzata'**
+  String get voiceFeedbackShowPoster;
+
+  /// No description provided for @voiceFeedbackClosePoster.
+  ///
+  /// In it, this message translates to:
+  /// **'Locandina chiusa'**
+  String get voiceFeedbackClosePoster;
+
+  /// No description provided for @voiceFeedbackPosterNotAvailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Locandina non disponibile'**
+  String get voiceFeedbackPosterNotAvailable;
+
   /// No description provided for @voiceFeedbackNotRecognized.
   ///
   /// In it, this message translates to:
@@ -2927,6 +3011,60 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'VLC non raggiungibile'**
   String get voiceFeedbackVlcError;
+
+  /// No description provided for @navTimer.
+  ///
+  /// In it, this message translates to:
+  /// **'Timer VLC'**
+  String get navTimer;
+
+  /// No description provided for @timerTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Timer Spegnimento VLC'**
+  String get timerTitle;
+
+  /// No description provided for @timerSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Imposta un\'ora per terminare automaticamente VLC'**
+  String get timerSubtitle;
+
+  /// No description provided for @timerEnabled.
+  ///
+  /// In it, this message translates to:
+  /// **'Abilita Timer'**
+  String get timerEnabled;
+
+  /// No description provided for @timerEnabledSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Quando attivo, VLC verrà chiuso all\'ora specificata'**
+  String get timerEnabledSubtitle;
+
+  /// No description provided for @timerTime.
+  ///
+  /// In it, this message translates to:
+  /// **'Ora di spegnimento'**
+  String get timerTime;
+
+  /// No description provided for @timerTimeHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Formato 24h (es. 23:30)'**
+  String get timerTimeHint;
+
+  /// No description provided for @timerHelpTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Come funziona'**
+  String get timerHelpTitle;
+
+  /// No description provided for @timerHelpText.
+  ///
+  /// In it, this message translates to:
+  /// **'Il timer controlla l\'ora ogni minuto. Quando l\'ora corrente corrisponde a quella impostata, VLC viene terminato forzatamente (pkill su Linux, taskkill su Windows). Il timer funziona solo se MyPlaylist è in esecuzione.'**
+  String get timerHelpText;
 }
 
 class _AppLocalizationsDelegate

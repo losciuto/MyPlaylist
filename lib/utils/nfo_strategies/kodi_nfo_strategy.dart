@@ -178,6 +178,14 @@ class KodiNfoStrategy implements NfoStrategy {
           : clean(setNode.innerText);
     }
 
+    // Tags
+    final tags = getList('tag');
+
+    // Personal Rating (custom element)
+    String? personalRatingStr = getString('personalrating');
+    personalRatingStr ??= getString('myrating');
+    final safePersonalRating = robustParse(personalRatingStr);
+
     return {
       'title': title,
       'genres': genres.join(', '),
@@ -188,9 +196,11 @@ class KodiNfoStrategy implements NfoStrategy {
       'actors': safeActors.join(', '),
       'actorThumbs': actorThumbs.join('|'),
       'rating': safeRating,
+      'personalRating': safePersonalRating,
       'duration': duration,
       'poster': thumb,
       'saga': saga,
+      'tags': tags.join(', '),
     };
   }
 }

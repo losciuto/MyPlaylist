@@ -38,6 +38,12 @@ enum VoiceCommandType {
 
   /// Torna indietro nella riproduzione di un numero di secondi.
   vlcSeekBackward,
+
+  /// Mostra la locandina del film in corso di riproduzione.
+  showPoster,
+
+  /// Chiude la locandina aperta.
+  closePoster,
 }
 
 /// Esito dell'analisi di una frase trascritta.
@@ -69,6 +75,9 @@ enum VoiceFeedback {
   volumeSet,
   seekForward,
   seekBackward,
+  showPoster,
+  closePoster,
+  posterNotAvailable,
   notRecognized,
   vlcUnreachable,
 }

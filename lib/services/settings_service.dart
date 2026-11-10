@@ -40,6 +40,8 @@ class SettingsService with ChangeNotifier {
   static const String _keyLastFilterSettings = 'last_filter_settings';
   static const String _keyVoiceLanguage = 'voice_language';
   static const String _keyVoiceInputDevice = 'voice_input_device';
+  static const String _keyVlcKillTimerEnabled = 'vlc_kill_timer_enabled';
+  static const String _keyVlcKillTimerTime = 'vlc_kill_timer_time';
 
   // State
   String _playerPath = '';
@@ -65,6 +67,8 @@ class SettingsService with ChangeNotifier {
   FilterSettings? _lastFilterSettings;
   String _voiceLanguage = 'it';
   String? _voiceInputDevice;
+  bool _vlcKillTimerEnabled = false;
+  String _vlcKillTimerTime = '23:59'; // Default: 23:59
 
   bool get initialized => _initialized;
   String get playerPath => _playerPath;
@@ -89,6 +93,12 @@ class SettingsService with ChangeNotifier {
   bool get excludeConvertedBackupFromScan => _excludeConvertedBackupFromScan;
   FilterSettings? get lastFilterSettings => _lastFilterSettings;
   String get voiceLanguage => _voiceLanguage;
+
+  /// Timer VLC: se abilitato, uccide VLC all'ora impostata.
+  bool get vlcKillTimerEnabled => _vlcKillTimerEnabled;
+
+  /// Ora del giorno in formato HH:mm (24h) per uccidere VLC.
+  String get vlcKillTimerTime => _vlcKillTimerTime;
 
   /// Id del microfono scelto per i comandi vocali, null per il predefinito.
   String? get voiceInputDevice => _voiceInputDevice;
@@ -137,6 +147,8 @@ class SettingsService with ChangeNotifier {
 
     _voiceLanguage = _prefs.getString(_keyVoiceLanguage) ?? 'it';
     _voiceInputDevice = _prefs.getString(_keyVoiceInputDevice);
+    _vlcKillTimerEnabled = _prefs.getBool(_keyVlcKillTimerEnabled) ?? false;
+    _vlcKillTimerTime = _prefs.getString(_keyVlcKillTimerTime) ?? '23:59';
 
     _autoSyncEnabled = _prefs.getBool(_keyAutoSyncEnabled) ?? false;
     _watchedDirectories = _prefs.getStringList(_keyWatchedDirectories) ?? [];
@@ -257,6 +269,22 @@ class SettingsService with ChangeNotifier {
     } else {
       await _prefs.setString(_keyVoiceInputDevice, deviceId);
     }
+    notifyListeners();
+  }
+
+  /// Abilita/disabilita il timer di spegnimento VLC.
+  Future<void> setVlcKillTimerEnabled(bool enabled) async {
+    if (_vlcKillTimerEnabled == enabled) return;
+    _vlcKillTimerEnabled = enabled;
+    await _prefs.setBool(_keyVlcKillTimerEnabled, enabled);
+    notifyListeners();
+  }
+
+  /// Imposta l'ora (formato HH:mm 24h) per il kill timer di VLC.
+  Future<void> setVlcKillTimerTime(String time) async {
+    if (_vlcKillTimerTime == time) return;
+    _vlcKillTimerTime = time;
+    await _prefs.setString(_keyVlcKillTimerTime, time);
     notifyListeners();
   }
 

@@ -69,6 +69,7 @@ errori tipizzati sono in `VoiceError`: `unsupportedPlatform`,
 | Pausa | "pausa", "sospendi" | "pause" | — |
 | Riprendi | "riprendi", "riproduci" | "resume", "continue" | — |
 | Stop | "ferma", "ferma tutto", "chiudi vlc" | "stop", "close vlc" | — |
+| Chiudi locandina | "chiudi" | "close" | — |
 
 Il riconoscimento e' a **parole chiave**, con sinonimi, e l'ordine delle
 regole conta: "volume 50" viene valutato prima di "volume su". I numeri si

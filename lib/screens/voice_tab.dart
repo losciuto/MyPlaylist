@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
+import '../models/video.dart';
+import '../screens/video_details_dialog.dart';
 import '../services/voice/voice_command.dart';
 import '../services/voice/voice_command_service.dart';
 import '../services/voice/voice_language.dart';
@@ -19,6 +21,8 @@ class VoiceTab extends StatefulWidget {
 }
 
 class _VoiceTabState extends State<VoiceTab> {
+  VoiceCommandService? _voiceService;
+
   @override
   void initState() {
     super.initState();
@@ -26,12 +30,40 @@ class _VoiceTabState extends State<VoiceTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final voice = context.read<VoiceCommandService>();
+      _voiceService = voice;
       voice.loadInputDevices();
       // Se il modello e' gia' in locale il motore parte subito: cosi' il
       // microfono non resta disattivato anche se il modello non e' stato
       // avviato in questa sessione.
       voice.prepareIfModelPresent();
+
+      // Ascolta le notifiche per mostrare la locandina
+      voice.showPosterNotifier.addListener(_onShowPoster);
     });
+  }
+
+  @override
+  void dispose() {
+    _voiceService?.showPosterNotifier.removeListener(_onShowPoster);
+    super.dispose();
+  }
+
+  void _onShowPoster() {
+    final voice = _voiceService;
+    if (voice == null) return;
+    final video = voice.showPosterNotifier.value;
+    if (video != null && mounted) {
+      _showVideoDetails(video);
+      // Reset the notifier to avoid showing the same video multiple times
+      voice.showPosterNotifier.value = null;
+    }
+  }
+
+  void _showVideoDetails(Video video) {
+    showDialog(
+      context: context,
+      builder: (ctx) => VideoDetailsDialog(video: video),
+    );
   }
 
   @override
@@ -664,6 +696,8 @@ class _HelpPanel extends StatelessWidget {
       l10n.voiceHelpVolume,
       l10n.voiceHelpSeek,
       l10n.voiceHelpStop,
+      l10n.voiceHelpPoster,
+      l10n.voiceHelpClosePoster,
     ];
 
     return Container(
@@ -742,6 +776,12 @@ String _feedbackText(AppLocalizations l10n, VoiceLogEntry entry) {
       return l10n.voiceFeedbackSeekForward(entry.number ?? 0);
     case VoiceFeedback.seekBackward:
       return l10n.voiceFeedbackSeekBackward(entry.number ?? 0);
+    case VoiceFeedback.showPoster:
+      return l10n.voiceFeedbackShowPoster;
+    case VoiceFeedback.closePoster:
+      return l10n.voiceFeedbackClosePoster;
+    case VoiceFeedback.posterNotAvailable:
+      return l10n.voiceFeedbackPosterNotAvailable;
     case VoiceFeedback.notRecognized:
       return l10n.voiceFeedbackNotRecognized;
     case VoiceFeedback.vlcUnreachable:

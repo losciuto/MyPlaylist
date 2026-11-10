@@ -20,6 +20,7 @@ Widget buildVideoInfoColumn({
   required TextEditingController posterPathController,
   required TextEditingController sagaController,
   required TextEditingController sagaIndexController,
+  required TextEditingController tagsController,
   required TextEditingController dateAddedController,
   required TextEditingController timeController,
   required DateTime? dateAdded,
@@ -53,6 +54,8 @@ Widget buildVideoInfoColumn({
         ),
         const SizedBox(height: 10),
         editVideoTextField(context, genresController, l10n.labelGenres),
+        const SizedBox(height: 10),
+        editVideoTextField(context, tagsController, l10n.labelTags),
         const SizedBox(height: 10),
         editVideoTextField(context, directorsController, l10n.labelDirectors),
         const SizedBox(height: 10),
@@ -156,12 +159,14 @@ Widget buildVideoInfoColumn({
   );
 }
 
-/// Colonna destra: voto e trama. [onRatingChanged] segnala lo slider.
+/// Colonna destra: voto, voto personale e trama. [onRatingChanged] e [onPersonalRatingChanged] segnalano gli slider.
 Widget buildVideoRatingColumn({
   required BuildContext context,
   required double rating,
+  required double personalRating,
   required TextEditingController plotController,
   required ValueChanged<double> onRatingChanged,
+  required ValueChanged<double> onPersonalRatingChanged,
 }) {
   final l10n = AppLocalizations.of(context)!;
 
@@ -179,6 +184,20 @@ Widget buildVideoRatingColumn({
         ),
         Text(
           l10n.ratingLabel(rating.toStringAsFixed(1)),
+          style: const TextStyle(color: Colors.white),
+        ),
+        const SizedBox(height: 20),
+        Text(l10n.colPersonalRating, style: const TextStyle(color: Colors.white70)),
+        Slider(
+          value: personalRating,
+          max: 10,
+          divisions: 20,
+          label: personalRating.toString(),
+          activeColor: Colors.red,
+          onChanged: onPersonalRatingChanged,
+        ),
+        Text(
+          l10n.personalRatingLabel(personalRating.toStringAsFixed(1)),
           style: const TextStyle(color: Colors.white),
         ),
         const SizedBox(height: 20),

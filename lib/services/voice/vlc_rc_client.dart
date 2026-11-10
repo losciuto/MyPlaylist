@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import '../logger_service.dart';
 
 /// Errore nell'invio di un comando all'interfaccia RC del VLC.
 class VlcRcException implements Exception {
@@ -125,6 +126,36 @@ class VlcRcClient {
     } on VlcRcException {
       return false;
     }
+  }
+
+  /// Restituisce il path del file in corso di riproduzione, se disponibile.
+  Future<String?> getCurrentPlayingFile() async {
+    final response = await send('info');
+    LoggerService().info('VLC RC Client: info response: $response');
+    // La risposta di "info" può contenere il filename in due formati:
+    // Formato 1 (vecchio): [ "filename", "/path/to/file.mp4" ]
+    // Formato 2 (nuovo): | filename: /path/to/file.mkv  (nella sezione Meta data)
+    final lines = response.split('\n');
+    for (final line in lines) {
+      // Formato 1: [ "filename", "/path/to/file.mp4" ]
+      if (line.contains('filename')) {
+        final match = RegExp(r'"filename"\s*,\s*"([^"]+)"').firstMatch(line);
+        if (match != null) {
+          LoggerService().info('VLC RC Client: extracted filename (format 1): ${match.group(1)}');
+          return match.group(1);
+        }
+        // Formato 2: | filename: /path/to/file.mkv
+        final match2 = RegExp(r'filename\s*:\s*(.+)').firstMatch(line);
+        if (match2 != null) {
+          final extracted = match2.group(1)?.trim();
+          if (extracted != null && extracted.isNotEmpty) {
+            LoggerService().info('VLC RC Client: extracted filename (format 2): $extracted');
+            return extracted;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   /// Toglie il prompt finale e i ritorni a capo dal testo ricevuto.

@@ -228,6 +228,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colRating => 'Rating';
 
   @override
+  String get colPersonalRating => 'Personal Rating';
+
+  @override
   String get colSaga => 'Saga';
 
   @override
@@ -339,6 +342,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectionGenres => 'GENRES';
+
+  @override
+  String get sectionTags => 'TAGS';
+
+  @override
+  String get sectionPersonalRating => 'PERSONAL RATING';
 
   @override
   String get sectionCast => 'Cast';
@@ -546,6 +555,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabSagas => 'Sagas';
 
   @override
+  String get tabTags => 'Tags';
+
+  @override
   String get generalSettings => 'GENERAL SETTINGS';
 
   @override
@@ -557,6 +569,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String filterByRating(Object rating) {
     return 'Filter by rating ≥ $rating';
+  }
+
+  @override
+  String get minPersonalRating => 'Minimum Personal Rating:';
+
+  @override
+  String filterByPersonalRating(Object rating) {
+    return 'Filter by personal rating ≥ $rating';
   }
 
   @override
@@ -768,6 +788,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelGenres => 'Genres (comma separated)';
 
   @override
+  String get labelTags => 'Tags (comma separated)';
+
+  @override
+  String get labelPersonalRating => 'Personal Rating (0-10)';
+
+  @override
   String get labelDirectors => 'Directors';
 
   @override
@@ -788,6 +814,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String ratingLabel(Object rating) {
     return 'Rating: $rating';
+  }
+
+  @override
+  String personalRatingLabel(Object rating) {
+    return 'Personal Rating: $rating';
   }
 
   @override
@@ -1621,6 +1652,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceHelpStop => 'stop';
 
   @override
+  String get voiceHelpPoster => 'poster';
+
+  @override
+  String get voiceHelpClosePoster => 'close poster';
+
+  @override
   String get voiceErrorUnsupportedPlatform =>
       'Voice commands are not supported on this platform.';
 
@@ -1691,8 +1728,46 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get voiceFeedbackShowPoster => 'Poster displayed';
+
+  @override
+  String get voiceFeedbackClosePoster => 'Poster closed';
+
+  @override
+  String get voiceFeedbackPosterNotAvailable => 'Poster not available';
+
+  @override
   String get voiceFeedbackNotRecognized => 'Command not recognized';
 
   @override
   String get voiceFeedbackVlcError => 'VLC unreachable';
+
+  @override
+  String get navTimer => 'VLC Timer';
+
+  @override
+  String get timerTitle => 'VLC Shutdown Timer';
+
+  @override
+  String get timerSubtitle => 'Set a time to automatically stop VLC';
+
+  @override
+  String get timerEnabled => 'Enable Timer';
+
+  @override
+  String get timerEnabledSubtitle =>
+      'When active, VLC will be closed at the specified time';
+
+  @override
+  String get timerTime => 'Shutdown Time';
+
+  @override
+  String get timerTimeHint => '24h format (e.g. 23:30)';
+
+  @override
+  String get timerHelpTitle => 'How it works';
+
+  @override
+  String get timerHelpText =>
+      'The timer checks the time every minute. When the current time matches the set time, VLC is forcefully terminated (pkill on Linux, taskkill on Windows). The timer only works while MyPlaylist is running.';
 }

@@ -20,6 +20,7 @@ class Videos extends Table {
   TextColumn get actors => text().withDefault(const Constant(''))();
   TextColumn get duration => text().withDefault(const Constant(''))();
   RealColumn get rating => real().withDefault(const Constant(0.0))();
+  RealColumn get personalRating => real().withDefault(const Constant(0.0))();
   IntColumn get isSeries => integer().withDefault(const Constant(0))();
   TextColumn get posterPath => text().withDefault(const Constant(''))();
   TextColumn get saga => text().withDefault(const Constant(''))();
@@ -27,6 +28,7 @@ class Videos extends Table {
   TextColumn get directorThumbs => text().withDefault(const Constant(''))();
   IntColumn get sagaIndex => integer().withDefault(const Constant(0))();
   DateTimeColumn get dateAdded => dateTime().nullable()();
+  TextColumn get tags => text().withDefault(const Constant(''))();
 
   List<Index> get indexes => [
     Index(
@@ -54,12 +56,20 @@ class Videos extends Table {
       'CREATE INDEX IF NOT EXISTS videos_rating_idx ON videos (rating)',
     ),
     Index(
+      'videos_personal_rating_idx',
+      'CREATE INDEX IF NOT EXISTS videos_personal_rating_idx ON videos (personal_rating)',
+    ),
+    Index(
       'videos_isseries_idx',
       'CREATE INDEX IF NOT EXISTS videos_isseries_idx ON videos (is_series)',
     ),
     Index(
       'videos_dateadded_idx',
       'CREATE INDEX IF NOT EXISTS videos_dateadded_idx ON videos (date_added)',
+    ),
+    Index(
+      'videos_tags_idx',
+      'CREATE INDEX IF NOT EXISTS videos_tags_idx ON videos (tags)',
     ),
   ];
 }
@@ -78,7 +88,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase instance = AppDatabase();
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -166,6 +176,36 @@ class AppDatabase extends _$AppDatabase {
             ),
           );
         }
+        if (from < 7) {
+          // Add tags column for comma-separated tags
+          final hasTags = await customSelect(
+            "SELECT COUNT(*) FROM pragma_table_info('videos') WHERE name='tags'",
+          ).getSingle().then((rows) => rows.read<int>('COUNT(*)') > 0);
+          if (!hasTags) {
+            await m.addColumn(videos, videos.tags as GeneratedColumn);
+            await m.createIndex(
+              Index(
+                'videos_tags_idx',
+                'CREATE INDEX IF NOT EXISTS videos_tags_idx ON videos (tags)',
+              ),
+            );
+          }
+        }
+        if (from < 8) {
+          // Add personalRating column for user's personal rating
+          final hasPersonalRating = await customSelect(
+            "SELECT COUNT(*) FROM pragma_table_info('videos') WHERE name='personal_rating'",
+          ).getSingle().then((rows) => rows.read<int>('COUNT(*)') > 0);
+          if (!hasPersonalRating) {
+            await m.addColumn(videos, videos.personalRating);
+            await m.createIndex(
+              Index(
+                'videos_personal_rating_idx',
+                'CREATE INDEX IF NOT EXISTS videos_personal_rating_idx ON videos (personal_rating)',
+              ),
+            );
+          }
+        }
       },
       beforeOpen: (details) async {
         // Migration logic removed - sqflite is no longer used
@@ -197,6 +237,7 @@ class AppDatabase extends _$AppDatabase {
             actorThumbs: Value(video.actorThumbs),
             duration: Value(video.duration),
             rating: Value(video.rating),
+            personalRating: Value(video.personalRating),
             isSeries: Value(video.isSeries ? 1 : 0),
             posterPath: Value(video.posterPath),
             saga: Value(video.saga),
@@ -207,6 +248,7 @@ class AppDatabase extends _$AppDatabase {
                     (video.mtime * 1000).toInt(),
                   ),
             ),
+            tags: Value(video.tags),
           ),
         ], mode: InsertMode.insertOrReplace);
       }
@@ -228,6 +270,7 @@ class AppDatabase extends _$AppDatabase {
         actorThumbs: Value(video.actorThumbs),
         duration: Value(video.duration),
         rating: Value(video.rating),
+        personalRating: Value(video.personalRating),
         isSeries: Value(video.isSeries ? 1 : 0),
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
@@ -236,6 +279,7 @@ class AppDatabase extends _$AppDatabase {
           video.dateAdded ??
               DateTime.fromMillisecondsSinceEpoch((video.mtime * 1000).toInt()),
         ),
+        tags: Value(video.tags),
       ),
       mode: InsertMode.insertOrIgnore,
     );
@@ -256,6 +300,7 @@ class AppDatabase extends _$AppDatabase {
         actorThumbs: Value(video.actorThumbs),
         duration: Value(video.duration),
         rating: Value(video.rating),
+        personalRating: Value(video.personalRating),
         isSeries: Value(video.isSeries ? 1 : 0),
         posterPath: Value(video.posterPath),
         saga: Value(video.saga),
@@ -263,6 +308,7 @@ class AppDatabase extends _$AppDatabase {
         dateAdded: video.dateAdded != null
             ? Value(video.dateAdded)
             : const Value.absent(),
+        tags: Value(video.tags),
       ),
     );
   }
@@ -366,11 +412,13 @@ class AppDatabase extends _$AppDatabase {
       actorThumbs: v.actorThumbs,
       duration: v.duration,
       rating: v.rating,
+      personalRating: v.personalRating,
       isSeries: v.isSeries == 1,
       posterPath: v.posterPath,
       saga: v.saga,
       sagaIndex: v.sagaIndex,
       dateAdded: v.dateAdded,
+      tags: v.tags,
     );
   }
 
@@ -409,6 +457,7 @@ class AppDatabase extends _$AppDatabase {
       case 'directors':
       case 'actors':
       case 'saga':
+      case 'tags':
         // Per campi comma-separated, contiamo ogni singolo valore estratto
         sql =
             """
@@ -463,6 +512,7 @@ class AppDatabase extends _$AppDatabase {
     List<String>? genres,
     List<String>? years,
     double? minRating,
+    double? personalRatingMin,
     List<String>? actors,
     List<String>? directors,
     List<String>? excludedGenres,
@@ -471,6 +521,8 @@ class AppDatabase extends _$AppDatabase {
     List<String>? excludedDirectors,
     List<String>? sagas,
     List<String>? excludedSagas,
+    List<String>? tags,
+    List<String>? excludedTags,
     int limit = 20,
     List<int>? excludeIds,
   }) async {
@@ -492,6 +544,9 @@ class AppDatabase extends _$AppDatabase {
       if (minRating != null && minRating > 0) {
         predicates.add(t.rating.isBiggerOrEqualValue(minRating));
       }
+      if (personalRatingMin != null && personalRatingMin > 0) {
+        predicates.add(t.personalRating.isBiggerOrEqualValue(personalRatingMin));
+      }
       if (actors != null && actors.isNotEmpty) {
         predicates.add(
           actors.map((a) => t.actors.like('%$a%')).reduce((a, b) => a | b),
@@ -507,6 +562,11 @@ class AppDatabase extends _$AppDatabase {
       if (sagas != null && sagas.isNotEmpty) {
         predicates.add(
           sagas.map((s) => t.saga.like('%$s%')).reduce((a, b) => a | b),
+        );
+      }
+      if (tags != null && tags.isNotEmpty) {
+        predicates.add(
+          tags.map((tg) => t.tags.like('%$tg%')).reduce((a, b) => a | b),
         );
       }
 
@@ -531,6 +591,11 @@ class AppDatabase extends _$AppDatabase {
       if (excludedSagas != null && excludedSagas.isNotEmpty) {
         for (var s in excludedSagas) {
           predicates.add(t.saga.like('%$s%').not());
+        }
+      }
+      if (excludedTags != null && excludedTags.isNotEmpty) {
+        for (var tg in excludedTags) {
+          predicates.add(t.tags.like('%$tg%').not());
         }
       }
       if (excludeIds != null && excludeIds.isNotEmpty) {
@@ -568,9 +633,38 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<model.Video?> getVideoByPath(String path) async {
-    final driftVideo = await (select(
+    // Normalize path: remove file:// prefix, decode URL encoding
+    String normalizedPath = path;
+    if (normalizedPath.startsWith('file://')) {
+      normalizedPath = normalizedPath.substring(7);
+    }
+    // URL decode
+    normalizedPath = Uri.decodeFull(normalizedPath);
+    
+    // Try exact match first
+    var driftVideo = await (select(
       videos,
-    )..where((t) => t.path.equals(path))).getSingleOrNull();
+    )..where((t) => t.path.equals(normalizedPath))).getSingleOrNull();
+    
+    if (driftVideo != null) {
+      return _mapDriftToModel(driftVideo);
+    }
+    
+    // Try case-insensitive match using lower()
+    driftVideo = await (select(
+      videos,
+    )..where((t) => t.path.lower().equals(normalizedPath.toLowerCase()))).getSingleOrNull();
+    
+    if (driftVideo != null) {
+      return _mapDriftToModel(driftVideo);
+    }
+    
+    // Try partial match (path ends with the given filename)
+    final fileName = p.basename(normalizedPath);
+    driftVideo = await (select(
+      videos,
+    )..where((t) => t.path.like('%$fileName'))).getSingleOrNull();
+    
     return driftVideo == null ? null : _mapDriftToModel(driftVideo);
   }
 

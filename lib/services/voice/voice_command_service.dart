@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:vosk_flutter_fixed/vosk_flutter.dart';
 
+import '../../models/video.dart';
 import '../../providers/playlist_provider.dart';
+import '../../repositories/video_repository.dart';
+import '../../screens/video_details_dialog.dart';
 import '../error_reporter_service.dart';
 import '../logger_service.dart';
 import '../settings_service.dart';
@@ -55,6 +59,8 @@ class VoiceCommandService extends ChangeNotifier {
   VoiceCommandService({
     required this.playlistProvider,
     required this.settingsService,
+    required this.videoRepository,
+    required this.navigatorKey,
   }) {
     _language = VoiceLanguage.fromCode(settingsService.voiceLanguage);
     LoggerService().info(
@@ -65,6 +71,8 @@ class VoiceCommandService extends ChangeNotifier {
 
   final PlaylistProvider playlistProvider;
   final SettingsService settingsService;
+  final VideoRepository videoRepository;
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// Frequenza di campionamento richiesta da Vosk.
   static const int sampleRate = 16000;
@@ -93,6 +101,10 @@ class VoiceCommandService extends ChangeNotifier {
   /// -160 indica silenzio, 0 il massimo. Viene aggiornato mentre si
   /// ascolta, per far capire se il microfono sta capturing qualcosa.
   final ValueNotifier<double> inputLevel = ValueNotifier<double>(-160);
+
+  /// Notifica per mostrare la locandina del film in corso.
+  /// Il valore contiene il video completo per mostrare VideoDetailsDialog.
+  final ValueNotifier<Video?> showPosterNotifier = ValueNotifier<Video?>(null);
 
   Timer? _levelTimer;
   double _peakLevelDb = -160;
@@ -577,6 +589,69 @@ class VoiceCommandService extends ChangeNotifier {
         await _seek(entry, command.number ?? 30, forward: true);
       case VoiceCommandType.vlcSeekBackward:
         await _seek(entry, command.number ?? 30, forward: false);
+      case VoiceCommandType.showPoster:
+        await _showPoster(entry);
+      case VoiceCommandType.closePoster:
+        await _closePoster(entry);
+    }
+  }
+
+  Future<void> _showPoster(VoiceLogEntry entry) async {
+    final client = VlcRcClient(port: settingsService.vlcPort);
+    try {
+      final filePath = await client.getCurrentPlayingFile();
+      LoggerService().info('VoiceCommand: VLC returned path: $filePath');
+      if (filePath == null || filePath.isEmpty) {
+        entry.feedback = VoiceFeedback.posterNotAvailable;
+        entry.succeeded = false;
+        return;
+      }
+
+      final video = await videoRepository.getVideoByPath(filePath);
+      LoggerService().info('VoiceCommand: Video found: ${video?.title}, posterPath: ${video?.posterPath}, isHttp: ${video?.posterPath.startsWith('http')}');
+      if (video == null || video.posterPath.isEmpty) {
+        entry.feedback = VoiceFeedback.posterNotAvailable;
+        entry.succeeded = false;
+        return;
+      }
+
+      // Il poster è disponibile, mostriamo il dialog globalmente tramite navigatorKey
+      entry.feedback = VoiceFeedback.showPoster;
+      entry.number = video.id;
+      final navigator = navigatorKey.currentState;
+      if (navigator != null && navigator.mounted) {
+        navigator.push(
+          DialogRoute<void>(
+            context: navigator.context,
+            builder: (ctx) => VideoDetailsDialog(video: video),
+          ),
+        );
+      } else {
+        // Fallback: notifichiamo comunque per la scheda Voce se attiva
+        showPosterNotifier.value = video;
+      }
+    } on VlcRcException catch (e) {
+      _markFailure(entry, e);
+} on Exception catch (e) {
+        entry.feedback = VoiceFeedback.posterNotAvailable;
+        entry.succeeded = false;
+        errorReporter.report(
+          'Errore durante recupero locandina',
+          e,
+          source: 'VoiceCommand',
+        );
+      }
+    }
+
+  Future<void> _closePoster(VoiceLogEntry entry) async {
+    final navigator = navigatorKey.currentState;
+    if (navigator != null && navigator.mounted && navigator.canPop()) {
+      navigator.pop();
+      entry.feedback = VoiceFeedback.closePoster;
+    } else {
+      // Nessun dialog da chiudere
+      entry.feedback = VoiceFeedback.notRecognized;
+      entry.succeeded = false;
     }
   }
 
@@ -651,6 +726,10 @@ class VoiceCommandService extends ChangeNotifier {
         return VoiceFeedback.seekForward;
       case VoiceCommandType.vlcSeekBackward:
         return VoiceFeedback.seekBackward;
+      case VoiceCommandType.showPoster:
+        return VoiceFeedback.showPoster;
+      case VoiceCommandType.closePoster:
+        return VoiceFeedback.closePoster;
     }
   }
 

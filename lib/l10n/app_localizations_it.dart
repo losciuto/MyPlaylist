@@ -231,6 +231,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get colRating => 'Rating';
 
   @override
+  String get colPersonalRating => 'Voto Personale';
+
+  @override
   String get colSaga => 'Saga';
 
   @override
@@ -342,6 +345,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get sectionGenres => 'GENERI';
+
+  @override
+  String get sectionTags => 'TAG';
+
+  @override
+  String get sectionPersonalRating => 'VOTO PERSONALE';
 
   @override
   String get sectionCast => 'CAST';
@@ -549,6 +558,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tabSagas => 'Saghe';
 
   @override
+  String get tabTags => 'Tag';
+
+  @override
   String get generalSettings => 'IMPOSTAZIONI GENERALI';
 
   @override
@@ -560,6 +572,14 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String filterByRating(Object rating) {
     return 'Filtra per rating ≥ $rating';
+  }
+
+  @override
+  String get minPersonalRating => 'Voto Personale Minimo:';
+
+  @override
+  String filterByPersonalRating(Object rating) {
+    return 'Filtra per voto personale ≥ $rating';
   }
 
   @override
@@ -770,6 +790,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get labelGenres => 'Generi (separati da virgola)';
 
   @override
+  String get labelTags => 'Tag (separati da virgola)';
+
+  @override
+  String get labelPersonalRating => 'Voto Personale (0-10)';
+
+  @override
   String get labelDirectors => 'Registi';
 
   @override
@@ -790,6 +816,11 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String ratingLabel(Object rating) {
     return 'Voto: $rating';
+  }
+
+  @override
+  String personalRatingLabel(Object rating) {
+    return 'Voto Personale: $rating';
   }
 
   @override
@@ -1626,6 +1657,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get voiceHelpStop => 'ferma';
 
   @override
+  String get voiceHelpPoster => 'locandina';
+
+  @override
+  String get voiceHelpClosePoster => 'chiudi locandina';
+
+  @override
   String get voiceErrorUnsupportedPlatform =>
       'I comandi vocali non sono supportati su questa piattaforma.';
 
@@ -1696,8 +1733,47 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get voiceFeedbackShowPoster => 'Locandina visualizzata';
+
+  @override
+  String get voiceFeedbackClosePoster => 'Locandina chiusa';
+
+  @override
+  String get voiceFeedbackPosterNotAvailable => 'Locandina non disponibile';
+
+  @override
   String get voiceFeedbackNotRecognized => 'Comando non riconosciuto';
 
   @override
   String get voiceFeedbackVlcError => 'VLC non raggiungibile';
+
+  @override
+  String get navTimer => 'Timer VLC';
+
+  @override
+  String get timerTitle => 'Timer Spegnimento VLC';
+
+  @override
+  String get timerSubtitle =>
+      'Imposta un\'ora per terminare automaticamente VLC';
+
+  @override
+  String get timerEnabled => 'Abilita Timer';
+
+  @override
+  String get timerEnabledSubtitle =>
+      'Quando attivo, VLC verrà chiuso all\'ora specificata';
+
+  @override
+  String get timerTime => 'Ora di spegnimento';
+
+  @override
+  String get timerTimeHint => 'Formato 24h (es. 23:30)';
+
+  @override
+  String get timerHelpTitle => 'Come funziona';
+
+  @override
+  String get timerHelpText =>
+      'Il timer controlla l\'ora ogni minuto. Quando l\'ora corrente corrisponde a quella impostata, VLC viene terminato forzatamente (pkill su Linux, taskkill su Windows). Il timer funziona solo se MyPlaylist è in esecuzione.';
 }

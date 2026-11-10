@@ -339,6 +339,28 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
                           ),
                           const SizedBox(height: 15),
                         ],
+                        if (widget.video.tags.isNotEmpty) ...[
+                          _buildSectionTitle(l10n.sectionTags),
+                          Text(
+                            widget.video.tags,
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                        if (widget.video.personalRating > 0) ...[
+                          _buildSectionTitle(l10n.sectionPersonalRating),
+                          Text(
+                            widget.video.personalRating.toString(),
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
                         if (widget.video.directors.isNotEmpty) ...[
                           _buildSectionTitle(l10n.sectionDirectors),
                           _buildPeopleList(

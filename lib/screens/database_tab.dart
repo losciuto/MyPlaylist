@@ -25,6 +25,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
   final TextEditingController _searchController = TextEditingController();
   final VideoProcessingService _processingService = VideoProcessingService();
   final ScrollController _horizontalScrollController = ScrollController();
+  late DatabaseProvider _databaseProvider;
 
   bool _onlyMissingNfo = false;
 
@@ -90,7 +91,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     if (mode == null) return;
     if (!mounted) return;
 
-    final provider = context.read<DatabaseProvider>();
+    final provider = _databaseProvider;
     final allVideos = List<Video>.from(provider.videos);
     final total = allVideos.length;
 
@@ -232,17 +233,18 @@ class _DatabaseTabState extends State<DatabaseTab> {
   @override
   void initState() {
     super.initState();
-    _searchController.text = context.read<DatabaseProvider>().searchQuery;
+    _databaseProvider = context.read<DatabaseProvider>();
+    _searchController.text = _databaseProvider.searchQuery;
 
     // Sync search bar when provider changes (e.g. from photo filter)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DatabaseProvider>().addListener(_onProviderChange);
+      _databaseProvider.addListener(_onProviderChange);
     });
   }
 
   void _onProviderChange() {
     if (!mounted) return;
-    final query = context.read<DatabaseProvider>().searchQuery;
+    final query = _databaseProvider.searchQuery;
     if (_searchController.text != query) {
       setState(() {
         _searchController.text = query;
@@ -252,11 +254,8 @@ class _DatabaseTabState extends State<DatabaseTab> {
 
   @override
   void dispose() {
-    // We should safely remove the listener
-    // This is tricky without a reference to the same provider instance if it changes
-    // But usually provider is stable during tab lifetime.
     try {
-      context.read<DatabaseProvider>().removeListener(_onProviderChange);
+      _databaseProvider.removeListener(_onProviderChange);
     } on Exception catch (e) {
       LoggerService().debug('Error removing listener: $e');
     }
@@ -267,13 +266,13 @@ class _DatabaseTabState extends State<DatabaseTab> {
   }
 
   void _sortVideos(int columnIndex, bool ascending) {
-    final provider = context.read<DatabaseProvider>();
+    final provider = _databaseProvider;
     provider.sort(columnIndex, ascending);
   }
 
   // Wrappers to keep UI clean
   void _filterVideos(String query) {
-    context.read<DatabaseProvider>().filterVideos(query);
+    _databaseProvider.filterVideos(query);
   }
 
   Future<void> _editVideo(Video video) async {
@@ -283,7 +282,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     );
 
     if (result == true && mounted) {
-      await context.read<DatabaseProvider>().refreshVideos();
+      await _databaseProvider.refreshVideos();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.videoUpdated)),
@@ -302,7 +301,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     );
 
     if (confirmed && mounted) {
-      await context.read<DatabaseProvider>().deleteVideo(video);
+      await _databaseProvider.deleteVideo(video);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -323,7 +322,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     );
 
     if (confirmed && mounted) {
-      await context.read<DatabaseProvider>().clearDatabase();
+      await _databaseProvider.clearDatabase();
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -343,7 +342,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     if (!confirmed) return;
     if (!mounted) return;
 
-    final provider = context.read<DatabaseProvider>();
+    final provider = _databaseProvider;
     final allVideos = List<Video>.from(provider.videos)
       ..sort((a, b) {
         final aDate =
@@ -559,7 +558,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
     }
 
     if (mounted) {
-      await context.read<DatabaseProvider>().refreshVideos();
+      await _databaseProvider.refreshVideos();
       if (!mounted) return;
       showDialog(
         context: context,
@@ -691,7 +690,7 @@ class _DatabaseTabState extends State<DatabaseTab> {
                   ),
                   ElevatedButton.icon(
                     onPressed: () {
-                      final provider = context.read<DatabaseProvider>();
+                      final provider = _databaseProvider;
                       Navigator.of(context)
                           .push(
                             MaterialPageRoute(

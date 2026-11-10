@@ -124,6 +124,18 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _personalRatingMeta = const VerificationMeta(
+    'personalRating',
+  );
+  @override
+  late final GeneratedColumn<double> personalRating = GeneratedColumn<double>(
+    'personal_rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _isSeriesMeta = const VerificationMeta(
     'isSeries',
   );
@@ -205,6 +217,16 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -218,6 +240,7 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     actors,
     duration,
     rating,
+    personalRating,
     isSeries,
     posterPath,
     saga,
@@ -225,6 +248,7 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
     directorThumbs,
     sagaIndex,
     dateAdded,
+    tags,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -305,6 +329,15 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
         rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
       );
     }
+    if (data.containsKey('personal_rating')) {
+      context.handle(
+        _personalRatingMeta,
+        personalRating.isAcceptableOrUnknown(
+          data['personal_rating']!,
+          _personalRatingMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_series')) {
       context.handle(
         _isSeriesMeta,
@@ -351,6 +384,12 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
       context.handle(
         _dateAddedMeta,
         dateAdded.isAcceptableOrUnknown(data['date_added']!, _dateAddedMeta),
+      );
+    }
+    if (data.containsKey('tags')) {
+      context.handle(
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
       );
     }
     return context;
@@ -406,6 +445,10 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
         DriftSqlType.double,
         data['${effectivePrefix}rating'],
       )!,
+      personalRating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}personal_rating'],
+      )!,
       isSeries: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}is_series'],
@@ -434,6 +477,10 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, DriftVideo> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}date_added'],
       ),
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
     );
   }
 
@@ -455,6 +502,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
   final String actors;
   final String duration;
   final double rating;
+  final double personalRating;
   final int isSeries;
   final String posterPath;
   final String saga;
@@ -462,6 +510,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
   final String directorThumbs;
   final int sagaIndex;
   final DateTime? dateAdded;
+  final String tags;
   const DriftVideo({
     required this.id,
     required this.path,
@@ -474,6 +523,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     required this.actors,
     required this.duration,
     required this.rating,
+    required this.personalRating,
     required this.isSeries,
     required this.posterPath,
     required this.saga,
@@ -481,6 +531,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     required this.directorThumbs,
     required this.sagaIndex,
     this.dateAdded,
+    required this.tags,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -496,6 +547,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     map['actors'] = Variable<String>(actors);
     map['duration'] = Variable<String>(duration);
     map['rating'] = Variable<double>(rating);
+    map['personal_rating'] = Variable<double>(personalRating);
     map['is_series'] = Variable<int>(isSeries);
     map['poster_path'] = Variable<String>(posterPath);
     map['saga'] = Variable<String>(saga);
@@ -505,6 +557,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     if (!nullToAbsent || dateAdded != null) {
       map['date_added'] = Variable<DateTime>(dateAdded);
     }
+    map['tags'] = Variable<String>(tags);
     return map;
   }
 
@@ -521,6 +574,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       actors: Value(actors),
       duration: Value(duration),
       rating: Value(rating),
+      personalRating: Value(personalRating),
       isSeries: Value(isSeries),
       posterPath: Value(posterPath),
       saga: Value(saga),
@@ -530,6 +584,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       dateAdded: dateAdded == null && nullToAbsent
           ? const Value.absent()
           : Value(dateAdded),
+      tags: Value(tags),
     );
   }
 
@@ -550,6 +605,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       actors: serializer.fromJson<String>(json['actors']),
       duration: serializer.fromJson<String>(json['duration']),
       rating: serializer.fromJson<double>(json['rating']),
+      personalRating: serializer.fromJson<double>(json['personalRating']),
       isSeries: serializer.fromJson<int>(json['isSeries']),
       posterPath: serializer.fromJson<String>(json['posterPath']),
       saga: serializer.fromJson<String>(json['saga']),
@@ -557,6 +613,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       directorThumbs: serializer.fromJson<String>(json['directorThumbs']),
       sagaIndex: serializer.fromJson<int>(json['sagaIndex']),
       dateAdded: serializer.fromJson<DateTime?>(json['dateAdded']),
+      tags: serializer.fromJson<String>(json['tags']),
     );
   }
   @override
@@ -574,6 +631,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       'actors': serializer.toJson<String>(actors),
       'duration': serializer.toJson<String>(duration),
       'rating': serializer.toJson<double>(rating),
+      'personalRating': serializer.toJson<double>(personalRating),
       'isSeries': serializer.toJson<int>(isSeries),
       'posterPath': serializer.toJson<String>(posterPath),
       'saga': serializer.toJson<String>(saga),
@@ -581,6 +639,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       'directorThumbs': serializer.toJson<String>(directorThumbs),
       'sagaIndex': serializer.toJson<int>(sagaIndex),
       'dateAdded': serializer.toJson<DateTime?>(dateAdded),
+      'tags': serializer.toJson<String>(tags),
     };
   }
 
@@ -596,6 +655,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     String? actors,
     String? duration,
     double? rating,
+    double? personalRating,
     int? isSeries,
     String? posterPath,
     String? saga,
@@ -603,6 +663,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     String? directorThumbs,
     int? sagaIndex,
     Value<DateTime?> dateAdded = const Value.absent(),
+    String? tags,
   }) => DriftVideo(
     id: id ?? this.id,
     path: path ?? this.path,
@@ -615,6 +676,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     actors: actors ?? this.actors,
     duration: duration ?? this.duration,
     rating: rating ?? this.rating,
+    personalRating: personalRating ?? this.personalRating,
     isSeries: isSeries ?? this.isSeries,
     posterPath: posterPath ?? this.posterPath,
     saga: saga ?? this.saga,
@@ -622,6 +684,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     directorThumbs: directorThumbs ?? this.directorThumbs,
     sagaIndex: sagaIndex ?? this.sagaIndex,
     dateAdded: dateAdded.present ? dateAdded.value : this.dateAdded,
+    tags: tags ?? this.tags,
   );
   DriftVideo copyWithCompanion(VideosCompanion data) {
     return DriftVideo(
@@ -636,6 +699,9 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
       actors: data.actors.present ? data.actors.value : this.actors,
       duration: data.duration.present ? data.duration.value : this.duration,
       rating: data.rating.present ? data.rating.value : this.rating,
+      personalRating: data.personalRating.present
+          ? data.personalRating.value
+          : this.personalRating,
       isSeries: data.isSeries.present ? data.isSeries.value : this.isSeries,
       posterPath: data.posterPath.present
           ? data.posterPath.value
@@ -649,6 +715,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           : this.directorThumbs,
       sagaIndex: data.sagaIndex.present ? data.sagaIndex.value : this.sagaIndex,
       dateAdded: data.dateAdded.present ? data.dateAdded.value : this.dateAdded,
+      tags: data.tags.present ? data.tags.value : this.tags,
     );
   }
 
@@ -666,13 +733,15 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           ..write('actors: $actors, ')
           ..write('duration: $duration, ')
           ..write('rating: $rating, ')
+          ..write('personalRating: $personalRating, ')
           ..write('isSeries: $isSeries, ')
           ..write('posterPath: $posterPath, ')
           ..write('saga: $saga, ')
           ..write('actorThumbs: $actorThumbs, ')
           ..write('directorThumbs: $directorThumbs, ')
           ..write('sagaIndex: $sagaIndex, ')
-          ..write('dateAdded: $dateAdded')
+          ..write('dateAdded: $dateAdded, ')
+          ..write('tags: $tags')
           ..write(')'))
         .toString();
   }
@@ -690,6 +759,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     actors,
     duration,
     rating,
+    personalRating,
     isSeries,
     posterPath,
     saga,
@@ -697,6 +767,7 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
     directorThumbs,
     sagaIndex,
     dateAdded,
+    tags,
   );
   @override
   bool operator ==(Object other) =>
@@ -713,13 +784,15 @@ class DriftVideo extends DataClass implements Insertable<DriftVideo> {
           other.actors == this.actors &&
           other.duration == this.duration &&
           other.rating == this.rating &&
+          other.personalRating == this.personalRating &&
           other.isSeries == this.isSeries &&
           other.posterPath == this.posterPath &&
           other.saga == this.saga &&
           other.actorThumbs == this.actorThumbs &&
           other.directorThumbs == this.directorThumbs &&
           other.sagaIndex == this.sagaIndex &&
-          other.dateAdded == this.dateAdded);
+          other.dateAdded == this.dateAdded &&
+          other.tags == this.tags);
 }
 
 class VideosCompanion extends UpdateCompanion<DriftVideo> {
@@ -734,6 +807,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
   final Value<String> actors;
   final Value<String> duration;
   final Value<double> rating;
+  final Value<double> personalRating;
   final Value<int> isSeries;
   final Value<String> posterPath;
   final Value<String> saga;
@@ -741,6 +815,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
   final Value<String> directorThumbs;
   final Value<int> sagaIndex;
   final Value<DateTime?> dateAdded;
+  final Value<String> tags;
   const VideosCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
@@ -753,6 +828,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.actors = const Value.absent(),
     this.duration = const Value.absent(),
     this.rating = const Value.absent(),
+    this.personalRating = const Value.absent(),
     this.isSeries = const Value.absent(),
     this.posterPath = const Value.absent(),
     this.saga = const Value.absent(),
@@ -760,6 +836,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.directorThumbs = const Value.absent(),
     this.sagaIndex = const Value.absent(),
     this.dateAdded = const Value.absent(),
+    this.tags = const Value.absent(),
   });
   VideosCompanion.insert({
     this.id = const Value.absent(),
@@ -773,6 +850,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.actors = const Value.absent(),
     this.duration = const Value.absent(),
     this.rating = const Value.absent(),
+    this.personalRating = const Value.absent(),
     this.isSeries = const Value.absent(),
     this.posterPath = const Value.absent(),
     this.saga = const Value.absent(),
@@ -780,6 +858,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     this.directorThumbs = const Value.absent(),
     this.sagaIndex = const Value.absent(),
     this.dateAdded = const Value.absent(),
+    this.tags = const Value.absent(),
   }) : path = Value(path),
        mtime = Value(mtime);
   static Insertable<DriftVideo> custom({
@@ -794,6 +873,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Expression<String>? actors,
     Expression<String>? duration,
     Expression<double>? rating,
+    Expression<double>? personalRating,
     Expression<int>? isSeries,
     Expression<String>? posterPath,
     Expression<String>? saga,
@@ -801,6 +881,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Expression<String>? directorThumbs,
     Expression<int>? sagaIndex,
     Expression<DateTime>? dateAdded,
+    Expression<String>? tags,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -814,6 +895,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       if (actors != null) 'actors': actors,
       if (duration != null) 'duration': duration,
       if (rating != null) 'rating': rating,
+      if (personalRating != null) 'personal_rating': personalRating,
       if (isSeries != null) 'is_series': isSeries,
       if (posterPath != null) 'poster_path': posterPath,
       if (saga != null) 'saga': saga,
@@ -821,6 +903,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       if (directorThumbs != null) 'director_thumbs': directorThumbs,
       if (sagaIndex != null) 'saga_index': sagaIndex,
       if (dateAdded != null) 'date_added': dateAdded,
+      if (tags != null) 'tags': tags,
     });
   }
 
@@ -836,6 +919,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Value<String>? actors,
     Value<String>? duration,
     Value<double>? rating,
+    Value<double>? personalRating,
     Value<int>? isSeries,
     Value<String>? posterPath,
     Value<String>? saga,
@@ -843,6 +927,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     Value<String>? directorThumbs,
     Value<int>? sagaIndex,
     Value<DateTime?>? dateAdded,
+    Value<String>? tags,
   }) {
     return VideosCompanion(
       id: id ?? this.id,
@@ -856,6 +941,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       actors: actors ?? this.actors,
       duration: duration ?? this.duration,
       rating: rating ?? this.rating,
+      personalRating: personalRating ?? this.personalRating,
       isSeries: isSeries ?? this.isSeries,
       posterPath: posterPath ?? this.posterPath,
       saga: saga ?? this.saga,
@@ -863,6 +949,7 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
       directorThumbs: directorThumbs ?? this.directorThumbs,
       sagaIndex: sagaIndex ?? this.sagaIndex,
       dateAdded: dateAdded ?? this.dateAdded,
+      tags: tags ?? this.tags,
     );
   }
 
@@ -902,6 +989,9 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     if (rating.present) {
       map['rating'] = Variable<double>(rating.value);
     }
+    if (personalRating.present) {
+      map['personal_rating'] = Variable<double>(personalRating.value);
+    }
     if (isSeries.present) {
       map['is_series'] = Variable<int>(isSeries.value);
     }
@@ -923,6 +1013,9 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
     if (dateAdded.present) {
       map['date_added'] = Variable<DateTime>(dateAdded.value);
     }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
     return map;
   }
 
@@ -940,13 +1033,15 @@ class VideosCompanion extends UpdateCompanion<DriftVideo> {
           ..write('actors: $actors, ')
           ..write('duration: $duration, ')
           ..write('rating: $rating, ')
+          ..write('personalRating: $personalRating, ')
           ..write('isSeries: $isSeries, ')
           ..write('posterPath: $posterPath, ')
           ..write('saga: $saga, ')
           ..write('actorThumbs: $actorThumbs, ')
           ..write('directorThumbs: $directorThumbs, ')
           ..write('sagaIndex: $sagaIndex, ')
-          ..write('dateAdded: $dateAdded')
+          ..write('dateAdded: $dateAdded, ')
+          ..write('tags: $tags')
           ..write(')'))
         .toString();
   }
@@ -1279,6 +1374,7 @@ typedef $$VideosTableCreateCompanionBuilder =
       Value<String> actors,
       Value<String> duration,
       Value<double> rating,
+      Value<double> personalRating,
       Value<int> isSeries,
       Value<String> posterPath,
       Value<String> saga,
@@ -1286,6 +1382,7 @@ typedef $$VideosTableCreateCompanionBuilder =
       Value<String> directorThumbs,
       Value<int> sagaIndex,
       Value<DateTime?> dateAdded,
+      Value<String> tags,
     });
 typedef $$VideosTableUpdateCompanionBuilder =
     VideosCompanion Function({
@@ -1300,6 +1397,7 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<String> actors,
       Value<String> duration,
       Value<double> rating,
+      Value<double> personalRating,
       Value<int> isSeries,
       Value<String> posterPath,
       Value<String> saga,
@@ -1307,6 +1405,7 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<String> directorThumbs,
       Value<int> sagaIndex,
       Value<DateTime?> dateAdded,
+      Value<String> tags,
     });
 
 class $$VideosTableFilterComposer
@@ -1373,6 +1472,11 @@ class $$VideosTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get personalRating => $composableBuilder(
+    column: $table.personalRating,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get isSeries => $composableBuilder(
     column: $table.isSeries,
     builder: (column) => ColumnFilters(column),
@@ -1405,6 +1509,11 @@ class $$VideosTableFilterComposer
 
   ColumnFilters<DateTime> get dateAdded => $composableBuilder(
     column: $table.dateAdded,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tags => $composableBuilder(
+    column: $table.tags,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1473,6 +1582,11 @@ class $$VideosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get personalRating => $composableBuilder(
+    column: $table.personalRating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get isSeries => $composableBuilder(
     column: $table.isSeries,
     builder: (column) => ColumnOrderings(column),
@@ -1505,6 +1619,11 @@ class $$VideosTableOrderingComposer
 
   ColumnOrderings<DateTime> get dateAdded => $composableBuilder(
     column: $table.dateAdded,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tags => $composableBuilder(
+    column: $table.tags,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1551,6 +1670,11 @@ class $$VideosTableAnnotationComposer
   GeneratedColumn<double> get rating =>
       $composableBuilder(column: $table.rating, builder: (column) => column);
 
+  GeneratedColumn<double> get personalRating => $composableBuilder(
+    column: $table.personalRating,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get isSeries =>
       $composableBuilder(column: $table.isSeries, builder: (column) => column);
 
@@ -1577,6 +1701,9 @@ class $$VideosTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dateAdded =>
       $composableBuilder(column: $table.dateAdded, builder: (column) => column);
+
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
 }
 
 class $$VideosTableTableManager
@@ -1618,6 +1745,7 @@ class $$VideosTableTableManager
                 Value<String> actors = const Value.absent(),
                 Value<String> duration = const Value.absent(),
                 Value<double> rating = const Value.absent(),
+                Value<double> personalRating = const Value.absent(),
                 Value<int> isSeries = const Value.absent(),
                 Value<String> posterPath = const Value.absent(),
                 Value<String> saga = const Value.absent(),
@@ -1625,6 +1753,7 @@ class $$VideosTableTableManager
                 Value<String> directorThumbs = const Value.absent(),
                 Value<int> sagaIndex = const Value.absent(),
                 Value<DateTime?> dateAdded = const Value.absent(),
+                Value<String> tags = const Value.absent(),
               }) => VideosCompanion(
                 id: id,
                 path: path,
@@ -1637,6 +1766,7 @@ class $$VideosTableTableManager
                 actors: actors,
                 duration: duration,
                 rating: rating,
+                personalRating: personalRating,
                 isSeries: isSeries,
                 posterPath: posterPath,
                 saga: saga,
@@ -1644,6 +1774,7 @@ class $$VideosTableTableManager
                 directorThumbs: directorThumbs,
                 sagaIndex: sagaIndex,
                 dateAdded: dateAdded,
+                tags: tags,
               ),
           createCompanionCallback:
               ({
@@ -1658,6 +1789,7 @@ class $$VideosTableTableManager
                 Value<String> actors = const Value.absent(),
                 Value<String> duration = const Value.absent(),
                 Value<double> rating = const Value.absent(),
+                Value<double> personalRating = const Value.absent(),
                 Value<int> isSeries = const Value.absent(),
                 Value<String> posterPath = const Value.absent(),
                 Value<String> saga = const Value.absent(),
@@ -1665,6 +1797,7 @@ class $$VideosTableTableManager
                 Value<String> directorThumbs = const Value.absent(),
                 Value<int> sagaIndex = const Value.absent(),
                 Value<DateTime?> dateAdded = const Value.absent(),
+                Value<String> tags = const Value.absent(),
               }) => VideosCompanion.insert(
                 id: id,
                 path: path,
@@ -1677,6 +1810,7 @@ class $$VideosTableTableManager
                 actors: actors,
                 duration: duration,
                 rating: rating,
+                personalRating: personalRating,
                 isSeries: isSeries,
                 posterPath: posterPath,
                 saga: saga,
@@ -1684,6 +1818,7 @@ class $$VideosTableTableManager
                 directorThumbs: directorThumbs,
                 sagaIndex: sagaIndex,
                 dateAdded: dateAdded,
+                tags: tags,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

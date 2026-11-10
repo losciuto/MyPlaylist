@@ -21,6 +21,7 @@ class _FilterDialogState extends State<FilterDialog> {
   Map<String, int> _availableActors = {};
   Map<String, int> _availableDirectors = {};
   Map<String, int> _availableSagas = {};
+  Map<String, int> _availableTags = {};
 
   // Selected state
   final List<String> _selectedGenres = [];
@@ -33,12 +34,15 @@ class _FilterDialogState extends State<FilterDialog> {
   final List<String> _excludedDirectors = [];
   final List<String> _selectedSagas = [];
   final List<String> _excludedSagas = [];
+  final List<String> _selectedTags = [];
+  final List<String> _excludedTags = [];
   double _minRating = 0.0;
+  double _personalRatingMin = 0.0;
   final TextEditingController _limitController = TextEditingController(
     text: '20',
   );
   int _currentTab =
-      0; // 0: Generale, 1: Generi, 2: Anni, 3: Registi, 4: Attori, 5: Saghe
+      0; // 0: Generale, 1: Generi, 2: Anni, 3: Registi, 4: Attori, 5: Saghe, 6: Tag
 
   bool _isLoading = true;
   String? _loadError;
@@ -60,7 +64,10 @@ class _FilterDialogState extends State<FilterDialog> {
       _excludedDirectors.addAll(last.excludedDirectors);
       _selectedSagas.addAll(last.sagas);
       _excludedSagas.addAll(last.excludedSagas);
+      _selectedTags.addAll(last.tags);
+      _excludedTags.addAll(last.excludedTags);
       _minRating = last.ratingMin;
+      _personalRatingMin = last.personalRatingMin;
       _limitController.text = last.limit.toString();
     } else {
       _limitController.text = settingsService.defaultPlaylistSize.toString();
@@ -104,7 +111,7 @@ class _FilterDialogState extends State<FilterDialog> {
     );
   }
 
-  Future<void> _loadData() async {
+Future<void> _loadData() async {
     try {
       final genres = await db.AppDatabase.instance.getValuesWithCounts(
         'genres',
@@ -117,6 +124,7 @@ class _FilterDialogState extends State<FilterDialog> {
         'directors',
       );
       final sagas = await db.AppDatabase.instance.getValuesWithCounts('saga');
+      final tags = await db.AppDatabase.instance.getValuesWithCounts('tags');
 
       // Sort alphabetically
       final sortedGenres = Map.fromEntries(
@@ -130,6 +138,9 @@ class _FilterDialogState extends State<FilterDialog> {
       );
       final sortedDirectors = Map.fromEntries(
         directors.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+      );
+      final sortedTags = Map.fromEntries(
+        tags.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
       );
 
       // Filter sagas to show only those with more than 1 movie
@@ -145,10 +156,11 @@ class _FilterDialogState extends State<FilterDialog> {
           _availableActors = sortedActors;
           _availableDirectors = sortedDirectors;
           _availableSagas = filteredSagas;
+          _availableTags = sortedTags;
           _isLoading = false;
         });
       }
-    } on Object catch (e) {
+    } on Exception catch (e) {
       errorReporter.report(
         'Dati dei filtri non caricati',
         e,
@@ -223,6 +235,11 @@ class _FilterDialogState extends State<FilterDialog> {
                     AppLocalizations.of(context)!.tabSagas,
                     Icons.library_books,
                   ),
+                  _buildSidebarItem(
+                    6,
+                    AppLocalizations.of(context)!.tabTags,
+                    Icons.tag,
+                  ),
                   const Divider(color: Colors.white12),
                   _buildSummary(),
                 ],
@@ -248,6 +265,8 @@ class _FilterDialogState extends State<FilterDialog> {
               _excludedDirectors.clear();
               _selectedSagas.clear();
               _excludedSagas.clear();
+              _selectedTags.clear();
+              _excludedTags.clear();
               _minRating = 0.0;
               _limitController.text = context
                   .read<SettingsService>()
@@ -271,6 +290,7 @@ class _FilterDialogState extends State<FilterDialog> {
               genres: _selectedGenres,
               years: _selectedYears,
               ratingMin: _minRating,
+              personalRatingMin: _personalRatingMin,
               actors: _selectedActors,
               directors: _selectedDirectors,
               excludedGenres: _excludedGenres,
@@ -279,6 +299,8 @@ class _FilterDialogState extends State<FilterDialog> {
               excludedDirectors: _excludedDirectors,
               sagas: _selectedSagas,
               excludedSagas: _excludedSagas,
+              tags: _selectedTags,
+              excludedTags: _excludedTags,
               limit: int.tryParse(_limitController.text) ?? 20,
             );
             context.read<SettingsService>().setLastFilterSettings(settings);
@@ -471,6 +493,25 @@ class _FilterDialogState extends State<FilterDialog> {
                 style: const TextStyle(color: Colors.white70),
               ),
             ),
+            const SizedBox(height: 30),
+            Text(
+              AppLocalizations.of(context)!.minPersonalRating,
+              style: const TextStyle(color: Colors.white70),
+            ),
+            Slider(
+              value: _personalRatingMin,
+              max: 10,
+              divisions: 20,
+              label: _personalRatingMin.toString(),
+              activeColor: Colors.red,
+              onChanged: (val) => setState(() => _personalRatingMin = val),
+            ),
+            Center(
+              child: Text(
+                AppLocalizations.of(context)!.filterByPersonalRating(_personalRatingMin),
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ),
           ],
         );
       case 1:
@@ -513,6 +554,14 @@ class _FilterDialogState extends State<FilterDialog> {
           _selectedSagas,
           _excludedSagas,
         );
+      case 6:
+        return _buildMultiSelect(
+          AppLocalizations.of(context)!.tabTags,
+          'tags',
+          _availableTags,
+          _selectedTags,
+          _excludedTags,
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -524,13 +573,15 @@ class _FilterDialogState extends State<FilterDialog> {
         _selectedYears.length +
         _selectedActors.length +
         _selectedDirectors.length +
-        _selectedSagas.length;
+        _selectedSagas.length +
+        _selectedTags.length;
     final int exclusions =
         _excludedGenres.length +
         _excludedYears.length +
         _excludedActors.length +
         _excludedDirectors.length +
-        _excludedSagas.length;
+        _excludedSagas.length +
+        _excludedTags.length;
 
     if (inclusions == 0 && exclusions == 0) {
       return Padding(

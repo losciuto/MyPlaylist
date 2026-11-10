@@ -4,9 +4,11 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
 import '../database/app_database.dart';
 import '../providers/playlist_provider.dart';
+import '../models/video.dart';
 import 'settings_service.dart';
 import './logger_service.dart';
 import 'error_reporter_service.dart';
+import 'voice/vlc_rc_client.dart';
 
 class RemoteCommandLog {
   RemoteCommandLog({
@@ -365,6 +367,51 @@ class RemoteControlService with ChangeNotifier {
         await playlistProvider.stopPlayer();
         message = 'VLC terminato correttamente';
         break;
+      case 'show_poster':
+        final video = await _getCurrentlyPlayingVideo();
+        if (video == null || video.posterPath.isEmpty) {
+          return {
+            'status': 'error',
+            'message': 'Locandina non disponibile',
+            'command': command,
+          };
+        }
+        return {
+          'status': 'success',
+          'message': 'Locandina recuperata',
+          'command': command,
+          'posterPath': video.posterPath,
+        };
+      case 'close_poster':
+        return {
+          'status': 'success',
+          'message': 'Locandina chiusa',
+          'command': command,
+        };
+      case 'get_vlc_kill_timer':
+        return {
+          'status': 'success',
+          'message': 'Timer VLC recuperato',
+          'command': command,
+          'enabled': settingsService.vlcKillTimerEnabled,
+          'time': settingsService.vlcKillTimerTime,
+        };
+      case 'set_vlc_kill_timer':
+        final enabled = args['enabled'] as bool?;
+        final time = args['time'] as String?;
+        if (enabled != null) {
+          await settingsService.setVlcKillTimerEnabled(enabled);
+        }
+        if (time != null) {
+          await settingsService.setVlcKillTimerTime(time);
+        }
+        return {
+          'status': 'success',
+          'message': 'Timer VLC aggiornato',
+          'command': command,
+          'enabled': settingsService.vlcKillTimerEnabled,
+          'time': settingsService.vlcKillTimerTime,
+        };
       default:
         throw Exception('Unknown command: $command');
     }
@@ -375,6 +422,18 @@ class RemoteControlService with ChangeNotifier {
       'command': command,
       'playlist': playlistProvider.playlist.map((v) => v.toMap()).toList(),
     };
+  }
+
+  Future<Video?> _getCurrentlyPlayingVideo() async {
+    final client = VlcRcClient(port: settingsService.vlcPort);
+    try {
+      final filePath = await client.getCurrentPlayingFile();
+      if (filePath == null || filePath.isEmpty) return null;
+
+      return await AppDatabase.instance.getVideoByPath(filePath);
+    } on Exception {
+      return null;
+    }
   }
 
   @override

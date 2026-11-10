@@ -9,7 +9,9 @@ import 'services/settings_service.dart';
 import 'providers/database_provider.dart';
 import 'providers/playlist_provider.dart';
 import 'services/remote_control_service.dart';
+import 'repositories/video_repository.dart';
 import 'services/voice/voice_command_service.dart';
+import 'services/vlc_kill_timer_service.dart';
 import 'config/app_config.dart';
 import 'database/app_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -67,12 +69,18 @@ void main() async {
   // Initialize File Watcher
   final fileWatcher = FileWatcherService();
 
+  // Initialize VLC Kill Timer
+  final vlcKillTimer = VlcKillTimerService();
+
   // Initial sync state
   if (settingsService.autoSyncEnabled) {
     for (final dir in settingsService.watchedDirectories) {
       fileWatcher.startWatching(dir);
     }
   }
+
+  // Initialize VLC Kill Timer
+  vlcKillTimer.initialize(settingsService);
 
   // Listen for settings changes to update watcher
   settingsService.addListener(() async {
@@ -120,6 +128,7 @@ void main() async {
           create: (_) => DatabaseProvider()..refreshVideos(),
         ),
         ChangeNotifierProvider(create: (context) => PlaylistProvider()),
+        Provider(create: (_) => videoRepository),
         ChangeNotifierProxyProvider2<
           SettingsService,
           PlaylistProvider,
@@ -141,6 +150,8 @@ void main() async {
           create: (context) => VoiceCommandService(
             settingsService: context.read<SettingsService>(),
             playlistProvider: context.read<PlaylistProvider>(),
+            videoRepository: context.read<VideoRepository>(),
+            navigatorKey: MyApp.navigatorKey,
           ),
           update: (context, settings, playlist, previous) => previous!,
         ),
@@ -153,11 +164,15 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // Chiave globale per il navigator, usata dal VoiceCommandService per mostrare dialog globalmente
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsService>(
       builder: (context, settings, child) {
         return MaterialApp(
+          navigatorKey: MyApp.navigatorKey,
           debugShowCheckedModeBanner: false,
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             dragDevices: {

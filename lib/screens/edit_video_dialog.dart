@@ -40,10 +40,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   late TextEditingController _durationController;
   late TextEditingController _sagaController;
   late TextEditingController _sagaIndexController;
+  late TextEditingController _tagsController;
   late TextEditingController _dateAddedController;
   late TextEditingController _timeController;
   late DateTime? _dateAdded;
   late double _rating;
+  late double _personalRating;
 
   bool _isSaving = false;
   bool _isDownloading = false;
@@ -66,6 +68,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _sagaIndexController = TextEditingController(
       text: widget.video.sagaIndex.toString(),
     );
+    _tagsController = TextEditingController(text: widget.video.tags);
     _dateAdded = widget.video.dateAdded;
     _dateAddedController = TextEditingController(
       text: _dateAdded != null
@@ -497,6 +500,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
     _durationController.dispose();
     _sagaController.dispose();
     _sagaIndexController.dispose();
+    _tagsController.dispose();
     _dateAddedController.dispose();
     _timeController.dispose();
     super.dispose();
@@ -520,9 +524,11 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
         plot: _plotController.text,
         posterPath: _posterPathController.text,
         rating: _rating,
+        personalRating: _personalRating,
         isSeries: widget.video.isSeries,
         saga: _sagaController.text,
         sagaIndex: int.tryParse(_sagaIndexController.text) ?? 0,
+        tags: _tagsController.text,
         dateAdded: _dateAdded,
       );
 
@@ -759,6 +765,7 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                         posterPathController: _posterPathController,
                         sagaController: _sagaController,
                         sagaIndexController: _sagaIndexController,
+                        tagsController: _tagsController,
                         dateAddedController: _dateAddedController,
                         timeController: _timeController,
                         dateAdded: _dateAdded,
@@ -770,9 +777,12 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
                       child: buildVideoRatingColumn(
                         context: context,
                         rating: _rating,
+                        personalRating: _personalRating,
                         plotController: _plotController,
                         onRatingChanged: (value) =>
                             setState(() => _rating = value),
+                        onPersonalRatingChanged: (value) =>
+                            setState(() => _personalRating = value),
                       ),
                     ),
                   ],

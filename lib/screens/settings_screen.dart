@@ -15,6 +15,7 @@ import 'settings/player_tab.dart';
 import 'settings/remote_tab.dart';
 import 'settings/maintenance_tab.dart';
 import 'settings/debug_tab.dart';
+import 'settings/timer_tab.dart';
 import 'settings/bulk_sync_progress_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _obscureSecret = true;
   bool _isCheckingUpdates = false;
   int _currentTab =
-      0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control, 4: Manutenzione, 5: Debug
+      0; // 0: Generale, 1: Metadati, 2: Player, 3: Remote Control, 4: Manutenzione, 5: Debug, 6: Timer
 
   @override
   void initState() {
@@ -184,6 +185,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(color: Colors.white10),
                 _sidebarItem(4, Icons.build),
                 _sidebarItem(5, Icons.bug_report),
+                const Divider(color: Colors.white10),
+                _sidebarItem(6, Icons.timer),
               ],
             ),
           ),
@@ -298,6 +301,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       case 5:
         return buildDebugTab(context: context, onRefresh: _refreshCurrentTab);
+      case 6:
+        return buildTimerTab(context: context);
       default:
         return const SizedBox.shrink();
     }

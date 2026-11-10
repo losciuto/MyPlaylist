@@ -41,6 +41,7 @@ Widget buildSettingsSidebarItem({
     3 => l10n.remoteTab,
     4 => l10n.maintenanceTab,
     5 => l10n.debugTab,
+    6 => l10n.navTimer,
     _ => fallbackLabel,
   };
 
