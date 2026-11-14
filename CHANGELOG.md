@@ -1,5 +1,22 @@
 All notable changes to this project will be documented in this file.
 
+## [3.19.0] - 14/11/2026
+
+### Added
+- **Corrupted Files tracking**: new dedicated service and UI to detect, list, and manage corrupted video files.
+  - **Service**: `CorruptedFilesService` logs files where `ffprobe` fails during metadata operations, persisting entries to `~/MyPlaylist/corrupted_files.json` (or `%APPDATA%\MyPlaylist\corrupted_files.json` on Windows).
+  - **Integration**: automatically captures corrupted files from `MetadataService.getFileMetadata()` and `VideoProcessingService.bulkRenameTitles()`.
+  - **UI**: "File Corrotti" button in the Database tab (red button in action bar) opens a full-screen list with per-entry actions.
+  - **Per-entry actions**: Verify with ffmpeg, Remove from database, Move to quarantine folder, Retry metadata extraction, Delete from list.
+  - **Bulk actions**: Verify All, Clear Verified OK, Clear All.
+  - **Localization**: 25+ strings in Italian and English.
+
+### Fixed
+- **Folder scan**: fixed crash on folders with invalid percent encoding in name (e.g., "Serie%TV") by catching `ArgumentError` from `Uri.decodeFull()` in `getVideoByPath`.
+
+### Changed
+- **NFO generation (interactive)**: the selection dialog now shows the filename being processed below the title, making it clear which video the TMDB results belong to.
+
 ## [3.18.0] - 14/11/2026
 
 ### Fixed

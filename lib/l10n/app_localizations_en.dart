@@ -1779,4 +1779,89 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get timerHelpText =>
       'The timer checks the time every minute. When the current time matches the set time, VLC is forcefully terminated (pkill on Linux, taskkill on Windows). The timer only works while MyPlaylist is running.';
+
+  @override
+  String get corruptedFilesTitle => 'Corrupted Files';
+
+  @override
+  String get corruptedFilesButton => 'Corrupted Files';
+
+  @override
+  String get corruptedFilesEmpty => 'No corrupted files detected';
+
+  @override
+  String get corruptedFilesDetectedAt => 'Detected on';
+
+  @override
+  String get corruptedFilesVerify => 'Verify';
+
+  @override
+  String get corruptedFilesRemoveDb => 'Remove from DB';
+
+  @override
+  String get corruptedFilesQuarantine => 'Quarantine';
+
+  @override
+  String get corruptedFilesRetry => 'Retry Metadata';
+
+  @override
+  String get corruptedFilesDelete => 'Delete from list';
+
+  @override
+  String get corruptedFilesClearVerified => 'Clear verified OK';
+
+  @override
+  String get corruptedFilesClearAll => 'Clear all';
+
+  @override
+  String get corruptedFilesStatusDetected => 'Detected';
+
+  @override
+  String get corruptedFilesStatusVerifiedCorrupted => 'Confirmed corrupted';
+
+  @override
+  String get corruptedFilesStatusVerifiedOk => 'OK - File readable';
+
+  @override
+  String get corruptedFilesStatusRemovedFromDb => 'Removed from DB';
+
+  @override
+  String get corruptedFilesStatusQuarantined => 'Quarantined';
+
+  @override
+  String get corruptedFilesStatusRetryPending => 'Pending retry';
+
+  @override
+  String get corruptedFilesVerificationResult => 'Verification result';
+
+  @override
+  String get corruptedFilesVerifying => 'Verifying...';
+
+  @override
+  String get corruptedFilesVerifyAll => 'Verify All';
+
+  @override
+  String get corruptedFilesConfirmRemoveDb =>
+      'Remove this video from database?';
+
+  @override
+  String get corruptedFilesConfirmQuarantine =>
+      'Move file to quarantine (.corrupted_quarantine)?';
+
+  @override
+  String get corruptedFilesConfirmClearAll =>
+      'Clear the entire corrupted files list?';
+
+  @override
+  String get corruptedFilesErrorDetails => 'Error details';
+
+  @override
+  String get corruptedFilesNoVideoId => 'Video not in database';
+
+  @override
+  String get corruptedFilesVerifyAllTitle => 'Verify all unverified files';
+
+  @override
+  String get corruptedFilesVerifyAllConfirm =>
+      'Verify all unverified files with ffmpeg? This may take some time.';
 }

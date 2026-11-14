@@ -11,6 +11,7 @@ import '../config/app_config.dart';
 import 'package:intl/intl.dart';
 import '../database/app_database.dart';
 import 'error_reporter_service.dart';
+import 'corrupted_files_service.dart';
 
 enum MetadataUpdateResult { updated, alreadyInSync, failed }
 
@@ -52,6 +53,12 @@ class MetadataService {
 
       if (result.exitCode != 0) {
         LoggerService().debug('ffprobe failed for $filePath');
+        // Report as potentially corrupted file
+        await CorruptedFilesService().reportCorruptedFile(
+          path: filePath,
+          title: p.basename(filePath),
+          errorDetails: 'ffprobe exit code: ${result.exitCode}, stderr: ${result.stderr}',
+        );
         return {};
       }
 
@@ -78,6 +85,11 @@ class MetadataService {
         'Lettura metadati non riuscita',
         e,
         source: 'MetadataService',
+      );
+      await CorruptedFilesService().reportCorruptedFile(
+        path: filePath,
+        title: p.basename(filePath),
+        errorDetails: e.toString(),
       );
       return {};
     }

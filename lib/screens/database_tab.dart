@@ -12,6 +12,7 @@ import '../widgets/video_data_table.dart';
 import '../services/video_processing_service.dart';
 import 'failed_renames_screen.dart';
 import 'duplicates_dialog.dart';
+import 'corrupted_files_screen.dart';
 import '../widgets/confirm_dialog.dart';
 import '../services/logger_service.dart';
 
@@ -687,6 +688,21 @@ class _DatabaseTabState extends State<DatabaseTab> {
                     label: Text(l10n.duplicatesButton),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange.shade800,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const CorruptedFilesScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.warning_amber_rounded),
+                    label: Text(l10n.corruptedFilesButton),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade800,
                       foregroundColor: Colors.white,
                     ),
                   ),

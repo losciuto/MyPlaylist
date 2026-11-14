@@ -3083,6 +3083,168 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Il timer controlla l\'ora ogni minuto. Quando l\'ora corrente corrisponde a quella impostata, VLC viene terminato forzatamente (pkill su Linux, taskkill su Windows). Il timer funziona solo se MyPlaylist è in esecuzione.'**
   String get timerHelpText;
+
+  /// No description provided for @corruptedFilesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'File Corrotti'**
+  String get corruptedFilesTitle;
+
+  /// No description provided for @corruptedFilesButton.
+  ///
+  /// In it, this message translates to:
+  /// **'File Corrotti'**
+  String get corruptedFilesButton;
+
+  /// No description provided for @corruptedFilesEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun file corrotto rilevato'**
+  String get corruptedFilesEmpty;
+
+  /// No description provided for @corruptedFilesDetectedAt.
+  ///
+  /// In it, this message translates to:
+  /// **'Rilevato il'**
+  String get corruptedFilesDetectedAt;
+
+  /// No description provided for @corruptedFilesVerify.
+  ///
+  /// In it, this message translates to:
+  /// **'Verifica'**
+  String get corruptedFilesVerify;
+
+  /// No description provided for @corruptedFilesRemoveDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi da DB'**
+  String get corruptedFilesRemoveDb;
+
+  /// No description provided for @corruptedFilesQuarantine.
+  ///
+  /// In it, this message translates to:
+  /// **'Quarantena'**
+  String get corruptedFilesQuarantine;
+
+  /// No description provided for @corruptedFilesRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova Metadati'**
+  String get corruptedFilesRetry;
+
+  /// No description provided for @corruptedFilesDelete.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina dalla lista'**
+  String get corruptedFilesDelete;
+
+  /// No description provided for @corruptedFilesClearVerified.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulisci verificati OK'**
+  String get corruptedFilesClearVerified;
+
+  /// No description provided for @corruptedFilesClearAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota tutto'**
+  String get corruptedFilesClearAll;
+
+  /// No description provided for @corruptedFilesStatusDetected.
+  ///
+  /// In it, this message translates to:
+  /// **'Rilevato'**
+  String get corruptedFilesStatusDetected;
+
+  /// No description provided for @corruptedFilesStatusVerifiedCorrupted.
+  ///
+  /// In it, this message translates to:
+  /// **'Corrotto confermato'**
+  String get corruptedFilesStatusVerifiedCorrupted;
+
+  /// No description provided for @corruptedFilesStatusVerifiedOk.
+  ///
+  /// In it, this message translates to:
+  /// **'OK - File leggibile'**
+  String get corruptedFilesStatusVerifiedOk;
+
+  /// No description provided for @corruptedFilesStatusRemovedFromDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimosso da DB'**
+  String get corruptedFilesStatusRemovedFromDb;
+
+  /// No description provided for @corruptedFilesStatusQuarantined.
+  ///
+  /// In it, this message translates to:
+  /// **'In quarantena'**
+  String get corruptedFilesStatusQuarantined;
+
+  /// No description provided for @corruptedFilesStatusRetryPending.
+  ///
+  /// In it, this message translates to:
+  /// **'In attesa di riprova'**
+  String get corruptedFilesStatusRetryPending;
+
+  /// No description provided for @corruptedFilesVerificationResult.
+  ///
+  /// In it, this message translates to:
+  /// **'Esito verifica'**
+  String get corruptedFilesVerificationResult;
+
+  /// No description provided for @corruptedFilesVerifying.
+  ///
+  /// In it, this message translates to:
+  /// **'Verifica in corso...'**
+  String get corruptedFilesVerifying;
+
+  /// No description provided for @corruptedFilesVerifyAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Verifica Tutti'**
+  String get corruptedFilesVerifyAll;
+
+  /// No description provided for @corruptedFilesConfirmRemoveDb.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere questo video dal database?'**
+  String get corruptedFilesConfirmRemoveDb;
+
+  /// No description provided for @corruptedFilesConfirmQuarantine.
+  ///
+  /// In it, this message translates to:
+  /// **'Spostare il file in quarantena (.corrupted_quarantine)?'**
+  String get corruptedFilesConfirmQuarantine;
+
+  /// No description provided for @corruptedFilesConfirmClearAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuotare l\'intero elenco dei file corrotti?'**
+  String get corruptedFilesConfirmClearAll;
+
+  /// No description provided for @corruptedFilesErrorDetails.
+  ///
+  /// In it, this message translates to:
+  /// **'Dettaglio errore'**
+  String get corruptedFilesErrorDetails;
+
+  /// No description provided for @corruptedFilesNoVideoId.
+  ///
+  /// In it, this message translates to:
+  /// **'Video non in database'**
+  String get corruptedFilesNoVideoId;
+
+  /// No description provided for @corruptedFilesVerifyAllTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Verifica di tutti i file non verificati'**
+  String get corruptedFilesVerifyAllTitle;
+
+  /// No description provided for @corruptedFilesVerifyAllConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi verificare con ffmpeg tutti i file non ancora controllati? Potrebbe richiedere tempo.'**
+  String get corruptedFilesVerifyAllConfirm;
 }
 
 class _AppLocalizationsDelegate
