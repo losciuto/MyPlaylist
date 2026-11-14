@@ -2,6 +2,9 @@
 
 Creatore di Playlist Video e Gestore Database Locale.
 
+> [!IMPORTANT]
+> **Nota sull'auto-aggiornamento**: Se aggiorni dalla **versione 3.17.1 o precedenti**, devi **installare manualmente v3.18.0** (o v3.17.2+) una volta, perché un bug nella verifica SHA-256 dell'aggiornatore in-app impediva gli aggiornamenti automatici. Dopo questa installazione manuale una tantum, le versioni future si aggiorneranno automaticamente. Scarica da [GitHub Releases](https://github.com/losciuto/MyPlaylist/releases).
+
 ## Funzionalità
 *   **Scansione Cartelle**: Importa video con estrazione automatica metadati (NFO/Nome file).
 *   **Database**: Gestione completa (Ricerca, Modifica, Rinomina Massa).

@@ -2,6 +2,9 @@
 
 Video Playlist Creator and Local Database Manager built with Flutter.
 
+> [!IMPORTANT]
+> **Auto-update note**: If you are upgrading from **version 3.17.1 or earlier**, you must **manually install v3.18.0** (or v3.17.2+) once, because a SHA-256 verification bug in the in-app updater prevented automatic updates. After this one-time manual update, future versions will auto-update normally. Download from [GitHub Releases](https://github.com/losciuto/MyPlaylist/releases).
+
 ## Overview
 MyPlaylist is a desktop application designed to manage your local video collection, extract metadata from NFO files, and generate playlists (Random, Recent, or Filtered) for your favorite media player.
 
