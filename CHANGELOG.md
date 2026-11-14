@@ -1,5 +1,16 @@
 All notable changes to this project will be documented in this file.
 
+## [3.18.0] - 14/11/2026
+
+### Fixed
+- **Folder scan**: fixed crash on folders with invalid percent encoding in name (e.g., "Serie%TV") by catching `ArgumentError` from `Uri.decodeFull()` in `getVideoByPath`.
+
+### Changed
+- **NFO generation (interactive)**: the selection dialog now shows the filename being processed below the title, making it clear which video the TMDB results belong to.
+
+### Added
+- **NFO generation (interactive)**: filename display in TMDB selection dialog during bulk NFO generation.
+
 ## [3.17.2] - 10/11/2026
 
 ### Fixed

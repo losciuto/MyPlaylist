@@ -2874,6 +2874,24 @@ abstract class AppLocalizations {
   /// **'chiudi locandina'**
   String get voiceHelpClosePoster;
 
+  /// No description provided for @voiceHelpPosterScroll.
+  ///
+  /// In it, this message translates to:
+  /// **'su / giù (scorri la locandina)'**
+  String get voiceHelpPosterScroll;
+
+  /// No description provided for @voiceFeedbackPosterScrolledUp.
+  ///
+  /// In it, this message translates to:
+  /// **'Locandina scorsa su'**
+  String get voiceFeedbackPosterScrolledUp;
+
+  /// No description provided for @voiceFeedbackPosterScrolledDown.
+  ///
+  /// In it, this message translates to:
+  /// **'Locandina scorsa giù'**
+  String get voiceFeedbackPosterScrolledDown;
+
   /// No description provided for @voiceErrorUnsupportedPlatform.
   ///
   /// In it, this message translates to:

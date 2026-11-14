@@ -7,10 +7,12 @@ class MovieSelectionDialog extends StatefulWidget {
     required this.title,
     required this.results,
     this.isBulkMode = false,
+    this.filename,
   });
   final String title;
   final List<Map<String, dynamic>> results;
   final bool isBulkMode;
+  final String? filename;
 
   @override
   State<MovieSelectionDialog> createState() => _MovieSelectionDialogState();
@@ -39,16 +41,35 @@ class _MovieSelectionDialogState extends State<MovieSelectionDialog> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              widget.title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF4CAF50),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Column(
+              children: [
+                Text(
+                  widget.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF4CAF50),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (widget.filename != null && widget.filename!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      widget.filename!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             Expanded(

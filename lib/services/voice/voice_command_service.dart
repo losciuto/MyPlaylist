@@ -50,6 +50,14 @@ enum VoiceError {
   recorderUnavailable,
 }
 
+
+/// Richiesta di scorrimento della locandina aperta.
+class PosterScrollEvent {
+  const PosterScrollEvent(this.delta, this.id);
+  final double delta;
+  final int id;
+}
+
 /// Motore dei comandi vocali.
 ///
 /// Si occupa di scaricare il modello Vosk, di catturare l'audio dal
@@ -105,6 +113,11 @@ class VoiceCommandService extends ChangeNotifier {
   /// Notifica per mostrare la locandina del film in corso.
   /// Il valore contiene il video completo per mostrare VideoDetailsDialog.
   final ValueNotifier<Video?> showPosterNotifier = ValueNotifier<Video?>(null);
+
+  /// Richiesta di scorrimento della locandina aperta (su/giu di ~3 righe).
+  final ValueNotifier<PosterScrollEvent?> posterScrollRequest =
+      ValueNotifier<PosterScrollEvent?>(null);
+  int _posterScrollSeq = 0;
 
   Timer? _levelTimer;
   double _peakLevelDb = -160;
@@ -593,6 +606,10 @@ class VoiceCommandService extends ChangeNotifier {
         await _showPoster(entry);
       case VoiceCommandType.closePoster:
         await _closePoster(entry);
+      case VoiceCommandType.posterScrollUp:
+        _scrollPoster(entry, up: true);
+      case VoiceCommandType.posterScrollDown:
+        _scrollPoster(entry, up: false);
     }
   }
 
@@ -698,6 +715,34 @@ class VoiceCommandService extends ChangeNotifier {
     );
   }
 
+
+
+  /// Richiede lo scorrimento della locandina aperta di ~3 righe.
+  /// Restituisce true se la richiesta e' stata emessa.
+  bool requestPosterScroll({required bool up}) {
+    const double delta = 3 * 24.0;
+    _posterScrollSeq++;
+    posterScrollRequest.value = PosterScrollEvent(
+      up ? -delta : delta,
+      _posterScrollSeq,
+    );
+    return true;
+  }
+
+  void _scrollPoster(VoiceLogEntry entry, {required bool up}) {
+    try {
+      requestPosterScroll(up: up);
+      entry.feedback =
+          up ? VoiceFeedback.posterScrolledUp : VoiceFeedback.posterScrolledDown;
+      entry.succeeded = true;
+    } on Object catch (e) {
+      LoggerService().error('Scroll locandina vocale fallito', e);
+      entry.feedback =
+          up ? VoiceFeedback.posterScrolledUp : VoiceFeedback.posterScrolledDown;
+      entry.succeeded = false;
+    }
+  }
+
   VoiceFeedback _feedbackFor(VoiceCommandType type) {
     switch (type) {
       case VoiceCommandType.playlistRandom:
@@ -730,6 +775,10 @@ class VoiceCommandService extends ChangeNotifier {
         return VoiceFeedback.showPoster;
       case VoiceCommandType.closePoster:
         return VoiceFeedback.closePoster;
+      case VoiceCommandType.posterScrollUp:
+        return VoiceFeedback.posterScrolledUp;
+      case VoiceCommandType.posterScrollDown:
+        return VoiceFeedback.posterScrolledDown;
     }
   }
 
@@ -761,6 +810,8 @@ class VoiceCommandService extends ChangeNotifier {
     _disposed = true;
     _stopLevelMeter();
     inputLevel.dispose();
+    showPosterNotifier.dispose();
+    posterScrollRequest.dispose();
     _audioSubscription?.cancel();
     _recorder?.dispose();
     _releaseRecognizer();

@@ -1,5 +1,16 @@
 All notable changes to this project will be documented in this file.
 
+## [3.18.0] - 14/11/2026
+
+### Corretto
+- **Scansione cartelle**: risolto il crash su cartelle con percent-encoding non valido nel nome (es. "Serie%TV") catturando `ArgumentError` da `Uri.decodeFull()` in `getVideoByPath`.
+
+### Modificato
+- **Generazione NFO (interattiva)**: il dialogo di selezione ora mostra il nome del file in elaborazione sotto il titolo, rendendo chiaro a quale video appartengono i risultati TMDB.
+
+### Aggiunto
+- **Generazione NFO (interattiva)**: visualizzazione del filename nel dialogo di selezione TMDB durante la generazione NFO in massa.
+
 ## [3.17.2] - 10/11/2026
 
 ### Corretto

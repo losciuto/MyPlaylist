@@ -1,5 +1,15 @@
 # MyPlaylist Release Notes
 
+## Version 3.18.0 — 2026-11-14
+
+### Bug Fixes
+- **Folder scan**: fixed crash on folders with invalid percent encoding in name (e.g., "Serie%TV") by catching `ArgumentError` from `Uri.decodeFull()` in `getVideoByPath`.
+
+### Changes
+- **NFO generation (interactive)**: the TMDB selection dialog now shows the filename being processed below the title, making it clear which video the results belong to.
+
+---
+
 ## Version 3.17.2 — 2026-11-10
 
 ### Bug Fixes

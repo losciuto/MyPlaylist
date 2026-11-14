@@ -7,6 +7,7 @@ import '../services/settings_service.dart';
 import '../providers/database_provider.dart';
 import 'package:my_playlist/l10n/app_localizations.dart';
 import '../widgets/person_avatar.dart';
+import '../services/voice/voice_command_service.dart';
 
 class VideoDetailsDialog extends StatefulWidget {
   const VideoDetailsDialog({super.key, required this.video});
@@ -19,19 +20,43 @@ class VideoDetailsDialog extends StatefulWidget {
 class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
   late final ScrollController _directorsController;
   late final ScrollController _actorsController;
+  late final ScrollController _contentController;
+  VoiceCommandService? _voiceService;
 
   @override
   void initState() {
     super.initState();
     _directorsController = ScrollController();
     _actorsController = ScrollController();
+    _contentController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _voiceService = context.read<VoiceCommandService>();
+      _voiceService?.posterScrollRequest.addListener(_onPosterScrollRequest);
+    });
   }
 
   @override
   void dispose() {
+    _voiceService?.posterScrollRequest.removeListener(_onPosterScrollRequest);
     _directorsController.dispose();
     _actorsController.dispose();
+    _contentController.dispose();
     super.dispose();
+  }
+
+  void _onPosterScrollRequest() {
+    final voice = _voiceService;
+    if (voice == null || !_contentController.hasClients) return;
+    final delta = voice.posterScrollRequest.value?.delta ?? 0.0;
+    if (delta == 0.0) return;
+    final target = (_contentController.offset + delta)
+        .clamp(0.0, _contentController.position.maxScrollExtent);
+    _contentController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -54,6 +79,7 @@ class _VideoDetailsDialogState extends State<VideoDetailsDialog> {
         ),
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
+          controller: _contentController,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

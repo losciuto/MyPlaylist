@@ -141,19 +141,29 @@ void main() async {
           ),
           update: (context, settings, playlist, previous) => previous!,
         ),
-        ChangeNotifierProxyProvider2<
+        ChangeNotifierProxyProvider3<
           SettingsService,
           PlaylistProvider,
+          RemoteControlService,
           VoiceCommandService
         >(
           lazy: false,
-          create: (context) => VoiceCommandService(
-            settingsService: context.read<SettingsService>(),
-            playlistProvider: context.read<PlaylistProvider>(),
-            videoRepository: context.read<VideoRepository>(),
-            navigatorKey: MyApp.navigatorKey,
-          ),
-          update: (context, settings, playlist, previous) => previous!,
+          create: (context) {
+            final voice = VoiceCommandService(
+              settingsService: context.read<SettingsService>(),
+              playlistProvider: context.read<PlaylistProvider>(),
+              videoRepository: context.read<VideoRepository>(),
+              navigatorKey: MyApp.navigatorKey,
+            );
+            context.read<RemoteControlService>().voiceCommandService = voice;
+            return voice;
+          },
+          update: (context, settings, playlist, remote, previous) {
+            if (previous != null) {
+              remote.voiceCommandService = previous;
+            }
+            return previous!;
+          },
         ),
       ],
       child: const MyApp(),

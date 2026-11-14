@@ -44,6 +44,12 @@ enum VoiceCommandType {
 
   /// Chiude la locandina aperta.
   closePoster,
+
+  /// Scorre la locandina verso l'alto.
+  posterScrollUp,
+
+  /// Scorre la locandina verso il basso.
+  posterScrollDown,
 }
 
 /// Esito dell'analisi di una frase trascritta.
@@ -78,6 +84,8 @@ enum VoiceFeedback {
   showPoster,
   closePoster,
   posterNotAvailable,
+  posterScrolledUp,
+  posterScrolledDown,
   notRecognized,
   vlcUnreachable,
 }

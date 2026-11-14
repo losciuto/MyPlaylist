@@ -1663,6 +1663,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get voiceHelpClosePoster => 'chiudi locandina';
 
   @override
+  String get voiceHelpPosterScroll => 'su / giù (scorri la locandina)';
+
+  @override
+  String get voiceFeedbackPosterScrolledUp => 'Locandina scorsa su';
+
+  @override
+  String get voiceFeedbackPosterScrolledDown => 'Locandina scorsa giù';
+
+  @override
   String get voiceErrorUnsupportedPlatform =>
       'I comandi vocali non sono supportati su questa piattaforma.';
 

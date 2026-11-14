@@ -254,6 +254,8 @@ class VoiceCommandParser {
     _Rule(type: VoiceCommandType.playerStop, triggers: <String>['stop', 'ferma', 'ferma tutto', 'chiudi vlc']),
     _Rule(type: VoiceCommandType.showPoster, triggers: <String>['locandina']),
     _Rule(type: VoiceCommandType.closePoster, triggers: <String>['chiudi']),
+    _Rule(type: VoiceCommandType.posterScrollUp, triggers: <String>['su']),
+    _Rule(type: VoiceCommandType.posterScrollDown, triggers: <String>['giu']),
   ];
 
   static const List<_Rule> _englishRules = <_Rule>[
@@ -307,6 +309,8 @@ class VoiceCommandParser {
     _Rule(type: VoiceCommandType.playerStop, triggers: <String>['stop']),
     _Rule(type: VoiceCommandType.showPoster, triggers: <String>['poster']),
     _Rule(type: VoiceCommandType.closePoster, triggers: <String>['close']),
+    _Rule(type: VoiceCommandType.posterScrollUp, triggers: <String>['scroll up']),
+    _Rule(type: VoiceCommandType.posterScrollDown, triggers: <String>['scroll down']),
   ];
 }
 

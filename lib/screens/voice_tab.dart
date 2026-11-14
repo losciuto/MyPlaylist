@@ -698,6 +698,7 @@ class _HelpPanel extends StatelessWidget {
       l10n.voiceHelpStop,
       l10n.voiceHelpPoster,
       l10n.voiceHelpClosePoster,
+      l10n.voiceHelpPosterScroll,
     ];
 
     return Container(
@@ -780,6 +781,10 @@ String _feedbackText(AppLocalizations l10n, VoiceLogEntry entry) {
       return l10n.voiceFeedbackShowPoster;
     case VoiceFeedback.closePoster:
       return l10n.voiceFeedbackClosePoster;
+    case VoiceFeedback.posterScrolledUp:
+      return l10n.voiceFeedbackPosterScrolledUp;
+    case VoiceFeedback.posterScrolledDown:
+      return l10n.voiceFeedbackPosterScrolledDown;
     case VoiceFeedback.posterNotAvailable:
       return l10n.voiceFeedbackPosterNotAvailable;
     case VoiceFeedback.notRecognized:

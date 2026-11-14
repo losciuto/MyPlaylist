@@ -1658,6 +1658,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceHelpClosePoster => 'close poster';
 
   @override
+  String get voiceHelpPosterScroll => 'scroll up / scroll down (scroll poster)';
+
+  @override
+  String get voiceFeedbackPosterScrolledUp => 'Poster scrolled up';
+
+  @override
+  String get voiceFeedbackPosterScrolledDown => 'Poster scrolled down';
+
+  @override
   String get voiceErrorUnsupportedPlatform =>
       'Voice commands are not supported on this platform.';
 

@@ -638,8 +638,12 @@ class AppDatabase extends _$AppDatabase {
     if (normalizedPath.startsWith('file://')) {
       normalizedPath = normalizedPath.substring(7);
     }
-    // URL decode
-    normalizedPath = Uri.decodeFull(normalizedPath);
+    // URL decode - handle invalid percent encoding gracefully
+    try {
+      normalizedPath = Uri.decodeFull(normalizedPath);
+    } on ArgumentError {
+      // Invalid percent encoding (e.g., folder named "Serie%TV"), use original path
+    }
     
     // Try exact match first
     var driftVideo = await (select(

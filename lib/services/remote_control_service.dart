@@ -9,6 +9,7 @@ import 'settings_service.dart';
 import './logger_service.dart';
 import 'error_reporter_service.dart';
 import 'voice/vlc_rc_client.dart';
+import 'voice/voice_command_service.dart';
 
 class RemoteCommandLog {
   RemoteCommandLog({
@@ -25,6 +26,7 @@ class RemoteControlService with ChangeNotifier {
   RemoteControlService({
     required this.playlistProvider,
     required this.settingsService,
+    this.voiceCommandService,
   }) {
     _currentPort = settingsService.remoteServerPort;
     _currentSecret = settingsService.remoteServerSecret;
@@ -36,6 +38,7 @@ class RemoteControlService with ChangeNotifier {
   }
   final PlaylistProvider playlistProvider;
   final SettingsService settingsService;
+  VoiceCommandService? voiceCommandService;
 
   ServerSocket? _server;
   HttpServer? _imageServer;
@@ -386,6 +389,23 @@ class RemoteControlService with ChangeNotifier {
         return {
           'status': 'success',
           'message': 'Locandina chiusa',
+          'command': command,
+        };
+      case 'scroll_poster':
+        final dir = args['direction'] as String? ?? '';
+        final up = dir == 'up';
+        final down = dir == 'down';
+        if (!up && !down) {
+          return {
+            'status': 'error',
+            'message': 'Direzione non valida',
+            'command': command,
+          };
+        }
+        final scrolled = voiceCommandService?.requestPosterScroll(up: up) ?? false;
+        return {
+          'status': scrolled ? 'success' : 'error',
+          'message': scrolled ? 'Locandina scorsa' : 'Locandina non aperta',
           'command': command,
         };
       case 'get_vlc_kill_timer':
